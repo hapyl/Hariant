@@ -8,6 +8,7 @@ import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.event.HariantAttributeEvent;
 import me.hapyl.hariant.util.Resettable;
@@ -65,7 +66,7 @@ public final class AttributeModifierMap implements AttributeModifiable, Ticking,
         // Check for effect resistance for negative modifiers
         final HariantEntity applier = attributeModifier.getApplier();
         
-        if (attributeModifier.getEffectType() == EffectType.DEBUFF && entity.hasEffectResistance(applier)) {
+        if (attributeModifier.getEffectType() == EffectType.DEBUFF && entity.hasEffectResistance(applier, AssistSource.create(attributeModifier))) {
             return;
         }
         

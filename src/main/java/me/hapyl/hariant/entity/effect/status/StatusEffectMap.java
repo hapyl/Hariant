@@ -3,6 +3,7 @@ package me.hapyl.hariant.entity.effect.status;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.effect.EffectType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +49,7 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
         final EffectType effectType = effect.getEffectType();
         
         // If effect is a DEBUFF, check for Effect Resistance and cancel if entity resisted the effect
-        if (effectType == EffectType.DEBUFF && entity.hasEffectResistance(applier)) {
+        if (effectType == EffectType.DEBUFF && entity.hasEffectResistance(applier, AssistSource.create(effect))) {
             return;
         }
         

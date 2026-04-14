@@ -2,10 +2,10 @@ package me.hapyl.hariant.inventory.item.artifact;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.HariantConstants;
-import me.hapyl.hariant.HariantLogger;
-import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
+import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -120,19 +120,19 @@ public final class ItemArtifactBloodyRose extends ItemArtifact {
             return Math.min(critDamageIncreasePerHealthMaximum.intValue(), critDamageBonus);
         }
         
-        private class ModifierTwoPiece extends AttributeModifier {
+        private class ModifierTwoPiece extends AttributeModifierArtifactSet {
             ModifierTwoPiece() {
-                super(createModifierKey(PieceCount.TWO_PIECE), null, HariantConstants.INDEFINITE_DURATION);
+                super(ArtifactSetBreeze.this, PieceCount.TWO_PIECE, null, HariantConstants.INDEFINITE_DURATION);
                 
                 entries.add(entry(AttributeType.CRIT_CHANCE, AttributeModifierType.FLAT, critChanceIncrease.doubleValue()));
             }
         }
         
-        private class ModifierFourPiece extends AttributeModifier {
+        private class ModifierFourPiece extends AttributeModifierArtifactSet {
             private final int critDamageIncrease;
             
             ModifierFourPiece(int critDamageIncrease) {
-                super(createModifierKey(PieceCount.FOUR_PIECE), null, critDamageIncreaseDuration.intValue());
+                super(ArtifactSetBreeze.this, PieceCount.FOUR_PIECE, null, critDamageIncreaseDuration.intValue());
                 
                 entries.add(entry(AttributeType.CRIT_DAMAGE, AttributeModifierType.FLAT, critDamageIncrease));
                 

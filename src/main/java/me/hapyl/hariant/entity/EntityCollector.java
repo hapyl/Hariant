@@ -20,7 +20,7 @@ public interface EntityCollector extends Located {
     // *-* double *-* //
     
     @NotNull
-    default Stream<HariantEntity> collectionNearbyEntities(@NotNull BoundingBox boundingBox) {
+    default Stream<HariantEntity> collectNearbyEntities(@NotNull BoundingBox boundingBox) {
         return this.getLocation().getWorld().getNearbyEntities(boundingBox)
                    .stream()
                    .map(Hariant::getEntityOrNull)

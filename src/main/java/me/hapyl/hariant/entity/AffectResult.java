@@ -35,6 +35,11 @@ public enum AffectResult {
     /**
      * Defines that this {@link HariantEntity} cannot affect the other because it's invisible and cannot be seen by this entity.
      */
-    CANNOT_AFFECT_INVISIBLE
+    CANNOT_AFFECT_INVISIBLE,
+    
+    /**
+     * Defines that this {@link HariantEntity} cannot affect the other because it's a {@link HariantMarkerEntity}.
+     */
+    CANNOT_AFFECT_MARKER
     
 }

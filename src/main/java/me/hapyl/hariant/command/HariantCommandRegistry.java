@@ -18,6 +18,7 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.element.anomaly.EnumAnomaly;
+import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -232,12 +233,23 @@ public final class HariantCommandRegistry {
                 final TypeConverter arg0 = args.get(0);
                 final EnumAnomaly elementalAnomaly = arg0.toEnum(EnumAnomaly.class);
                 
+                final String argument = args.get(1).toString();
+                
+                if (!argument.isEmpty() && !argument.startsWith("-")) {
+                    HariantLogger.error(hariantPlayer, Component.text("Argument must start with `-`!"));
+                    return;
+                }
+                
                 if (elementalAnomaly == null) {
                     HariantLogger.error(hariantPlayer, Component.text("Unknown anomaly `%s`!".formatted(arg0)));
                     return;
                 }
                 
-                hariantPlayer.triggerAnomaly(elementalAnomaly, hariantPlayer);
+                // Process arguments
+                final HariantEntity source = argument.equals("-s") ? null : hariantPlayer;
+                
+                // Trigger anomaly
+                hariantPlayer.triggerAnomaly(elementalAnomaly, source);
                 
                 HariantLogger.success(
                         hariantPlayer,

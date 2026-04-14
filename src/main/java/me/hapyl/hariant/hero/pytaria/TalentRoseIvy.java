@@ -150,7 +150,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
     
     private class RoseIvyModifier extends AttributeModifier {
         RoseIvyModifier(@NotNull HariantEntity applier) {
-            super(modifierKey, applier, effectDuration.intValue());
+            super(modifierKey, TalentRoseIvy.this.getName(), applier, effectDuration.intValue());
             
             this.of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.ADDITIVE, speedDecrease.doubleValue());
         }

@@ -27,19 +27,24 @@ public class ElementData implements ElementHandler, Ticking {
     public void applyElement(@NotNull ElementSource elementSource) {
         final ElementType elementType = elementSource.getElementType();
         final HariantEntity source = elementSource.getSource();
+        final double elementUnits = elementSource.getElementUnits();
+        
+        if (elementUnits <= 0) {
+            return;
+        }
         
         // Scale units by the source's Elemental Mastery
-        double units = this.calculateElementBuildUp(elementSource.getElementUnits(), source);
+        double units = this.calculateElementBuildUp(elementUnits, source);
         
         // Apply units
-        final double totalUnits = elementUnits.merge(elementType, units, Double::sum);
+        final double totalUnits = this.elementUnits.merge(elementType, units, Double::sum);
         
         // Check for anomaly
         if (totalUnits >= HariantConstants.ANOMALY_THRESHOLD) {
             this.triggerAnomaly(elementType.getElementalAnomaly(), source);
             
             // Reset units
-            elementUnits.remove(elementType);
+            this.elementUnits.remove(elementType);
         }
     }
     

@@ -90,7 +90,6 @@ public final class Hariant implements Runnable, Lifecycle {
         // Tick entities
         final Collection<HariantEntity> entities = entityMap.values();
         
-        // Don't call `removeIfShould` to avoid double calling `remove()`
         entities.removeIf(HariantEntity::shouldRemove);
         entities.forEach(HariantEntity::tick0);
         

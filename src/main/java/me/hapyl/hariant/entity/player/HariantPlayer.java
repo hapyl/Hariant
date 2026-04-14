@@ -277,8 +277,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         this.playSound(Sound.ENTITY_BLAZE_DEATH, 1.0f);
         
         // Award eliminations & assists
-        // TODO @Feb 27, 2026 (xanyjl) -> !!important
-        
         final List<? extends CombatData> assistingPlayers
                 = this.combatTracker.assistingPlayers()
                                     // Filter self and lastAttacker
@@ -395,11 +393,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     @Override
     public Component getName() {
         return Hariant.getPlayerProfile(this.getHandle()).getName();
-    }
-    
-    @Override
-    public final boolean shouldRemove() {
-        return false;
     }
     
     @Override

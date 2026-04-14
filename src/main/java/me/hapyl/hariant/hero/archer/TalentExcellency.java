@@ -116,7 +116,7 @@ public final class TalentExcellency extends TalentPassive implements Listener {
     
     public class ExcellencyAttributeModifier extends AttributeModifier {
         ExcellencyAttributeModifier() {
-            super(modifierKey, null, HariantConstants.INDEFINITE_DURATION);
+            super(modifierKey, TalentExcellency.this.getName(), null, HariantConstants.INDEFINITE_DURATION);
         }
         
         @Override
