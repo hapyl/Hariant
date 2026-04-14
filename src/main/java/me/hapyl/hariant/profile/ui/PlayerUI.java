@@ -111,11 +111,9 @@ public final class PlayerUI implements Ticking {
                 }
                 
                 final AttributeModifier modifier = modifiers.get(i);
-                
-                final Key modifierKey = modifier.getKey();
                 final HariantEntity applier = modifier.getApplier();
                 
-                builder.append(Component.text(modifierKey.getKey(), NamedTextColor.YELLOW));
+                builder.append(modifier.getName().color(NamedTextColor.YELLOW));
                 
                 if (applier != null) {
                     builder.append(Component.text(" from %s".formatted(applier.toString()), NamedTextColor.DARK_GRAY));

@@ -49,11 +49,6 @@ public abstract class ArtifactSet implements Keyed, Named {
     public abstract void applyEffect(@NotNull HariantPlayer player, @NotNull PieceCount pieceCount);
     
     @NotNull
-    public Key createModifierKey(@NotNull PieceCount pieceCount) {
-        return Key.ofString("%s_%s".formatted(key.toString(), pieceCount.name().toLowerCase()));
-    }
-    
-    @NotNull
     @Override
     public final Key getKey() {
         return key;

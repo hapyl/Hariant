@@ -57,6 +57,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.potion.PotionEffectType;
@@ -428,10 +429,6 @@ public class HariantEntity
     public void onInteract(@NotNull HariantPlayer player) {
     }
     
-    public final boolean canAffectAndHasNotResistedEffect(@NotNull HariantEntity entity) {
-        return canAffect(entity) && !entity.hasEffectResistance(this);
-    }
-    
     /**
      * Gets whether this {@link HariantEntity} can affect the given {@link HariantEntity} in any context.
      *
@@ -462,6 +459,9 @@ public class HariantEntity
         else if (!this.canSee(entity)) {
             return AffectResult.CANNOT_AFFECT_INVISIBLE;
         }
+        else if (entity instanceof HariantMarkerEntity) {
+            return AffectResult.CANNOT_AFFECT_MARKER;
+        }
         
         return AffectResult.CAN_AFFECT;
     }
@@ -471,12 +471,13 @@ public class HariantEntity
     }
     
     public boolean canSee(@NotNull HariantEntity entity) {
-        return entity.isInvisible();
+        // TODO @Apr 14, 2026 (xanyjl) -> Implement invisibility
+        return true;
     }
     
     public boolean isInvisible() {
-        // TODO @Feb 24, 2026 (xanyjl) ->
-        return true;
+        // TODO @Apr 14, 2026 (xanyjl) -> Implement invisibility
+        return false;
     }
     
     public boolean canAttack(@NotNull HariantEntity entity) {
@@ -603,6 +604,7 @@ public class HariantEntity
     
     @ApiStatus.Internal
     public final void tick0() {
+        // Handler deferred death
         if (this.deferDeath) {
             this.deferDeath = false;
             this.onDestroy();
@@ -724,18 +726,36 @@ public class HariantEntity
     
     @Override
     public final void remove() {
+        // Removal is a little wonky and done via the following:
+        // 1. `onDestroy()` is called, that MUST remove the bukkit entity (Unless it's a player)
+        // 2. Bukkit entity removed
+        // 3. `Hariant#tick` calls `entities#removeIf()` that removes HariantEntity if the `shouldRemove` is true, which
+        //    only is true if the bukkit entity is dead.
+        // 4. Done! Both bukkit entity and HariantEntity is removed.
         this.onDestroy();
     }
     
     @Override
-    public boolean shouldRemove() {
+    public final boolean shouldRemove() {
+        // Always unregister dead bukkit entities
         return entity.isDead();
     }
     
+    /**
+     * Called whenever this {@link HariantEntity} is created.
+     */
     @Override
     public void onCreate() {
     }
     
+    /**
+     * Called whenever this {@link HariantEntity} is destroyed, and <b>must</b> remove the bukkit entity, by either setting
+     * its health to {@code 0} or by calling {@link Entity#remove()} method.
+     *
+     * <p>
+     * Players must reset the states but not remove the player.
+     * </p>
+     */
     @Override
     public void onDestroy() {
         // We play the death animation, so set the health to 0 instead of calling remove()
@@ -873,7 +893,7 @@ public class HariantEntity
         return thisTeam != null && thisTeam == thatTeam;
     }
     
-    public boolean hasEffectResistance(@Nullable HariantEntity attacker) {
+    public boolean hasEffectResistance(@Nullable HariantEntity attacker, @NotNull AssistSource assistSource) {
         // Make sure we never resist self-debuffs
         if (this.equals(attacker)) {
             return false;
@@ -896,7 +916,7 @@ public class HariantEntity
         if (attacker != null) {
             lastAttacker = attacker;
             
-            // TODO @Mar 05, 2026 (xanyjl) -> Add as assister
+            combatTracker.assist(attacker, assistSource);
         }
         
         return false;

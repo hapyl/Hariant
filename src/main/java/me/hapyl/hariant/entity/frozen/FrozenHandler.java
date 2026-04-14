@@ -48,9 +48,6 @@ public class FrozenHandler implements Ticking, TickDuration {
         this.currentTick = duration;
         this.frozenKeys = generateKeys();
         
-        
-        // FIXME @Apr 02, 2026 (xanyjl) -> Might want to switch to spam space or A D ?
-        
         // Add a tiny delay between first click
         this.lastInput = System.currentTimeMillis() + (250 - KEY_COOLDOWN);
     }

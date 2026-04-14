@@ -47,6 +47,7 @@
 * ~~Do something with Pytaria's bees~~
 * ~~Don't count suicide for kills~~
 * ~~Add custom clicks in Talents menu based on the Talent~~
+* ~~Add name for alchemist stick and BALL~~
 * Combat Tag
 * Trigger game type win on player leave
 * Remove projectiles on death?
@@ -54,4 +55,3 @@
 * Make drops look cooler
 * Implement shields
 * Anomalies should count as negative effects
-* Add name for alchemist stick and BALL

@@ -4,7 +4,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
-import me.hapyl.hariant.attribute.modifier.AttributeModifier;
+import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
@@ -107,10 +107,10 @@ public final class ItemArtifactUnstableLightningGem extends ItemArtifact {
             player.incrementUltimateResource(energyRegeneration.doubleValue());
         }
         
-        private class ModifierTwoPiece extends AttributeModifier {
+        private class ModifierTwoPiece extends AttributeModifierArtifactSet {
             
             ModifierTwoPiece() {
-                super(createModifierKey(PieceCount.TWO_PIECE), null, HariantConstants.INDEFINITE_DURATION);
+                super(ArtifactSetElectrifying.this, PieceCount.TWO_PIECE, null, HariantConstants.INDEFINITE_DURATION);
                 
                 entries.add(entry(AttributeType.ELECTRIC_DAMAGE_BONUS, AttributeModifierType.FLAT, electricDamageBonus.doubleValue()));
             }

@@ -1,6 +1,7 @@
 package me.hapyl.hariant.attribute.modifier;
 
 import com.google.common.collect.Sets;
+import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Streamable;
 import me.hapyl.hariant.HariantConstants;
@@ -12,6 +13,7 @@ import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.ui.ComponentDisplayable;
 import me.hapyl.hariant.util.TickDuration;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,22 +22,30 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class AttributeModifier implements Effect, TickDuration, TickingEntity, Streamable<AttributeModifier.Entry>, AttributeModifierAdder, ComponentDisplayable {
+public class AttributeModifier implements Effect, TickDuration, TickingEntity, Streamable<AttributeModifier.Entry>, AttributeModifierAdder, ComponentDisplayable, Named {
     
     protected final Set<Entry> entries;
     protected final int duration;
     
     private final Key key;
+    private final Component name;
     private final HariantEntity applier;
     
     private int tick;
     
-    public AttributeModifier(@NotNull Key key, @Nullable HariantEntity applier, int duration) {
+    public AttributeModifier(@NotNull Key key, @NotNull Component name, @Nullable HariantEntity applier, int duration) {
         this.key = key;
+        this.name = name;
         this.applier = applier;
         this.duration = duration;
         this.tick = duration;
         this.entries = Sets.newLinkedHashSet();
+    }
+    
+    @Override
+    @NotNull
+    public final Component getName() {
+        return name;
     }
     
     @NotNull

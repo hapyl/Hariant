@@ -62,7 +62,7 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
     
     public class ElementalAnomalySoakedAttributeModifier extends AttributeModifier {
         ElementalAnomalySoakedAttributeModifier(@Nullable HariantEntity applier, int duration) {
-            super(modifierKey, applier, duration);
+            super(modifierKey, ElementalAnomalySoaked.this.getName(), applier, duration);
             
             this.of(AttributeType.MAX_HEALTH, AttributeModifierType.ADDITIVE, -maxHealthDecrease.doubleValue());
             this.of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.ADDITIVE, -movementSpeedDecrease.doubleValue());

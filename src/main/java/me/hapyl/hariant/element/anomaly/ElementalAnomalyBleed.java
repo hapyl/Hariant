@@ -120,7 +120,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         private final DamageSource damageSource;
         
         ElementalAnomalyBleedAttributeModifier(@NotNull Key key, @Nullable HariantEntity applier, int duration, double damage) {
-            super(key, applier, duration);
+            super(key, ElementalAnomalyBleed.this.getName(), applier, duration);
             
             // Reduce vitality
             this.of(AttributeType.VITALITY, AttributeModifierType.FLAT, -vitalityReduction.doubleValue());

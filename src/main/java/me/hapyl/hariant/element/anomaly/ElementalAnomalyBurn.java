@@ -91,7 +91,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
         private final DamageSource damageSource;
         
         ElementalAnomalyBurnAttributeModifier(@Nullable HariantEntity applier, int duration, double damage) {
-            super(modifierKey, applier, duration);
+            super(modifierKey, ElementalAnomalyBurn.this.getName(), applier, duration);
             
             this.of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, -attackDecrease.doubleValue());
             

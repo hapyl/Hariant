@@ -14,6 +14,9 @@ public enum EnumAnomaly implements ElementalAnomaly {
     BURN(new ElementalAnomalyBurn()),
     SOAKED(new ElementalAnomalySoaked()),
     FROZEN(new ElementalAnomalyFrozen()),
+    INFESTED(new ElementalAnomalyInfested()),
+    SHOCK(new ElementalAnomalyShock()),
+    INTANGIBILITY(new ElementalAnomalyIntangibility()),
     
     ;
     

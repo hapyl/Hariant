@@ -5,6 +5,7 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
+import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -86,17 +87,17 @@ public class ItemArtifactMagicCodex extends ItemArtifact {
                    .forEach(player -> player.getAttributes().addModifier(new ModifierFourPiece(source)));
         }
         
-        public class ModifierTwoPiece extends AttributeModifier {
+        public class ModifierTwoPiece extends AttributeModifierArtifactSet {
             ModifierTwoPiece() {
-                super(createModifierKey(PieceCount.TWO_PIECE), null, HariantConstants.INDEFINITE_DURATION);
+                super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.TWO_PIECE, null, HariantConstants.INDEFINITE_DURATION);
                 
                 of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.FLAT, twoPieceElementalMasteryIncrease.doubleValue());
             }
         }
         
-        public class ModifierFourPiece extends AttributeModifier {
+        public class ModifierFourPiece extends AttributeModifierArtifactSet {
             ModifierFourPiece(@Nullable HariantEntity applier) {
-                super(createModifierKey(PieceCount.FOUR_PIECE), applier, fourPieceElementalMasteryIncreaseDuration.intValue());
+                super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.FOUR_PIECE, applier, fourPieceElementalMasteryIncreaseDuration.intValue());
                 
                 of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.FLAT, fourPieceElementalMasteryIncrease.doubleValue());
             }

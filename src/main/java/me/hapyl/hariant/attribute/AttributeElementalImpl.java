@@ -60,6 +60,12 @@ public class AttributeElementalImpl extends AttributeImpl {
         }
         
         @Override
+        public double defaultValue() {
+            // To balance RES shread, we default to 20
+            return 20;
+        }
+        
+        @Override
         public double minValue() {
             return -80; // -80%
         }

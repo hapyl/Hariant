@@ -6,6 +6,7 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
+import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -100,10 +101,10 @@ public final class ItemArtifactPhilosophersStone extends ItemArtifact {
             ev.multiplyDamage(() -> identity, 1 + damageBoost);
         }
         
-        private class ModifierTwoPiece extends AttributeModifier {
+        private class ModifierTwoPiece extends AttributeModifierArtifactSet {
             
             ModifierTwoPiece() {
-                super(createModifierKey(PieceCount.TWO_PIECE), null, HariantConstants.INDEFINITE_DURATION);
+                super(ArtifactSetAlchemicalSynergy.this, PieceCount.TWO_PIECE, null, HariantConstants.INDEFINITE_DURATION);
                 
                 of(AttributeType.TOXIC_DAMAGE_BONUS, AttributeModifierType.FLAT, toxicDamageBonus.doubleValue());
             }

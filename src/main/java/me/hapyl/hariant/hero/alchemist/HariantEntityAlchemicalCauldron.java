@@ -267,7 +267,7 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
         private static final Key MODIFIER_KEY = Key.ofString("alchemical_madness");
         
         AlchemicalMadnessModifier() {
-            super(MODIFIER_KEY, null, talent.infusionDuration.intValue());
+            super(MODIFIER_KEY, Component.text("Alchemical Madness"), null, talent.infusionDuration.intValue());
             
             this.of(AttributeType.TOXIC_DAMAGE_BONUS, AttributeModifierType.FLAT, talent.toxicDamageIncrease.doubleValue());
         }
