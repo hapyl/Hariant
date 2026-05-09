@@ -4,6 +4,8 @@ import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.hero.HeroInstance;
+import me.hapyl.hariant.inventory.item.AbstractItem;
+import me.hapyl.hariant.inventory.item.Item;
 import me.hapyl.hariant.inventory.item.ItemInstance;
 import me.hapyl.hariant.util.Owned;
 import net.kyori.adventure.text.Component;
@@ -54,10 +56,11 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
     @Override
     @NotNull
     public ItemBuilder createBuilder() {
-        final ItemBuilder builder = super.createBuilder();
         final ItemArtifact origin = getOrigin();
+        final ItemBuilder builder = origin.getIcon().createBuilder(); // Have to recreate fully
         
         builder.setName(origin.getName());
+        builder.addLore();
         
         builder.addWrappedLore(origin.getDescription());
         builder.addLore();

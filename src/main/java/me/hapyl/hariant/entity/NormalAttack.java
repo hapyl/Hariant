@@ -8,6 +8,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.weapon.NormalAttackRanged;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,8 +19,8 @@ public class NormalAttack extends AttributeScaling implements DamageSourceCreato
     private final ElementType elementType;
     private final int attackCooldown;
     
-    public NormalAttack(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double scaling, int attackCooldown) {
-        super(attributeType, scaling);
+    public NormalAttack(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, int attackCooldown) {
+        super(attributeType, attributeScaling);
         
         this.elementType = elementType;
         this.attackCooldown = attackCooldown;
@@ -47,6 +48,16 @@ public class NormalAttack extends AttributeScaling implements DamageSourceCreato
     @NotNull
     public KnockbackSource createKnockbackCause(@NotNull HariantEntity attacker) {
         return KnockbackSource.create(attacker, HariantConstants.MELEE_KNOCKBACK_STRENGTH);
+    }
+    
+    @NotNull
+    public static NormalAttack melee(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, int attackCooldown) {
+        return new NormalAttack(elementType, attributeType, attributeScaling, attackCooldown);
+    }
+    
+    @NotNull
+    public static NormalAttackRanged ranged(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, int shotCooldown) {
+        return new NormalAttackRanged(elementType, attributeType, attributeScaling, shotCooldown);
     }
     
     @NotNull

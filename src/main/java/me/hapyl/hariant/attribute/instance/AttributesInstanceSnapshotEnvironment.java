@@ -3,6 +3,7 @@ package me.hapyl.hariant.attribute.instance;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
+import me.hapyl.hariant.attribute.modifier.AttributeModifierAdderHandler;
 import me.hapyl.hariant.entity.HariantEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +21,7 @@ public final class AttributesInstanceSnapshotEnvironment implements AttributesIn
     
     @NotNull
     @Override
-    public Optional<HariantEntity> getEntity() {
+    public Optional<HariantEntity> entity() {
         return Optional.empty();
     }
     
@@ -36,6 +37,10 @@ public final class AttributesInstanceSnapshotEnvironment implements AttributesIn
     
     @Override
     public void set(@NotNull AttributeType attributeType, double value) {
+    }
+    
+    @Override
+    public void add(@NotNull AttributeType attributeType, double value) {
     }
     
     @Override

@@ -32,6 +32,8 @@ public class HariantCommandManageHero extends HariantPlayerCommand {
         // hero (hero) (artifact)    (slot) [uuid]
         final PlayerDatabase database = Hariant.getPlayerDatabase(player);
         
+        // TODO @Apr 27, 2026 (xanyjl) -> Add a way to create heroes for others
+        
         final TypeConverter argument0 = args.get(0);
         final Key key = argument0.toKey();
         

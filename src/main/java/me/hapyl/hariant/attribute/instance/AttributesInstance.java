@@ -1,32 +1,34 @@
 package me.hapyl.hariant.attribute.instance;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifiable;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierMap;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.effect.EffectType;
+import me.hapyl.hariant.event.HariantAttributeEvent;
 import me.hapyl.hariant.util.Resettable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class AttributesInstance extends Attributes implements AttributeModifiable, Ticking, Resettable {
     
     protected final HariantEntity entity;
-    protected final AttributeModifierMap modifierMap;
+    protected final Map<Key, AttributeModifier> modifiers;
     
     public AttributesInstance(@NotNull HariantEntity entity, @Nullable Attributes copyFrom) {
         super(copyFrom);
         
         this.entity = entity;
-        this.modifierMap = new AttributeModifierMap(this);
+        this.modifiers = Maps.newLinkedHashMap(); // Keep order, literally just for the display purpose
     }
     
     @NotNull
@@ -47,77 +49,148 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     
     @Override
     public void addModifier(@NotNull AttributeModifier attributeModifier) {
-        modifierMap.addModifier(attributeModifier);
+        // Check for effect resistance for negative modifiers
+        final HariantEntity applier = attributeModifier.getApplier();
+        
+        if (attributeModifier.getEffectType() == EffectType.DEBUFF && entity.hasEffectResistance(attributeModifier)) {
+            return;
+        }
+        
+        final boolean modifierExists = this.modifiers.containsKey(attributeModifier.getKey());
+        
+        this.modifiers.put(attributeModifier.getKey(), attributeModifier);
+        this.triggerAttributeUpdate(attributeModifier);
+        
+        // Call `onApply`
+        attributeModifier.onApply(entity, applier, attributeModifier.duration());
+        
+        // If new modifier, trigger component display
+        if (!modifierExists) {
+            attributeModifier.display(entity.getMidpointLocation());
+        }
+        
+        // Trigger buff/debuff
+        new HariantAttributeEvent(entity, attributeModifier).callEvent();
     }
     
     @Override
     public boolean removeModifier(@NotNull Key key) {
-        return modifierMap.removeModifier(key);
+        final AttributeModifier modifier = this.modifiers.remove(key);
+        
+        if (modifier != null) {
+            modifier.onRemove0(entity);
+            this.triggerAttributeUpdate(modifier);
+            return true;
+        }
+        
+        return false;
     }
     
     @Override
     public boolean removeModifiers(@NotNull Predicate<AttributeModifier> filter) {
-        return modifierMap.removeModifiers(filter);
+        final Set<AttributeType> attributesToUpdate = Sets.newHashSet();
+        
+        final boolean modified = this.modifiers.values().removeIf(modifier -> {
+            if (!filter.test(modifier)) {
+                return false;
+            }
+            
+            modifier.stream().map(AttributeModifier.Entry::attributeType).forEach(attributesToUpdate::add);
+            modifier.onRemove0(entity);
+            return true;
+        });
+        
+        attributesToUpdate.forEach(this::updateAttribute);
+        return modified;
     }
     
     @Override
     public boolean hasModifier(@NotNull Key key) {
-        return modifierMap.hasModifier(key);
+        return modifiers.containsKey(key);
     }
     
     @NotNull
     public List<? extends AttributeModifier> getModifiers() {
-        return modifierMap.getModifiers();
+        return List.copyOf(modifiers.values());
     }
     
     @NotNull
     @Override
     public Optional<AttributeModifier> getModifier(@NotNull Key key) {
-        return modifierMap.getModifier(key);
+        return Optional.ofNullable(modifiers.get(key));
     }
     
     @NotNull
     @Override
     public <M extends AttributeModifier> Optional<M> getModifier(@NotNull Class<M> modifierClass) {
-        return modifierMap.getModifier(modifierClass);
+        return modifiers.values()
+                        .stream()
+                        .filter(modifierClass::isInstance)
+                        .map(modifierClass::cast)
+                        .findFirst();
     }
     
     @Override
     public void tick() {
-        modifierMap.tick();
+        final Iterator<AttributeModifier> iterator = modifiers.values().iterator();
+        
+        while (iterator.hasNext()) {
+            final AttributeModifier modifier = iterator.next();
+            
+            // Tick modifier
+            modifier.tick(entity);
+            
+            if (modifier.isOver()) {
+                modifier.onRemove0(entity);
+                iterator.remove();
+                this.triggerAttributeUpdate(modifier);
+            }
+        }
     }
     
     @Override
     @NotNull
     public Stream<AttributeModifier> streamModifiers() {
-        return modifierMap.streamModifiers();
+        return modifiers.values().stream();
     }
     
     public double getFlatModifierBonus(@NotNull AttributeType attributeType) {
-        return modifierMap.streamOf(attributeType, AttributeModifierType.FLAT)
+        return streamModifierEntries(attributeType, AttributeModifierType.FLAT)
                           .mapToDouble(AttributeModifier.Entry::value)
                           .sum();
     }
     
     public double getAdditiveModifierBonus(@NotNull AttributeType attributeType) {
-        return 1 + modifierMap.streamOf(attributeType, AttributeModifierType.ADDITIVE)
+        return 1 + streamModifierEntries(attributeType, AttributeModifierType.ADDITIVE)
                               .mapToDouble(AttributeModifier.Entry::value)
                               .sum();
     }
     
     public double getMultiplicativeModifierBonus(@NotNull AttributeType attributeType) {
-        return modifierMap.streamOf(attributeType, AttributeModifierType.MULTIPLICATIVE)
+        return streamModifierEntries(attributeType, AttributeModifierType.MULTIPLICATIVE)
                           .mapToDouble(entry -> 1 + entry.value())
                           .reduce(1, (value1, value2) -> value1 * value2);
     }
     
     @Override
     public void reset() {
-        modifierMap.reset();
+        modifiers.clear();
     }
     
     public void updateAttribute(@NotNull AttributeType attributeType) {
         attributeType.update(entity, get(attributeType));
+    }
+    
+    private void triggerAttributeUpdate(@NotNull AttributeModifier modifier) {
+        modifier.stream()
+                .map(AttributeModifier.Entry::attributeType)
+                .distinct()
+                .forEach(this::updateAttribute);
+    }
+    
+    @NotNull
+    private Stream<AttributeModifier.Entry> streamModifierEntries(@NotNull AttributeType attributeType, @NotNull AttributeModifierType modifierType) {
+        return modifiers.values().stream().flatMap(AttributeModifier::stream).filter(entry -> entry.attributeType() == attributeType && entry.modifierType() == modifierType);
     }
     
 }

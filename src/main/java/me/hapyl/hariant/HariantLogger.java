@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
+import org.bukkit.permissions.ServerOperator;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalTime;
@@ -52,7 +53,7 @@ public final class HariantLogger {
                                                .append(Component.text(String.valueOf(object), NamedTextColor.YELLOW));
         
         Bukkit.getOnlinePlayers().stream()
-              .filter(player -> PlayerRank.getRank(player).isOrHigher(PlayerRank.ADMIN))
+              .filter(ServerOperator::isOp) // Fuck it, just check for operator instead of rank, since it throws errors when used wrongly
               .forEach(player -> player.sendMessage(message));
         
         Bukkit.getConsoleSender().sendMessage(message);

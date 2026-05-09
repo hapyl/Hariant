@@ -6,7 +6,6 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.effect.EffectType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -45,11 +44,11 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     }
     
     @Override
-    public void addEffect(@NotNull EnumStatusEffect effect, int duration, @Nullable HariantEntity applier) {
+    public void addEffect(@NotNull EnumStatusEffect effect, int duration, @NotNull HariantEntity applier) {
         final EffectType effectType = effect.getEffectType();
         
         // If effect is a DEBUFF, check for Effect Resistance and cancel if entity resisted the effect
-        if (effectType == EffectType.DEBUFF && entity.hasEffectResistance(applier, AssistSource.create(effect))) {
+        if (effectType == EffectType.DEBUFF && entity.hasEffectResistance(AssistSource.create(applier, effect))) {
             return;
         }
         
@@ -65,15 +64,13 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
             effectMap.put(effect, effectInstance);
             
             // Call event
-            effect.onApply(entity, applier);
+            effect.onApply(entity, applier, duration);
         }
         
         // Call event if applier exists
-        if (applier != null) {
-            switch (effectType) {
-                case BUFF -> entity.triggerBuff(applier);
-                case DEBUFF -> entity.triggerDebuff(applier);
-            }
+        switch (effectType) {
+            case BUFF -> entity.triggerBuff(applier);
+            case DEBUFF -> entity.triggerDebuff(applier);
         }
     }
     

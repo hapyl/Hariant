@@ -20,6 +20,7 @@ import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.element.anomaly.EnumAnomaly;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
+import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.type.HariantEntityDummy;
@@ -65,6 +66,7 @@ public final class HariantCommandRegistry {
         register("hero", HariantCommandHero::new);
         register("ping", HariantCommandPing::new);
         register("temper", HariantTemperCommand::new);
+        register("debug", HariantDebugCommand::new);
         
         registerTestCommand("create_or_delete_player", (player, args) -> {
             final HariantPlayer existingPlayer = Hariant.getPlayer(player).orElse(null);
@@ -122,10 +124,6 @@ public final class HariantCommandRegistry {
             HariantLogger.success(player, Component.text("Drawn %s shape with %.1f rotation.".formatted(shapeName, rotationAngle)));
         });
         
-        registerTestCommand("charge_ultimate", (player, args) -> {
-            Hariant.getPlayer(player).ifPresent(HariantPlayer::chargeUltimate);
-        });
-        
         registerTestCommand("create_or_delete_game_instance", (player, args) -> {
             if (Hariant.isGameInProgress()) {
                 Hariant.endCurrentGameInstance(WinResult.create(WinType.WIN_CONDITION_MET, List.of()));
@@ -149,17 +147,6 @@ public final class HariantCommandRegistry {
             newTeam.addPlayer(profile);
         });
         
-        registerTestCommand("testherohead", (player, args) -> {
-            final Hero hero = args.get(0).toStaticConstant(HeroRegistry.class, Hero.class).orElse(null);
-            
-            if (hero == null) {
-                HariantLogger.error(player, Component.text("Даун."));
-                return;
-            }
-            
-            player.sendMessage(Component.text("Head: ").append(hero.asHeadComponent()));
-        });
-        
         registerTestCommand("togglespectator", (player, args) -> {
             final PlayerProfile profile = Hariant.getPlayerProfile(player);
             
@@ -171,25 +158,6 @@ public final class HariantCommandRegistry {
                     ? Component.text("You are now spectating.")
                     : Component.text("You are no longer spectating.")
             );
-        });
-        
-        registerTestCommand("cooldown", (player, args) -> {
-            Hariant.getPlayer(player).ifPresent(hariantPlayer -> {
-                hariantPlayer.resetCooldowns();
-                hariantPlayer.resetUltimate();
-                hariantPlayer.chargeUltimate();
-                
-                HariantLogger.success(player, Component.text("Reset cooldowns and charged ultimate!"));
-            });
-        });
-        
-        registerTestCommand("heal", (player, args) -> {
-            Hariant.getPlayer(player).ifPresent(hariantPlayer -> {
-                final double healing = args.get(0).toDouble(1);
-                
-                hariantPlayer.heal(HealingSource.create(healing, hariantPlayer));
-                hariantPlayer.sendMessage(Component.text("Healed for %.0f!".formatted(healing), NamedTextColor.GREEN));
-            });
         });
         
         registerTestCommand("setteamdata", (player, args) -> {
@@ -280,6 +248,13 @@ public final class HariantCommandRegistry {
             final ItemBuilder builder = ItemBuilder.playerHead(args.get(0).toString());
             
             player.getInventory().addItem(builder.asIcon());
+        });
+        
+        registerTestCommand("interrupt", (player, args) -> {
+            Hariant.getPlayer(player).ifPresent(hariantPlayer -> {
+                hariantPlayer.interrupt(AssistSource.create(hariantPlayer, Component.text("Command")));
+                hariantPlayer.messageSuccess(Component.text("Interrupted current action!"));
+            });
         });
     }
     

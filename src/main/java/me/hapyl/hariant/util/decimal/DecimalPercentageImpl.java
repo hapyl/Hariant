@@ -4,7 +4,7 @@ public class DecimalPercentageImpl extends DecimalImpl {
     private static final int DIVISOR = 100;
     
     DecimalPercentageImpl(double value) {
-        super(value, DecimalFormat.decimal("%,.0f%%", "%,.1f%%"));
+        super(value, DecimalFormat.decimal("%,.0f%%", "%,.2f%%"));
     }
     
     @Override

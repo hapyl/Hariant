@@ -59,6 +59,9 @@ public final class Colors {
     public static final TextColor THE_SPACE = TextColor.color(0xA020F0);
     public static final TextColor HELL = TextColor.color(0x8B0000);
     
+    public static final TextColor SOUL = TextColor.color(0x00B2BA);
+    public static final TextColor BLOOD_PURPLE = TextColor.color(0x780839);
+    
     private Colors() {
     }
     

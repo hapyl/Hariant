@@ -94,6 +94,7 @@ public final class TalentFlowerBreeze extends Talent {
         player.getAttributes().addModifier(
                 modifierKey,
                 this.getDuration(),
+                player,
                 adder ->
                         adder.of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue())
                              .of(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, defenseIncrease.doubleValue())

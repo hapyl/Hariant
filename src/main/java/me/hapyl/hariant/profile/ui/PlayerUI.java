@@ -4,18 +4,16 @@ import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.player.ScoreboardBuilder;
 import me.hapyl.eterna.module.player.tablist.Tablist;
-import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.VanillaTeamManager;
-import me.hapyl.hariant.util.Identified;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -114,10 +112,7 @@ public final class PlayerUI implements Ticking {
                 final HariantEntity applier = modifier.getApplier();
                 
                 builder.append(modifier.getName().color(NamedTextColor.YELLOW));
-                
-                if (applier != null) {
-                    builder.append(Component.text(" from %s".formatted(applier.toString()), NamedTextColor.DARK_GRAY));
-                }
+                builder.append(Component.text(" from %s".formatted(applier.equals(player) ? "self" : applier.toString()), NamedTextColor.DARK_GRAY));
                 
                 builder.appendNewline();
                 

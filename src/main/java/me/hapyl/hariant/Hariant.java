@@ -6,7 +6,6 @@ import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.player.dialog.DialogEndType;
 import me.hapyl.eterna.module.reflect.glowing.Glowing;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
-import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.annotate.Singleton;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseView;
@@ -34,7 +33,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -55,7 +53,10 @@ import java.util.stream.Stream;
  */
 public final class Hariant implements Runnable, Lifecycle {
     
-    public static final Component GAME_NAME = Component.text("Hariant", Colors.BRAND_COLOR);
+    public static final Component GAME_NAME = Component.text("Hariant", Colors.BRAND_COLOR)
+                                                       .appendSpace()
+                                                       .append(Component.text("TEST VERSION", NamedTextColor.RED, TextDecoration.BOLD));
+    
     private static final int GAME_END_DELAY = Tick.fromSeconds(5);
     
     @Singleton static HariantPlugin plugin;
@@ -118,8 +119,8 @@ public final class Hariant implements Runnable, Lifecycle {
         entityMap.values().forEach(HariantEntity::remove);
         entityMap.clear();
         
-        // Save player data on shutdown
-        profiles.values().forEach(PlayerProfile::onDestroy);
+        // Just save the database on shutdown, don't call onDestroy()
+        profiles.values().forEach(PlayerProfile::saveDatabaseSync);
         profiles.clear();
     }
     

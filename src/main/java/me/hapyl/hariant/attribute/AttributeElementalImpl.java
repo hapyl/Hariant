@@ -28,9 +28,7 @@ public class AttributeElementalImpl extends AttributeImpl {
         AttributeElementalDamageBonusImpl(@NotNull ElementType elementType) {
             super(
                     elementType,
-                    Component.empty()
-                             .append(elementType.getName())
-                             .append(Component.text(" Damage Bonus")),
+                    elementType.getName().append(Component.text(" DMG Bonus")),
                     Component.empty()
                              .append(Component.text("Increases the damage dealt by "))
                              .append(elementType.getName())
@@ -49,9 +47,7 @@ public class AttributeElementalImpl extends AttributeImpl {
         AttributeElementalResistanceImpl(@NotNull ElementType elementType) {
             super(
                     elementType,
-                    Component.empty()
-                             .append(elementType.getName())
-                             .append(Component.text(" Resistance")),
+                    elementType.getName().append(Component.text(" Resistance")),
                     Component.empty()
                              .append(Component.text("Decreases the damage taken from "))
                              .append(elementType.getName())

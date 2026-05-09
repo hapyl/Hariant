@@ -11,6 +11,8 @@ public final class ItemRegistry extends StaticRegistry<Item> {
     public static final ItemArtifact ARTIFACT_BLOODY_ROSE;
     public static final ItemArtifact ARTIFACT_PHILOSOPHERS_STONE;
     public static final ItemArtifact ARTIFACT_MAGIC_CODEX;
+    public static final ItemArtifact ARTIFACT_SHATTERED_SOUL;
+    public static final ItemArtifact ARTIFACT_WHOOPEE_CUSHION;
     
     private static final StaticRegistryMap<Item> REGISTRY;
     
@@ -21,6 +23,8 @@ public final class ItemRegistry extends StaticRegistry<Item> {
         ARTIFACT_BLOODY_ROSE = REGISTRY.register("artifact_bloody_rose", ItemArtifactBloodyRose::new);
         ARTIFACT_PHILOSOPHERS_STONE = REGISTRY.register("artifact_philosophers_stone", ItemArtifactPhilosophersStone::new);
         ARTIFACT_MAGIC_CODEX = REGISTRY.register("artifact_magic_codex", ItemArtifactMagicCodex::new);
+        ARTIFACT_SHATTERED_SOUL = REGISTRY.register("artifact_shattered_soul", ItemArtifactShatteredSoul::new);
+        ARTIFACT_WHOOPEE_CUSHION = REGISTRY.register("artifact_whoopee_cushion", ItemArtifactWhoopeeCushion::new);
     }
     
     @NotNull

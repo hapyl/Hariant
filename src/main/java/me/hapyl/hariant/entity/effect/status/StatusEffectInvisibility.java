@@ -13,7 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class StatusEffectInvisibility extends StatusEffectImpl implements Listener {
     StatusEffectInvisibility() {
@@ -50,7 +49,7 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
     }
     
     @Override
-    public void onApply(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+    public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
         entity.hide();
         entity.addVanillaEffect(PotionEffectType.INVISIBILITY, 1, HariantConstants.INDEFINITE_DURATION);
         
@@ -60,7 +59,7 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
     }
     
     @Override
-    public void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+    public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
         entity.show();
         entity.removeVanillaEffect(PotionEffectType.INVISIBILITY);
     }

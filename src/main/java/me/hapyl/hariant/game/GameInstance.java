@@ -7,6 +7,7 @@ import me.hapyl.hariant.entity.Lifecycle;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.battleground.Battleground;
 import me.hapyl.hariant.game.type.GameType;
+import me.hapyl.hariant.object.ObjectManager;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.ui.PlayerUIFormatter;
 import me.hapyl.hariant.team.EnumTeam;
@@ -62,4 +63,8 @@ public interface GameInstance extends Lifecycle, Ticking, PlayerUIFormatter, Pla
     default boolean endIfWinConditionMet() {
         return Hariant.endCurrentGameInstanceIfWinConditionMet();
     }
+    
+    @NotNull
+    ObjectManager getObjectManager();
+    
 }

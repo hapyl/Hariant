@@ -30,6 +30,16 @@ public enum EnumTerm implements Term {
             Component.text("Filling the elemental gauge fully triggers elemental anomaly of the corresponding element.")
     ),
     
+    CRITICAL_DAMAGE(
+            Component.text("Critical DMG"),
+            Component.text("Multiplies the original damage by Crit Damage.")
+    ),
+    
+    INTERRUPTION(
+            Component.text("Interruption"),
+            Component.text("Interrupts the current action and cancels any talent cast.")
+    ),
+    
     ;
     
     private final Component name;

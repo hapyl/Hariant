@@ -157,7 +157,7 @@ public final class PlayerProfile
             });
         }
         else {
-            // Realistically this shoule never be called manually, but...
+            // Realistically this should never be called manually, but...
             this.isSpectator = false;
             this.playerUI.getVanillaTeamManager().setStateForAllProfilesExceptSelf(VanillaTeamManager.State.LOBBY);
         }
@@ -252,5 +252,9 @@ public final class PlayerProfile
     @Override
     public String toString() {
         return "PlayerProfile(%s)".formatted(player.getName());
+    }
+    
+    public void saveDatabaseSync() {
+        database.save(false);
     }
 }

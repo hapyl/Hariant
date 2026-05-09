@@ -99,7 +99,7 @@ public abstract class TalentUltimate extends Talent implements Duration {
             final Component ultimateResourceFormatted = Component.text(percentCharged >= 1.0 ? "CHARGED!" : "%,.0f%%".formatted(percentCharged * 100), resourceStyle);
             
             // If on cooldown, show the percentage grayed out with a cooldown in parentheses
-            if (player.isOnCooldown(this)) {
+            if (player.hasCooldown(this)) {
                 builder.append(ultimateResourceFormatted.color(NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH))
                        .append(Component.text(" (%s)".formatted(Tick.format(player.getCooldownTimeLeft(this))), Colors.FORMAT_TICK));
             }
@@ -177,8 +177,8 @@ public abstract class TalentUltimate extends Talent implements Duration {
     }
     
     @Override
-    protected void initLocalAttributeFields() {
-        super.initLocalAttributeFields();
+    protected void initAttributeFields() {
+        super.initAttributeFields();
         
         this.attributeFields.add(new DisplayFieldInstance(
                 Component.empty()

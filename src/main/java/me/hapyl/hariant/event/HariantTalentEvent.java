@@ -8,6 +8,7 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+// TODO @Apr 24, 2026 (xanyjl) -> Need to do something about abilities, they aren't talents, so merge those, two events or something else?
 public class HariantTalentEvent extends HariantPlayerEvent implements Cancellable {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
@@ -69,7 +70,7 @@ public class HariantTalentEvent extends HariantPlayerEvent implements Cancellabl
     }
     
     public static final class Cancel {
-        private static final Cancel INSTANCE = new Cancel(Component.text("Cannot do that now."));
+        private static final Cancel INSTANCE = new Cancel(Component.text("Cannot execute talent right now!"));
         
         private final Component reason;
         

@@ -10,7 +10,6 @@ public final class PlayerDatabaseView extends PlayerDatabase {
         super(database, uuid);
     }
     
-    
     @Override
     public void save() {
         throw new UnsupportedOperationException("Mutating database view is not supported!");

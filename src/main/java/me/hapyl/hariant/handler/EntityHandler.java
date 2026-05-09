@@ -18,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -166,7 +167,17 @@ public final class EntityHandler implements Listener {
     
     @EventHandler
     public void handleHangingEvent(HangingBreakEvent ev) {
-        if (Hariant.isGameInProgress()) {
+        // If removed by an entity, check for the remover
+        if (ev instanceof HangingBreakByEntityEvent ev2) {
+            final Entity remover = ev2.getRemover();
+            
+            // If remover isn't a player or the player is not in creative mode, cancel the removal
+            if (!(remover instanceof Player player) || player.getGameMode() != GameMode.CREATIVE) {
+                ev.setCancelled(true);
+            }
+        }
+        // Otherwise, always cancel removal
+        else {
             ev.setCancelled(true);
         }
     }
@@ -189,7 +200,7 @@ public final class EntityHandler implements Listener {
         
         final HariantPlayer player = Hariant.getPlayer(ev.getPlayer()).orElse(null);
         
-        if (player == null || player.isOnCooldown(Holder.INTERACTION_COOLDOWN)) {
+        if (player == null || player.hasCooldown(Holder.INTERACTION_COOLDOWN)) {
             return;
         }
         

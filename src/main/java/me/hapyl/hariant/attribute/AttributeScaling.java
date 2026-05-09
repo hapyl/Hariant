@@ -1,10 +1,12 @@
 package me.hapyl.hariant.attribute;
 
+import me.hapyl.hariant.attribute.instance.Attributes;
+import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.util.decimal.DecimalFormat;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public class AttributeScaling implements AttributeFormatter {
+public class AttributeScaling implements ComponentFormatter {
     
     protected final AttributeType attributeType;
     protected final double scaling;
@@ -24,8 +26,12 @@ public class AttributeScaling implements AttributeFormatter {
                                .append(attributeType.abbreviation());
     }
     
+    public double getScaledValue(@NotNull Attributes attributes) {
+        return attributes.get(attributeType) * (scaling / 100);
+    }
+    
     public double getScaledValue(@NotNull Attributable attributable) {
-        return attributable.getAttributes().get(attributeType) * (scaling / 100);
+        return getScaledValue(attributable.getAttributes());
     }
     
     @NotNull

@@ -12,7 +12,6 @@ import me.hapyl.hariant.entity.player.HeartStyle;
 import net.kyori.adventure.text.Component;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
     
@@ -30,14 +29,14 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
             if (entity instanceof HariantPlayer player) {
                 player.setHeartStyle(HeartStyle.green());
             }
         }
         
         @Override
-        public void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+        public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
             if (entity instanceof HariantPlayer player) {
                 player.setHeartStyle(null);
             }
@@ -60,7 +59,7 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
             if (entity.getTicksAlive() % DAMAGE_PERIOD != 0) {
                 return;
             }
@@ -79,7 +78,7 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
             entity.addVanillaEffect(PotionEffectType.NAUSEA, 1, 5);
         }
     }

@@ -1,9 +1,9 @@
-package me.hapyl.hariant.attribute;
+package me.hapyl.hariant.util;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public interface AttributeFormatter {
+public interface ComponentFormatter {
     
     @NotNull
     Component format();

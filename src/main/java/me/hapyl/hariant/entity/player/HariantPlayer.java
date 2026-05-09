@@ -14,16 +14,21 @@ import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.PlayerState;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
+import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.tracker.CombatData;
+import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.heal.HealingSource;
-import me.hapyl.hariant.event.HariantPlayerRespawnEvent;
+import me.hapyl.hariant.event.HariantPlayerCreateEvent;
 import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroData;
 import me.hapyl.hariant.hero.HeroDataSupplier;
 import me.hapyl.hariant.hero.HeroInstance;
+import me.hapyl.hariant.object.ObjectManager;
+import me.hapyl.hariant.object.ObjectManagerHandler;
+import me.hapyl.hariant.object.ObjectManagerImpl;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.setting.Setting;
 import me.hapyl.hariant.profile.setting.Settings;
@@ -35,14 +40,14 @@ import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.TalentUltimateResource;
 import me.hapyl.hariant.task.Cancellable;
 import me.hapyl.hariant.task.HariantTickingTask;
+import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
+import me.hapyl.hariant.weapon.NormalAttackRanged;
 import me.hapyl.hariant.weapon.Weapon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.title.Title;
-import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
@@ -61,7 +66,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,6 +107,30 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         this.state = PlayerState.ALIVE;
         this.actionbarCache = new ActionbarCache();
         this.heartStyle = null;
+    }
+    
+    public void interrupt(@NotNull AssistSource source) {
+        // Check for effect resistance
+        if (hasEffectResistance(source)) {
+            return;
+        }
+        
+        // Cancel delegates
+        delegatedCancellable.forEach(Cancellable::cancel);
+        delegatedCancellable.clear();
+        
+        // Interrupt weapon
+        final PlayerInventory inventory = getInventory();
+        
+        inventory.setHeldItemSlot(8);
+        InternalTasks.later(() -> inventory.setHeldItemSlot(HariantConstants.WEAPON_SLOT), 2);
+        
+        // Add to assisters
+        combatTracker.assist(source);
+        
+        // Fx
+        playSound(Sound.ENTITY_ELDER_GUARDIAN_CURSE, 2.0f);
+        playSound(Sound.ENCHANT_THORNS_HIT, 0.0f);
     }
     
     @NotNull
@@ -192,15 +220,26 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         return heroInstance.getOrigin().getWeapon(this).getMeleeAttack();
     }
     
-    @Nullable
     @Override
-    public final NormalAttack getRangedAttack() {
+    public final NormalAttackRanged getRangedAttack() {
         return heroInstance.getOrigin().getWeapon(this).getRangedAttack();
     }
     
     @Override
     public boolean isPersistent() {
         return true;
+    }
+    
+    @Override
+    public boolean isInvisible() {
+        // Consider spectators invisible
+        final Player player = getHandle();
+        
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            return true;
+        }
+        
+        return false;
     }
     
     @Override
@@ -306,7 +345,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     }
     
     @Override
-    public boolean canSee(@NotNull HariantEntity entity) {
+    public boolean canSeeInvisible(@NotNull HariantEntity entity) {
         // If the entity is a player is NOT in SURVIVAL, we consider that we can't see them
         if (entity instanceof HariantPlayer player && player.getGameMode() != GameMode.SURVIVAL) {
             return false;
@@ -408,6 +447,9 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         
         // Call PlayerLifecycle
         heroInstance.getOrigin().getWeapon().onCreate(this);
+        
+        // Call event
+        new HariantPlayerCreateEvent(this).callEvent();
     }
     
     @Override
@@ -522,6 +564,9 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         player.setInvulnerable(false);
         player.setArrowsInBody(0, false);
         player.setGlowing(false);
+        
+        // Set health to max
+        health = getMaxHealth();
     }
     
     public void sendEliminationFeedback(@NotNull EliminationFeedback feedback, @NotNull HariantPlayer player) {
@@ -599,23 +644,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         return getHandle().getInventory();
     }
     
-    public void sendTitleSubtitle(@NotNull Component title, @NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(title, subtitle, fadeIn, stay, fadeOut);
-    }
-    
-    public void sendTitle(@NotNull Component title, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(title, null, fadeIn, stay, fadeOut);
-    }
-    
-    public void sendSubtitle(@NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        // Subtitle cannot be displayed without a title, so we send an empty title, which will override the main title, if any showing
-        this.sendTitle0(Component.empty(), subtitle, fadeIn, stay, fadeOut);
-    }
-    
-    public void sendSubtitleKeepTitle(@NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(null, subtitle, fadeIn, stay, fadeOut);
-    }
-    
     @NotNull
     public <I> I getSetting(@NotNull Setting<I> setting) {
         return profile.getDatabase().settings.getValue(setting);
@@ -660,14 +688,12 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         // Teleport to a random location
         Hariant.getCurrentGameInstance().ifPresent(gameInstance -> teleport(gameInstance.getBattleground().getRandomSpawnLocation()));
         
-        // TODO @Feb 24, 2026 (xanyjl) -> Add respawn resistance effect
+        // Add respawn resistance
+        addEffect(EnumStatusEffect.RESPAWN_RESISTANCE, 20, this);
         
         // Fx
-        this.addVanillaEffect(PotionEffectType.BLINDNESS, 1, 20);
-        this.sendTitleSubtitle(Component.text("ʀᴇsᴘᴀᴡɴᴇᴅ", Colors.SUCCESS, TextDecoration.BOLD), Component.empty(), 0, 20, 5);
-        
-        // Call respawn event
-        new HariantPlayerRespawnEvent(this).callEvent();
+        addVanillaEffect(PotionEffectType.BLINDNESS, 1, 20);
+        sendTitleSubtitle(Component.text("ʀᴇsᴘᴀᴡɴᴇᴅ", Colors.SUCCESS, TextDecoration.BOLD), Component.empty(), 0, 20, 5);
     }
     
     @NotNull
@@ -774,18 +800,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     
     private void fetchGameInstance(@NotNull Consumer<GameInstance> consumer) {
         Hariant.getCurrentGameInstance().ifPresent(consumer);
-    }
-    
-    private void sendTitle0(@Nullable Component title, @Nullable Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.ofMillis(fadeIn * 50L), Duration.ofMillis(stay * 50L), Duration.ofMillis(fadeOut * 50L)));
-        
-        if (title != null) {
-            this.sendTitlePart(TitlePart.TITLE, title);
-        }
-        
-        if (subtitle != null) {
-            this.sendTitlePart(TitlePart.SUBTITLE, subtitle);
-        }
     }
     
     private void startAttackCooldown(boolean isMeleeAttack) {

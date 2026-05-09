@@ -1,5 +1,6 @@
 package me.hapyl.hariant.entity;
 
+import me.hapyl.hariant.weapon.NormalAttackRanged;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,12 +19,12 @@ public interface Attacker {
     
     
     /**
-     * Gets the ranged {@link NormalAttack}, which is optional and used for projectile scaling.
+     * Gets the ranged {@link NormalAttackRanged}, which is optional and used for projectile scaling.
      *
      * @return the ranged attack of this entity.
      */
     @Nullable
-    default NormalAttack getRangedAttack() {
+    default NormalAttackRanged getRangedAttack() {
         return null;
     }
     

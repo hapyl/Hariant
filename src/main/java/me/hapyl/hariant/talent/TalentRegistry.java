@@ -1,8 +1,11 @@
 package me.hapyl.hariant.talent;
 
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.hero.alchemist.*;
 import me.hapyl.hariant.hero.archer.*;
+import me.hapyl.hariant.hero.mage.*;
 import me.hapyl.hariant.hero.pytaria.*;
+import me.hapyl.hariant.hero.troll.*;
 import me.hapyl.hariant.registry.StaticRegistry;
 import me.hapyl.hariant.registry.StaticRegistryMap;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +39,24 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentAbyssalCorrosion ABYSSAL_CORROSION;
     public static final TalentAbyssalCurse ABYSSAL_CURSE;
     
+    /**
+     * {@link HeroMage}
+     */
+    public static final TalentArcaneMute ARCANE_MUTE;
+    public static final TalentMetempsychosis METEMPSYCHOSIS;
+    public static final TalentSoulStorm SOUL_STORM;
+    public static final TalentSoulHarvest SOUL_HARVEST;
+    public static final TalentMageUltimate MAGE_ULTIMATE;
+    
+    /**
+     * {@link HeroTroll}
+     */
+    public static final TalentSpin SPIN;
+    public static final TalentPanicRoll PANIC_ROLL;
+    public static final TalentRepulsor REPULSOR;
+    public static final TalentLastLaugh LAST_LAUGH;
+    public static final TalentStickySituation STICKY_SITUATION;
+    
     private static final StaticRegistryMap<Talent> REGISTRY;
     
     static {
@@ -58,6 +79,18 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         ABYSSAL_CORROSION = REGISTRY.register("abyssal_corrosion", TalentAbyssalCorrosion::new);
         ABYSSAL_CURSE = REGISTRY.register("abyssal_curse", TalentAbyssalCurse::new);
         ALCHEMICAL_CAULDRON = REGISTRY.register("alchemical_cauldron", TalentAlchemicalCauldron::new);
+        
+        ARCANE_MUTE = REGISTRY.register("arcane_mute", TalentArcaneMute::new);
+        SOUL_STORM = REGISTRY.register("soul_storm", TalentSoulStorm::new);
+        METEMPSYCHOSIS = REGISTRY.register("metempsychosis", TalentMetempsychosis::new);
+        SOUL_HARVEST = REGISTRY.register("soul_harvest", TalentSoulHarvest::new);
+        MAGE_ULTIMATE = REGISTRY.register("mage_ultimate_temp", TalentMageUltimate::new);
+        
+        SPIN = REGISTRY.register("spin", TalentSpin::new);
+        PANIC_ROLL = REGISTRY.register("panic_roll", TalentPanicRoll::new);
+        REPULSOR = REGISTRY.register("repulsor", TalentRepulsor::new);
+        LAST_LAUGH = REGISTRY.register("last_laugh", TalentLastLaugh::new);
+        STICKY_SITUATION = REGISTRY.register("sticky_situation", TalentStickySituation::new);
     }
     
     @NotNull

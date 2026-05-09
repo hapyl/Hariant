@@ -1,7 +1,7 @@
 package me.hapyl.hariant.util.decimal;
 
 import me.hapyl.eterna.module.text.NumberToWord;
-import me.hapyl.hariant.attribute.AttributeFormatter;
+import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import net.kyori.adventure.text.Component;
@@ -39,7 +39,7 @@ import org.jetbrains.annotations.Range;
  * instantiated through the factory methods declared in this class.
  * </p>
  */
-public abstract class Decimal extends Number implements AttributeFormatter, ComponentLike {
+public abstract class Decimal extends Number implements ComponentFormatter, ComponentLike {
     
     protected final double value;
     
@@ -118,8 +118,8 @@ public abstract class Decimal extends Number implements AttributeFormatter, Comp
     }
     
     @NotNull
-    public static Decimal ofAttributeBonus(@NotNull AttributeType attributeType, @Range(from = 1, to = Integer.MAX_VALUE) final double value) {
-        return new DecimalAttributeBonusImpl(attributeType, value);
+    public static Decimal ofAttribute(@NotNull AttributeType attributeType, @Range(from = 1, to = Integer.MAX_VALUE) final double value) {
+        return new DecimalAttributeImpl(attributeType, value);
     }
     
     @NotNull

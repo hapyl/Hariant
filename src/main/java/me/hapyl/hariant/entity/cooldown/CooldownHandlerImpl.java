@@ -58,7 +58,7 @@ public final class CooldownHandlerImpl implements CooldownHandler {
     }
     
     @Override
-    public boolean isOnCooldown(@NotNull Key key) {
+    public boolean hasCooldown(@NotNull Key key) {
         final CooldownInstance instance = cooldowns.get(key);
         
         return instance != null && (instance.isIndefinite() || entity.getTicksAlive() < instance.endTick);

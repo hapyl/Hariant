@@ -29,6 +29,12 @@ public enum Definition implements Prefixed, Named, Styled, ComponentLike {
             Style.style(Colors.ABYSSAL_CURSE)
     ),
     
+    SOUL_FRAGMENT(
+            Component.text("✦"),
+            Component.text("Soul Fragment"),
+            Style.style(Colors.SOUL)
+    ),
+    
     ;
     
     private final Component prefix;
@@ -72,6 +78,14 @@ public enum Definition implements Prefixed, Named, Styled, ComponentLike {
     @Override
     public Component asComponent() {
         return component;
+    }
+    
+    @NotNull
+    public Component prefix(@NotNull Component component) {
+        return Component.empty()
+                        .append(prefix.style(style))
+                        .appendSpace()
+                        .append(component.style(style));
     }
     
 }

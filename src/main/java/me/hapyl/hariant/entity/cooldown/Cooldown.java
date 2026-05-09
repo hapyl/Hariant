@@ -2,11 +2,12 @@ package me.hapyl.hariant.entity.cooldown;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.util.decimal.DecimalFormat;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public interface Cooldown {
+public interface Cooldown extends ComponentFormatter {
     
     @NotNull
     Key getCooldownKey(); // We technically can extend Keyed and make this getKey(), but we might need to use a separate key for cooldowns and object
@@ -26,6 +27,12 @@ public interface Cooldown {
     
     default boolean hasCooldown() {
         return getCooldown() > 0;
+    }
+    
+    @NotNull
+    @Override
+    default Component format() {
+        return DecimalFormat.SECONDS.format(this.getCooldownSeconds());
     }
     
     @NotNull

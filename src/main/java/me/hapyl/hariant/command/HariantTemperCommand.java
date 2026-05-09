@@ -65,7 +65,7 @@ public class HariantTemperCommand extends HariantPlayerCommand {
                 }
             }
             else {
-                attributes.addModifier(MODIFIER_KEY, HariantConstants.INDEFINITE_DURATION, adder -> adder.of(attributeType, modifierType, value));
+                attributes.addModifier(MODIFIER_KEY, HariantConstants.INDEFINITE_DURATION, harp, adder -> adder.of(attributeType, modifierType, value));
                 
                 harp.messageSuccess(
                         Component.empty()

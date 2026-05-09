@@ -8,6 +8,13 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DamageSourceIdentity extends Keyed, Named {
     
+    @NotNull
+    DamageSourceIdentity COMMAND = create(
+            Key.ofString("command"),
+            Component.text("Command"),
+            DeathMessage.createWithDefaultKiller("{player} was killed [by {killer}]")
+    );
+    
     @Override
     @NotNull
     Key getKey();

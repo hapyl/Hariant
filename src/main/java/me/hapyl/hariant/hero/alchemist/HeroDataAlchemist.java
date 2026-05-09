@@ -81,15 +81,15 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> {
             final int corrosionLevel = this.getAbyssalCorrosionLevel();
             
             if (corrosionLevel >= 1) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_1, 5);
+                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_1, 5, player);
             }
             
             if (corrosionLevel >= 2) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_2, 5);
+                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_2, 5, player);
             }
             
             if (corrosionLevel >= 3) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_3, 5);
+                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_3, 5, player);
             }
         }
         

@@ -10,6 +10,7 @@ import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.TalentRegistry;
 import me.hapyl.hariant.weapon.WeaponBow;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 
 public class HeroArcher extends Hero {
@@ -78,8 +79,8 @@ public class HeroArcher extends Hero {
         WeaponBowOfDestiny() {
             super(
                     Key.ofString("bow_of_destiny"),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 15, 10),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 105, 10)
+                    NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 15, 10),
+                    NormalAttack.ranged(ElementType.PHYSICAL, AttributeType.ATTACK, 105, 10)
             );
             
             this.setName(Component.text("Bow of Destiny"));

@@ -1,6 +1,7 @@
 package me.hapyl.hariant.profile.setting;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.dialog.DialogSpeed;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,32 +14,37 @@ public final class Settings {
     public static final Setting<Boolean> ELIMINATION_FEEDBACK;
     public static final Setting<Boolean> COMBAT_FEEDBACK;
     
+    public static final Setting<DialogSpeed> DIALOG_SPEED;
+    
     static {
-        COOLDOWN_FEEDBACK = SettingImpl.ofBoolean(
+        COOLDOWN_FEEDBACK = Setting.ofBoolean(
                 Key.ofString("cooldown_feedback"),
                 Component.text("Cooldown Feedback"),
                 Component.text("Whether to show cooldown messages and play cooldown fx."),
                 Icon.ofMaterial(Material.CLOCK),
+                SettingCategory.GAMEPLAY,
                 true
         );
         
-        ATTACK_COOLDOWN_FEEDBACK = SettingImpl.ofBoolean(
+        ATTACK_COOLDOWN_FEEDBACK = Setting.ofBoolean(
                 Key.ofString("attack_cooldown_feedback"),
                 Component.text("Attack Cooldown Feedback"),
                 Component.text("Whether you will hear the \"pop\" sound when dealing damage while on cooldown."),
                 Icon.ofMaterial(Material.WOODEN_SWORD),
+                SettingCategory.GAMEPLAY,
                 true
         );
         
-        ELIMINATION_FEEDBACK = SettingImpl.ofBoolean(
+        ELIMINATION_FEEDBACK = Setting.ofBoolean(
                 Key.ofString("elimination_feedback"),
                 Component.text("Elimination/Assist Feedback"),
                 Component.text("Whether you will see feedback for eliminations/assists."),
                 Icon.ofMaterial(Material.SKELETON_SKULL),
+                SettingCategory.GAMEPLAY,
                 true
         );
         
-        COMBAT_FEEDBACK = SettingImpl.ofBoolean(
+        COMBAT_FEEDBACK = Setting.ofBoolean(
                 Key.ofString("combat_feedback"),
                 Component.text("Combat Feedback"),
                 Component.empty()
@@ -51,7 +57,17 @@ public final class Settings {
                          .append(Component.text(" • ", NamedTextColor.DARK_GRAY))
                          .append(Component.text("Damage done/received.")),
                 Icon.ofMaterial(Material.SWEET_BERRIES),
+                SettingCategory.GAMEPLAY,
                 false
+        );
+        
+        DIALOG_SPEED = Setting.ofEnum(
+                Key.ofString("dialog_speed"),
+                Component.text("Dialog Speed"),
+                Component.text("Defines the speed of the dialogs."),
+                Icon.ofMaterial(Material.FILLED_MAP),
+                SettingCategory.CHAT,
+                DialogSpeed.NORMAL
         );
     }
     

@@ -5,6 +5,8 @@ import me.hapyl.eterna.module.text.TimeFormat;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
 import me.hapyl.hariant.game.type.GameType;
+import me.hapyl.hariant.object.ObjectManager;
+import me.hapyl.hariant.object.ObjectManagerImpl;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamData;
@@ -21,6 +23,7 @@ public class GameInstanceImpl implements GameInstance {
     private final GameType gameType;
     private final EnumBattleground battleground;
     private final TeamDataMap teamDataMap;
+    private final ObjectManager objectManager;
     
     private GameInstanceState state;
     private int timeLeft;
@@ -32,6 +35,7 @@ public class GameInstanceImpl implements GameInstance {
         this.teamDataMap = new TeamDataMap();
         this.state = GameInstanceState.PREPARING;
         this.timeLeft = gameType.getTimeLimit();
+        this.objectManager = new ObjectManagerImpl();
     }
     
     @NotNull
@@ -123,6 +127,12 @@ public class GameInstanceImpl implements GameInstance {
         components.appendEmpty();
         
         this.gameType.formatScoreboard(profile, this, components);
+    }
+    
+    @NotNull
+    @Override
+    public ObjectManager getObjectManager() {
+        return objectManager;
     }
     
 }

@@ -11,7 +11,6 @@ import me.hapyl.eterna.module.registry.Keyed;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.annotate.StrictNamingConvention;
-import me.hapyl.hariant.attribute.AttributeFormatter;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
@@ -23,6 +22,7 @@ import me.hapyl.hariant.registry.Registrable;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
+import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.util.Duration;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.Identified;
@@ -160,7 +160,7 @@ public abstract class Talent
     
     @Override
     public void onRegister() {
-        this.initAttributeFields();
+        this.initAttributeFields0();
     }
     
     @Override
@@ -220,11 +220,15 @@ public abstract class Talent
     @NotNull
     public abstract Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context);
     
-    public final void execute0(@NotNull HariantPlayer player) {
+    public boolean canExecute(@NotNull HariantPlayer player) {
+        return true;
+    }
+    
+    public void execute0(@NotNull HariantPlayer player) {
         // Precondition checks
         final int cooldownTimeLeft = player.getCooldownTimeLeft(this);
         
-        if (player.isOnCooldown(this)) {
+        if (player.hasCooldown(this)) {
             if (player.getSetting(Settings.COOLDOWN_FEEDBACK)) {
                 player.messageError(
                         Component.text("This talent is on cooldown for ")
@@ -293,7 +297,7 @@ public abstract class Talent
     }
     
     @OverridingMethodsMustInvokeSuper
-    protected void initLocalAttributeFields() {
+    protected void initAttributeFields() {
         if (cooldown > 0) {
             attributeFields.add(new DisplayFieldInstance(Component.text("Cooldown"), this.getCooldownFormatted()));
         }
@@ -303,38 +307,54 @@ public abstract class Talent
         }
     }
     
-    private void initAttributeFields() {
+    private void initAttributeFields0() {
         if (!attributeFields.isEmpty()) {
             throw new IllegalStateException("Attribute fields already initiated!");
         }
         
-        this.initLocalAttributeFields();
+        this.initAttributeFields();
         
         try {
-            for (Field field : this.getClass().getDeclaredFields()) {
-                final DisplayField displayField = field.getAnnotation(DisplayField.class);
-                
-                if (displayField == null) {
-                    continue;
+            for (Class<?> clazz : getClassHierarchyReversed()) {
+                for (Field field : clazz.getDeclaredFields()) {
+                    final DisplayField displayField = field.getAnnotation(DisplayField.class);
+                    
+                    if (displayField == null) {
+                        continue;
+                    }
+                    
+                    field.setAccessible(true);
+                    final Object fieldValue = field.get(this);
+                    
+                    if (!(fieldValue instanceof ComponentFormatter formatter)) {
+                        throw new IllegalArgumentException(
+                                "Field %s (%s) in %s must implement %s!".formatted(field.getName(), clazz.getSimpleName(), field.getType().getSimpleName(), ComponentFormatter.class.getSimpleName()));
+                    }
+                    
+                    final String fieldName = !displayField.name().isEmpty()
+                                             ? displayField.name()
+                                             : formatFieldName(field);
+                    
+                    attributeFields.add(new DisplayFieldInstance(Component.text(fieldName), formatter.format()));
                 }
-                
-                field.setAccessible(true);
-                final Object fieldValue = field.get(this);
-                
-                if (!(fieldValue instanceof AttributeFormatter formatter)) {
-                    throw new IllegalArgumentException("%s must implement %s!".formatted(field.getType().getSimpleName(), AttributeFormatter.class.getSimpleName()));
-                }
-                
-                final String fieldName = !displayField.name().isEmpty()
-                                         ? displayField.name()
-                                         : formatFieldName(field);
-                
-                attributeFields.add(new DisplayFieldInstance(Component.text(fieldName), formatter.format()));
             }
         }
         catch (IllegalAccessException e) {
             throw new RuntimeException("Error parsing attribute fields in %s: %s".formatted(this.getClass().getSimpleName(), e.getMessage()), e);
         }
+    }
+    
+    @NotNull
+    private List<Class<?>> getClassHierarchyReversed() {
+        final List<Class<?>> hierarchy = Lists.newArrayList();
+        Class<?> clazz = this.getClass();
+        
+        while (clazz != Talent.class) {
+            hierarchy.addFirst(clazz);
+            clazz = clazz.getSuperclass();
+        }
+        
+        return hierarchy;
     }
     
     @NotNull

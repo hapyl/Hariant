@@ -65,7 +65,7 @@ public enum Affiliation implements Prefixed, Named, Described, Styled, Component
             Component.text("⛓"),
             Component.text("Hell"),
             Component.text("A barren land of the underworld."),
-            Style.style(Colors.THE_SPACE)
+            Style.style(Colors.HELL)
     ),
     
     ;

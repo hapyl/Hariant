@@ -4,11 +4,11 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class HariantPlayerRespawnEvent extends HariantPlayerEvent {
+public class HariantPlayerCreateEvent extends HariantPlayerEvent {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
-    public HariantPlayerRespawnEvent(@NotNull HariantPlayer player) {
+    public HariantPlayerCreateEvent(@NotNull HariantPlayer player) {
         super(player);
     }
     

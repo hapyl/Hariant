@@ -5,7 +5,6 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
@@ -24,11 +23,13 @@ import org.jetbrains.annotations.Nullable;
 public final class ItemArtifactPhilosophersStone extends ItemArtifact {
     public ItemArtifactPhilosophersStone(@NotNull Key key) {
         super(key, Component.text("Philosopher's Stone"), Icon.ofTexture("1cf948805dcb43a2cf0406aab37a412ceeff82a6ba1541a11d6c8307555d1aa6"), new ArtifactSetAlchemicalSynergy(key));
+        
+        setDescription(Component.text("An alchemical substance resembling a stone, said to be capable of turning lead to gold."));
     }
     
     public static class ArtifactSetAlchemicalSynergy extends ArtifactSet implements Listener {
         
-        private final Decimal toxicDamageBonus = Decimal.ofAttributeBonus(AttributeType.TOXIC_DAMAGE_BONUS, 20);
+        private final Decimal toxicDamageBonus = Decimal.ofAttribute(AttributeType.TOXIC_DAMAGE_BONUS, 20);
         
         private final Decimal damageBoostPerDebuff = Decimal.ofPercentage(6);
         private final Decimal maxNumbersOfDebuffs = Decimal.ofValue(3);
@@ -70,7 +71,7 @@ public final class ItemArtifactPhilosophersStone extends ItemArtifact {
         @Override
         public void applyEffect(@NotNull HariantPlayer player, @NotNull PieceCount pieceCount) {
             if (pieceCount.isOrHigher(PieceCount.TWO_PIECE)) {
-                player.getAttributes().addModifier(new ModifierTwoPiece());
+                player.getAttributes().addModifier(new ModifierTwoPiece(player));
             }
         }
         
@@ -102,9 +103,8 @@ public final class ItemArtifactPhilosophersStone extends ItemArtifact {
         }
         
         private class ModifierTwoPiece extends AttributeModifierArtifactSet {
-            
-            ModifierTwoPiece() {
-                super(ArtifactSetAlchemicalSynergy.this, PieceCount.TWO_PIECE, null, HariantConstants.INDEFINITE_DURATION);
+            ModifierTwoPiece(@NotNull HariantEntity applier) {
+                super(ArtifactSetAlchemicalSynergy.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
                 
                 of(AttributeType.TOXIC_DAMAGE_BONUS, AttributeModifierType.FLAT, toxicDamageBonus.doubleValue());
             }

@@ -6,7 +6,6 @@ import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.EffectType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public enum EnumStatusEffect implements StatusEffect {
     
@@ -16,6 +15,11 @@ public enum EnumStatusEffect implements StatusEffect {
     ABYSSAL_CORROSION_1(new StatusEffectAbyssalCorrosion.Level1()),
     ABYSSAL_CORROSION_2(new StatusEffectAbyssalCorrosion.Level2()),
     ABYSSAL_CORROSION_3(new StatusEffectAbyssalCorrosion.Level3()),
+    
+    ARCANE_MUTE(new StatusEffectArcaneMute()),
+    TALENT_LOCK(new StatusEffectTalentLock()),
+    
+    RESPAWN_RESISTANCE(new StatusEffectRespawnResistance()),
     
     ;
     
@@ -56,17 +60,17 @@ public enum EnumStatusEffect implements StatusEffect {
     }
     
     @Override
-    public void onApply(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
-        statusEffect.onApply(entity, applier);
+    public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
+        statusEffect.onApply(entity, applier, duration);
     }
     
     @Override
-    public void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+    public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
         statusEffect.onRemove(entity, applier);
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
         statusEffect.onTick(entity, applier, tick);
     }
     

@@ -22,7 +22,7 @@ public final class TalentAlchemistPotionInvisibility extends TalentAlchemistPoti
     @NotNull
     @Override
     public AlchemistPotionInstance drink(@NotNull HariantPlayer player, @NotNull HeroDataAlchemist heroData) {
-        player.addEffect(EnumStatusEffect.INVISIBILITY, this.getDuration());
+        player.addEffect(EnumStatusEffect.INVISIBILITY, this.getDuration(), player);
         
         return new AlchemistPotionInvisibilityInstance(player);
     }

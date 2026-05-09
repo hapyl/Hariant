@@ -1,6 +1,5 @@
 package me.hapyl.hariant.hero;
 
-import me.hapyl.eterna.module.component.ButtonComponents;
 import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
@@ -16,6 +15,7 @@ import me.hapyl.hariant.annotate.StrictNamingConvention;
 import me.hapyl.hariant.attribute.Attributable;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
+import me.hapyl.hariant.debug.DebugListener;
 import me.hapyl.hariant.entity.HeadComponent;
 import me.hapyl.hariant.entity.SmallCapsComponent;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -47,7 +47,7 @@ public abstract class Hero
         implements
         Keyed, Named, Described, Attributable,
         HariantEventHandler, ComponentLike, HeadComponent,
-        SmallCapsComponent, ActionbarSupplier, ItemCreator {
+        SmallCapsComponent, ActionbarSupplier, ItemCreator, DebugListener {
     
     private final Key key;
     private final Component name;
@@ -89,7 +89,7 @@ public abstract class Hero
         final ItemBuilder builder = ItemBuilder.playerHead(equipment.getHeadTexture());
         builder.setName(name);
         builder.addLore();
-
+        
         // Profile
         builder.addLore(Component.text("ᴘʀᴏꜰɪʟᴇ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         builder.addLore(Component.text(" Archetype: ", Colors.GRAY).append(profile.getArchetype()));
@@ -97,19 +97,19 @@ public abstract class Hero
         builder.addLore(Component.text(" Affiliation: ", Colors.GRAY).append(profile.getAffiliation()));
         builder.addLore(Component.text(" Gender: ", Colors.GRAY).append(profile.getGender()));
         builder.addLore();
-
+        
         // Attributes
         builder.addLore(Component.text("ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
-        builder.addLore(createRating(AttributeType.MAX_HEALTH));
-        builder.addLore(createRating(AttributeType.ATTACK));
-        builder.addLore(createRating(AttributeType.DEFENSE));
-        builder.addLore(createRating(AttributeType.MOVEMENT_SPEED));
+        builder.addLore(attributes.createLore(AttributeType.MAX_HEALTH));
+        builder.addLore(attributes.createLore(AttributeType.ATTACK));
+        builder.addLore(attributes.createLore(AttributeType.DEFENSE));
+        builder.addLore(attributes.createLore(AttributeType.MOVEMENT_SPEED));
         builder.addLore();
-
+        
         // Description
         builder.addLore(Component.text("ᴅᴇꜱᴄʀɪᴘᴛɪᴏɴ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         builder.addWrappedLore(description, _component -> _component.style(Style.style(NamedTextColor.DARK_GRAY, TextDecoration.ITALIC)));
-
+        
         return builder;
     }
     
@@ -265,13 +265,8 @@ public abstract class Hero
         return List.of();
     }
     
-    @NotNull
-    private Component createRating(@NotNull AttributeType attributeType) {
-        return Component.empty()
-                .appendSpace()
-                .append(attributeType.getName())
-                .appendSpace()
-                .append(attributes.getRating(attributeType));
+    @Override
+    public void debugOnCooldownReset(@NotNull HariantPlayer player) {
     }
     
 }

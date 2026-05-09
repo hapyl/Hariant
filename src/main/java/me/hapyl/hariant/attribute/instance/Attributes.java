@@ -4,14 +4,10 @@ import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.annotate.NotEmpty;
 import me.hapyl.hariant.attribute.AttributeType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
-import java.util.List;
 
 public class Attributes implements AttributesBase {
     
@@ -42,6 +38,11 @@ public class Attributes implements AttributesBase {
         this.attributeMap.put(attributeType, value);
     }
     
+    @Override
+    public void add(@NotNull AttributeType attributeType, double value) {
+        attributeMap.merge(attributeType, value, Double::sum);
+    }
+    
     @NotNull
     public Attributes adjust(@NotNull AttributeType attributeType, double value) {
         this.set(attributeType, value);
@@ -49,28 +50,12 @@ public class Attributes implements AttributesBase {
     }
     
     @NotNull
-    public Component getRating(@NotNull AttributeType attributeType) {
-        class Holder {
-            private static final int MID_RATING = 3;
-            private static final int MAX_RATING = 6;
-        }
-        
-        final double defaultValue = attributeType.defaultValue();
-        final double value = this.base(attributeType); // Force base call
-        
-        final double ratio = value / defaultValue;
-        final double quality = Math.clamp(Math.round(ratio * Holder.MID_RATING), 0, Holder.MAX_RATING);
-        
-        final TextComponent.Builder builder = Component.text();
-        
-        final Component prefix = attributeType.getPrefixStyled();
-        final Component prefixGrayed = attributeType.getPrefix().color(NamedTextColor.DARK_GRAY);
-        
-        for (int i = 0; i < Holder.MAX_RATING; i++) {
-            builder.append(i < quality ? prefix : prefixGrayed);
-        }
-        
-        return builder.build();
+    public Component createLore(@NotNull AttributeType attributeType) {
+        return Component.empty()
+                        .appendSpace()
+                        .append(attributeType.asComponent())
+                        .appendSpace()
+                        .append(attributeType.format(this.get(attributeType)));
     }
     
     @NotNull

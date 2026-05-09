@@ -23,7 +23,7 @@ public class EntityTicker implements Ticking, Resettable {
      * Note that some {@link DamageType} may ignore the invulnerability ticks.
      * </p>
      */
-    public final Ticker invulnerability; // FIXME @Mar 10, 2026 (xanyjl) -> This is not needed I think?
+    public final Ticker invulnerability;
     
     private final HariantEntity entity;
     private final List<Ticker> tickerList;

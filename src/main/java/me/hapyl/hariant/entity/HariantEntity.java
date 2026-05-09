@@ -36,6 +36,9 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.ticker.EntityTicker;
 import me.hapyl.hariant.event.*;
 import me.hapyl.hariant.handler.ProjectileHandler;
+import me.hapyl.hariant.object.ObjectManager;
+import me.hapyl.hariant.object.ObjectManagerHandler;
+import me.hapyl.hariant.object.ObjectManagerImpl;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamEntry;
 import me.hapyl.hariant.team.TeamEntryProvider;
@@ -44,6 +47,7 @@ import me.hapyl.hariant.ui.ComponentDisplayAnimation;
 import me.hapyl.hariant.util.MathFont;
 import me.hapyl.hariant.util.SoundFx;
 import me.hapyl.hariant.util.UniquelyIdentified;
+import me.hapyl.hariant.weapon.NormalAttackRanged;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
@@ -51,6 +55,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.object.PlayerHeadObjectContents;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -68,6 +74,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -111,6 +118,7 @@ public class HariantEntity
     protected final ElementData elementData;
     
     private final HariantRandom random;
+    private final ObjectManager objectManager;
     
     @Nullable
     protected HariantEntity lastAttacker;
@@ -133,6 +141,7 @@ public class HariantEntity
         this.combatTracker = new CombatTracker(this);
         this.cooldownHandler = new CooldownHandlerImpl(this);
         this.elementData = new ElementData(this);
+        this.objectManager = new ObjectManagerImpl();
         
         this.updateAttributes();
         
@@ -156,8 +165,8 @@ public class HariantEntity
     }
     
     @Override
-    public boolean isOnCooldown(@NotNull Key key) {
-        return cooldownHandler.isOnCooldown(key);
+    public boolean hasCooldown(@NotNull Key key) {
+        return cooldownHandler.hasCooldown(key);
     }
     
     @Override
@@ -181,9 +190,8 @@ public class HariantEntity
         return NormalAttack.common();
     }
     
-    @Nullable
     @Override
-    public NormalAttack getRangedAttack() {
+    public NormalAttackRanged getRangedAttack() {
         // Explicit super call
         return Attacker.super.getRangedAttack();
     }
@@ -225,7 +233,7 @@ public class HariantEntity
         final Key cooldownKey = source.getCooldownKey();
         final boolean doesNotIgnoreCooldown = !source.isFlagged(DamageFlag.IGNORES_INTERNAL_COOLDOWN);
         
-        if (source.hasCooldown() && doesNotIgnoreCooldown && this.isOnCooldown(source)) {
+        if (source.hasCooldown() && doesNotIgnoreCooldown && this.hasCooldown(source)) {
             return DamageResult.IMMUNE;
         }
         
@@ -436,7 +444,7 @@ public class HariantEntity
      * @return {@code true} if this entity can affect the other one; {@code false} otherwise.
      */
     public final boolean canAffect(@NotNull HariantEntity entity) {
-        return getAffection(entity) == AffectResult.CAN_AFFECT;
+        return entity.getAffection(this) == AffectResult.CAN_AFFECT;
     }
     
     /**
@@ -447,20 +455,25 @@ public class HariantEntity
      */
     @NotNull
     public final AffectResult getAffection(@NotNull HariantEntity entity) {
+        // Check for self
         if (this.isSelf(entity)) {
             return AffectResult.CANNOT_AFFECT_SELF;
         }
+        // Check for death
         else if (this.isDead()) {
             return AffectResult.CANNOT_AFFECT_DEAD;
         }
+        // Check for teammate
         else if (this.isTeammate(entity)) {
             return AffectResult.CANNOT_AFFECT_TEAMMATE;
         }
-        else if (!this.canSee(entity)) {
+        // Check for invisibility
+        else if (this.isInvisible() && !entity.canSeeInvisible(this)) {
             return AffectResult.CANNOT_AFFECT_INVISIBLE;
         }
-        else if (entity instanceof HariantMarkerEntity) {
-            return AffectResult.CANNOT_AFFECT_MARKER;
+        // Check for invulnerability
+        else if (ticker.invulnerability.value() > 0) {
+            return AffectResult.CANNOT_AFFECT_INVULNERABLE;
         }
         
         return AffectResult.CAN_AFFECT;
@@ -470,13 +483,22 @@ public class HariantEntity
         return entity.isDead();
     }
     
-    public boolean canSee(@NotNull HariantEntity entity) {
-        // TODO @Apr 14, 2026 (xanyjl) -> Implement invisibility
-        return true;
+    /**
+     * Gets whether this entity can see the other while it's invisible.
+     *
+     * @param entity - The entity to check.
+     * @return {@code true} if this entity can see the other while it's invisible.
+     */
+    public boolean canSeeInvisible(@NotNull HariantEntity entity) {
+        return isTeammate(entity);
     }
     
+    /**
+     * Gets whether this entity is invisible
+     *
+     * @return {@code true} if this entity is invisible; {@code false} otherwise.
+     */
     public boolean isInvisible() {
-        // TODO @Apr 14, 2026 (xanyjl) -> Implement invisibility
         return false;
     }
     
@@ -758,8 +780,7 @@ public class HariantEntity
      */
     @Override
     public void onDestroy() {
-        // We play the death animation, so set the health to 0 instead of calling remove()
-        entity.setHealth(0.0);
+        entity.remove();
     }
     
     @NotNull
@@ -879,7 +900,7 @@ public class HariantEntity
     }
     
     public boolean isSelfOrTeammateOrCannotSee(@Nullable HariantEntity other) {
-        return other != null && (this.equals(other) || this.isTeammate(other) || !this.canSee(other));
+        return other != null && (this.equals(other) || this.isTeammate(other) || !this.canSeeInvisible(other));
     }
     
     public boolean isTeammate(@Nullable HariantEntity other) {
@@ -893,13 +914,15 @@ public class HariantEntity
         return thisTeam != null && thisTeam == thatTeam;
     }
     
-    public boolean hasEffectResistance(@Nullable HariantEntity attacker, @NotNull AssistSource assistSource) {
+    public boolean hasEffectResistance(@NotNull AssistSource assistSource) {
+        final HariantEntity source = assistSource.source();
+        
         // Make sure we never resist self-debuffs
-        if (this.equals(attacker)) {
+        if (this.equals(source)) {
             return false;
         }
         
-        if (this.isOnCooldown(COOLDOWN_EFFECT_RESISTANCE)) {
+        if (this.hasCooldown(COOLDOWN_EFFECT_RESISTANCE)) {
             return true;
         }
         
@@ -913,11 +936,8 @@ public class HariantEntity
         }
         
         // Otherwise reassign last damager and add as assister
-        if (attacker != null) {
-            lastAttacker = attacker;
-            
-            combatTracker.assist(attacker, assistSource);
-        }
+        lastAttacker = source;
+        combatTracker.assist(assistSource);
         
         return false;
     }
@@ -975,7 +995,7 @@ public class HariantEntity
     }
     
     @Override
-    public void addEffect(@NotNull EnumStatusEffect effect, int duration, @Nullable HariantEntity applier) {
+    public void addEffect(@NotNull EnumStatusEffect effect, int duration, @NotNull HariantEntity applier) {
         effectMap.addEffect(effect, duration, applier);
     }
     
@@ -1114,6 +1134,31 @@ public class HariantEntity
         entity.setVisualFire(visualFire == null ? TriState.NOT_SET : visualFire ? TriState.TRUE : TriState.FALSE);
     }
     
+    public void sendTitleSubtitle(@NotNull Component title, @NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
+        this.sendTitle0(title, subtitle, fadeIn, stay, fadeOut);
+    }
+    
+    public void sendTitle(@NotNull Component title, int fadeIn, int stay, int fadeOut) {
+        this.sendTitle0(title, null, fadeIn, stay, fadeOut);
+    }
+    
+    public void sendSubtitle(@NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
+        // Subtitle cannot be displayed without a title, so we send an empty title, which will override the main title, if any showing
+        this.sendTitle0(Component.empty(), subtitle, fadeIn, stay, fadeOut);
+    }
+    
+    public void sendSubtitleKeepTitle(@NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
+        this.sendTitle0(null, subtitle, fadeIn, stay, fadeOut);
+    }
+    
+    public int getInvulnerability() {
+        return ticker.invulnerability.value();
+    }
+    
+    public void setInvulnerability(int duration) {
+        ticker.invulnerability.value(duration);
+    }
+    
     @NotNull
     private Location getLocationInFront0(double distance, boolean fromEyes) {
         final Location location = fromEyes ? this.getEyeLocation() : this.getLocation();
@@ -1132,4 +1177,15 @@ public class HariantEntity
         }
     }
     
+    private void sendTitle0(@Nullable Component title, @Nullable Component subtitle, int fadeIn, int stay, int fadeOut) {
+        this.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.ofMillis(fadeIn * 50L), Duration.ofMillis(stay * 50L), Duration.ofMillis(fadeOut * 50L)));
+        
+        if (title != null) {
+            this.sendTitlePart(TitlePart.TITLE, title);
+        }
+        
+        if (subtitle != null) {
+            this.sendTitlePart(TitlePart.SUBTITLE, subtitle);
+        }
+    }
 }

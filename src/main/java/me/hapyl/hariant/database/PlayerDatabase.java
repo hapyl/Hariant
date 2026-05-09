@@ -9,6 +9,7 @@ import me.hapyl.hariant.HariantPlugin;
 import me.hapyl.hariant.database.problem.*;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.database.serialize.MongoSerializable;
+import me.hapyl.hariant.dialog.DialogDatabaseEntry;
 import me.hapyl.hariant.hero.HeroDirectory;
 import me.hapyl.hariant.inventory.HariantInventory;
 import me.hapyl.hariant.level.LevelEntry;
@@ -32,6 +33,7 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
     public final HeroDirectory hero;
     public final SettingEntry settings;
     public final LevelEntry level;
+    public final DialogDatabaseEntry dialog;
     
     private final Database database;
     private final UUID uuid;
@@ -75,6 +77,7 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
         this.hero = deserialize("hero", HeroDirectory.class, problemReporter);
         this.settings = deserialize("setting", SettingEntry.class, problemReporter);
         this.level = deserialize("level", LevelEntry.class, problemReporter);
+        this.dialog = deserialize("dialog", DialogDatabaseEntry.class, problemReporter);
         
         // Handle problems
         problemReporter.handle(problem -> {
@@ -129,6 +132,10 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
     }
     
     public void save() {
+        this.save(true);
+    }
+    
+    public void save(boolean async) {
         root.append("last_known_name", Bukkit.getOfflinePlayer(uuid).getName());
         root.append("last_online", System.currentTimeMillis());
         
@@ -153,10 +160,15 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
             }
         });
         
-        // Save asynchronously
-        InternalTasks.asynchronously(() -> {
-            database.getCollection(DatabaseCollection.PLAYERS).replaceOne(filter, root);
-        });
+        // Save
+        final Runnable runnable = () -> database.getCollection(DatabaseCollection.PLAYERS).replaceOne(filter, root);
+        
+        if (async) {
+            InternalTasks.asynchronously(runnable);
+        }
+        else {
+            runnable.run();
+        }
     }
     
     @NotNull

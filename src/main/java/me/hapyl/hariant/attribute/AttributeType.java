@@ -1,7 +1,6 @@
 package me.hapyl.hariant.attribute;
 
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.attribute.instance.AttributesBase;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.util.decimal.DecimalFormat;
@@ -10,6 +9,7 @@ import net.kyori.adventure.text.format.Style;
 import org.bukkit.attribute.AttributeInstance;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -334,12 +334,19 @@ public enum AttributeType implements Attribute {
     AETHER_RESISTANCE(AttributeElementalImpl.ofElementalResistance(ElementType.AETHER));
     
     
+    private static final List<AttributeType> BASE_ATTRIBUTES;
+    private static final List<AttributeType> ADVANCED_ATTRIBUTES;
     private static final List<AttributeType> ELEMENTAL_DAMAGE_BONUSES;
     private static final List<AttributeType> ELEMENTAL_RESISTANCE;
     
     private static final Map<ElementType, AttributeType[]> ELEMENTAL_ATTRIBUTES;
     
     static {
+        BASE_ATTRIBUTES = Arrays.stream(AttributeType.values()).filter(AttributeType::isBase).toList();
+        ADVANCED_ATTRIBUTES = Arrays.stream(AttributeType.values())
+                                    .filter(attributeType -> !attributeType.isBase() && !(attributeType.attribute instanceof AttributeElementalImpl))
+                                    .toList();
+        
         ELEMENTAL_DAMAGE_BONUSES = List.of(PHYSICAL_DAMAGE_BONUS, FIRE_DAMAGE_BONUS, WATER_DAMAGE_BONUS, ICE_DAMAGE_BONUS, TOXIC_DAMAGE_BONUS, ELECTRIC_DAMAGE_BONUS, AETHER_DAMAGE_BONUS);
         ELEMENTAL_RESISTANCE = List.of(PHYSICAL_RESISTANCE, FIRE_RESISTANCE, WATER_RESISTANCE, ICE_RESISTANCE, TOXIC_RESISTANCE, ELECTRIC_RESISTANCE, AETHER_RESISTANCE);
         
@@ -429,6 +436,16 @@ public enum AttributeType implements Attribute {
     @NotNull
     public static AttributeType getElementalResistanceAttribute(@NotNull ElementType elementType) {
         return getElementalAttribute(elementType, false);
+    }
+    
+    @NotNull
+    public static List<AttributeType> getBaseAttributes() {
+        return BASE_ATTRIBUTES;
+    }
+    
+    @NotNull
+    public static List<AttributeType> getAdvancedAttributes() {
+        return ADVANCED_ATTRIBUTES;
     }
     
     @NotNull

@@ -30,10 +30,10 @@ public final class TalentExcellency extends TalentPassive implements Listener {
     @DisplayField private final Decimal attackIncrease = Decimal.ofPercentage(25);
     
     @DisplayField private final Decimal allTypeResistanceThreshold = Decimal.ofPercentage(50);
-    @DisplayField private final Decimal allTypeResistanceIncrease = Decimal.ofAttributeBonus(AttributeType.PHYSICAL_RESISTANCE, 20);
+    @DisplayField private final Decimal allTypeResistanceIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 20);
     
     @DisplayField private final Decimal allTypeDamageThreshold = Decimal.ofPercentage(25);
-    @DisplayField private final Decimal allTypeDamageIncrease = Decimal.ofAttributeBonus(AttributeType.PHYSICAL_RESISTANCE, 40);
+    @DisplayField private final Decimal allTypeDamageIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 40);
     
     private final Key modifierKey = Key.ofString("excellency");
     
@@ -89,7 +89,7 @@ public final class TalentExcellency extends TalentPassive implements Listener {
         int excellency = 0;
         
         if (threshold <= attackIncreaseThreshold.doubleValue()) {
-            final ExcellencyAttributeModifier modifier = new ExcellencyAttributeModifier();
+            final ExcellencyAttributeModifier modifier = new ExcellencyAttributeModifier(player);
             excellency++;
             
             modifier.of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue());
@@ -115,8 +115,8 @@ public final class TalentExcellency extends TalentPassive implements Listener {
     }
     
     public class ExcellencyAttributeModifier extends AttributeModifier {
-        ExcellencyAttributeModifier() {
-            super(modifierKey, TalentExcellency.this.getName(), null, HariantConstants.INDEFINITE_DURATION);
+        ExcellencyAttributeModifier(@NotNull HariantEntity applier) {
+            super(modifierKey, TalentExcellency.this.getName(), applier, HariantConstants.INDEFINITE_DURATION);
         }
         
         @Override

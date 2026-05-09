@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class AttributeModifierArtifactSet extends AttributeModifier {
     
-    public AttributeModifierArtifactSet(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount, @Nullable HariantEntity applier, int duration) {
+    public AttributeModifierArtifactSet(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount, @NotNull HariantEntity applier, int duration) {
         super(createModifierKey(artifactSet, pieceCount), createModifierName(artifactSet, pieceCount), applier, duration);
     }
     

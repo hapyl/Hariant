@@ -4,7 +4,6 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -18,18 +17,19 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class ItemArtifactMagicCodex extends ItemArtifact {
+public final class ItemArtifactMagicCodex extends ItemArtifact {
     public ItemArtifactMagicCodex(@NotNull Key key) {
-        super(key, Component.text("Magic Codex"), Icon.ofTemporaryTexture(), new ArtifactSetTomeOfTheEnlightened(key));
+        super(key, Component.text("Magic Codex"), Icon.ofTexture("4dd5f059d22d7dd0bea5addaa8ea4a2323f3607c74c877b59489112ad60a5517"), new ArtifactSetTomeOfTheEnlightened(key));
+        
+        setDescription(Component.text("A collection of novice magic lessons approved by the Kingdom."));
     }
     
     public static class ArtifactSetTomeOfTheEnlightened extends ArtifactSet implements Listener {
         
-        private final Decimal twoPieceElementalMasteryIncrease = Decimal.ofAttributeBonus(AttributeType.ELEMENTAL_MASTERY, 80);
+        private final Decimal twoPieceElementalMasteryIncrease = Decimal.ofAttribute(AttributeType.ELEMENTAL_MASTERY, 120);
         
-        private final Decimal fourPieceElementalMasteryIncrease = Decimal.ofAttributeBonus(AttributeType.ELEMENTAL_MASTERY, 80);
+        private final Decimal fourPieceElementalMasteryIncrease = Decimal.ofAttribute(AttributeType.ELEMENTAL_MASTERY, 120);
         private final Decimal fourPieceElementalMasteryIncreaseDuration = Decimal.ofSeconds(16);
         
         ArtifactSetTomeOfTheEnlightened(@NotNull Key key) {
@@ -51,6 +51,7 @@ public class ItemArtifactMagicCodex extends ItemArtifact {
                              .append(Component.text("Triggering an "))
                              .append(EnumTerm.ELEMENTAL_ANOMALY)
                              .append(Component.text(" increases your and your teammates "))
+                             .appendNewline()
                              .append(AttributeType.ELEMENTAL_MASTERY)
                              .append(Component.text(" by "))
                              .append(fourPieceElementalMasteryIncrease)
@@ -63,7 +64,7 @@ public class ItemArtifactMagicCodex extends ItemArtifact {
         @Override
         public void applyEffect(@NotNull HariantPlayer player, @NotNull PieceCount pieceCount) {
             if (pieceCount.isOrHigher(PieceCount.TWO_PIECE)) {
-                player.getAttributes().addModifier(new ModifierTwoPiece());
+                player.getAttributes().addModifier(new ModifierTwoPiece(player));
             }
         }
         
@@ -88,15 +89,15 @@ public class ItemArtifactMagicCodex extends ItemArtifact {
         }
         
         public class ModifierTwoPiece extends AttributeModifierArtifactSet {
-            ModifierTwoPiece() {
-                super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.TWO_PIECE, null, HariantConstants.INDEFINITE_DURATION);
+            ModifierTwoPiece(@NotNull HariantEntity applier) {
+                super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
                 
                 of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.FLAT, twoPieceElementalMasteryIncrease.doubleValue());
             }
         }
         
         public class ModifierFourPiece extends AttributeModifierArtifactSet {
-            ModifierFourPiece(@Nullable HariantEntity applier) {
+            ModifierFourPiece(@NotNull HariantEntity applier) {
                 super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.FOUR_PIECE, applier, fourPieceElementalMasteryIncreaseDuration.intValue());
                 
                 of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.FLAT, fourPieceElementalMasteryIncrease.doubleValue());

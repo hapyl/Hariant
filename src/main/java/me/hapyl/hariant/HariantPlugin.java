@@ -9,7 +9,10 @@ import me.hapyl.hariant.database.DatabaseSyncer;
 import me.hapyl.hariant.event.HariantEntityMoveEvent;
 import me.hapyl.hariant.handler.EntityHandler;
 import me.hapyl.hariant.handler.PlayerHandler;
+import me.hapyl.hariant.handler.PlayerSitHandler;
 import me.hapyl.hariant.handler.ProjectileHandler;
+import me.hapyl.hariant.npc.NpcHandler;
+import me.hapyl.hariant.weapon.ability.AbilityHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.World;
@@ -21,7 +24,7 @@ import java.util.logging.Logger;
 
 public final class HariantPlugin extends JavaPlugin {
     
-    public static final String REQUIRED_ETERNA_VERSION = "6.2.1";
+    public static final String REQUIRED_ETERNA_VERSION = "6.2.3";
     
     private HariantConfig config;
     private Database database;
@@ -63,6 +66,9 @@ public final class HariantPlugin extends JavaPlugin {
         pluginManager.registerEvents(new EntityHandler(), this);
         pluginManager.registerEvents(new ProjectileHandler(), this);
         pluginManager.registerEvents(new HariantEntityMoveEvent.Handler(), this);
+        pluginManager.registerEvents(new AbilityHandler(), this);
+        pluginManager.registerEvents(new NpcHandler(), this);
+        pluginManager.registerEvents(new PlayerSitHandler(), this);
         
         for (final World world : Bukkit.getWorlds()) {
             setDefaultGamerules(world);

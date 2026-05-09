@@ -13,14 +13,14 @@ public class HariantEffectEvent extends HariantEntityEvent {
     private final HariantEntity applier;
     private final EffectType effectType;
     
-    public HariantEffectEvent(@NotNull HariantEntity entity, @Nullable HariantEntity applier, @NotNull EffectType effectType) {
+    public HariantEffectEvent(@NotNull HariantEntity entity, @NotNull HariantEntity applier, @NotNull EffectType effectType) {
         super(entity);
         
         this.applier = applier;
         this.effectType = effectType;
     }
     
-    @Nullable
+    @NotNull
     public HariantEntity getApplier() {
         return applier;
     }
@@ -41,7 +41,7 @@ public class HariantEffectEvent extends HariantEntityEvent {
         return HANDLER_LIST;
     }
     
-    public static void triggerDummyEvent(@NotNull HariantEntity entity, @Nullable HariantEntity applier, boolean buff) {
+    public static void triggerDummyEvent(@NotNull HariantEntity entity, @NotNull HariantEntity applier, boolean buff) {
         new HariantEffectEvent(entity, applier, buff ? EffectType.BUFF : EffectType.DEBUFF).callEvent();
     }
     

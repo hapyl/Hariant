@@ -57,7 +57,6 @@ public final class ProjectileHandler implements Listener {
         final NormalAttack rangedAttack = entity.getRangedAttack();
         
         // Ignore if entity has no ranged damage, it should have used launchProjectile()!
-        
         if (rangedAttack == null) {
             return;
         }

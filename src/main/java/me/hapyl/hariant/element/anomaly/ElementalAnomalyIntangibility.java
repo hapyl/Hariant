@@ -1,7 +1,7 @@
 package me.hapyl.hariant.element.anomaly;
 
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.attribute.AttributeFormatter;
+import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
@@ -24,7 +24,7 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
     private final Decimal damagePercentOfMaxHealth = Decimal.ofPercentage(10);
     private final double damageAdditional = 44;
     
-    @DisplayField private final AttributeFormatter damage = () -> Component.text("%s Max HP + %s".formatted(damagePercentOfMaxHealth.format(), damageAdditional));
+    @DisplayField private final ComponentFormatter damage = () -> Component.text("%s Max HP + %s".formatted(damagePercentOfMaxHealth.format(), damageAdditional));
     
     @DisplayField private final Decimal resistanceReduction = Decimal.ofValue(-40, DecimalFormat.PERCENTAGE);
     @DisplayField private final Decimal resistanceReductionDuration = Decimal.ofSeconds(10);
@@ -77,11 +77,11 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
             return;
         }
         
-        entity.getAttributes().addModifier(new ElementalAnomalyIntangibilityModifier(source));
+        entity.getAttributes().addModifier(new ElementalAnomalyIntangibilityModifier(source != null ? source : entity));
     }
     
     class ElementalAnomalyIntangibilityModifier extends AttributeModifier {
-        ElementalAnomalyIntangibilityModifier(@Nullable HariantEntity applier) {
+        ElementalAnomalyIntangibilityModifier(@NotNull HariantEntity applier) {
             super(attributeKey, ElementalAnomalyIntangibility.this.getName(), applier, resistanceReductionDuration.intValue());
             
             this.ofElementalResistance(AttributeModifierType.FLAT, resistanceReduction.doubleValue());

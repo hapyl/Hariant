@@ -4,7 +4,6 @@ import me.hapyl.eterna.module.annotate.EventLike;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.HariantEntity;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface Effect {
     
@@ -27,11 +26,11 @@ public interface Effect {
     }
     
     @EventLike
-    void onApply(@NotNull HariantEntity entity, @Nullable HariantEntity applier);
+    void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration);
     
     @EventLike
-    void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier);
+    void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier);
     
     @EventLike
-    void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick);
+    void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick);
 }

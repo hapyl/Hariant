@@ -2,6 +2,9 @@ package me.hapyl.hariant.menu.hero;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.instance.Attributes;
+import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.hero.Affiliation;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
@@ -38,7 +41,7 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         final Affiliation affiliation = profile.getAffiliation();
         
         setItem(
-                20,
+                19,
                 ICON_AFFILIATION.createBuilder()
                                 .setName(Component.text("Affiliation"))
                                 .addLore()
@@ -47,12 +50,15 @@ public class MenuHeroProfile extends MenuHeroAbstract {
                                 .asIcon()
         );
         
+        // Set attribute
+        setItem(30, createAttributesIcon());
+        
         // Set weapon
-        setItem(31, createWeaponIcon());
+        setItem(32, createWeaponIcon());
         
         // Set lore
         setItem(
-                24,
+                25,
                 new ItemBuilder(Material.WRITABLE_BOOK)
                         .setName(Component.text("Story"))
                         .addLore()
@@ -64,6 +70,66 @@ public class MenuHeroProfile extends MenuHeroAbstract {
     }
     
     @NotNull
+    private ItemStack createAttributesIcon() {
+        final Hero hero = heroInstance.getOrigin();
+        final Attributes attributes = hero.getAttributes();
+        
+        final ItemBuilder builder = new ItemBuilder(Material.COMPARATOR);
+        builder.setName(Component.text("Attributes"));
+        builder.addLore();
+        
+        
+        // Base attributes
+        builder.addLore(Component.text("ʙᴀꜱᴇ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
+        
+        for (AttributeType attributeType : AttributeType.getBaseAttributes()) {
+            builder.addLore(attributes.createLore(attributeType));
+        }
+        
+        // Advanced attributes
+        builder.addLore();
+        builder.addLore(Component.text("ᴀᴅᴠᴀɴᴄᴇᴅ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
+        
+        for (AttributeType attributeType : AttributeType.getAdvancedAttributes()) {
+            
+            attributes.createLore(attributeType);
+            builder.addLore(
+                    Component.empty()
+                             .appendSpace()
+                             .append(attributeType)
+                             .appendSpace()
+                             .append(attributeType.format(attributes.base(attributeType)))
+            );
+        }
+        
+        builder.addLore();
+        builder.addLore(Component.text("ᴇʟᴇᴍᴇɴᴛᴀʟ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
+        
+        builder.addLore(Component.text(" (Element) (Resistance/DMG Bonus)", NamedTextColor.DARK_GRAY));
+        
+        // Elemental attributes
+        for (ElementType elementType : ElementType.values()) {
+            final AttributeType elementalResistanceAttribute = AttributeType.getElementalResistanceAttribute(elementType);
+            final AttributeType elementalDamageBonusAttribute = AttributeType.getElementalDamageBonusAttribute(elementType);
+            
+            final Component elementalResistance = elementalResistanceAttribute.format(attributes.get(elementalResistanceAttribute));
+            final Component elementalDamageBonus = elementalDamageBonusAttribute.format(attributes.get(elementalDamageBonusAttribute));
+            
+            builder.addLore(
+                    Component.empty()
+                             .appendSpace()
+                             .append(elementType.asComponent())
+                             .append(Component.text("   "))
+                             .append(elementalResistance.color(NamedTextColor.GREEN))
+                             .append(Component.text(" / ", NamedTextColor.GRAY))
+                             .append(elementalDamageBonus.color(NamedTextColor.RED))
+            );
+        }
+        
+        return builder.asIcon();
+    }
+    
+    @NotNull
     private ItemStack createWeaponIcon() {
         final Weapon weapon = heroInstance.getOrigin().getWeapon();
         final ItemBuilder builder = weapon.createBuilder();
@@ -71,7 +137,6 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         builder.setName(Component.text("Weapon"));
         
         builder.editLore(lore -> {
-            lore.addFirst(Component.text(""));
             lore.addFirst(weapon.getName().color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
         });
         

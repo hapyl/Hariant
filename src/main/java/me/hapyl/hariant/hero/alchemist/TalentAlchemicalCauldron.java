@@ -30,7 +30,7 @@ public final class TalentAlchemicalCauldron extends Talent {
     @DisplayField public final Decimal cauldronHealth = Decimal.ofValue(500);
     
     @DisplayField public final Decimal infusionDuration = Decimal.ofSeconds(15);
-    @DisplayField public final Decimal toxicDamageIncrease = Decimal.ofAttributeBonus(AttributeType.TOXIC_DAMAGE_BONUS, 40);
+    @DisplayField public final Decimal toxicDamageIncrease = Decimal.ofAttribute(AttributeType.TOXIC_DAMAGE_BONUS, 40);
     
     public TalentAlchemicalCauldron(@NotNull Key key) {
         super(key, Component.text("Alchemical Cauldron"), Icon.ofMaterial(Material.CAULDRON));

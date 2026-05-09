@@ -48,10 +48,17 @@
 * ~~Don't count suicide for kills~~
 * ~~Add custom clicks in Talents menu based on the Talent~~
 * ~~Add name for alchemist stick and BALL~~
+* ~~Attribute star doesn't fucking work~~
+* ~~Make drops look cooler~~
 * Combat Tag
 * Trigger game type win on player leave
 * Remove projectiles on death?
 * Archer bow cooldown
-* Make drops look cooler
 * Implement shields
-* Anomalies should count as negative effects
+* Anomalies should count as negative effects (Should it?)
+
+
+-- FIXME
+* ~~Component on Silence~~
+* ~~Add respawn RES~~
+* Finish Soul Storm (Change sounds, add suffocation invul)

@@ -4,7 +4,6 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
-import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
@@ -23,13 +22,15 @@ public final class ItemArtifactBloodyRose extends ItemArtifact {
     
     public ItemArtifactBloodyRose(@NotNull Key key) {
         super(key, Component.text("Bloody Rose"), Icon.ofTexture("676f0a8f03a79e4b19bef283b8915e1ffb0c42b311530b01550b31893d4b0742"), new ArtifactSetBreeze(key));
+        
+        setDescription(Component.text("A white rose consumed by blood."));
     }
     
     public static class ArtifactSetBreeze extends ArtifactSet implements Listener {
         
-        private final Decimal critChanceIncrease = Decimal.ofAttributeBonus(AttributeType.CRIT_CHANCE, 20);
+        private final Decimal critChanceIncrease = Decimal.ofAttribute(AttributeType.CRIT_CHANCE, 20);
         
-        private final Decimal critDamageIncreasePerHealthDecreased = Decimal.ofAttributeBonus(AttributeType.CRIT_DAMAGE, 20);
+        private final Decimal critDamageIncreasePerHealthDecreased = Decimal.ofAttribute(AttributeType.CRIT_DAMAGE, 20);
         private final Decimal critDamageIncreasePerHealthMaximum = Decimal.ofValue(60);
         private final Decimal critDamageIncreaseDuration = Decimal.ofSeconds(6f);
         
@@ -53,12 +54,14 @@ public final class ItemArtifactBloodyRose extends ItemArtifact {
                              .append(Component.text("Whenever your health decreases, for each "))
                              .append(healthLost)
                              .append(Component.text(" health lost, increases your "))
+                             .appendNewline() // Manual newline because it cuts the CD char
                              .append(AttributeType.CRIT_DAMAGE)
                              .append(Component.text(" by "))
                              .append(critDamageIncreasePerHealthDecreased)
                              .append(Component.text(" for "))
                              .append(critDamageIncreaseDuration)
                              .append(Component.text("."))
+                             .appendNewline()
                              .appendNewline()
                              .append(Component.text("A maximum of "))
                              .append(critDamageIncreasePerHealthMaximum)
@@ -77,7 +80,7 @@ public final class ItemArtifactBloodyRose extends ItemArtifact {
         @Override
         public void applyEffect(@NotNull HariantPlayer player, @NotNull PieceCount pieceCount) {
             if (pieceCount.isOrHigher(PieceCount.TWO_PIECE)) {
-                player.getAttributes().addModifier(new ModifierTwoPiece());
+                player.getAttributes().addModifier(new ModifierTwoPiece(player));
             }
         }
         
@@ -110,7 +113,7 @@ public final class ItemArtifactBloodyRose extends ItemArtifact {
                 return;
             }
             
-            attributes.addModifier(new ModifierFourPiece(critDamageIncrease));
+            attributes.addModifier(new ModifierFourPiece(player, critDamageIncrease));
         }
         
         public int calculateCritDamageIncrease(final double healthDifference) {
@@ -121,8 +124,8 @@ public final class ItemArtifactBloodyRose extends ItemArtifact {
         }
         
         private class ModifierTwoPiece extends AttributeModifierArtifactSet {
-            ModifierTwoPiece() {
-                super(ArtifactSetBreeze.this, PieceCount.TWO_PIECE, null, HariantConstants.INDEFINITE_DURATION);
+            ModifierTwoPiece(@NotNull HariantEntity applier) {
+                super(ArtifactSetBreeze.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
                 
                 entries.add(entry(AttributeType.CRIT_CHANCE, AttributeModifierType.FLAT, critChanceIncrease.doubleValue()));
             }
@@ -131,8 +134,8 @@ public final class ItemArtifactBloodyRose extends ItemArtifact {
         private class ModifierFourPiece extends AttributeModifierArtifactSet {
             private final int critDamageIncrease;
             
-            ModifierFourPiece(int critDamageIncrease) {
-                super(ArtifactSetBreeze.this, PieceCount.FOUR_PIECE, null, critDamageIncreaseDuration.intValue());
+            ModifierFourPiece(@NotNull HariantEntity applier, int critDamageIncrease) {
+                super(ArtifactSetBreeze.this, PieceCount.FOUR_PIECE, applier, critDamageIncreaseDuration.intValue());
                 
                 entries.add(entry(AttributeType.CRIT_DAMAGE, AttributeModifierType.FLAT, critDamageIncrease));
                 

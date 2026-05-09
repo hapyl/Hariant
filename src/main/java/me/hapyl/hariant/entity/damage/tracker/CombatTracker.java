@@ -1,20 +1,16 @@
 package me.hapyl.hariant.entity.damage.tracker;
 
 import com.google.common.collect.Maps;
-import me.hapyl.eterna.module.util.Compute;
 import me.hapyl.eterna.module.util.Streamable;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.util.Resettable;
-import me.hapyl.hariant.util.UniquelyIdentified;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public final class CombatTracker implements Resettable, Streamable<CombatData> {
@@ -38,8 +34,9 @@ public final class CombatTracker implements Resettable, Streamable<CombatData> {
         });
     }
     
-    public void assist(@NotNull HariantEntity entity, @NotNull AssistSource assistSource) {
-        final CombatData data = this.getData(entity);
+    public void assist(@NotNull AssistSource assistSource) {
+        final HariantEntity source = assistSource.source();
+        final CombatData data = this.getData(source);
         
         data.lastAssist = assistSource;
         data.lastAssistAt = System.currentTimeMillis();
@@ -63,7 +60,7 @@ public final class CombatTracker implements Resettable, Streamable<CombatData> {
                                  final AssistSource lastAssist = data.getLastAssist();
                                  final long lastAssistAt = System.currentTimeMillis() - data.getLastAssistAt();
                                  
-                                 return lastAssist == null && lastAssistAt < HariantConstants.ASSIST_DURATION_MILLIS;
+                                 return lastAssist != null && lastAssistAt < HariantConstants.ASSIST_DURATION_MILLIS;
                              }
                          });
     }

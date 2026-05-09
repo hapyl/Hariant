@@ -7,6 +7,7 @@ import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
@@ -23,11 +24,15 @@ public final class ItemArtifactUnstableLightningGem extends ItemArtifact {
     
     public ItemArtifactUnstableLightningGem(@NotNull Key key) {
         super(key, Component.text("Unstable Lightning Gem"), Icon.ofTexture("2136e8a543621bb511e386507aeae4613928682649bd147d0f7939411cb49081"), new ArtifactSetElectrifying(key));
+        
+        setDescription(
+                Component.text("A crystal gem infused with unstable lightning energy, which seem to react to the touch.")
+        );
     }
     
     public static class ArtifactSetElectrifying extends ArtifactSet implements Listener {
         
-        private final Decimal electricDamageBonus = Decimal.ofAttributeBonus(AttributeType.ELECTRIC_DAMAGE_BONUS, 20);
+        private final Decimal electricDamageBonus = Decimal.ofAttribute(AttributeType.ELECTRIC_DAMAGE_BONUS, 20);
         private final Decimal energyRegeneration = Decimal.ofValue(8);
         
         private final Cooldown energyRegenerationCooldown = Cooldown.ofSeconds(Key.ofString("electrifying"), 6f);
@@ -56,6 +61,7 @@ public final class ItemArtifactUnstableLightningGem extends ItemArtifact {
                              .append(TalentUltimateResource.ENERGY)
                              .append(Component.text("."))
                              .appendNewline()
+                             .appendNewline()
                              .append(Component.text("This effect can only occur once every "))
                              .append(energyRegenerationCooldown.getCooldownFormatted())
                              .append(Component.text("."))
@@ -73,7 +79,7 @@ public final class ItemArtifactUnstableLightningGem extends ItemArtifact {
             final AttributesInstance attributes = player.getAttributes();
             
             if (pieceCount.isOrHigher(PieceCount.TWO_PIECE)) {
-                attributes.addModifier(new ModifierTwoPiece());
+                attributes.addModifier(new ModifierTwoPiece(player));
             }
         }
         
@@ -99,7 +105,7 @@ public final class ItemArtifactUnstableLightningGem extends ItemArtifact {
                 return;
             }
             
-            if (player.isOnCooldown(energyRegenerationCooldown)) {
+            if (player.hasCooldown(energyRegenerationCooldown)) {
                 return;
             }
             
@@ -108,9 +114,8 @@ public final class ItemArtifactUnstableLightningGem extends ItemArtifact {
         }
         
         private class ModifierTwoPiece extends AttributeModifierArtifactSet {
-            
-            ModifierTwoPiece() {
-                super(ArtifactSetElectrifying.this, PieceCount.TWO_PIECE, null, HariantConstants.INDEFINITE_DURATION);
+            ModifierTwoPiece(@NotNull HariantEntity applier) {
+                super(ArtifactSetElectrifying.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
                 
                 entries.add(entry(AttributeType.ELECTRIC_DAMAGE_BONUS, AttributeModifierType.FLAT, electricDamageBonus.doubleValue()));
             }

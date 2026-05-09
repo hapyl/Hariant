@@ -114,7 +114,7 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
         final HeroDataAlchemist heroData = player.getHeroData(alchemist, HeroDataAlchemist::new);
         
         heroData.setAlchemicalMadness(talent.infusionDuration.intValue());
-        player.getAttributes().addModifier(new AlchemicalMadnessModifier());
+        player.getAttributes().addModifier(new AlchemicalMadnessModifier(player));
         
         alchemist.giveWeapon(player);
         
@@ -266,8 +266,8 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
     private class AlchemicalMadnessModifier extends AttributeModifier {
         private static final Key MODIFIER_KEY = Key.ofString("alchemical_madness");
         
-        AlchemicalMadnessModifier() {
-            super(MODIFIER_KEY, Component.text("Alchemical Madness"), null, talent.infusionDuration.intValue());
+        AlchemicalMadnessModifier(@NotNull HariantEntity applier) {
+            super(MODIFIER_KEY, Component.text("Alchemical Madness"), applier, talent.infusionDuration.intValue());
             
             this.of(AttributeType.TOXIC_DAMAGE_BONUS, AttributeModifierType.FLAT, talent.toxicDamageIncrease.doubleValue());
         }

@@ -1,0 +1,63 @@
+package me.hapyl.hariant.hero.troll;
+
+import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.instance.Attributes;
+import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.NormalAttack;
+import me.hapyl.hariant.hero.*;
+import me.hapyl.hariant.talent.TalentPassive;
+import me.hapyl.hariant.talent.TalentRegistry;
+import me.hapyl.hariant.util.Icon;
+import me.hapyl.hariant.weapon.WeaponMelee;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
+import org.jetbrains.annotations.NotNull;
+
+public class HeroTroll extends Hero {
+    public HeroTroll(@NotNull Key key) {
+        super(key, Component.text("Troll"), Attributes.base(1000, 100, 100), new WeaponStickonator());
+        
+        final HeroProfile profile = getProfile();
+        profile.setElementType(ElementType.PHYSICAL);
+        profile.setArchetype(Archetype.HEXBANE);
+        profile.setGender(Gender.MALE);
+        
+        final HeroEquipment equipment = getEquipment();
+        equipment.setHeadTexture("9626c019c8b41c7b249ae9bb6760c4e6980051cf0d6895cb3e6846d81245ad11");
+        equipment.setChestPlate(255, 204, 84);
+        equipment.setLeggings(255, 204, 84);
+        equipment.setBoots(255, 204, 84);
+    }
+    
+    @Override
+    public @NotNull TalentSpin getFirstTalent() {
+        return TalentRegistry.SPIN;
+    }
+    
+    @Override
+    public @NotNull TalentPanicRoll getSecondTalent() {
+        return TalentRegistry.PANIC_ROLL;
+    }
+    
+    @Override
+    public @NotNull TalentRepulsor getThirdTalent() {
+        return TalentRegistry.REPULSOR;
+    }
+    
+    @Override
+    public @NotNull TalentPassive getPassiveTalent() {
+        return TalentRegistry.LAST_LAUGH;
+    }
+    
+    @Override
+    public @NotNull TalentStickySituation getUltimateTalent() {
+        return TalentRegistry.STICKY_SITUATION;
+    }
+    
+    public static class WeaponStickonator extends WeaponMelee {
+        WeaponStickonator() {
+            super(Key.ofString("stickonator"), Icon.ofMaterial(Material.STICK), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 56, 10));
+        }
+    }
+}

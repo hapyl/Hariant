@@ -21,16 +21,20 @@ public interface CooldownHandler {
         this.setCooldown(cooldown, HariantConstants.INDEFINITE_COOLDOWN);
     }
     
+    default void setIndefiniteCooldown(@NotNull Key key) {
+        this.setCooldown(key, HariantConstants.INDEFINITE_COOLDOWN);
+    }
+    
     int getCooldownTimeLeft(@NotNull Key key);
     
     default int getCooldownTimeLeft(@NotNull Cooldown cooldown) {
         return this.getCooldownTimeLeft(cooldown.getCooldownKey());
     }
     
-    boolean isOnCooldown(@NotNull Key key);
+    boolean hasCooldown(@NotNull Key key);
     
-    default boolean isOnCooldown(@NotNull Cooldown cooldown) {
-        return this.isOnCooldown(cooldown.getCooldownKey());
+    default boolean hasCooldown(@NotNull Cooldown cooldown) {
+        return this.hasCooldown(cooldown.getCooldownKey());
     }
     
     void resetCooldowns();
