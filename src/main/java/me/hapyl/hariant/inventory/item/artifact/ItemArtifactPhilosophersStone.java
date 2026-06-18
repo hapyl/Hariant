@@ -3,12 +3,12 @@ package me.hapyl.hariant.inventory.item.artifact;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
-import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
@@ -57,7 +57,7 @@ public final class ItemArtifactPhilosophersStone extends ItemArtifact {
                              .append(Component.text(" for each unique "))
                              .append(Component.text("de-buff", Colors.ERROR))
                              .append(Component.text(" active, up to "))
-                             .append(Component.text("%.0f%%".formatted(damageBoostPerDebuff.getValue() * maxNumbersOfDebuffs.getValue()), Colors.FORMAT_NUMBER))
+                             .append(Component.text("%.0f%%".formatted(damageBoostPerDebuff.value() * maxNumbersOfDebuffs.value()), Colors.NUMBER))
                              .append(Component.text("."))
             );
         }
@@ -91,15 +91,13 @@ public final class ItemArtifactPhilosophersStone extends ItemArtifact {
             
             final long debuffCount = playerAttacker.countEffects(EffectType.DEBUFF);
             
-            HariantLogger.debug("debuffCount = " + debuffCount);
-            
             if (debuffCount == 0) {
                 return;
             }
             
-            final double damageBoost = damageBoostPerDebuff.doubleValue() * Math.min(debuffCount, maxNumbersOfDebuffs.intValue());
+            final double damageBoost = 1 + damageBoostPerDebuff.doubleValue() * Math.min(debuffCount, maxNumbersOfDebuffs.intValue());
             
-            ev.multiplyDamage(() -> identity, 1 + damageBoost);
+            ev.mutateDamage(() -> identity, DamageMutator.multiply(), damageBoost);
         }
         
         private class ModifierTwoPiece extends AttributeModifierArtifactSet {

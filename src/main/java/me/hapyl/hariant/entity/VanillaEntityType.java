@@ -1,6 +1,7 @@
 package me.hapyl.hariant.entity;
 
 import com.google.common.collect.Maps;
+import me.hapyl.eterna.module.util.StringList;
 import org.bukkit.Location;
 import org.bukkit.entity.Husk;
 import org.bukkit.entity.LivingEntity;
@@ -30,7 +31,7 @@ public interface VanillaEntityType<E extends LivingEntity> {
     
     @Nullable
     static VanillaEntityType<? extends LivingEntity> byName(@NotNull String name) {
-        return VanillaEntityTypeImpl.values.get(name.toLowerCase());
+        return VanillaEntityTypeImpl.VALUES.get(name.toLowerCase());
     }
     
     @NotNull
@@ -38,9 +39,14 @@ public interface VanillaEntityType<E extends LivingEntity> {
         return new VanillaEntityTypeImpl<>(name, enityClass);
     }
     
+    @NotNull
+    static StringList listNames() {
+        return StringList.of(VanillaEntityTypeImpl.VALUES.keySet());
+    }
+    
     class VanillaEntityTypeImpl<E extends LivingEntity> implements VanillaEntityType<E> {
         
-        private static final Map<String, VanillaEntityType<?>> values = Maps.newHashMap();
+        private static final Map<String, VanillaEntityType<?>> VALUES = Maps.newHashMap();
         
         private final String name;
         private final Class<E> clazz;
@@ -49,7 +55,7 @@ public interface VanillaEntityType<E extends LivingEntity> {
             this.name = name;
             this.clazz = clazz;
             
-            values.put(name, this);
+            VALUES.put(name, this);
         }
         
         @NotNull

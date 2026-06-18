@@ -22,4 +22,12 @@ public interface ComparableOrdinal<E extends ComparableOrdinal<E>> {
         return this.ordinal() <= that.ordinal();
     }
     
+    default boolean isEqual(@NotNull E that) {
+        return this.ordinal() == that.ordinal();
+    }
+    
+    default boolean isNotEqual(@NotNull E that) {
+        return this.ordinal() != that.ordinal();
+    }
+    
 }

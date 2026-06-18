@@ -3,7 +3,6 @@ package me.hapyl.hariant.weapon.ability;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.profile.setting.Settings;
@@ -52,7 +51,7 @@ public final class AbilityHandler implements Listener {
     private static void processAbility(@NotNull HariantPlayer player, @NotNull AbilityType abilityType) {
         // Make sure that we clicked with a selected weapon slot
         final Hero hero = player.getHero();
-        final Weapon weapon = hero.getWeapon();
+        final Weapon weapon = hero.getWeapon(player);
         
         final int heldItemSlot = player.getInventory().getHeldItemSlot();
         
@@ -96,7 +95,7 @@ public final class AbilityHandler implements Listener {
         
         // Start cooldown
         if (response.isOk()) {
-            player.setCooldown(cooldownKey, cooldown);
+            player.setCooldown(cooldownKey, cooldown, true);
         }
         else if (response.isAwait()) {
             player.setIndefiniteCooldown(cooldownKey);

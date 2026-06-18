@@ -7,9 +7,8 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantTalentEvent;
+import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
@@ -27,7 +26,7 @@ public class StatusEffectArcaneMute extends StatusEffectImpl implements Listener
     @Override
     public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
         // Fx
-        entity.sendTitleSubtitle(ARCANE_MUTE_PREFIX, Component.text("Shhhhh...", NamedTextColor.LIGHT_PURPLE), 10, 20, 10);
+        entity.sendTitleSubtitle(ARCANE_MUTE_PREFIX, Component.text("Shhhhh...", Colors.LIGHT_PURPLE), 10, 20, 10);
         entity.playSound(Sound.ENTITY_SILVERFISH_HURT, 0.0f);
     }
     
@@ -49,12 +48,12 @@ public class StatusEffectArcaneMute extends StatusEffectImpl implements Listener
     }
     
     @EventHandler
-    public void handleHariantTalentEvent(HariantTalentEvent ev) {
+    public void handleHariantTalentEvent(HariantTalentPreconditionEvent ev) {
         if (!ev.getPlayer().hasEffect(EnumStatusEffect.ARCANE_MUTE)) {
             return;
         }
         
-        ev.setCancelled(HariantTalentEvent.cancel(Component.text("Arcane Mute")));
+        ev.setCancelled(HariantTalentPreconditionEvent.cancel(Component.text("Arcane Mute")));
     }
     
 }

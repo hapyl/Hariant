@@ -1,15 +1,15 @@
 package me.hapyl.hariant.util;
 
+import me.hapyl.hariant.Colors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 public final class ComponentProgress {
     
-    private static final Style DEFAULT_STYLE_EMPTY = Style.style(NamedTextColor.DARK_GRAY);
+    private static final Style DEFAULT_STYLE_EMPTY = Style.style(Colors.DARK_GRAY);
     
     private ComponentProgress() {
     }

@@ -2,6 +2,7 @@ package me.hapyl.hariant.attribute.instance;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.annotate.NotEmpty;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -59,6 +60,18 @@ public class Attributes implements AttributesBase {
     }
     
     @NotNull
+    public Component createRelativeArrow(@NotNull AttributeType attributeType) {
+        final double baseValue = this.base(attributeType);
+        final double defaultValue = attributeType.defaultValue();
+        
+        return baseValue > defaultValue
+               ? Component.text("▲", Colors.GREEN)
+               : baseValue < defaultValue
+                 ? Component.text("▼", Colors.RED)
+                 : Component.text("■", Colors.DARK_GRAY);
+    }
+    
+    @NotNull
     public static Attributes base(final double maxHealth, final double attack, final double defense) {
         final Attributes attributes = new Attributes(null);
         attributes.set(AttributeType.MAX_HEALTH, maxHealth);
@@ -81,5 +94,9 @@ public class Attributes implements AttributesBase {
         return base(1000, 100, 100);
     }
     
+    @NotNull
+    public static Attributes copyOf(@NotNull Attributes attributes) {
+        return new Attributes(attributes);
+    }
     
 }

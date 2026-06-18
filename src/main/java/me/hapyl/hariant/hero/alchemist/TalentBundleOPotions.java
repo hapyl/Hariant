@@ -6,6 +6,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantRandom;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -16,7 +17,6 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
@@ -42,7 +42,7 @@ public class TalentBundleOPotions extends Talent implements Listener {
     @DisplayField private final Decimal potionYOffset = Decimal.ofValue(0.35);
     @DisplayField private final Decimal potionMaxXOffset = Decimal.ofValue(0.2);
     @DisplayField private final Decimal potionMaxZOffset = Decimal.ofValue(0.2);
-    @DisplayField private final Decimal potionExplosionRadius = Decimal.ofValue(5);
+    @DisplayField private final Decimal potionExplosionRadius = Decimal.ofValue(4);
     @DisplayField private final Decimal potionElementalApplication = Decimal.ofValue(500);
     
     private final Map<ThrownPotion, BundlePotion> alchemistPotionMap = Maps.newHashMap();
@@ -50,7 +50,7 @@ public class TalentBundleOPotions extends Talent implements Listener {
     public TalentBundleOPotions(@NotNull Key key) {
         super(key, Component.text("Bundle o' Potions"), Icon.ofMaterial(Material.BUNDLE));
         
-        this.setCooldownSeconds(12);
+        this.setCooldownSeconds(10);
         
         this.setDescription(
                 Component.empty()
@@ -65,7 +65,7 @@ public class TalentBundleOPotions extends Talent implements Listener {
                          .append(
                                  Component.empty()
                                           .append(Component.text("Upon landing, each potion explodes and applies "))
-                                          .append(Component.text("massive", NamedTextColor.WHITE, TextDecoration.UNDERLINED))
+                                          .append(Component.text("massive", Colors.WHITE, TextDecoration.UNDERLINED))
                                           .append(Component.text(" elemental build-up."))
                          )
         );
@@ -122,14 +122,14 @@ public class TalentBundleOPotions extends Talent implements Listener {
             return;
         }
         
-        potion.alchemist.collectNearbyEntities(potionExplosionRadius)
-                        .filter(potion.alchemist::canAffect)
-                        .forEach(entity -> {
-                            entity.applyElement(ElementSource.create(potion.elementType, potion.alchemist, potionElementalApplication.doubleValue()));
-                        });
+        potion.collectNearbyEntities(potionExplosionRadius)
+              .filter(potion.alchemist::canAffect)
+              .forEach(entity -> {
+                  entity.applyElement(ElementSource.create(potion.elementType, potion.alchemist, potionElementalApplication.doubleValue()));
+              });
     }
     
-    public record BundlePotion(@NotNull HariantPlayer alchemist, @NotNull ThrownPotion thrownPotion, @NotNull ElementType elementType) {
+    public record BundlePotion(@NotNull HariantPlayer alchemist, @NotNull ThrownPotion thrownPotion, @NotNull ElementType elementType) implements EntityCollector {
         
         private static final Map<ElementType, ItemStack> ELEMENT_TYPE_ITEM_STACK = Map.ofEntries(
                 createPotionOfColor(ElementType.PHYSICAL),
@@ -140,6 +140,12 @@ public class TalentBundleOPotions extends Talent implements Listener {
                 createPotionOfColor(ElementType.ELECTRIC),
                 createPotionOfColor(ElementType.AETHER)
         );
+        
+        @NotNull
+        @Override
+        public Location getLocation() {
+            return thrownPotion.getLocation();
+        }
         
         @NotNull
         public static BundlePotion create(@NotNull HariantPlayer player, @NotNull Location location, @NotNull ElementType elementType) {

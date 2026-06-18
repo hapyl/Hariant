@@ -12,6 +12,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
@@ -28,11 +29,10 @@ import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
-import me.hapyl.hariant.term.EnumTerm;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,6 +46,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public final class TalentRoseIvy extends Talent implements Listener {
     
@@ -56,7 +57,6 @@ public final class TalentRoseIvy extends Talent implements Listener {
     @DisplayField private final Decimal affectPeriod = Decimal.ofSeconds(0.5f);
     @DisplayField private final Decimal effectDuration = Decimal.ofSeconds(0.5f);
     @DisplayField private final Decimal speedDecrease = Decimal.ofPercentage(-25);
-    @DisplayField private final Decimal formingDelay = Decimal.ofSeconds(0.5f);
     
     private final Key modifierKey = Key.ofString("rose_ivy");
     
@@ -77,14 +77,14 @@ public final class TalentRoseIvy extends Talent implements Listener {
         this.setDescription(
                 Component.empty()
                          .append(Component.text("Throw a bag filled with "))
-                         .append(Component.text("spiky rose", NamedTextColor.RED))
+                         .append(Component.text("spiky rose", Colors.RED))
                          .append(Component.text(" seeds in front of you."))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Upon hit, the seeds sprout to life, creating a "))
                          .append(this.getName().color(Colors.SUCCESS))
                          .append(Component.text(" in small "))
-                         .append(EnumTerm.AREA_OF_EFFECT)
+                         .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text(" for "))
                          .append(this.getDurationFormatted())
                          .append(Component.text("."))
@@ -99,7 +99,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("This talent cannot kill.", NamedTextColor.DARK_GRAY))
+                         .append(Component.text("This talent cannot kill.", Colors.DARK_GRAY))
         );
     }
     
@@ -144,7 +144,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
     
     private class RoseIvyProjectileDamageSource extends DamageSourceImpl {
         RoseIvyProjectileDamageSource(@Nullable HariantEntity attacker) {
-            super(TalentRoseIvy.this, attacker, DamageType.TALENT, ElementType.PHYSICAL, List.of(), List.of(), 1, 1);
+            super(TalentRoseIvy.this, attacker, DamageType.TALENT, ElementType.PHYSICAL, List.of(), Set.of(), 1, 1);
         }
     }
     
@@ -160,7 +160,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
         }
     }
     
-    private class RoseIvyTask extends HariantTickingTask {
+    private class RoseIvyTask extends HariantTickingTask implements EntityCollector {
         private static final BlockData PARTICLE_DATA = Material.SWEET_BERRY_BUSH.createBlockData();
         
         private final HariantPlayer player;
@@ -186,12 +186,12 @@ public final class TalentRoseIvy extends Talent implements Listener {
             
             // Show the model
             if (tick <= modelParts) {
-                vineEntity.asTagged(String.valueOf(tick), Hariant::showBukkitEntity);
+                vineEntity.forEach(String.valueOf(tick), display -> Hariant.showBukkitEntity(display.getDisplay()));
             }
             
             // If fully drawn, apply IVY effect
             if (modulo(affectPeriod)) {
-                player.collectNearbyEntities(origin, TalentRoseIvy.this.radius.doubleValue())
+                collectNearbyEntities(origin, radius, 1, radius)
                       .filter(player::canAffect)
                       .forEach(entity -> {
                           entity.addEffect(EnumStatusEffect.ROSE_IVY, effectDuration, player);
@@ -207,6 +207,12 @@ public final class TalentRoseIvy extends Talent implements Listener {
         @Override
         public void onCancel() {
             vineEntity.remove();
+        }
+        
+        @NotNull
+        @Override
+        public Location getLocation() {
+            return origin;
         }
     }
     

@@ -8,7 +8,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.*;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class HariantEntityMoveEvent extends HariantEntityEvent implements Cancellable {
     

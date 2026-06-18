@@ -1,5 +1,6 @@
 package me.hapyl.hariant.menu.hero;
 
+import me.hapyl.eterna.module.component.ComponentStyler;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -12,7 +13,6 @@ import me.hapyl.hariant.hero.HeroProfile;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.weapon.Weapon;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 public class MenuHeroProfile extends MenuHeroAbstract {
     
     private static final Icon ICON_AFFILIATION = Icon.ofTexture("b0aca013178a9f47913e894d3d0bfd4b0b66120825b9aab8a4d7d9bf0245abf");
-    private static final Style STYLE_AFFILIATION = Style.style(NamedTextColor.GRAY, TextDecoration.ITALIC);
+    private static final ComponentStyler STYLER_AFFILIATION = ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(2).build();
     
     public MenuHeroProfile(@NotNull Player player, @NotNull HeroInstance heroInstance) {
         super(player, heroInstance, Category.PROFILE);
@@ -45,8 +45,8 @@ public class MenuHeroProfile extends MenuHeroAbstract {
                 ICON_AFFILIATION.createBuilder()
                                 .setName(Component.text("Affiliation"))
                                 .addLore()
-                                .addLore(affiliation.asComponent().color(NamedTextColor.WHITE))
-                                .addWrappedLore(affiliation.getDescription(), _component -> Component.text("  ").append(_component.style(STYLE_AFFILIATION)))
+                                .addLore(affiliation.asComponent().color(Colors.WHITE))
+                                .addWrappedLore(affiliation.getDescription(), STYLER_AFFILIATION)
                                 .asIcon()
         );
         
@@ -83,7 +83,12 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         builder.addLore(Component.text("ʙᴀꜱᴇ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         
         for (AttributeType attributeType : AttributeType.getBaseAttributes()) {
-            builder.addLore(attributes.createLore(attributeType));
+            builder.addLore(
+                    Component.empty()
+                             .appendSpace()
+                             .append(attributes.createRelativeArrow(attributeType))
+                             .append(attributes.createLore(attributeType))
+            );
         }
         
         // Advanced attributes
@@ -91,10 +96,11 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         builder.addLore(Component.text("ᴀᴅᴠᴀɴᴄᴇᴅ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         
         for (AttributeType attributeType : AttributeType.getAdvancedAttributes()) {
-            
             attributes.createLore(attributeType);
             builder.addLore(
                     Component.empty()
+                             .appendSpace()
+                             .append(attributes.createRelativeArrow(attributeType))
                              .appendSpace()
                              .append(attributeType)
                              .appendSpace()
@@ -105,7 +111,7 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         builder.addLore();
         builder.addLore(Component.text("ᴇʟᴇᴍᴇɴᴛᴀʟ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         
-        builder.addLore(Component.text(" (Element) (Resistance/DMG Bonus)", NamedTextColor.DARK_GRAY));
+        builder.addLore(Component.text(" (Element) (Resistance/DMG Bonus)", Colors.DARK_GRAY));
         
         // Elemental attributes
         for (ElementType elementType : ElementType.values()) {
@@ -120,9 +126,9 @@ public class MenuHeroProfile extends MenuHeroAbstract {
                              .appendSpace()
                              .append(elementType.asComponent())
                              .append(Component.text("   "))
-                             .append(elementalResistance.color(NamedTextColor.GREEN))
-                             .append(Component.text(" / ", NamedTextColor.GRAY))
-                             .append(elementalDamageBonus.color(NamedTextColor.RED))
+                             .append(elementalResistance.color(Colors.GREEN))
+                             .append(Component.text(" / ", Colors.GRAY))
+                             .append(elementalDamageBonus.color(Colors.RED))
             );
         }
         
@@ -137,7 +143,7 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         builder.setName(Component.text("Weapon"));
         
         builder.editLore(lore -> {
-            lore.addFirst(weapon.getName().color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+            lore.addFirst(weapon.getName().color(Colors.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
         });
         
         return builder.asIcon();

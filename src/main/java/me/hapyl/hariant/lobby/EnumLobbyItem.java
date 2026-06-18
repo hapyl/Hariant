@@ -1,26 +1,33 @@
 package me.hapyl.hariant.lobby;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
-import me.hapyl.eterna.module.registry.Key;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
 public enum EnumLobbyItem implements LobbyItem {
     
-    HERO_SELECTOR(2, new LobbyItemHeroSelector(Key.ofString("hero_selector"))),
-    PLAYER_PROFILE(4, new LobbyItemPlayerProfile(Key.ofString("player_profile"))),
+    HERO_SELECTOR(new LobbyItemHeroSelector()),
+    GAME_MANAGEMENT(new LobbyItemGameManagement()),
+    PLAYER_PROFILE(new LobbyItemPlayerProfile()),
+    READY(new LobbyItemReady());
     
+    private static final ItemStack ITEM_STARTING_GAME = new ItemBuilder(Material.YELLOW_DYE)
+            .setName(Component.text("Game Starting..."))
+            .asIcon();
     
-    ;
-    
-    private final int slot;
     private final LobbyItem lobbyItem;
     
-    EnumLobbyItem(int slot, @NotNull LobbyItem lobbyItem) {
-        this.slot = slot;
+    EnumLobbyItem(@NotNull LobbyItem lobbyItem) {
         this.lobbyItem = lobbyItem;
+    }
+    
+    @Override
+    public int getSlot() {
+        return lobbyItem.getSlot();
     }
     
     @NotNull
@@ -46,12 +53,26 @@ public enum EnumLobbyItem implements LobbyItem {
         lobbyItem.use(player);
     }
     
-    public static void giveAll(@NotNull Player player) {
+    @Override
+    public void give(@NotNull Player player) {
+        lobbyItem.give(player);
+    }
+    
+    public static void clearInventoryAndGiveAllItems(@NotNull Player player) {
         final PlayerInventory inventory = player.getInventory();
         inventory.clear();
         
         for (EnumLobbyItem lobbyItem : EnumLobbyItem.values()) {
-            inventory.setItem(lobbyItem.slot, lobbyItem.createBuilder(player).build());
+            lobbyItem.give(player);
+        }
+    }
+    
+    public static void giveReadyItem(@NotNull Player player, boolean actualItem) {
+        if (actualItem) {
+            READY.give(player);
+        }
+        else {
+            player.getInventory().setItem(READY.getSlot(), ITEM_STARTING_GAME);
         }
     }
     

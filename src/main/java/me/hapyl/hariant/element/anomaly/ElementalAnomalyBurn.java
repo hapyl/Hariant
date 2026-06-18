@@ -12,13 +12,13 @@ import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
     
@@ -34,7 +34,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
     private final DeathMessage deathMessage = DeathMessage.createWithDefaultKiller("{player} burnt to death");
     
     ElementalAnomalyBurn() {
-        super(Key.ofString("burn"), Component.text("Burn"));
+        super(Key.ofString("burn"), Component.text("Burn"), ElementType.FIRE);
         
         this.setDescription(
                 Component.empty()
@@ -54,12 +54,6 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
         final double damage = this.calculateBurnDamage(source);
         
         entity.getAttributes().addModifier(new ElementalAnomalyBurnAttributeModifier(source != null ? source : entity, duration, damage));
-    }
-    
-    @NotNull
-    @Override
-    public Style getStyle() {
-        return ElementType.FIRE.getStyle();
     }
     
     public int calculateBurnDuration(@Nullable HariantEntity source) {
@@ -121,7 +115,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
                     DamageType.ANOMALY,
                     ElementType.FIRE,
                     List.of(DamageComponent.elemental()),
-                    List.of(),
+                    Set.of(),
                     damage,
                     0
             );

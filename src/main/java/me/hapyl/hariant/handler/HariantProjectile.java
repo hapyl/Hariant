@@ -7,6 +7,7 @@ import me.hapyl.eterna.module.util.Handle;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageSource;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Projectile;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,11 @@ public final class HariantProjectile implements Handle<Projectile>, Coordinates,
     HariantProjectile(@NotNull Projectile projectile, @NotNull DamageSource damageSource) {
         this.projectile = projectile;
         this.damageSource = validateDamageSource(damageSource);
+    }
+    
+    @Override
+    public @NotNull Color outlineColor() {
+        return Color.AQUA;
     }
     
     @NotNull

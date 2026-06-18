@@ -2,22 +2,17 @@ package me.hapyl.hariant.lobby;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.HariantLogger;
+import me.hapyl.hariant.profile.menu.MenuPlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 
-public class LobbyItemPlayerProfile extends LobbyItemImpl {
+public final class LobbyItemPlayerProfile extends LobbyItemImpl {
     
-    LobbyItemPlayerProfile(@NotNull Key key) {
-        super(
-                key,
-                Material.PLAYER_HEAD,
-                Component.text("Profile"),
-                Component.text("Opens your personal profiles, which shows personal information.")
-        );
+    LobbyItemPlayerProfile() {
+        super(5, Key.ofString("player_profile"), Material.PLAYER_HEAD, Component.text("Profile"), Component.text("Opens your personal profiles, which shows personal information."));
     }
     
     @NotNull
@@ -28,6 +23,7 @@ public class LobbyItemPlayerProfile extends LobbyItemImpl {
     
     @Override
     public void use(@NotNull Player player) {
-        HariantLogger.error(player, Component.text("I'm going to be honest with you, I haven't yet implemented player profiles yet, so pretend a fancy menu opened with all your cool data."));
+        new MenuPlayerProfile(player);
     }
+    
 }

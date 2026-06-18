@@ -29,7 +29,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Arrow;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -58,6 +57,7 @@ public final class TalentChainLightning extends Talent implements Listener {
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Upon hitting an enemy, the arrow creates a chain reaction that deals "))
+                         .appendNewline()
                          .append(ElementType.ELECTRIC.asComponentDamage())
                          .append(Component.text(" up to "))
                          .append(maxChainReaction)

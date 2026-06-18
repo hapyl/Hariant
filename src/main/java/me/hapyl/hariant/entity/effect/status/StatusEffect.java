@@ -9,9 +9,10 @@ import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 
-public interface StatusEffect extends Effect, Named, Described, DamageSourceIdentity {
+public interface StatusEffect extends Effect, Named, Described, DamageSourceIdentity, ComponentLike {
     
     @Override
     @NotNull
@@ -42,4 +43,9 @@ public interface StatusEffect extends Effect, Named, Described, DamageSourceIden
     @Override
     Component getDescription();
     
+    @NotNull
+    @Override
+    default Component asComponent() {
+        return getName();
+    }
 }

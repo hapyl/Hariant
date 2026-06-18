@@ -3,9 +3,11 @@ package me.hapyl.hariant.entity.damage;
 import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
+import me.hapyl.hariant.entity.damage.report.DamageReport;
 import me.hapyl.hariant.event.HariantDamageCalculationsEvent;
 import me.hapyl.hariant.util.Identified;
-import net.kyori.adventure.text.Component;
+import me.hapyl.hariant.util.decimal.Decimal;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +28,10 @@ public final class DamageInstance {
     private final HariantEntity attacker;
     
     private double damage;
+    
     private boolean critical;
+    private boolean shielded;
+    private boolean lethal;
     
     public DamageInstance(@NotNull HariantEntity entity, @NotNull DamageSource source) {
         this.source = source;
@@ -56,13 +61,28 @@ public final class DamageInstance {
         return critical;
     }
     
+    public boolean isShielded() {
+        return shielded;
+    }
+    
+    public boolean isLethal() {
+        return lethal;
+    }
+    
     public double getDamage() {
         return damage;
     }
     
-    public void multiplyDamage(@NotNull Identified identity, double multiplier) {
-        this.damageReport.report(identity, multiplier, damage);
-        this.damage *= multiplier;
+    public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final double value) {
+        final double damageBeforeMutation = damage;
+        final double damageAfterMutation = mutator.mutate(damage, value);
+        
+        this.damage = damageAfterMutation;
+        this.damageReport.report(identity, mutator, value, damageBeforeMutation, damageAfterMutation);
+    }
+    
+    public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final Decimal value) {
+        this.mutateDamage(identity, mutator, value.doubleValue());
     }
     
     @NotNull
@@ -75,17 +95,23 @@ public final class DamageInstance {
         return List.copyOf(components);
     }
     
-    public boolean isAlreadyCritical() {
-        return critical;
-    }
-    
     @ApiStatus.Internal
     public void markCritical() {
         this.critical = true;
     }
     
     @ApiStatus.Internal
-    void calculateDamage() {
+    public void markShielded() {
+        this.shielded = true;
+    }
+    
+    @ApiStatus.Internal
+    public void markLethal() {
+        this.lethal = true;
+    }
+    
+    @ApiStatus.Internal
+    private void calculateDamage() {
         this.damage = source.getDamage();
         
         // Snapshot attributes so we can modify them in the event without
@@ -97,12 +123,12 @@ public final class DamageInstance {
         new HariantDamageCalculationsEvent(source, snapshotEntity, snapshotAttacker).callEvent();
         
         // Apply components
-        for (DamageComponent component : components) {
+        for (final DamageComponent component : components) {
             final double multiplier = component.multiplier(this, snapshotEntity, snapshotAttacker);
             final double damageBeforeMultiplier = damage;
             
             this.damage *= multiplier;
-            this.damageReport.report(component, multiplier, damageBeforeMultiplier);
+            this.damageReport.report(component, DamageMutator.multiply(), multiplier, damageBeforeMultiplier, damage);
         }
     }
     

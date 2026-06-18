@@ -25,7 +25,7 @@ public final class InternalTasks {
     }
     
     public static void now(@NotNull Runnable runnable) {
-        runTask(runnable, (BukkitRunnable::runTask));
+        runTask(runnable, BukkitRunnable::runTask);
     }
     
     private static void runTask(@NotNull Runnable runnable, @NotNull BiFunction<BukkitRunnable, Plugin, BukkitTask> function) {

@@ -1,41 +1,44 @@
 package me.hapyl.hariant.inventory.drop;
 
-import me.hapyl.eterna.module.component.Named;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
+import me.hapyl.hariant.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
 
-public final class Drop implements Named, ComponentLike {
+/**
+ * Represents a generated {@link Droppable}.
+ */
+public final class Drop {
     
-    private final Component name;
+    private final Droppable droppable;
+    private final DropTier dropTier;
+    
+    private final double dropChance;
     private final int amount;
     
-    private final Component component;
-    
-    Drop(@NotNull Droppable droppable, int amount) {
-        this.name = droppable.getName();
+    Drop(@NotNull Droppable droppable, @NotNull DropTier dropTier, double dropChance, int amount) {
+        this.droppable = droppable;
         this.amount = amount;
-        this.component = Component.empty()
-                                  .append(Component.text("%d".formatted(amount), NamedTextColor.GOLD))
-                                  .append(Component.text(" x ", NamedTextColor.DARK_GRAY))
-                                  .append(name);
+        this.dropChance = dropChance;
+        this.dropTier = dropTier;
     }
     
-    @NotNull
-    @Override
-    public Component getName() {
-        return name;
+    public @NotNull Droppable getDroppable() {
+        return droppable;
+    }
+    
+    public @NotNull DropTier getDropTier() {
+        return dropTier;
+    }
+    
+    public double getDropChance() {
+        return dropChance;
     }
     
     public int getAmount() {
         return amount;
     }
     
-    @NotNull
-    @Override
-    public Component asComponent() {
-        return component;
+    public void drop(@NotNull PlayerProfile profile) {
+        droppable.drop(profile, this);
     }
     
 }

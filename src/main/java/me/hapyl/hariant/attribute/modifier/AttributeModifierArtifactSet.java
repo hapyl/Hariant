@@ -7,7 +7,6 @@ import me.hapyl.hariant.inventory.item.artifact.ArtifactSet;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class AttributeModifierArtifactSet extends AttributeModifier {
     

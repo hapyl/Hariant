@@ -8,7 +8,9 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.annotate.StrictNamingConvention;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
@@ -16,6 +18,7 @@ import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantTalentEvent;
+import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import me.hapyl.hariant.inventory.item.ItemCreator;
 import me.hapyl.hariant.profile.setting.Settings;
 import me.hapyl.hariant.registry.Registrable;
@@ -27,8 +30,6 @@ import me.hapyl.hariant.util.Duration;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.Identified;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,7 +46,7 @@ public abstract class Talent
         Registrable, Cooldown, Duration, DamageSourceIdentity,
         Identified {
     
-    protected final List<DisplayFieldInstance> attributeFields;
+    private final List<DisplayFieldInstance> attributeFields;
     
     private final Key key;
     private final Component name;
@@ -90,7 +91,7 @@ public abstract class Talent
     
     @NotNull
     @Override
-    public final Key getCooldownKey() {
+    public Key getCooldownKey() {
         return key;
     }
     
@@ -125,7 +126,7 @@ public abstract class Talent
         builder.setName(getName());
         
         // Append talent type
-        builder.addLore(this.getTalentTypeWithClassName().color(NamedTextColor.DARK_GRAY));
+        builder.addLore(this.getTalentTypeWithClassName().color(Colors.DARK_GRAY));
         builder.addLore();
         
         // Add description
@@ -140,24 +141,27 @@ public abstract class Talent
         
         builder.setName(getName());
         
-        builder.addLore(Component.text("Details", NamedTextColor.DARK_GRAY));
+        builder.addLore(Component.text("Details", Colors.DARK_GRAY));
         builder.addLore();
         
         // Append talent type description
-        builder.addLore(this.talentType.getName().color(NamedTextColor.GOLD));
-        builder.addWrappedLore(this.talentType.getDescription(), _component -> Component.text("  ").append(_component).color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC));
+        builder.addLore(this.talentType.getName().color(Colors.GOLD));
+        builder.addWrappedLore(this.talentType.getDescription(), HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_2);
         builder.addLore();
         
         // Append attribute fields
-        builder.addLore(Component.text("Attributes", NamedTextColor.GOLD));
-        
-        attributeFields.forEach(instance -> {
-            builder.addLore(instance.asComponent());
-        });
+        if (!attributeFields.isEmpty()) {
+            builder.addLore(Component.text("Attributes", Colors.GOLD));
+            
+            attributeFields.forEach(instance -> {
+                builder.addLore(instance.asComponent());
+            });
+        }
         
         return builder;
     }
     
+    @OverridingMethodsMustInvokeSuper
     @Override
     public void onRegister() {
         this.initAttributeFields0();
@@ -220,10 +224,6 @@ public abstract class Talent
     @NotNull
     public abstract Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context);
     
-    public boolean canExecute(@NotNull HariantPlayer player) {
-        return true;
-    }
-    
     public void execute0(@NotNull HariantPlayer player) {
         // Precondition checks
         final int cooldownTimeLeft = player.getCooldownTimeLeft(this);
@@ -253,10 +253,16 @@ public abstract class Talent
         }
         
         // Call talent event execution
-        final HariantTalentEvent event = new HariantTalentEvent(player, this);
+        final HariantTalentPreconditionEvent event = new HariantTalentPreconditionEvent(player, this);
         
         if (event.callEvent()) {
-            player.messageError(event.getCancelReason());
+            player.messageError(
+                    Component.empty()
+                             .append(Component.text("Cannot use talent! "))
+                             .append(Component.text("(", Colors.DARK_GRAY))
+                             .append(event.getCancelReason().color(Colors.DARK_GRAY))
+                             .append(Component.text(")", Colors.DARK_GRAY))
+            );
             return;
         }
         
@@ -284,6 +290,9 @@ public abstract class Talent
         else if (response.isAwait()) {
             player.setIndefiniteCooldown(this);
         }
+        
+        // Call the talent event AFTER the execution
+        new HariantTalentEvent(player, this, response).callEvent();
     }
     
     @NotNull
@@ -297,7 +306,7 @@ public abstract class Talent
     }
     
     @OverridingMethodsMustInvokeSuper
-    protected void initAttributeFields() {
+    protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
         if (cooldown > 0) {
             attributeFields.add(new DisplayFieldInstance(Component.text("Cooldown"), this.getCooldownFormatted()));
         }
@@ -312,7 +321,7 @@ public abstract class Talent
             throw new IllegalStateException("Attribute fields already initiated!");
         }
         
-        this.initAttributeFields();
+        this.initAttributeFields(attributeFields);
         
         try {
             for (Class<?> clazz : getClassHierarchyReversed()) {

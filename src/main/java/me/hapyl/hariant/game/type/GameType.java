@@ -8,9 +8,12 @@ import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.game.PlayerCallback;
 import me.hapyl.hariant.game.WinResult;
 import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.hariant.team.EnumTeam;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public interface GameType extends Named, Described, PlayerCallback {
     
@@ -38,4 +41,7 @@ public interface GameType extends Named, Described, PlayerCallback {
     
     @Override
     void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player);
+    
+    @NotNull
+    List<EnumTeam> getWiningTeamsWhenTimeLimit(@NotNull GameInstance gameInstance);
 }

@@ -1,44 +1,70 @@
 package me.hapyl.hariant.profile.setting;
 
+import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
-import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
-public final class SettingImpl<I> extends SettingAbstractImpl<I> {
+public abstract class SettingImpl<I> implements Setting<I> {
     
-    private final Class<I> valueClass;
+    protected final I defaultValue;
     
-    SettingImpl(
-            @NotNull Key key,
-            @NotNull Component name,
-            @NotNull Component description,
-            @NotNull Icon icon,
-            @NotNull SettingCategory category,
-            @NotNull Class<I> valueClass,
-            @NotNull I defaultValue
-    ) {
-        if (valueClass != Boolean.class && valueClass != Integer.class) {
-            throw new IllegalArgumentException("Setting can only be Boolean or Integer, not %s!".formatted(valueClass.getSimpleName()));
-        }
+    private final Key key;
+    private final Component name;
+    private final Component description;
+    private final Icon icon;
+    private final SettingCategory category;
+    
+    SettingImpl(@NotNull Key key, @NotNull Component name, @NotNull Component description, @NotNull Icon icon, @NotNull SettingCategory category, @NotNull I defaultValue) {
+        this.key = key;
+        this.name = name;
+        this.description = description;
+        this.icon = icon;
+        this.defaultValue = defaultValue;
+        this.category = category;
+    }
+    
+    @Override
+    @NotNull
+    public Key getKey() {
+        return key;
+    }
+    
+    @Override
+    @NotNull
+    public Component getName() {
+        return name;
+    }
+    
+    @Override
+    @NotNull
+    public Component getDescription() {
+        return description;
+    }
+    
+    @Override
+    @NotNull
+    public ItemBuilder createBuilder() {
+        final ItemBuilder builder = icon.createBuilder();
         
-        super(key, name, description, icon, category, defaultValue);
+        builder.setName(name);
+        builder.addLore();
+        builder.addWrappedLore(description);
         
-        this.valueClass = valueClass;
+        return builder;
     }
     
     @NotNull
     @Override
-    public I getValue(@NotNull Document document) {
-        final I i = document.get(this.getKeyAsString(), valueClass);
-        
-        return i != null ? i : defaultValue();
+    public SettingCategory getCategory() {
+        return category;
     }
     
+    @NotNull
     @Override
-    public void setValue(@NotNull Document document, @NotNull I value) {
-        document.put(this.getKeyAsString(), value);
+    public I defaultValue() {
+        return defaultValue;
     }
     
 }

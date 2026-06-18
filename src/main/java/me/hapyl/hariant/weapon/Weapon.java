@@ -1,12 +1,13 @@
 package me.hapyl.hariant.weapon;
 
 import com.google.common.collect.Maps;
-import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
+import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.Attacker;
 import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -16,8 +17,8 @@ import me.hapyl.hariant.inventory.item.ItemCreator;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.weapon.ability.Ability;
 import me.hapyl.hariant.weapon.ability.AbilityType;
+import me.hapyl.hariant.weapon.projectile.WeaponRangeProjectile;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -31,9 +32,10 @@ import java.util.Objects;
 ///
 /// <pre>
 /// Weapon {@code (package-private)}
-/// |- WeaponMelee
-/// |- WeaponRange
-///     |- WeaponBow
+/// |- {@link WeaponMelee}
+/// |- {@link WeaponRange}
+///     |- {@link WeaponBow}
+///     |- {@link WeaponRangeProjectile}
 /// </pre>
 public class Weapon implements
         Keyed, ItemCreator, Icon, Named,
@@ -124,13 +126,12 @@ public class Weapon implements
         builder.addLore();
         
         // Add description
-        builder.addWrappedLore(description);
+        builder.addWrappedLore(description, HariantConstants.COMPONENT_STYLER_DESCRIPTION);
         builder.addLore();
         
         // Add abilities
         if (!abilities.isEmpty()) {
-            builder.addLore(Component.text(abilities.size() == 1 ? "ᴀʙɪʟɪᴛʏ:" : "ᴀʙɪʟɪᴛɪᴇꜱ:", NamedTextColor.YELLOW, TextDecoration.BOLD));
-            builder.addLore();
+            builder.addLore(Component.text(abilities.size() == 1 ? "Ability" : "Abilities", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
             
             int index = 0;
             
@@ -144,14 +145,13 @@ public class Weapon implements
                 
                 builder.addLore(
                         Component.empty()
-                                 .append(Component.text("✦ ", NamedTextColor.GOLD))
-                                 .append(ability.getName().color(NamedTextColor.GOLD))
-                                 .append(Component.text(" (", NamedTextColor.DARK_GRAY))
-                                 .append(abilityType.getName().color(NamedTextColor.DARK_GRAY))
-                                 .append(Component.text(")", NamedTextColor.DARK_GRAY))
+                                 .append(Component.text("✦ ", Colors.GOLD))
+                                 .append(ability.getName().color(Colors.GOLD))
+                                 .appendSpace()
+                                 .append(abilityType)
                 );
                 
-                builder.addWrappedLore(ability.getDescription(), _component -> Component.text("  ").append(_component.style(ItemBuilder.DEFAULT_LORE_STYLE)));
+                builder.addWrappedLore(ability.getDescription(), HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_3);
             }
         }
         
@@ -182,7 +182,7 @@ public class Weapon implements
     }
     
     public void startCooldown(@NotNull HariantPlayer player, int cooldown) {
-        player.setCooldown(this.getKey(), cooldown);
+        player.setCooldown(this.getKey(), cooldown, true);
     }
     
     public int getCooldown(@NotNull HariantPlayer player) {

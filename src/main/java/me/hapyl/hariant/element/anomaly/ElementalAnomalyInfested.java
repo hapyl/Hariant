@@ -3,6 +3,7 @@ package me.hapyl.hariant.element.anomaly;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
@@ -15,7 +16,6 @@ import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -36,11 +36,11 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             Key.ofString("toxic_cloud"),
             Component.text("Toxic Cloud"),
-            DeathMessage.createWithDefaultKiller("{player} was poisoned to death")
+            DeathMessage.create("{player} was poisoned to death [by {killer}]")
     );
     
     ElementalAnomalyInfested() {
-        super(Key.ofString("infested"), Component.text("Infested"));
+        super(Key.ofString("infested"), Component.text("Infested"), ElementType.TOXIC);
         
         setDescription(
                 Component.empty()
@@ -48,7 +48,7 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
                          .append(ElementType.TOXIC.asComponentDamage())
                          .append(Component.text("."))
                          .appendNewline()
-                         .append(Component.text("The toxic damage cannot kill.", NamedTextColor.DARK_GRAY))
+                         .append(Component.text("The toxic damage cannot kill.", Colors.DARK_GRAY))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Enemies, who enter the field have their "))

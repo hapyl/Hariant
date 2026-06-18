@@ -12,7 +12,7 @@ public interface DamageSourceIdentity extends Keyed, Named {
     DamageSourceIdentity COMMAND = create(
             Key.ofString("command"),
             Component.text("Command"),
-            DeathMessage.createWithDefaultKiller("{player} was killed [by {killer}]")
+            DeathMessage.create("{player} was killed [by {killer}]")
     );
     
     @Override

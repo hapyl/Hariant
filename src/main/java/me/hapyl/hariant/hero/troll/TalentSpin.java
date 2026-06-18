@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.troll;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -12,13 +13,12 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
-public class TalentSpin extends Talent {
+public final class TalentSpin extends Talent {
     
     @DisplayField private final Decimal radius = Decimal.ofValue(30);
     @DisplayField private final Decimal rotationDegrees = Decimal.ofValue(180, value -> Component.text("%.0f°".formatted(value)));
@@ -32,7 +32,7 @@ public class TalentSpin extends Talent {
         setDescription(
                 Component.empty()
                          .append(Component.text("Rotate the heads of nearby "))
-                         .append(Component.text("enemies", NamedTextColor.RED))
+                         .append(Component.text("enemies", Colors.RED))
                          .append(Component.text(" by "))
                          .append(rotationDegrees)
                          .append(Component.text("."))

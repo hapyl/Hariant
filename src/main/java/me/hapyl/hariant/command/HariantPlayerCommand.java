@@ -1,16 +1,14 @@
 package me.hapyl.hariant.command;
 
 import me.hapyl.eterna.module.command.ArgumentList;
-import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.rank.PlayerRank;
-import me.hapyl.hariant.entity.player.HariantPlayer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
+import java.util.List;
 
 public abstract class HariantPlayerCommand extends HariantCommand {
     
@@ -18,10 +16,15 @@ public abstract class HariantPlayerCommand extends HariantCommand {
         super(name, rank);
     }
     
-    protected abstract void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank);
+    public abstract void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank);
+    
+    @NotNull
+    public List<String> tabComplete(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+        return List.of();
+    }
     
     @Override
-    protected final void execute(@NotNull CommandSender sender, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+    public final void execute(@NotNull CommandSender sender, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
         if (!(sender instanceof Player player)) {
             HariantLogger.error(sender, Component.text("You must be a player to perform this command!"));
             return;
@@ -30,8 +33,14 @@ public abstract class HariantPlayerCommand extends HariantCommand {
         this.execute(player, args, playerRank);
     }
     
-    public void asHariantPlayer(@NotNull Player player, @NotNull Consumer<HariantPlayer> consumer) {
-        Hariant.getPlayer(player).ifPresentOrElse(consumer, () -> HariantLogger.error(player, Component.text("You must have a player handle to execute this command!")));
+    @NotNull
+    @Override
+    public final List<String> tabComplete(@NotNull CommandSender sender, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+        if (sender instanceof Player player) {
+            return this.tabComplete(player, args, playerRank);
+        }
+        
+        return List.of();
     }
     
 }

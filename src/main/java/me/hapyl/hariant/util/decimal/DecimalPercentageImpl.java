@@ -1,6 +1,7 @@
 package me.hapyl.hariant.util.decimal;
 
 public class DecimalPercentageImpl extends DecimalImpl {
+    
     private static final int DIVISOR = 100;
     
     DecimalPercentageImpl(double value) {
@@ -24,6 +25,6 @@ public class DecimalPercentageImpl extends DecimalImpl {
     
     @Override
     public double doubleValue() {
-        return super.doubleValue() / DIVISOR;
+        return this.value / DIVISOR;
     }
 }

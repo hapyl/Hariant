@@ -1,5 +1,5 @@
 name: Hariant
-version: '1.0-SNAPSHOT'
+version: '0.0.1-SNAPSHOT'
 main: "me.hapyl.hariant.HariantPlugin"
 api-version: '1.21'
 depend: [ "EternaAPI" ]

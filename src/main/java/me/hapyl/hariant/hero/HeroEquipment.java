@@ -2,15 +2,14 @@ package me.hapyl.hariant.hero;
 
 import me.hapyl.eterna.module.inventory.ItemStacks;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HeadComponent;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -144,7 +143,7 @@ public class HeroEquipment implements HeadComponent {
                 ObjectContents.playerHead()
                               .profileProperty(PlayerHeadObjectContents.property("textures", base64, ""))
                               .build()
-        ).color(NamedTextColor.WHITE);
+        ).color(Colors.WHITE);
     }
     
     @NotNull

@@ -4,7 +4,6 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.effect.EffectType;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class HariantEffectEvent extends HariantEntityEvent {
     

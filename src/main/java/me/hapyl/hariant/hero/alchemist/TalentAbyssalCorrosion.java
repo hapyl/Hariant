@@ -2,20 +2,20 @@ package me.hapyl.hariant.hero.alchemist;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.hero.Definition;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
 public final class TalentAbyssalCorrosion extends TalentPassive {
     
     @DisplayField public final Decimal corrosionDecrementPerSecond = Decimal.ofValue(0.75);
-    @DisplayField public final Decimal abyssalCurseInstabilityDecrementPerOneCorrosion = Decimal.ofPercentage(0.5);
+    @DisplayField public final Decimal abyssalCurseInstabilityDecrementThreshold = Decimal.ofValue(10);
+    @DisplayField public final Decimal abyssalCurseInstabilityDecrement = Decimal.ofPercentage(5);
     @DisplayField public final Decimal maximumCorrosion = Decimal.ofValue(100);
     
     @DisplayField public final Decimal corrosionThreshold1 = Decimal.ofValue(40);
@@ -37,11 +37,11 @@ public final class TalentAbyssalCorrosion extends TalentPassive {
                          .append(Component.text("Having a high amount of "))
                          .append(Definition.ABYSSAL_CORROSION)
                          .append(Component.text(" puts a toll on your body and soul, while also "))
-                         .append(Component.text("decreasing", Colors.FORMAT_TICK))
+                         .append(Component.text("decreasing", Colors.TICK))
                          .append(Component.text(" the time it takes before "))
                          .append(Definition.ABYSSAL_CURSE)
                          .append(Component.text(" becomes "))
-                         .append(Component.text("unstable", NamedTextColor.DARK_RED))
+                         .append(Component.text("unstable", Colors.DARK_RED))
                          .append(Component.text("."))
         );
     }

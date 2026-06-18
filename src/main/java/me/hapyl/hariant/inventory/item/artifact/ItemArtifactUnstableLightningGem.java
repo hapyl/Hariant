@@ -11,7 +11,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
-import me.hapyl.hariant.talent.ultimate.TalentUltimateResource;
+import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -58,7 +58,7 @@ public final class ItemArtifactUnstableLightningGem extends ItemArtifact {
                              .append(Component.text(" generates "))
                              .append(energyRegeneration)
                              .appendSpace()
-                             .append(TalentUltimateResource.ENERGY)
+                             .append(UltimateResourceType.ENERGY)
                              .append(Component.text("."))
                              .appendNewline()
                              .appendNewline()
@@ -99,9 +99,9 @@ public final class ItemArtifactUnstableLightningGem extends ItemArtifact {
                 return;
             }
             
-            final TalentUltimateResource ultimateResource = player.getHeroInstance().getOrigin().getUltimateTalent().getResource();
+            final UltimateResourceType ultimateResourceType = player.getHeroInstance().getOrigin().getUltimateTalent().getUltimateResourceType();
             
-            if (ultimateResource != TalentUltimateResource.ENERGY) {
+            if (ultimateResourceType != UltimateResourceType.ENERGY) {
                 return;
             }
             

@@ -23,4 +23,12 @@ public class TeamData implements Comparable<TeamData> {
         return Integer.compare(this.kills, that.kills);
     }
     
+    public int getKills() {
+        return kills;
+    }
+    
+    public int getDeaths() {
+        return deaths;
+    }
+    
 }

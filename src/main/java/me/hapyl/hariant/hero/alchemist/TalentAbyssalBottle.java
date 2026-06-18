@@ -1,7 +1,5 @@
 package me.hapyl.hariant.hero.alchemist;
 
-import me.hapyl.eterna.module.component.Keybind;
-import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPattern;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPatternApplier;
@@ -21,7 +19,6 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -57,7 +54,7 @@ public final class TalentAbyssalBottle extends Talent implements MenuHeroTalents
                          .append(Component.text("Shake the "))
                          .append(Component.text("abyssal bottle", Colors.ABYSS))
                          .append(Component.text(" to conjure five potent potions, which will "))
-                         .append(Component.text("replace your talents", NamedTextColor.GRAY, TextDecoration.UNDERLINED))
+                         .append(Component.text("replace your talents", Colors.GRAY, TextDecoration.UNDERLINED))
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()

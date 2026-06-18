@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.RomanNumber;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
@@ -11,12 +12,11 @@ import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.*;
 import me.hapyl.hariant.talent.TalentRegistry;
-import me.hapyl.hariant.talent.ultimate.TalentUltimate;
+import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.weapon.Weapon;
 import me.hapyl.hariant.weapon.WeaponMelee;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -52,7 +52,7 @@ public class HeroAlchemist extends Hero {
         final HeroEquipment equipment = getEquipment();
         equipment.setHeadTexture("661691fb01825b9d9ec1b8f04199443146aa7d5627aa745962c0704b6a236027");
         equipment.setChestPlate(31, 5, 3, TrimPattern.SHAPER, TrimMaterial.COPPER);
-        equipment.setLeggings(102, 55, 38, TrimPattern.SILENCE, TrimMaterial.COPPER);
+        equipment.setBoots(102, 55, 38, TrimPattern.SILENCE, TrimMaterial.COPPER);
         
         setDescription(Component.text("An alchemist who was cursed by the abyss."));
     }
@@ -83,7 +83,7 @@ public class HeroAlchemist extends Hero {
     
     @NotNull
     @Override
-    public TalentUltimate getUltimateTalent() {
+    public TalentAbyssalCurse getUltimateTalent() {
         return TalentRegistry.ABYSSAL_CURSE;
     }
     
@@ -179,8 +179,8 @@ public class HeroAlchemist extends Hero {
                 // Append current potion
                 potionInstance != null
                 ? Component.empty()
-                           .append(Component.text("\uD83E\uDDEA ", NamedTextColor.DARK_PURPLE))
-                           .append(Component.text(Tick.format(potionInstance.currentTick()), NamedTextColor.LIGHT_PURPLE))
+                           .append(Component.text("\uD83E\uDDEA ", Colors.DARK_PURPLE))
+                           .append(Component.text(Tick.format(potionInstance.currentTick()), Colors.LIGHT_PURPLE))
                 : Component.empty(),
                 
                 // Append cauldron
@@ -196,10 +196,11 @@ public class HeroAlchemist extends Hero {
     }
     
     public int getCurseDuration(@NotNull HariantPlayer player, int baseDuration) {
+        final TalentAbyssalCorrosion passiveTalent = this.getPassiveTalent();
         final HeroDataAlchemist heroData = player.getHeroData(this, HeroDataAlchemist::new);
         final double abyssalCorrosion = heroData.getAbyssalCorrosion();
         
-        return (int) (baseDuration * (1 - abyssalCorrosion * this.getPassiveTalent().corrosionDecrementPerTick));
+        return (int) (baseDuration * (1 - (((int) (abyssalCorrosion / passiveTalent.abyssalCurseInstabilityDecrementThreshold.doubleValue())) * passiveTalent.abyssalCurseInstabilityDecrement.doubleValue())));
     }
     
     private static class WeaponAlchemistStick extends WeaponMelee {

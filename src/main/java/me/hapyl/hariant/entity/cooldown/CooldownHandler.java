@@ -7,14 +7,14 @@ import org.jetbrains.annotations.Range;
 
 public interface CooldownHandler {
     
-    void setCooldown(@NotNull Key key, @Range(from = HariantConstants.INDEFINITE_COOLDOWN, to = Integer.MAX_VALUE) int duration);
+    void setCooldown(@NotNull Key key, @Range(from = HariantConstants.INDEFINITE_COOLDOWN, to = Integer.MAX_VALUE) int duration, boolean respectCooldownReduction);
     
     default void setCooldown(@NotNull Cooldown cooldown, @Range(from = HariantConstants.INDEFINITE_COOLDOWN, to = Integer.MAX_VALUE) int duration) {
-        this.setCooldown(cooldown.getCooldownKey(), duration);
+        this.setCooldown(cooldown.getCooldownKey(), duration, true);
     }
     
     default void setCooldown(@NotNull Cooldown cooldown) {
-        this.setCooldown(cooldown.getCooldownKey(), cooldown.getCooldown());
+        this.setCooldown(cooldown.getCooldownKey(), cooldown.getCooldown(), true);
     }
     
     default void setIndefiniteCooldown(@NotNull Cooldown cooldown) {
@@ -22,7 +22,8 @@ public interface CooldownHandler {
     }
     
     default void setIndefiniteCooldown(@NotNull Key key) {
-        this.setCooldown(key, HariantConstants.INDEFINITE_COOLDOWN);
+        // Doesn't matter about the cooldown reduction, so we skip it
+        this.setCooldown(key, HariantConstants.INDEFINITE_COOLDOWN, false);
     }
     
     int getCooldownTimeLeft(@NotNull Key key);

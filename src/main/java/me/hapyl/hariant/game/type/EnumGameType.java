@@ -5,9 +5,12 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.game.WinResult;
 import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.hariant.team.EnumTeam;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public enum EnumGameType implements GameType {
     
@@ -67,5 +70,10 @@ public enum EnumGameType implements GameType {
     @Override
     public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player) {
         gameType.onDeath(gameInstance, player);
+    }
+    
+    @Override
+    public @NotNull List<EnumTeam> getWiningTeamsWhenTimeLimit(@NotNull GameInstance gameInstance) {
+        return gameType.getWiningTeamsWhenTimeLimit(gameInstance);
     }
 }

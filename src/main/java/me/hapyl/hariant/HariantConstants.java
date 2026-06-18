@@ -1,10 +1,14 @@
 package me.hapyl.hariant;
 
+import me.hapyl.eterna.module.component.ComponentStyler;
 import me.hapyl.eterna.module.math.Tick;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 @ApiStatus.NonExtendable
 public interface HariantConstants {
@@ -97,14 +101,14 @@ public interface HariantConstants {
     double ASSIST_DAMAGE_THRESHOLD_PERCENTAGE = 0.3;
     
     /**
-     * Defines the weapon inventory slot.
+     * Defines the default weapon inventory slot.
      */
-    int WEAPON_SLOT = 4;
+    int DEFAULT_WEAPON_SLOT = 4;
     
     /**
      * Defines the absolute minimum health bukkit player may have.
      */
-    double ABSOLUTE_MIN_HEALTH = 0.1;
+    double ABSOLUTE_MIN_HEALTH = 0.5;
     
     /**
      * Defines the absolute maximum health bukkit player may have.
@@ -135,4 +139,79 @@ public interface HariantConstants {
      * Defines the duration, in ticks, how ofter to sync the database with remote.
      */
     int DATABASE_SYNC_PERIOD = Tick.fromMinutes(10);
+    
+    /**
+     * Defines the delay, in ticks, before decay starts to decrement.
+     */
+    int DECAY_DELAY = 30;
+    
+    /**
+     * Defines the minimum health entity under decay can have.
+     */
+    int DECAY_MINIMUM_HEALTH = 1;
+    
+    /**
+     * Defines the default strength of a shield.
+     */
+    double SHIELD_STRENGTH_DEFAULT = 1.0;
+    
+    /**
+     * Defines the minimum strength of a shield.
+     */
+    double SHIELD_STRENGTH_MINIMUM = 0;
+    
+    /**
+     * Defines the maximum strength of a shield.
+     */
+    double SHIELD_STRENGTH_MAXIMUM = 5;
+    
+    /**
+     * Defines the component styler for descriptions.
+     */
+    @NotNull ComponentStyler COMPONENT_STYLER_DESCRIPTION = ComponentStyler.create(Style.style(Colors.GRAY));
+    
+    /**
+     * Defines the component styler for descriptions with padding of one whitespace.
+     */
+    @NotNull ComponentStyler COMPONENT_STYLER_DESCRIPTION_PADDING_1 = createStylerWithPadding(1);
+    
+    /**
+     * Defines the component styler for descriptions with padding of two whitespaces.
+     */
+    @NotNull ComponentStyler COMPONENT_STYLER_DESCRIPTION_PADDING_2 = createStylerWithPadding(2);
+    
+    /**
+     * Defines the component styler for descriptions with padding of three whitespaces.
+     */
+    @NotNull ComponentStyler COMPONENT_STYLER_DESCRIPTION_PADDING_3 = createStylerWithPadding(3);
+    
+    /**
+     * Defines the component styler for flavor text.
+     */
+    @NotNull ComponentStyler COMPONENT_STYLER_FLAVOR_TEXT = ComponentStyler.create(Style.style(Colors.DARK_GRAY, TextDecoration.ITALIC));
+    /**
+     * Defines the duration in seconds for the game start countdown.
+     */
+    @Range(from = 1, to = 10) int GAME_START_COUNTDOWN_IN_SECONDS = 5;
+    /**
+     * Defines the duration in ticks before the game ends.
+     */
+    int GAME_END_DELAY = Tick.fromSeconds(5);
+    /**
+     * Defines the character used for critical damage.
+     */
+    @NotNull Component CHARACTER_CRITICAL_DAMAGE = Component.text("‼");
+    /**
+     * Defines the character used for shielded damage.
+     */
+    @NotNull Component CHARACTER_SHIELDED_DAMAGE = Component.text("🛡");
+    /**
+     * Defines the character used for lethal damage.
+     */
+    @NotNull Component CHARACTER_LETHAL_DAMAGE = Component.text("☠");
+    
+    static @NotNull ComponentStyler createStylerWithPadding(int padding) {
+        return ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(padding).build();
+    }
+    
 }

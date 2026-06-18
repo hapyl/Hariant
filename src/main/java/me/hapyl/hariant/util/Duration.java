@@ -21,7 +21,7 @@ public interface Duration {
     
     @NotNull
     default Component getDurationFormatted() {
-        return DecimalFormat.SECONDS.format(this.getDurationSeconds()).color(Colors.FORMAT_TICK);
+        return DecimalFormat.SECONDS.format(this.getDurationSeconds()).color(Colors.TICK);
     }
     
 }

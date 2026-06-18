@@ -2,10 +2,8 @@ package me.hapyl.hariant.menu.hero;
 
 import me.hapyl.eterna.module.component.ButtonComponents;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
-import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroDirectory;
 import me.hapyl.hariant.hero.HeroInstance;
@@ -23,10 +21,10 @@ public class MenuHeroSelection extends MenuPage<Hero> {
     private final HeroDirectory heroDirectory;
     
     public MenuHeroSelection(@NotNull Player player) {
-        super(player, () -> Component.text("Select Hero"), ChestSize.SIZE_6);
+        super(player, () -> Component.text("Select Hero"));
         
         this.profile = Hariant.getPlayerProfile(player);
-        this.heroDirectory = profile.getDatabase().hero;
+        this.heroDirectory = profile.getDatabase().heroDirectory;
         
         this.setContents(HeroRegistry.getRegistry().values());
         this.openMenu();
@@ -39,12 +37,12 @@ public class MenuHeroSelection extends MenuPage<Hero> {
         
         // If hero instance doesn't exist, means player doesn't have that hero owned
         if (heroInstance == null) {
-            // TODO @Apr 12, 2026 (xanyjl) -> Maybe add preview of the hero
-            return ItemBuilder.playerHead(hero.getEquipment().getHeadTexture())
-                              .setName(Component.text("???", Colors.ERROR))
-                              .addLore()
-                              .addWrappedLore(Component.text("You do not own this hero!", Colors.ERROR))
-                              .addLore();
+            return hero.createBuilder()
+                       .setName(hero.getName().color(Colors.ERROR))
+                       .addLore()
+                       .addWrappedLore(Component.text("You do not own this hero!", Colors.ERROR))
+                       .addLore()
+                       .addLore(ButtonComponents.left("unlock"));
         }
         else {
             final ItemBuilder builder = heroInstance.createBuilder();
@@ -62,19 +60,12 @@ public class MenuHeroSelection extends MenuPage<Hero> {
         final HeroInstance heroInstance = heroDirectory.getHero(hero).orElse(null);
         
         if (heroInstance == null) {
-            HariantLogger.error(player, Component.text("You do not own this hero!"));
+            new MenuHeroUnlock(player, hero);
             return;
         }
         
         if (clickType.isLeftClick()) {
-            if (heroDirectory.getSelectedHero().equals(hero)) {
-                HariantLogger.error(player, Component.text("This hero is already selected!"));
-                return;
-            }
-            
-            heroDirectory.setSelectedHero(heroInstance);
-            HariantLogger.success(player, Component.empty().append(Component.text("Selected ")).append(hero.getName()).append(Component.text("!")));
-            
+            heroDirectory.trySelectHero(player, heroInstance);
             this.openMenu();
         }
         else if (clickType.isRightClick()) {

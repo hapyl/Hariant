@@ -109,17 +109,27 @@ public class HariantInventory extends PlayerDatabaseEntry {
         });
     }
     
+    public boolean hasResource(@NotNull Resource resource, int amount) {
+        return materials.getOrDefault(resource, 0) >= amount;
+    }
+    
     public int getResource(@NotNull Resource resource) {
         return materials.getOrDefault(resource, 0);
     }
     
-    public void addResource(@NotNull Resource resource, final int amount) {
-        // TODO @Feb 15, 2026 (xanyjl) -> Add a check whether the resource can be added
-        
+    public boolean canAddResource(@NotNull Resource resource, int amount) {
+        return getResource(resource) + amount < resource.maxStackSize();
+    }
+    
+    public void addResource(@NotNull Resource resource, int amount) {
         materials.compute(resource, (_resource, _amount) -> {
             // Increment the value and clamp between `0` - `maxStackSize()`
             return Math.clamp((_amount != null ? _amount : 0) + amount, 0, resource.maxStackSize());
         });
+    }
+    
+    public void removeResource(@NotNull Resource resource, int amount) {
+        this.addResource(resource, -amount);
     }
     
     public void createItem(@NotNull ItemInstance newInstance) {

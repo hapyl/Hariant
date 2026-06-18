@@ -4,12 +4,16 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesBase;
 import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
+import me.hapyl.hariant.entity.damage.DamageFlag;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 
-public class DamageComponentCritical implements DamageComponent {
+public final class DamageComponentCritical implements DamageComponent {
+    
+    DamageComponentCritical() {
+    }
     
     @NotNull
     @Override
@@ -19,23 +23,21 @@ public class DamageComponentCritical implements DamageComponent {
     
     @Override
     public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot snapshotEntity, @NotNull AttributesInstanceSnapshot snapshotAttacker) {
-        if (damageInstance.isAlreadyCritical()) {
+        if (damageInstance.isCritical()) {
             return 1.0;
         }
         
-        final double critChance = getCritChance(snapshotAttacker);
+        final double critChance = snapshotAttacker.normalized(AttributeType.CRIT_CHANCE);
+        final boolean forceCritical = damageInstance.getSource().isFlagged(DamageFlag.FORCE_CRITICAL);
+        
         final Random random = Hariant.getRandom();
         
-        if (critChance >= 1.0 || (critChance > 0.0 && random.nextDouble() < critChance)) {
+        if (critChance >= 1.0 || forceCritical || (critChance > 0.0 && random.nextDouble() < critChance)) {
             damageInstance.markCritical();
             return 1 + snapshotAttacker.normalized(AttributeType.CRIT_DAMAGE);
         }
         
         return 1.0;
-    }
-    
-    public double getCritChance(@NotNull AttributesBase attributes) {
-        return attributes.normalized(AttributeType.CRIT_CHANCE);
     }
     
 }

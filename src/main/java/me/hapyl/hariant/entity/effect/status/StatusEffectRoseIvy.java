@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public final class StatusEffectRoseIvy extends StatusEffectImpl implements Listener {
     
@@ -54,7 +55,7 @@ public final class StatusEffectRoseIvy extends StatusEffectImpl implements Liste
                     DamageType.TALENT,
                     ElementType.PHYSICAL,
                     List.of(),
-                    List.of(DamageFlag.CANNOT_KILL),
+                    Set.of(DamageFlag.CANNOT_KILL),
                     damage,
                     TalentRegistry.ROSE_IVY.elementalApplication.doubleValue()
             );

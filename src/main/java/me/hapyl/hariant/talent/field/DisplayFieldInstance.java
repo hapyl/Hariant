@@ -1,8 +1,8 @@
 package me.hapyl.hariant.talent.field;
 
+import me.hapyl.hariant.Colors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 public final class DisplayFieldInstance implements ComponentLike {
@@ -17,9 +17,9 @@ public final class DisplayFieldInstance implements ComponentLike {
         this.fieldValue = fieldValue;
         this.component = Component.empty()
                                   .append(Component.text(" "))
-                                  .append(fieldName.color(NamedTextColor.WHITE))
+                                  .append(fieldName.color(Colors.WHITE))
                                   .append(Component.text(" "))
-                                  .append(fieldValue.color(NamedTextColor.GRAY));
+                                  .append(fieldValue.color(Colors.GRAY));
     }
     
     @NotNull

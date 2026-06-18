@@ -6,6 +6,7 @@ import me.hapyl.eterna.module.block.display.DisplayModel;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.PiHelper;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
@@ -21,16 +22,15 @@ import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantDurationTask;
-import me.hapyl.hariant.term.EnumTerm;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Set;
 
 public final class TalentFlowerEscape extends Talent {
     
@@ -60,23 +60,23 @@ public final class TalentFlowerEscape extends Talent {
         this.setDescription(
                 Component.empty()
                          .append(Component.text("Throw a dealy "))
-                         .append(Component.text("flower", NamedTextColor.LIGHT_PURPLE))
+                         .append(Component.text("flower", Colors.LIGHT_PURPLE))
                          .append(Component.text(" at your current location and dash backwards."))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("The "))
-                         .append(Component.text("flower", NamedTextColor.LIGHT_PURPLE))
+                         .append(Component.text("flower", Colors.LIGHT_PURPLE))
                          .append(Component.text(" continuously pulses, dealing "))
                          .append(ElementType.PHYSICAL.asComponentDamage())
                          .append(Component.text(" in small "))
-                         .append(EnumTerm.AREA_OF_EFFECT)
+                         .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After "))
                          .append(this.getDurationFormatted())
                          .append(Component.text(", the "))
-                         .append(Component.text("flower", NamedTextColor.LIGHT_PURPLE))
+                         .append(Component.text("flower", Colors.LIGHT_PURPLE))
                          .append(Component.text(" explodes violently, dealing greater "))
                          .append(ElementType.PHYSICAL.asComponentDamage())
                          .append(Component.text("."))
@@ -192,7 +192,7 @@ public final class TalentFlowerEscape extends Talent {
                     DamageType.TALENT,
                     ElementType.PHYSICAL,
                     DamageComponent.common(),
-                    List.of(),
+                    Set.of(),
                     isPulse ? flowerPulseDamage.getScaledValue(source) : flowerExplosionDamage.getScaledValue(source),
                     isPulse ? elementalApplicationPulse.doubleValue() : elementalApplicationExplosion.doubleValue()
             );

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.entity.Entities;
 import me.hapyl.eterna.module.player.PlayerLib;
 import me.hapyl.hariant.HariantLogger;
+import me.hapyl.hariant.event.HariantSitEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -21,7 +22,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
 import java.util.Map;
@@ -106,7 +106,12 @@ public final class PlayerSitHandler implements Listener {
         });
     }
     
-    public void sit(@NotNull Player player, @UnknownNullability Block block, @NotNull Bed bed) {
+    public void sit(@NotNull Player player, @NotNull Block block, @NotNull Bed bed) {
+        // Call event
+        if (new HariantSitEvent(player, block).callEvent()) {
+            return;
+        }
+        
         final Location location = block.getLocation();
         final float yaw = blockFaceToInvertYaw(bed.getFacing());
         

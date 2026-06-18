@@ -13,14 +13,16 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class HariantCommandSpawnEntity extends HariantPlayerCommand {
+import java.util.List;
+
+public final class HariantCommandSpawnEntity extends HariantPlayerCommand {
     
     public HariantCommandSpawnEntity(@NotNull String name) {
         super(name, PlayerRank.ADMIN);
     }
     
     @Override
-    protected void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+    public void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
         // entity (entity_type)
         final TypeConverter argument0 = args.get(0);
         final VanillaEntityType<? extends LivingEntity> entityType = VanillaEntityType.byName(argument0.toString());
@@ -35,4 +37,12 @@ public class HariantCommandSpawnEntity extends HariantPlayerCommand {
         HariantLogger.success(player, Component.text("Spawned %s!".formatted(Capitalizable.capitalize(entityType.getName()))));
     }
     
+    @Override
+    public @NotNull List<String> tabComplete(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+        if (args.length == 1) {
+            return VanillaEntityType.listNames();
+        }
+        
+        return List.of();
+    }
 }

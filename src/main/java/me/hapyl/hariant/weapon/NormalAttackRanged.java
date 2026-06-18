@@ -20,6 +20,7 @@ public class NormalAttackRanged extends NormalAttack {
     @Override
     public DamageSource.Builder createDamageSource(@NotNull HariantEntity attacker) {
         return super.createDamageSource(attacker)
+                    // Very important that the damage type is set to RANGED, especially for bows
                     .damageType(DamageType.RANGED);
     }
     

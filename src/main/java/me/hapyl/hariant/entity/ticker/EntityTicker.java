@@ -1,6 +1,5 @@
 package me.hapyl.hariant.entity.ticker;
 
-import me.hapyl.eterna.module.util.Predicates;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageType;
@@ -32,8 +31,8 @@ public class EntityTicker implements Ticking, Resettable {
         this.entity = entity;
         
         this.tickerList = List.of(
-                life = new TickerImpl("life", TickerType.INCREMENT, Predicates.truthy()),
-                invulnerability = new TickerImpl("invulnerability", TickerType.DECREMENT, Predicates.truthy())
+                life = new TickerImpl("life", TickerType.INCREMENT, _ -> true),
+                invulnerability = new TickerImpl("invulnerability", TickerType.DECREMENT, _ -> true)
         );
     }
     

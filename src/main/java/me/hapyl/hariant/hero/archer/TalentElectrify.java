@@ -22,13 +22,13 @@ import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
-import me.hapyl.hariant.talent.ultimate.TalentUltimateResource;
+import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.HariantTask;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.task.executor.Executable;
 import me.hapyl.hariant.task.executor.While;
-import me.hapyl.hariant.term.EnumTerm;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -53,7 +53,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
     private final ProgressBar progressBar = new ProgressBar("⚡", 20, Style.style(Colors.ELEMENT_ELECTRIC));
     
     public TalentElectrify(@NotNull Key key) {
-        super(key, Component.text("Electrify"), Icon.ofMaterial(Material.BLAZE_POWDER), TalentUltimateResource.ENERGY, 100);
+        super(key, Component.text("Electrify"), Icon.ofMaterial(Material.BLAZE_POWDER), UltimateResourceType.ENERGY, 100);
         
         this.setDurationSeconds(10);
         
@@ -71,7 +71,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
                          .append(Component.text("Upon impact, the arrow release the energy that deals "))
                          .append(ElementType.ELECTRIC.asComponentDamage())
                          .append(Component.text(" in large "))
-                         .append(EnumTerm.AREA_OF_EFFECT)
+                         .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text(" over "))
                          .append(this.getDurationFormatted())
                          .append(Component.text("."))

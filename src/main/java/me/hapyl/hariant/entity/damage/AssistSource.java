@@ -4,7 +4,6 @@ import me.hapyl.eterna.module.component.Named;
 import me.hapyl.hariant.entity.HariantEntity;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface AssistSource extends Named {
     

@@ -6,25 +6,29 @@ import me.hapyl.hariant.config.HariantConfig;
 import me.hapyl.hariant.config.HariantConfigImpl;
 import me.hapyl.hariant.database.Database;
 import me.hapyl.hariant.database.DatabaseSyncer;
+import me.hapyl.hariant.entity.EntityGarbageCollector;
 import me.hapyl.hariant.event.HariantEntityMoveEvent;
-import me.hapyl.hariant.handler.EntityHandler;
-import me.hapyl.hariant.handler.PlayerHandler;
-import me.hapyl.hariant.handler.PlayerSitHandler;
-import me.hapyl.hariant.handler.ProjectileHandler;
+import me.hapyl.hariant.game.booster.BoosterHandler;
+import me.hapyl.hariant.handler.*;
 import me.hapyl.hariant.npc.NpcHandler;
+import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.weapon.ability.AbilityHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.World;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
 public final class HariantPlugin extends JavaPlugin {
     
-    public static final String REQUIRED_ETERNA_VERSION = "6.2.3";
+    /**
+     * Defines the minimum EternaAPI version plugin requires, using any versions below that will shut down the server.
+     */
+    public static final String REQUIRED_ETERNA_VERSION = "6.2.14";
     
     private HariantConfig config;
     private Database database;
@@ -52,16 +56,18 @@ public final class HariantPlugin extends JavaPlugin {
         // Load database
         database = new Database(this);
         
+        final BukkitScheduler scheduler = Bukkit.getScheduler();
+        final PluginManager pluginManager = Bukkit.getPluginManager();
+        
         // Schedule database syncer
         databaseSyncer = new DatabaseSyncer();
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, databaseSyncer, HariantConstants.DATABASE_SYNC_PERIOD, HariantConstants.DATABASE_SYNC_PERIOD);
+        scheduler.scheduleSyncRepeatingTask(this, databaseSyncer, HariantConstants.DATABASE_SYNC_PERIOD, HariantConstants.DATABASE_SYNC_PERIOD);
+        pluginManager.registerEvents(databaseSyncer, this);
         
         // Load manager
         Hariant.handler = new Hariant(this);
         
         // Load listeners
-        final PluginManager pluginManager = Bukkit.getPluginManager();
-        
         pluginManager.registerEvents(new PlayerHandler(), this);
         pluginManager.registerEvents(new EntityHandler(), this);
         pluginManager.registerEvents(new ProjectileHandler(), this);
@@ -69,6 +75,9 @@ public final class HariantPlugin extends JavaPlugin {
         pluginManager.registerEvents(new AbilityHandler(), this);
         pluginManager.registerEvents(new NpcHandler(), this);
         pluginManager.registerEvents(new PlayerSitHandler(), this);
+        pluginManager.registerEvents(new EntityGarbageCollector(), this);
+        pluginManager.registerEvents(new ServerHandler(), this);
+        pluginManager.registerEvents(new BoosterHandler(), this);
         
         for (final World world : Bukkit.getWorlds()) {
             setDefaultGamerules(world);
@@ -78,6 +87,9 @@ public final class HariantPlugin extends JavaPlugin {
                 Bukkit.getServer().unloadWorld(world, false);
             }
         }
+        
+        // Remove garbage entities
+        InternalTasks.later(EntityGarbageCollector::clearGarbage, 20);
     }
     
     @NotNull

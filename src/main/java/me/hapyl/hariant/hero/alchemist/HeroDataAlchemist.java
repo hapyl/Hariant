@@ -7,9 +7,9 @@ import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.hero.Definition;
 import me.hapyl.hariant.hero.HeroData;
 import me.hapyl.hariant.talent.TalentRegistry;
+import me.hapyl.hariant.util.Definition;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
@@ -167,7 +167,7 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> {
         this.abyssalCorrosion += abyssalCorrosion;
     }
     
-    public Component getAlchemicalMadnessFormatted() {
+    public @NotNull Component getAlchemicalMadnessFormatted() {
         final Definition definition = Definition.ALCHEMICAL_MADNESS;
         final Style style = definition.getStyle();
         

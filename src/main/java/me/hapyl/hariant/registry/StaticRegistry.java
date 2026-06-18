@@ -7,11 +7,11 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-public class StaticRegistry<K extends Keyed> {
+public class StaticRegistry<K extends Keyed & Registrable> {
     
     private static final String EXPECTED_METHOD_NAME = "getRegistry";
     
-    protected static <K extends Keyed, R extends StaticRegistry<K>> StaticRegistryMap<K> requestRegistry(@NotNull Class<R> clazz) {
+    protected static <K extends Keyed & Registrable, R extends StaticRegistry<K>> StaticRegistryMap<K> requestRegistry(@NotNull Class<R> clazz) {
         // Require `final` modifier
         if (!Modifier.isFinal(clazz.getModifiers())) {
             throw HariantPlugin.severeExceptionShutdownServer(new RuntimeException("Static registry `%s` class must be `final`!".formatted(clazz.getSimpleName())));

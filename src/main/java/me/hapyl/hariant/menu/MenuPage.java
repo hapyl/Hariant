@@ -22,11 +22,13 @@ public abstract class MenuPage<T> extends Menu {
     private static final int NO_CONTENTS_SLOT = 22;
     
     private LinkedList<? extends T> contents;
+    private int currentPage;
     
-    public MenuPage(@NotNull Player player, @NotNull PlayerMenuTitle title, @NotNull ChestSize size) {
-        super(player, title, size);
+    public MenuPage(@NotNull Player player, @NotNull PlayerMenuTitle title) {
+        super(player, title, ChestSize.SIZE_6);
         
         this.contents = Lists.newLinkedList();
+        this.currentPage = 1;
     }
     
     public void setContents(@NotNull List<? extends T> contents) {
@@ -60,6 +62,10 @@ public abstract class MenuPage<T> extends Menu {
             }
             
             slotPatternApplier.apply();
+            
+            // FIXME (xanyjl @ Friday, May 29) -> Cannot switch pages
+            
+            // Set arrows
         }
     }
     

@@ -5,14 +5,21 @@ import me.hapyl.hariant.HariantConstants;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents an interface for ticking objects that tick down.
+ */
 public interface TickDuration {
     
     int currentTick();
     
     int duration();
     
+    default boolean isIndefinite() {
+        return this.duration() == HariantConstants.INDEFINITE_DURATION;
+    }
+    
     default boolean isOver() {
-        return this.duration() != HariantConstants.INDEFINITE_DURATION && this.currentTick() <= 0;
+        return !this.isIndefinite() && this.currentTick() <= 0;
     }
     
     @NotNull

@@ -12,7 +12,7 @@ import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.pytaria.TalentFeelTheBreeze;
-import me.hapyl.hariant.task.HariantTask;
+import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.task.executor.Promise;
 import org.bukkit.Location;
@@ -24,10 +24,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-public class BeeSwarm extends HariantTask {
+public class BeeSwarm extends HariantTickingTask {
     
     private final HariantPlayer player;
     private final TalentFeelTheBreeze talent;
@@ -53,7 +52,7 @@ public class BeeSwarm extends HariantTask {
     }
     
     @Override
-    public void run() {
+    public void run(int tick) {
         // Remove dead bees from the swarm
         this.bees.removeIf(BeePet::isDead);
         
@@ -67,18 +66,26 @@ public class BeeSwarm extends HariantTask {
         final int size = this.bees.size();
         final double spread = Math.PI * 2 / size;
         
-        int index = 0;
+        int beeIndex = 0;
         
         for (final Iterator<BeePet> iterator = this.bees.iterator(); iterator.hasNext(); ) {
+            beeIndex++;
+            
             final BeePet bee = iterator.next();
             final Location location = bee.getLocation();
+            
+            // If the bees can't attack yet, float around the player
+            if (tick < talent.delayBeforeBeesCanTarget.intValue()) {
+                bee.floatAround(player.getMidpointLocation(), spread, beeIndex, tick);
+                continue;
+            }
             
             // If the bee has a target, check whether they're dead and reset target
             if (bee.target != null) {
                 // If target has died or too far away, stop going towards them
                 final double distanceToSquared = bee.distanceToSquared(bee.target);
                 
-                if (bee.target.isDead() || distanceToSquared > talent.maxStrayDistance.doubleValueSquared()) {
+                if (player.canAffect(bee.target) || distanceToSquared > talent.maxStrayDistance.doubleValueSquared()) {
                     bee.target = null;
                 }
             }
@@ -94,7 +101,7 @@ public class BeeSwarm extends HariantTask {
                     bee.target = target;
                     
                     // Play target fx
-                    player.playWorldSound(bee.getLocation(), Sound.ENTITY_BEE_HURT, 1.0f);
+                    player.playWorldSound(bee.getLocation(), Sound.ENTITY_BEE_HURT, 0.25f, 1.0f);
                 }
             }
             
@@ -125,20 +132,7 @@ public class BeeSwarm extends HariantTask {
                 }
                 // Otherwise, fly around the player because they smell nice
                 else {
-                    final double tick = Math.toRadians(player.getTicksAlive());
-                    final double currentSpread = (spread * index);
-                    
-                    final double x = Math.sin(tick * 4 + currentSpread) * 0.7;
-                    final double y = Math.sin(tick * 10 + currentSpread * 3) * 0.1;
-                    final double z = Math.cos(tick * 4 + currentSpread) * 0.7;
-                    
-                    final double randomSpread = 0.05;
-                    
-                    destination.add(x + random.nextSignedDouble(randomSpread), y, z + random.nextSignedDouble(randomSpread));
-                    destination.setYaw((float) Math.toDegrees(Math.atan2(-z, -x)));
-                    
-                    bee.setLocation(destination);
-                    bee.setAngry(false);
+                    bee.floatAround(destination, spread, beeIndex, tick);
                 }
             }
             // If not close enough, fly towards destination
@@ -160,8 +154,6 @@ public class BeeSwarm extends HariantTask {
                 bee.setLocation(location.add(direction));
                 bee.setAngry(bee.target != null);
             }
-            
-            index++;
         }
     }
     
@@ -173,7 +165,7 @@ public class BeeSwarm extends HariantTask {
     
     class BeeSwarmDamageSource extends DamageSourceImpl {
         BeeSwarmDamageSource(@Nullable HariantEntity source, double damage) {
-            super(talent, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponent.common(), List.of(), damage, talent.elementalApplication.doubleValue());
+            super(talent, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponent.common(), Set.of(), damage, talent.elementalApplication.doubleValue());
         }
     }
     

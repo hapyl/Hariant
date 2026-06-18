@@ -22,7 +22,7 @@ import java.util.List;
 public class HeroPytaria extends Hero {
     
     public HeroPytaria(@NotNull Key key) {
-        super(key, Component.text("Pytaria"), Attributes.base(1200, 80, 50), new WeaponAnnihilallium());
+        super(key, Component.text("Pytaria"), Attributes.base(1200, 80, 20), new WeaponAnnihilallium());
         
         final HeroProfile profile = getProfile();
         profile.setArchetype(Archetype.DAMAGE);

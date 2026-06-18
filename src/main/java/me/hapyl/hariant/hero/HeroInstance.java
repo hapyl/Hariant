@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.util.BukkitUtils;
 import me.hapyl.eterna.module.util.Enums;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.database.Instance;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.problem.Problem;
@@ -19,9 +20,7 @@ import me.hapyl.hariant.util.Hoverable;
 import me.hapyl.hariant.util.Timestamp;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bson.Document;
-import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -103,7 +102,7 @@ public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverabl
                                      Function.identity(),
                                      Collectors.collectingAndThen(
                                              Collectors.counting(),
-                                             // There is way this method throws, since it's impossible for an artifact to not have a set
+                                             // There is no way this method throws, since it's impossible for an artifact to not have a set
                                              count -> PieceCount.valueOf(count.intValue())
                                      )
                              ));
@@ -175,11 +174,11 @@ public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverabl
     public HoverEvent<?> createHoverEvent() {
         return HoverEvent.showText(
                 Component.empty()
-                         .append(Component.text("Instance: ", NamedTextColor.DARK_AQUA))
-                         .append(Component.text(this.getClass().getSimpleName(), NamedTextColor.AQUA))
+                         .append(Component.text("Instance: ", Colors.DARK_AQUA))
+                         .append(Component.text(this.getClass().getSimpleName(), Colors.AQUA))
                          .appendNewline()
-                         .append(Component.text("Timestamp: ", NamedTextColor.DARK_AQUA))
-                         .append(timestamp.asComponent().color(NamedTextColor.AQUA))
+                         .append(Component.text("Timestamp: ", Colors.DARK_AQUA))
+                         .append(timestamp.asComponent().color(Colors.AQUA))
         );
     }
     

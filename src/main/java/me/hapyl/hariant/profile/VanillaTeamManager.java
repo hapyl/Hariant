@@ -3,9 +3,8 @@ package me.hapyl.hariant.profile;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.annotate.PartiallyConstructed;
-import me.hapyl.hariant.database.rank.PlayerRank;
+import me.hapyl.hariant.database.rank.FormatRules;
 import me.hapyl.hariant.database.rank.RankFormatter;
 import me.hapyl.hariant.entity.Lifecycle;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.function.Predicate;
 
 public class VanillaTeamManager implements Ticking, Lifecycle {
@@ -100,18 +98,20 @@ public class VanillaTeamManager implements Ticking, Lifecycle {
     
     public static void bumpOtherProfilesToDeleteTeamForMe(@NotNull PlayerProfile profile) {
         Hariant.getPlayerProfiles()
-                .filter(Predicate.not(profile::equals))
-                .forEach(otherProfile -> {
-                    final VanillaTeamManager teamManager = otherProfile.getPlayerUI().getVanillaTeamManager();
-                    
-                    teamManager.getPlayerTeam(profile).unregister();
-                    teamManager.profileStateMap.remove(profile);
-                });
+               .filter(Predicate.not(profile::equals))
+               .forEach(otherProfile -> {
+                   final VanillaTeamManager teamManager = otherProfile.getPlayerUI().getVanillaTeamManager();
+                   
+                   teamManager.getPlayerTeam(profile).unregister();
+                   teamManager.profileStateMap.remove(profile);
+               });
     }
     
     public enum State {
         
         LOBBY {
+            private static final FormatRules FORMAT_RULES = FormatRules.create(true, true, true, false, false);
+            
             @Override
             public void update(@NotNull Team team, @NotNull PlayerProfile profile) {
                 super.update(team, profile);
@@ -125,12 +125,7 @@ public class VanillaTeamManager implements Ticking, Lifecycle {
             
             @Override
             public void tick(@NotNull Team team, @NotNull PlayerProfile profile) {
-                final PlayerRank playerRank = profile.getRank();
-                
-                team.prefix(playerRank.formatter().format(
-                        profile,
-                        RankFormatter.Part.PLAYER_HEAD, RankFormatter.Part.LEVEL, RankFormatter.Part.PREFIX
-                ));
+                team.prefix(profile.getNameFormatted(FORMAT_RULES));
             }
         },
         

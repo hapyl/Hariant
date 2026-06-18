@@ -3,6 +3,7 @@ package me.hapyl.hariant.attribute.modifier;
 import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.registry.Keyed;
 import me.hapyl.eterna.module.util.Streamable;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -44,6 +45,10 @@ public class AttributeModifier
         this.duration = duration;
         this.tick = duration;
         this.entries = Sets.newLinkedHashSet();
+    }
+    
+    public <K extends Keyed & Named> AttributeModifier(@NotNull K k, @NotNull HariantEntity applier, int duration) {
+        this(k.getKey(), k.getName(), applier, duration);
     }
     
     @NotNull

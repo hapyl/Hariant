@@ -6,11 +6,9 @@ import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.hero.*;
-import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.TalentRegistry;
 import me.hapyl.hariant.weapon.WeaponBow;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 
 public class HeroArcher extends Hero {
@@ -38,7 +36,7 @@ public class HeroArcher extends Hero {
         
         setDescription(
                 Component.empty()
-                         .append(Component.text("The best archer and defender of the Kingdom."))
+                         .append(Component.text("The best archer and protector of the Kingdom."))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Legends say he never missed a shot."))
@@ -65,7 +63,7 @@ public class HeroArcher extends Hero {
     
     @NotNull
     @Override
-    public TalentPassive getPassiveTalent() {
+    public TalentHawkeye getPassiveTalent() {
         return TalentRegistry.HAWKEYE;
     }
     

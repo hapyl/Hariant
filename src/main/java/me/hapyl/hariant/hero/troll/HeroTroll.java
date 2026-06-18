@@ -4,7 +4,9 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.NormalAttack;
+import me.hapyl.hariant.entity.damage.KnockbackSource;
 import me.hapyl.hariant.hero.*;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.TalentRegistry;
@@ -14,9 +16,16 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-public class HeroTroll extends Hero {
+public final class HeroTroll extends Hero {
+    
     public HeroTroll(@NotNull Key key) {
-        super(key, Component.text("Troll"), Attributes.base(1000, 100, 100), new WeaponStickonator());
+        super(
+                key,
+                Component.text("Troll"),
+                Attributes.base(1000, 100, 100)
+                          .adjust(AttributeType.LUCK, 20),
+                new WeaponStickonator()
+        );
         
         final HeroProfile profile = getProfile();
         profile.setElementType(ElementType.PHYSICAL);
@@ -28,6 +37,8 @@ public class HeroTroll extends Hero {
         equipment.setChestPlate(255, 204, 84);
         equipment.setLeggings(255, 204, 84);
         equipment.setBoots(255, 204, 84);
+        
+        setDescription(Component.text("Not a good fighter, but definitely a good troll!"));
     }
     
     @Override
@@ -57,7 +68,26 @@ public class HeroTroll extends Hero {
     
     public static class WeaponStickonator extends WeaponMelee {
         WeaponStickonator() {
-            super(Key.ofString("stickonator"), Icon.ofMaterial(Material.STICK), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 56, 10));
+            super(
+                    Key.ofString("stickonator"),
+                    Icon.ofMaterial(Material.STICK),
+                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 56, 10) {
+                        @Override
+                        public @NotNull KnockbackSource createKnockbackCause(@NotNull HariantEntity attacker) {
+                            return KnockbackSource.create(attacker, 0.4);
+                        }
+                    }
+            );
+            
+            setName(Component.text("Stickonator"));
+            
+            setDescription(
+                    Component.empty()
+                             .append(Component.text("- What's brown and sticky?")).appendNewline()
+                             .append(Component.text("- Don't say it...")).appendNewline()
+                             .append(Component.text("- A stick!")).appendNewline()
+                             .append(Component.text("- ..."))
+            );
         }
     }
 }

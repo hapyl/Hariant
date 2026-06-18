@@ -2,13 +2,11 @@ package me.hapyl.hariant.element.anomaly;
 
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
+import me.hapyl.hariant.element.Element;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,25 +15,44 @@ import java.util.Objects;
 @AutoRegisteredListener
 public abstract class ElementalAnomalyImpl implements ElementalAnomaly {
     
-    private static final Style DEFAULT_ANOMALY_STYLE = Style.style(Colors.ATTRIBUTE_ELEMENTAL_MASTERY);
-    
     private final Key key;
+    
+    private final Component prefix;
     private final Component name;
+    private final Style style;
     
     private Component description;
     
-    protected ElementalAnomalyImpl(@NotNull Key key, @NotNull Component name) {
+    public ElementalAnomalyImpl(@NotNull Key key, @NotNull Component prefix, @NotNull Component name, @NotNull Style style) {
         this.key = key;
+        this.prefix = prefix;
         this.name = name;
         this.description = Described.defaultValue();
+        this.style = style;
         
         AutoRegisteredListener.Registry.register(this);
+    }
+    
+    public ElementalAnomalyImpl(@NotNull Key key, @NotNull Component name, @NotNull Element element) {
+        this(key, element.getPrefix(), name, element.getStyle());
     }
     
     @Override
     @NotNull
     public final Key getKey() {
         return key;
+    }
+    
+    @NotNull
+    @Override
+    public Component getPrefix() {
+        return prefix;
+    }
+    
+    @NotNull
+    @Override
+    public Component getPrefixStyled() {
+        return prefix.style(getStyle());
     }
     
     @NotNull
@@ -53,7 +70,12 @@ public abstract class ElementalAnomalyImpl implements ElementalAnomaly {
     @NotNull
     @Override
     public Style getStyle() {
-        return DEFAULT_ANOMALY_STYLE;
+        return style;
+    }
+    
+    @Override
+    public void display(@NotNull Location location) {
+        ComponentDisplay.ofAscend(this.asComponent(), location, 40, 1.0f);
     }
     
     @Override
@@ -79,12 +101,7 @@ public abstract class ElementalAnomalyImpl implements ElementalAnomaly {
     @NotNull
     @Override
     public Component asComponent() {
-        return name.style(this.getStyle());
-    }
-    
-    @Override
-    public void display(@NotNull Location location) {
-        ComponentDisplay.ofAscend(this.asComponent(), location, 40, 1.0f);
+        return prefix.style(style).appendSpace().append(name.style(style));
     }
     
 }

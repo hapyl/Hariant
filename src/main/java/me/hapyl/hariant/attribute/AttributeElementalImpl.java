@@ -1,16 +1,16 @@
 package me.hapyl.hariant.attribute;
 
 import me.hapyl.eterna.module.util.Nulls;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.util.decimal.DecimalFormat;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 public class AttributeElementalImpl extends AttributeImpl {
     
     AttributeElementalImpl(@NotNull ElementType elementType, @NotNull Component name, @NotNull Component description) {
-        super(elementType.getPrefix(), name, description, Nulls.or(elementType.getStyle().color(), () -> NamedTextColor.WHITE), DecimalFormat.PERCENTAGE);
+        super(elementType.getPrefix(), name, description, Nulls.or(elementType.getStyle().color(), () -> Colors.WHITE), DecimalFormat.PERCENTAGE);
     }
     
     @NotNull
@@ -47,7 +47,7 @@ public class AttributeElementalImpl extends AttributeImpl {
         AttributeElementalResistanceImpl(@NotNull ElementType elementType) {
             super(
                     elementType,
-                    elementType.getName().append(Component.text(" Resistance")),
+                    elementType.getName().append(Component.text(" RES")),
                     Component.empty()
                              .append(Component.text("Decreases the damage taken from "))
                              .append(elementType.getName())

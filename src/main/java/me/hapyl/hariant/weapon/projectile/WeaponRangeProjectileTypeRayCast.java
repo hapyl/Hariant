@@ -4,6 +4,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.handler.ProjectileHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -78,6 +79,7 @@ public class WeaponRangeProjectileTypeRayCast extends WeaponRangeProjectileType 
                 
                 // Call `onHitEntity`
                 this.onHitEntity(player, weapon, hitEntity);
+                ProjectileHandler.playHitSound(player);
                 return;
             }
             

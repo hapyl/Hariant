@@ -2,7 +2,6 @@ package me.hapyl.hariant.hero.alchemist;
 
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.util.decimal.Decimal;
-import me.hapyl.hariant.util.decimal.DecimalImpl;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;

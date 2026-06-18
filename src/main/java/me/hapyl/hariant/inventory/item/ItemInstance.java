@@ -1,18 +1,18 @@
 package me.hapyl.hariant.inventory.item;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
-import me.hapyl.hariant.database.serialize.codec.MongoCodecs;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.database.InstanceImpl;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializable;
+import me.hapyl.hariant.database.serialize.codec.MongoCodecs;
 import me.hapyl.hariant.util.Destroyable;
 import me.hapyl.hariant.util.Hoverable;
 import me.hapyl.hariant.util.Timestamp;
 import me.hapyl.hariant.util.UniquelyIdentified;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -79,14 +79,14 @@ public class ItemInstance
     public HoverEvent<?> createHoverEvent() {
         return HoverEvent.showText(
                 Component.empty()
-                         .append(Component.text("UUID: ", NamedTextColor.DARK_AQUA))
-                         .append(Component.text(uuid.toString(), NamedTextColor.AQUA))
+                         .append(Component.text("UUID: ", Colors.DARK_AQUA))
+                         .append(Component.text(uuid.toString(), Colors.AQUA))
                          .appendNewline()
-                         .append(Component.text("Instance: ", NamedTextColor.DARK_AQUA))
-                         .append(Component.text(this.getClass().getSimpleName(), NamedTextColor.AQUA))
+                         .append(Component.text("Instance: ", Colors.DARK_AQUA))
+                         .append(Component.text(this.getClass().getSimpleName(), Colors.AQUA))
                          .appendNewline()
-                         .append(Component.text("Timestamp: ", NamedTextColor.DARK_AQUA))
-                         .append(timestamp.asComponent().color(NamedTextColor.AQUA))
+                         .append(Component.text("Timestamp: ", Colors.DARK_AQUA))
+                         .append(timestamp.asComponent().color(Colors.AQUA))
         );
     }
     

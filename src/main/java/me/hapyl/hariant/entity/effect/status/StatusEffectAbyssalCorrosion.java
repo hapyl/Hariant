@@ -7,8 +7,6 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.EffectType;
-import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.entity.player.HeartStyle;
 import net.kyori.adventure.text.Component;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
@@ -30,17 +28,10 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         
         @Override
         public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
-            if (entity instanceof HariantPlayer player) {
-                player.setHeartStyle(HeartStyle.green());
-            }
+            // Add poison effect to make hearts go green
+            entity.addVanillaEffect(PotionEffectType.POISON, 0, 2);
         }
         
-        @Override
-        public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
-            if (entity instanceof HariantPlayer player) {
-                player.setHeartStyle(null);
-            }
-        }
     }
     
     public static class Level2 extends StatusEffectAbyssalCorrosion {
@@ -60,7 +51,7 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         
         @Override
         public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
-            if (entity.getTicksAlive() % DAMAGE_PERIOD != 0) {
+            if (entity.ticksAlive() % DAMAGE_PERIOD != 0) {
                 return;
             }
             

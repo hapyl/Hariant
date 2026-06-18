@@ -10,7 +10,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantElementalAnomalyEvent;
 import me.hapyl.hariant.team.EnumTeam;
-import me.hapyl.hariant.term.EnumTerm;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -33,7 +33,7 @@ public final class ItemArtifactMagicCodex extends ItemArtifact {
         private final Decimal fourPieceElementalMasteryIncreaseDuration = Decimal.ofSeconds(16);
         
         ArtifactSetTomeOfTheEnlightened(@NotNull Key key) {
-            super(key, Component.text("Tone of the Enlightened"));
+            super(key, Component.text("Tome of the Enlightened"));
             
             setPieceDescription(
                     PieceCount.TWO_PIECE,
@@ -49,7 +49,7 @@ public final class ItemArtifactMagicCodex extends ItemArtifact {
                     PieceCount.FOUR_PIECE,
                     Component.empty()
                              .append(Component.text("Triggering an "))
-                             .append(EnumTerm.ELEMENTAL_ANOMALY)
+                             .append(EnumTerminology.ELEMENTAL_ANOMALY)
                              .append(Component.text(" increases your and your teammates "))
                              .appendNewline()
                              .append(AttributeType.ELEMENTAL_MASTERY)

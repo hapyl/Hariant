@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.archer;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageSource;
@@ -12,11 +13,11 @@ import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
+import me.hapyl.hariant.util.BaseChance;
 import me.hapyl.hariant.util.CommonComponents;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
@@ -37,7 +38,7 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
     @NotNull
     public static final Component HAWKEYE_ARROW = Component.text("Hawkeye Arrow", TextColor.color(0xFFE600));
     
-    @DisplayField private final Decimal homingChance = Decimal.ofPercentage(20);
+    @DisplayField private final BaseChance homingChance = BaseChance.baseChance(20);
     @DisplayField private final Decimal homingRadius = Decimal.ofValue(6);
     @DisplayField private final Decimal homingSmoothingFactor = Decimal.ofPercentage(70);
     
@@ -47,7 +48,7 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
         this.setDescription(
                 Component.empty()
                          .append(Component.text("Fully charged shots while "))
-                         .append(Component.text("sneaking", NamedTextColor.WHITE, TextDecoration.UNDERLINED))
+                         .append(Component.text("sneaking", Colors.WHITE, TextDecoration.UNDERLINED))
                          .append(Component.text(" have "))
                          .append(homingChance)
                          .append(Component.text(" chance to become a "))
@@ -76,7 +77,7 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
             return;
         }
         
-        if (!player.getRandom().chance(homingChance)) {
+        if (!homingChance.chance(player)) {
             return;
         }
         

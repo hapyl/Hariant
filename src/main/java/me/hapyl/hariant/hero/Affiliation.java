@@ -96,6 +96,12 @@ public enum Affiliation implements Prefixed, Named, Described, Styled, Component
     
     @NotNull
     @Override
+    public Component getPrefixStyled() {
+        return prefix.style(style);
+    }
+    
+    @NotNull
+    @Override
     public Component getName() {
         return name;
     }

@@ -13,6 +13,7 @@ import me.hapyl.eterna.module.npc.appearance.AppearanceBuilder;
 import me.hapyl.eterna.module.player.dialog.entry.DialogEntry;
 import me.hapyl.eterna.module.reflect.Skin;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.dialog.HariantDialog;
@@ -20,7 +21,6 @@ import me.hapyl.hariant.inventory.item.ItemRegistry;
 import me.hapyl.hariant.inventory.item.artifact.ItemArtifact;
 import me.hapyl.hariant.menu.Menu;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ public class HariantNpcMrNerd extends HariantNpc {
         super(
                 key,
                 LocationHelper.defaultLocation(4.5, 63.0, 6.5),
-                Component.text("Mr. Nerd", NamedTextColor.GOLD),
+                Component.text("Mr. Nerd", Colors.GOLD),
                 AppearanceBuilder.ofMannequin(
                         Skin.of(
                                 "ewogICJ0aW1lc3RhbXAiIDogMTc1MTg5NDIzNTM3NCwKICAicHJvZmlsZUlkIiA6ICI0NmNhODkyZTY4ODA0YThmYjFkYzkwYjg0ZTY5ZjVmZSIsCiAgInByb2ZpbGVOYW1lIiA6ICJPbG8xNjA2IiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzdlZmU0YmMzNDU5NmRhNzAzMDU0ZjZiODJlZTU4ODk1ZjlhMDVmODRlODEwYmFhNmRmMjQ1NDliZmM0ZWMyZjIiLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfQogIH0KfQ==",
@@ -75,7 +75,7 @@ public class HariantNpcMrNerd extends HariantNpc {
                             Component.text("I posses the best kind of power - knowledge!"),
                             Component.empty()
                                      .append(Component.text("I can use the power of knowledge to create "))
-                                     .append(Component.text("Artifacts", NamedTextColor.GOLD))
+                                     .append(Component.text("Artifacts", Colors.GOLD))
                                      .append(Component.text("!")),
                             Component.text("And since I'm so smart, so handsome, and so successful, I will do that for free!"),
                             Component.text("Talk to me again to open the Artifact Creating Menu!")
@@ -103,7 +103,7 @@ public class HariantNpcMrNerd extends HariantNpc {
                             final ItemBuilder builder = item.createBuilder();
                             
                             builder.addLore();
-                            builder.addLore(Component.text("                                            ", NamedTextColor.DARK_GRAY, TextDecoration.STRIKETHROUGH));
+                            builder.addLore(Component.text("                                            ", Colors.DARK_GRAY, TextDecoration.STRIKETHROUGH));
                             builder.addLore();
                             builder.addLore(ButtonComponents.left("create one artifact"));
                             builder.addLore(ButtonComponents.right("create four artifacts"));
@@ -124,7 +124,7 @@ public class HariantNpcMrNerd extends HariantNpc {
             final PlayerDatabase database = Hariant.getPlayerDatabase(player);
             
             for (int i = 0; i < amount; i++) {
-                artifact.newInstance(database, UUID.randomUUID());
+                database.inventory.createItem(artifact.newInstance(database, UUID.randomUUID()));
             }
             
             dialogCreating.startForcefully(player);
@@ -139,8 +139,8 @@ public class HariantNpcMrNerd extends HariantNpc {
             addEntry(
                     DialogEntry.ofNpc(
                             HariantNpcMrNerd.this,
-                            Component.text("ᔑリ↸ ℸ ̣ ⍑⚍ᓭ ╎ ⚍ᓭᒷ ℸ ̣ ⍑ᒷ !¡\uD835\uDE79∴ᒷ∷ \uD835\uDE79⎓ ꖌリ\uD835\uDE79∴ꖎᒷ↸⊣ᒷ", NamedTextColor.LIGHT_PURPLE),
-                            Component.text("ℸ ̣ \uD835\uDE79 ᓵ∷ᒷᔑℸ ̣ ᒷ ∴⍑ᔑℸ ̣  ||\uD835\uDE79⚍ ↸ᒷᓭ╎∷ᒷ!", NamedTextColor.LIGHT_PURPLE),
+                            Component.text("ᔑリ↸ ℸ ̣ ⍑⚍ᓭ ╎ ⚍ᓭᒷ ℸ ̣ ⍑ᒷ !¡\uD835\uDE79∴ᒷ∷ \uD835\uDE79⎓ ꖌリ\uD835\uDE79∴ꖎᒷ↸⊣ᒷ", Colors.LIGHT_PURPLE),
+                            Component.text("ℸ ̣ \uD835\uDE79 ᓵ∷ᒷᔑℸ ̣ ᒷ ∴⍑ᔑℸ ̣  ||\uD835\uDE79⚍ ↸ᒷᓭ╎∷ᒷ!", Colors.LIGHT_PURPLE),
                             Component.text("Done, enjoy!")
                     )
             );

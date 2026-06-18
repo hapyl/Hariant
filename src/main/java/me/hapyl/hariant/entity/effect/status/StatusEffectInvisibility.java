@@ -4,9 +4,10 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.StreamRules;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.event.HariantAttackEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
@@ -28,17 +29,15 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
     }
     
     @EventHandler
-    public void handleHariantDamageEvent(HariantDamageEvent ev) {
+    public void handleHariantDamageEvent(HariantAttackEvent ev) {
         final HariantEntity attacker = ev.getAttacker();
         
-        if (attacker == null) {
-            return;
-        }
-        
+        // Check if the ATTACKER has invisibility
         if (!attacker.hasEffect(EnumStatusEffect.INVISIBILITY)) {
             return;
         }
         
+        // Actually remove the effect
         attacker.removeEffect(EnumStatusEffect.INVISIBILITY);
         
         // Notify that they lost invisibility
@@ -50,17 +49,13 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
     
     @Override
     public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
-        entity.hide();
+        entity.hide(StreamRules.NOT_TEAMMATES);
         entity.addVanillaEffect(PotionEffectType.INVISIBILITY, 1, HariantConstants.INDEFINITE_DURATION);
-        
-        if (entity instanceof HariantPlayer player) {
-            // TODO @Mar 02, 2026 (xanyjl) -> Lose aggro if the entity is player
-        }
     }
     
     @Override
     public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
-        entity.show();
+        entity.show(StreamRules.ALL);
         entity.removeVanillaEffect(PotionEffectType.INVISIBILITY);
     }
 }

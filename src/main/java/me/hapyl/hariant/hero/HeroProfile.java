@@ -11,6 +11,7 @@ public final class HeroProfile {
     @NotNull private ElementType elementType;
     @NotNull private Affiliation affiliation;
     @NotNull private Gender gender;
+    @NotNull private Race race;
     
     HeroProfile(@NotNull Hero hero) {
         this.hero = hero;
@@ -18,6 +19,7 @@ public final class HeroProfile {
         this.elementType = ElementType.PHYSICAL;
         this.affiliation = Affiliation.NONE;
         this.gender = Gender.OTHER;
+        this.race = Race.HUMAN;
     }
     
     @NotNull
@@ -59,5 +61,14 @@ public final class HeroProfile {
     
     public void setGender(@NotNull Gender gender) {
         this.gender = gender;
+    }
+    
+    @NotNull
+    public Race getRace() {
+        return race;
+    }
+    
+    public void setRace(@NotNull Race race) {
+        this.race = race;
     }
 }

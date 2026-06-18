@@ -1,11 +1,11 @@
 package me.hapyl.hariant.talent.target;
 
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
@@ -49,7 +49,7 @@ public final class TalentTargetEntityRayCast implements TalentTarget {
                                               .orElse(null);
             
             if (entity != null) {
-                return TalentContext.of(entity);
+                return TalentContext.create(entity);
             }
             
             location.subtract(x, y, z);
@@ -61,7 +61,7 @@ public final class TalentTargetEntityRayCast implements TalentTarget {
     @NotNull
     @Override
     public Component errorMessage() {
-        return Component.text("No valid target!", NamedTextColor.RED);
+        return Component.text("No valid target!", Colors.RED);
     }
     
 }

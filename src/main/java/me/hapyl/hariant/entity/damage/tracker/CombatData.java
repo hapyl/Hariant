@@ -5,7 +5,6 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Streamable;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.AssistSource;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathComponent;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;

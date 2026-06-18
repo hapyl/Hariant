@@ -1,9 +1,10 @@
 package me.hapyl.hariant.hero.archer;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
-import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -13,11 +14,10 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.hero.pytaria.HeroDataPytaria;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.field.DisplayField;
-import me.hapyl.hariant.term.EnumTerm;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -30,10 +30,10 @@ public final class TalentExcellency extends TalentPassive implements Listener {
     @DisplayField private final Decimal attackIncrease = Decimal.ofPercentage(25);
     
     @DisplayField private final Decimal allTypeResistanceThreshold = Decimal.ofPercentage(50);
-    @DisplayField private final Decimal allTypeResistanceIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 20);
+    @DisplayField private final Decimal allTypeResistanceIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 10);
     
     @DisplayField private final Decimal allTypeDamageThreshold = Decimal.ofPercentage(25);
-    @DisplayField private final Decimal allTypeDamageIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 40);
+    @DisplayField private final Decimal allTypeDamageIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 20);
     
     private final Key modifierKey = Key.ofString("excellency");
     
@@ -43,26 +43,26 @@ public final class TalentExcellency extends TalentPassive implements Listener {
         this.setDescription(
                 Component.empty()
                          .append(Component.text("Whenever "))
-                         .append(Component.text("Pytaria", NamedTextColor.LIGHT_PURPLE))
+                         .append(Component.text("Pytaria", Colors.LIGHT_PURPLE))
                          .append(Component.text("'s health falls below certain thresholds, she gains a buff:"))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("%.0f%% of less:".formatted(attackIncreaseThreshold.getValue()), NamedTextColor.YELLOW))
+                         .append(Component.text("%.0f%% of less:".formatted(attackIncreaseThreshold.value()), Colors.YELLOW))
                          .appendNewline()
                          .append(Component.text("  Increases ").append(AttributeType.ATTACK).append(Component.text(" by ")).append(attackIncrease).append(Component.text(".")))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("%.0f%% of less:".formatted(allTypeResistanceThreshold.getValue()), NamedTextColor.GOLD))
+                         .append(Component.text("%.0f%% of less:".formatted(allTypeResistanceThreshold.value()), Colors.GOLD))
                          .appendNewline()
-                         .append(Component.text("  Increases ").append(EnumTerm.ALL_TYPE_RESISTANCE).append(Component.text(" by ")).append(allTypeResistanceIncrease).append(Component.text(".")))
-                         .appendNewline()
-                         .appendNewline()
-                         .append(Component.text("%.0f%% of less:".formatted(allTypeDamageThreshold.getValue()), NamedTextColor.RED))
-                         .appendNewline()
-                         .append(Component.text("  Increases ").append(EnumTerm.ALL_TYPE_DAMAGE).append(Component.text(" by ")).append(allTypeDamageIncrease).append(Component.text(".")))
+                         .append(Component.text("  Increases ").append(EnumTerminology.ALL_TYPE_RESISTANCE).append(Component.text(" by ")).append(allTypeResistanceIncrease).append(Component.text(".")))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("Each buff lasts as long as your health is at or below its threshold.", NamedTextColor.DARK_GRAY))
+                         .append(Component.text("%.0f%% of less:".formatted(allTypeDamageThreshold.value()), Colors.RED))
+                         .appendNewline()
+                         .append(Component.text("  Increases ").append(EnumTerminology.ALL_TYPE_DAMAGE).append(Component.text(" by ")).append(allTypeDamageIncrease).append(Component.text(".")))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("Each buff lasts as long as your health is at or below its threshold.", Colors.DARK_GRAY))
         );
     }
     

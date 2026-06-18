@@ -3,20 +3,18 @@ package me.hapyl.hariant;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.math.Tick;
-import me.hapyl.eterna.module.player.dialog.DialogEndType;
-import me.hapyl.eterna.module.reflect.glowing.Glowing;
-import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.hariant.annotate.Singleton;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseView;
 import me.hapyl.hariant.entity.EntitySpawner;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.Lifecycle;
+import me.hapyl.hariant.entity.StreamRules;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.*;
-import me.hapyl.hariant.game.battleground.Battleground;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
 import me.hapyl.hariant.game.type.EnumGameType;
+import me.hapyl.hariant.game.type.GameType;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.profile.PlayerProfile;
@@ -28,11 +26,12 @@ import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.util.BooleanExplained;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -53,11 +52,8 @@ import java.util.stream.Stream;
  */
 public final class Hariant implements Runnable, Lifecycle {
     
-    public static final Component GAME_NAME = Component.text("Hariant", Colors.BRAND_COLOR)
-                                                       .appendSpace()
-                                                       .append(Component.text("TEST VERSION", NamedTextColor.RED, TextDecoration.BOLD));
-    
-    private static final int GAME_END_DELAY = Tick.fromSeconds(5);
+    public static final Component GAME_NAME = Component.text("ʜᴀʀɪᴀɴᴛ", Colors.BRAND_COLOR, TextDecoration.BOLD);
+    public static final Component UPDATE_TOPIC = Component.text("Nothing much!", Colors.SUCCESS);
     
     @Singleton static HariantPlugin plugin;
     @Singleton static Hariant handler;
@@ -71,6 +67,7 @@ public final class Hariant implements Runnable, Lifecycle {
     @NotNull private EnumGameType selectedGameType;
     
     private GameInstance currentGameInstance;
+    private GameInstanceCountdown countdown;
     
     Hariant(@NotNull HariantPlugin plugin) {
         this.profiles = Maps.newHashMap();
@@ -104,7 +101,10 @@ public final class Hariant implements Runnable, Lifecycle {
             // We check for tick == 0 instead of <= 0 to not spam the method, even though it validates
             // and does not allow duplicate end of the current game instance
             if (currentGameInstance.getTimeLeft() == 0) {
-                endCurrentGameInstance(WinResult.create(WinType.TIME_LIMIT, List.of()));
+                final GameType gameType = currentGameInstance.getType();
+                final List<EnumTeam> winningTeams = gameType.getWiningTeamsWhenTimeLimit(currentGameInstance);
+                
+                endCurrentGameInstance(WinResult.create(WinType.TIME_LIMIT, winningTeams));
             }
         }
     }
@@ -132,60 +132,42 @@ public final class Hariant implements Runnable, Lifecycle {
         
         // Call team update
         handler.profiles.values().forEach(profile -> {
-            final Player bukkitPlayer = profile.getPlayer();
-            final HariantPlayer player = recreatePlayer(bukkitPlayer, profile.getSelectedHeroInstance());
+            recreatePlayer(profile.getPlayer(), profile.getSelectedHeroInstance());
             
             profile.handleInstanceCreated(handler.currentGameInstance);
-            
-            // Cancel dialog
-            profile.getCurrentDialog().ifPresent(dialogInstance -> {
-                dialogInstance.cancel(DialogEndType.COMPLETED);
-            });
-            
-            // TODO @Feb 24, 2026 (xanyjl) -> Cancel parkour
-            
-            // Teleport to the map
-            final Battleground battleground = handler.currentGameInstance.getBattleground();
-            
-            player.teleport(battleground.getRandomSpawnLocation());
-            
-            // Set glowing for teammates
-            profile.getTeam().getPlayerProfiles().filter(Predicate.not(profile::equals)).forEach(teammate -> {
-                Glowing.setGlowing(profile.getPlayer(), teammate.getPlayer(), PacketTeamColor.GREEN, Glowing.INFINITE_DURATION);
-            });
         });
         
         final int timeBeforePlayerReveal = handler.currentGameInstance.getBattleground().getTimeBeforePlayerReveal();
         
         // Hide all players
         getPlayers().forEach(player -> {
-            player.hide();
+            player.hide(StreamRules.NOT_TEAMMATES);
             
-            player.sendMessage(Component.text("PLAYERS HAVE BEEN HIDDEN!", NamedTextColor.GOLD, TextDecoration.BOLD));
+            player.sendMessage(Component.text("PLAYERS HAVE BEEN HIDDEN!", Colors.GOLD, TextDecoration.BOLD));
             player.sendMessage(
                     Component.empty()
-                             .append(Component.text(" They have ", NamedTextColor.YELLOW))
-                             .append(Component.text(Tick.round(timeBeforePlayerReveal), NamedTextColor.RED))
-                             .append(Component.text(" to spread before being revealed!", NamedTextColor.YELLOW))
+                             .append(Component.text(" They have ", Colors.YELLOW))
+                             .append(Component.text(Tick.round(timeBeforePlayerReveal), Colors.RED))
+                             .append(Component.text(" to spread before being revealed!", Colors.YELLOW))
             );
         });
         
         // Show all players after a delay
         InternalTasks.later(() -> {
             getPlayers().forEach(player -> {
-                player.show();
-                player.strikeLightning();
+                player.show(StreamRules.ALL);
+                player.strikeLightningEffect();
                 
-                player.sendMessage(Component.text("PLAYERS HAVE BEEN REVEALED!", NamedTextColor.GOLD, TextDecoration.BOLD));
-                player.sendMessage(Component.text(" Fight to death!", NamedTextColor.RED));
+                player.sendMessage(Component.text("PLAYERS HAVE BEEN REVEALED!", Colors.GOLD, TextDecoration.BOLD));
+                player.sendMessage(Component.text(" Fight to death!", Colors.RED));
             });
             
-            handler.currentGameInstance.setState(GameInstanceState.ACTIVE);
+            handler.currentGameInstance.setState(GameInstanceState.IN_PROGRESS);
         }, timeBeforePlayerReveal);
     }
     
     public static void endCurrentGameInstance(@NotNull WinResult result) {
-        if (handler.currentGameInstance == null || handler.currentGameInstance.getState() != GameInstanceState.ACTIVE) {
+        if (handler.currentGameInstance == null || handler.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS) {
             return;
         }
         
@@ -203,8 +185,10 @@ public final class Hariant implements Runnable, Lifecycle {
                 player.setGameMode(GameMode.SPECTATOR);
             }
             
+            // TODO (xanyjl @ Tuesday, June 9) -> Better
+            
             // Display result
-            player.sendMessage(Component.text("GAME OVER", NamedTextColor.GOLD, TextDecoration.BOLD));
+            player.sendMessage(Component.text("GAME OVER", Colors.GOLD, TextDecoration.BOLD));
             player.sendMessage(Component.text("Win type %s".formatted(result.getWinType())));
             player.sendMessage(Component.text("Winners: %s".formatted(result.getWinningTeams())));
         });
@@ -215,15 +199,11 @@ public final class Hariant implements Runnable, Lifecycle {
             
             @Override
             public void run() {
-                if (tick++ > GAME_END_DELAY) {
-                    // Destroy players
-                    getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(handler.currentGameInstance));
-                    
-                    // Sync the database
-                    plugin.getDatabaseSyncer().handlerInstanceDestroyed(handler.currentGameInstance);
-                    
+                if (tick++ > HariantConstants.GAME_END_DELAY) {
                     handler.currentGameInstance.setState(GameInstanceState.FINISHED);
-                    handler.currentGameInstance = null;
+                    
+                    // Destroy players AFTER setting the state
+                    getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(handler.currentGameInstance));
                     
                     // Cleanup tasks
                     HariantTask.cancelAllTasks();
@@ -232,13 +212,16 @@ public final class Hariant implements Runnable, Lifecycle {
                     clearEntities();
                     
                     this.cancel();
+                    handler.currentGameInstance = null; // Nullate instance at the very end
                     return;
                 }
+                
+                // TODO (xanyjl @ Tuesday, June 9) -> Trigger win cosmetics
                 
                 // Fx
                 players.forEach(player -> {
                     player.sendSubtitle(
-                            Component.text("game ends in %s".formatted(GAME_END_DELAY - tick), TextColor.color(0xA1DE9D)),
+                            Component.text("game ends in %s".formatted(HariantConstants.GAME_END_DELAY - tick), TextColor.color(0xA1DE9D)),
                             0, 10, 0
                     );
                 });
@@ -247,7 +230,7 @@ public final class Hariant implements Runnable, Lifecycle {
     }
     
     public static boolean endCurrentGameInstanceIfWinConditionMet() {
-        if (handler.currentGameInstance == null || handler.currentGameInstance.getState() != GameInstanceState.ACTIVE) {
+        if (handler.currentGameInstance == null || handler.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS) {
             return false;
         }
         
@@ -264,11 +247,11 @@ public final class Hariant implements Runnable, Lifecycle {
     @NotNull
     public static BooleanExplained canStartNewGameInstance() {
         if (handler.currentGameInstance != null) {
-            return BooleanExplained.ofFalse(Component.text("A game is already in progress!"));
+            return BooleanExplained.ofFalse(Component.text("A game is already in progress!", Colors.RED));
         }
         
         if (!handler.selectedBattleground.isSelectable() || handler.selectedBattleground.getSpawnLocations().isEmpty()) {
-            return BooleanExplained.ofFalse(Component.text("Selected battleground is invalid!"));
+            return BooleanExplained.ofFalse(Component.text("Selected battleground is invalid!", Colors.RED));
         }
         
         // TODO @Feb 14, 2026 (xanyjl) -> Add tutorial check
@@ -281,7 +264,7 @@ public final class Hariant implements Runnable, Lifecycle {
         if (populatedTeamsSize < minimumTeamsRequired) {
             return BooleanExplained.ofFalse(
                     Component.empty()
-                             .append(Component.text("Not enough teams to start! "))
+                             .append(Component.text("Not enough teams to start! ", Colors.RED))
                              .append(Components.makeComponentFractional(populatedTeamsSize, minimumTeamsRequired))
             );
         }
@@ -560,7 +543,7 @@ public final class Hariant implements Runnable, Lifecycle {
     }
     
     public static boolean isGameInProgressButNotActive() {
-        return handler.currentGameInstance != null && handler.currentGameInstance.getState() != GameInstanceState.ACTIVE;
+        return handler.currentGameInstance != null && handler.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS;
     }
     
     @NotNull
@@ -576,8 +559,92 @@ public final class Hariant implements Runnable, Lifecycle {
         Bukkit.getOnlinePlayers().forEach(player -> player.showEntity(plugin, entity));
     }
     
+    public static void hideBukkitEntity(@NotNull Player player, @NotNull Entity entity) {
+        player.hideEntity(plugin, entity);
+    }
+    
+    public static void showBukkitEntity(@NotNull Player player, @NotNull Entity entity) {
+        player.showEntity(plugin, entity);
+    }
+    
     public static int getPlayerProfileCount() {
         return handler.profiles.size();
+    }
+    
+    public static void globalBlockChange(@NotNull Location location, @NotNull BlockData blockData) {
+        Bukkit.getOnlinePlayers().forEach(player -> player.sendBlockChange(location, blockData));
+    }
+    
+    public static void globalBlockChange(@NotNull Location location) {
+        globalBlockChange(location, location.getBlock().getBlockData());
+    }
+    
+    public static boolean entityExists(@NotNull UUID uniqueId) {
+        return handler.entityMap.containsKey(uniqueId);
+    }
+    
+    public static void onPlayerReady(@NotNull PlayerProfile playerProfile) {
+        // If there is a countdown already, cancel it
+        if (handler.countdown != null) {
+            cancelCountdown(playerProfile);
+            return;
+        }
+        
+        // Check whether all players are ready
+        final Collection<? extends PlayerProfile> nonSpectatorProfiles = handler.profiles.values()
+                                                                                         .stream()
+                                                                                         .filter(Predicate.not(PlayerProfile::isSpectator))
+                                                                                         .toList();
+        
+        final int expectedReadyPlayers = nonSpectatorProfiles.size();
+        final int currentlyReadyPlayers = (int) nonSpectatorProfiles
+                .stream()
+                .filter(PlayerProfile::isReady)
+                .count();
+        
+        // If everyone who isn't a spectator is ready, attempt to start the game
+        if (currentlyReadyPlayers == expectedReadyPlayers) {
+            // Check whether the game can be started
+            final BooleanExplained booleanExplained = canStartNewGameInstance();
+            
+            if (!booleanExplained.booleanValue()) {
+                // Unready the player who was the last to press ready
+                playerProfile.setReady0(false, false);
+                
+                HariantLogger.PREFIX_ERROR.broadcastMessage(
+                        Component.empty()
+                                 .append(Component.text("Failed to start the game!", Colors.ERROR))
+                                 .appendSpace()
+                                 .append(booleanExplained.explain())
+                );
+                return;
+            }
+            
+            // Otherwise start the countdown
+            startCountdown();
+        }
+    }
+    
+    public static void startCountdown() {
+        if (handler.countdown != null) {
+            handler.countdown.cancel();
+        }
+        
+        handler.countdown = new GameInstanceCountdown();
+    }
+    
+    public static void cancelCountdown(@Nullable PlayerProfile canceller) {
+        if (handler.countdown == null) {
+            return;
+        }
+        
+        handler.countdown.cancel(canceller);
+        handler.countdown = null;
+    }
+    
+    @NotNull
+    public static String getVersion() {
+        return plugin.getPluginMeta().getVersion().replace("-SNAPSHOT", "");
     }
     
     private static void clearEntities() {

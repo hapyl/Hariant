@@ -7,10 +7,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class LobbyItemHeroSelector extends LobbyItemImpl {
+public final class LobbyItemHeroSelector extends LobbyItemImpl {
     
-    LobbyItemHeroSelector(@NotNull Key key) {
-        super(key, Material.TOTEM_OF_UNDYING, Component.text("Hero Selector"), Component.text("Select, preview or unlocks heroes."));
+    LobbyItemHeroSelector() {
+        super(1, Key.ofString("hero_selector"), Material.TOTEM_OF_UNDYING, Component.text("Hero Selector"), Component.text("Select, preview or unlocks heroes."));
     }
     
     @Override

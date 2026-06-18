@@ -16,8 +16,8 @@ public class NormalAttack extends AttributeScaling implements DamageSourceCreato
     
     private static final DamageSourceIdentity DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(Key.ofString("normal_attack"), Component.text("Normal Attack"), DeathMessage.DEFAULT);
     
-    private final ElementType elementType;
-    private final int attackCooldown;
+    protected final ElementType elementType;
+    protected final int attackCooldown;
     
     public NormalAttack(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, int attackCooldown) {
         super(attributeType, attributeScaling);

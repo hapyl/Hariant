@@ -8,6 +8,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public abstract class HariantCommand extends SimpleCommand {
     
     private final PlayerRank rank;
@@ -18,10 +20,15 @@ public abstract class HariantCommand extends SimpleCommand {
         this.rank = rank;
     }
     
-    protected abstract void execute(@NotNull CommandSender sender, @NotNull ArgumentList args, @NotNull PlayerRank playerRank);
+    public abstract void execute(@NotNull CommandSender sender, @NotNull ArgumentList args, @NotNull PlayerRank playerRank);
+    
+    @NotNull
+    public List<String> tabComplete(@NotNull CommandSender sender, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+        return List.of();
+    }
     
     @Override
-    protected final void execute(@NotNull CommandSender sender, @NotNull ArgumentList args) {
+    public final void execute(@NotNull CommandSender sender, @NotNull ArgumentList args) {
         final PlayerRank playerRank = PlayerRank.getRank(sender);
         
         if (!playerRank.isOrHigher(rank)) {
@@ -31,4 +38,17 @@ public abstract class HariantCommand extends SimpleCommand {
         
         this.execute(sender, args, playerRank);
     }
+    
+    @NotNull
+    @Override
+    public final List<String> tabComplete(@NotNull CommandSender sender, @NotNull ArgumentList args) {
+        final PlayerRank playerRank = PlayerRank.getRank(sender);
+        
+        if (!playerRank.isOrHigher(rank)) {
+            return List.of();
+        }
+        
+        return this.tabComplete(sender, args, playerRank);
+    }
+    
 }

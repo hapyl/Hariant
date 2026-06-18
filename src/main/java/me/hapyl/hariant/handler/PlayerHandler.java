@@ -2,36 +2,42 @@ package me.hapyl.hariant.handler;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.hapyl.eterna.module.inventory.menu.PlayerMenu;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.database.rank.RankFormatter;
+import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.damage.DamageInstance;
+import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.frozen.FrozenHandler;
+import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.HariantMonitorDamageEvent;
+import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.message.EnumMessageChannel;
-import me.hapyl.hariant.profile.message.MessageChannel;
+import me.hapyl.hariant.profile.setting.Settings;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import org.bukkit.GameMode;
 import org.bukkit.Input;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
@@ -41,57 +47,78 @@ public final class PlayerHandler implements Listener {
     public void handlePlayerJoinEvent(PlayerJoinEvent ev) {
         final Player player = ev.getPlayer();
         final PlayerProfile profile = Hariant.createProfile(player);
-        
         final PlayerRank playerRank = profile.getRank();
         final RankFormatter rankFormatter = playerRank.formatter();
+        
         final boolean displayJoinMessages = rankFormatter.displayJoinMessages();
         
         ev.joinMessage(
                 displayJoinMessages
                 ? Component.empty()
-                           .append(Component.text("[", NamedTextColor.DARK_GRAY))
-                           .append(Component.text("+", NamedTextColor.GREEN))
-                           .append(Component.text("]", NamedTextColor.DARK_GRAY))
+                           .append(Component.text("[", Colors.DARK_GRAY))
+                           .append(Component.text("+", Colors.GREEN))
+                           .append(Component.text("]", Colors.DARK_GRAY))
                            .appendSpace()
-                           .append(rankFormatter.format(profile))
+                           .append(profile.getNameFormatted())
                 : null
         );
         
         // Display staff join messages
         if (playerRank.isStaff()) {
-            // TODO @Feb 25, 2026 (xanyjl) ->
+            EnumMessageChannel.STAFF.message(
+                    Component.empty()
+                             .append(profile.getName().color(Colors.STAFF))
+                             .append(Component.text(" joined.", Colors.STAFF))
+            );
         }
+        
+        // TODO Cancel countdown if player joined
     }
     
     @EventHandler(priority = EventPriority.LOWEST)
     public void handlePlayerQuitEvent(PlayerQuitEvent ev) {
         final Player player = ev.getPlayer();
         final PlayerProfile profile = Hariant.getPlayerProfile(player);
+        final PlayerRank playerRank = profile.getRank();
+        final RankFormatter rankFormatter = playerRank.formatter();
         
-        final RankFormatter rankFormatter = profile.getRank().formatter();
         final boolean displayJoinMessages = rankFormatter.displayJoinMessages();
         
         ev.quitMessage(
                 displayJoinMessages
                 ? Component.empty()
-                           .append(Component.text("[", NamedTextColor.DARK_GRAY))
-                           .append(Component.text("-", NamedTextColor.RED))
-                           .append(Component.text("]", NamedTextColor.DARK_GRAY))
+                           .append(Component.text("[", Colors.DARK_GRAY))
+                           .append(Component.text("-", Colors.RED))
+                           .append(Component.text("]", Colors.DARK_GRAY))
                            .appendSpace()
-                           .append(rankFormatter.format(profile))
+                           .append(profile.getNameFormatted())
                 : null
         );
         
         Hariant.destroyProfile(player);
+        
+        if (playerRank.isStaff()) {
+            EnumMessageChannel.STAFF.message(
+                    Component.empty()
+                             .append(profile.getName().color(Colors.STAFF))
+                             .append(Component.text(" left.", Colors.STAFF))
+            );
+        }
     }
     
     @EventHandler
     public void handlePlayerItemHeldEvent(PlayerItemHeldEvent ev) {
         Hariant.getPlayer(ev.getPlayer()).ifPresent(player -> {
             final HeroInstance heroInstance = player.getHeroInstance();
+            final Hero hero = heroInstance.getOrigin();
+            
+            // TODO (xanyjl @ Tuesday, June 2) -> Condition for input talents (if you even add them)
             ev.setCancelled(true);
             
-            heroInstance.getOrigin().handleItemHeldEvent(player, heroInstance, ev);
+            // Always snap to weapon
+            player.getInventory().setHeldItemSlot(hero.getWeaponSlot(player));
+            
+            hero.handleItemHeldEvent(player, heroInstance, ev);
         });
     }
     
@@ -179,42 +206,29 @@ public final class PlayerHandler implements Listener {
     public void handleAsyncChatEvent(AsyncChatEvent ev) {
         final Player player = ev.getPlayer();
         
-        // We always cancel the event because we'll need to implement
-        // per-player message checks
+        // We always cancel the event because we'll need to use custom message logic
         ev.setCancelled(true);
         
         final PlayerProfile profile = Hariant.getPlayerProfile(player);
         Component originalMessage = ev.originalMessage();
         
-        // No fucking idea who can original message not be a TextComponent ¯\_(ツ)_/¯
+        // No fucking idea how can original message not be a TextComponent ¯\_(ツ)_/¯
         if (!(originalMessage instanceof TextComponent textComponent)) {
             return;
         }
         
-        final MessageChannel messageChannel = EnumMessageChannel.getChannel(profile, textComponent);
+        final EnumMessageChannel messageChannel = EnumMessageChannel.fromMessage(profile, textComponent);
         final Pattern lookupPattern = messageChannel.lookupPattern();
         
         final PlayerRank playerRank = profile.getRank();
         final RankFormatter rankFormatter = playerRank.formatter();
         
-        final Component prefix = rankFormatter.format(profile);
-        
-        // TODO @Feb 16, 2026 (xanyjl) -> Implement message checks & per-player format
-        
-        // Remove the lookupPattern from the message
         if (lookupPattern != null) {
-            originalMessage = originalMessage.replaceText(builder -> builder.match(lookupPattern).replacement(""));
+            originalMessage = originalMessage.replaceText(replacer -> replacer.match(lookupPattern).replacement(""));
         }
         
         // Create message
-        final TextComponent message = Component.empty()
-                                               .append(messageChannel.channelPrefix(profile))
-                                               .append(prefix)
-                                               .append(Component.text(":", NamedTextColor.GRAY))
-                                               .appendSpace()
-                                               .append(originalMessage.style(rankFormatter.getMessageStyle()));
-        
-        messageChannel.recipients(profile).forEach(recipient -> recipient.sendMessage(message));
+        messageChannel.message(profile, originalMessage.style(rankFormatter.getMessageStyle()));
     }
     
     @EventHandler
@@ -234,6 +248,114 @@ public final class PlayerHandler implements Listener {
                 frozenHandler.input(input);
             }
         });
+    }
+    
+    @EventHandler
+    public void handleHariantMonitorDamageEvent(HariantMonitorDamageEvent ev) {
+        final DamageInstance damageInstance = ev.getDamageInstance();
+        final DamageSource damageSource = damageInstance.getSource();
+        
+        final HariantEntity entity = ev.getEntity();
+        final HariantEntity source = damageSource.getSource();
+        
+        final double damage = damageInstance.getDamage();
+        
+        if (entity instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
+            sendCombatFeedback(player, damage, damageInstance, damageSource, source, entity, false);
+        }
+        else if (source instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
+            sendCombatFeedback(player, damage, damageInstance, damageSource, source, entity, true);
+        }
+    }
+    
+    @EventHandler
+    public void handleEntityDismountEvent(EntityDismountEvent ev) {
+        if (!(ev.getEntity() instanceof Player player)) {
+            return;
+        }
+        
+        final HariantPlayer hariantPlayer = Hariant.getPlayer(player).orElse(null);
+        
+        if (hariantPlayer == null) {
+            return;
+        }
+        
+        if (hariantPlayer.isBlockDismount()) {
+            ev.setCancelled(true);
+        }
+    }
+    
+    private void sendCombatFeedback(
+            @NotNull HariantPlayer player,
+            double damage,
+            @NotNull DamageInstance damageInstance,
+            @NotNull DamageSource damageSource,
+            @Nullable HariantEntity source,
+            @NotNull HariantEntity entity,
+            boolean outgoing
+    ) {
+        class Holder {
+            private static final Component PREFIX_INCOMING_DAMAGE = Component.empty()
+                                                                             .append(Component.text("[", Colors.DARK_GRAY))
+                                                                             .append(Component.text("⚔", Colors.RED))
+                                                                             .append(Component.text("]", Colors.DARK_GRAY));
+            
+            private static final Component PREFIX_OUTGOING_DAMAGE = Component.empty()
+                                                                             .append(Component.text("[", Colors.DARK_GRAY))
+                                                                             .append(Component.text("⚔", Colors.GREEN))
+                                                                             .append(Component.text("]", Colors.DARK_GRAY));
+            
+            private static final Style STYLE_IMPORTANT = Style.style(Colors.WHITE);
+        }
+        
+        final Component prefix = outgoing ? Holder.PREFIX_OUTGOING_DAMAGE : Holder.PREFIX_INCOMING_DAMAGE;
+        
+        final TextComponent.Builder builder = Component.text()
+                                                       .append(prefix)
+                                                       .appendSpace()
+                                                       .append(Component.text("%,.0f".formatted(damage), Holder.STYLE_IMPORTANT))
+                                                       .appendSpace();
+        
+        if (outgoing) {
+            builder.append(Component.text("using", Colors.GRAY))
+                   .appendSpace()
+                   .append(damageSource.getIdentity().getName().style(Holder.STYLE_IMPORTANT))
+                   .appendSpace()
+                   .append(Component.text("to", Colors.GRAY))
+                   .appendSpace()
+                   .append(entity.getName().style(Holder.STYLE_IMPORTANT))
+                   .appendSpace();
+        }
+        else {
+            builder.append(Component.text("from", Colors.GRAY))
+                   .appendSpace()
+                   .append(damageSource.getIdentity().getName().style(Holder.STYLE_IMPORTANT))
+                   .appendSpace();
+            
+            if (source != null) {
+                builder.append(Component.text("by", Colors.GRAY))
+                       .appendSpace()
+                       .append(source.getName().style(Holder.STYLE_IMPORTANT))
+                       .appendSpace();
+            }
+        }
+        
+        if (damageInstance.isCritical()) {
+            builder.append(HariantConstants.CHARACTER_CRITICAL_DAMAGE.style(Holder.STYLE_IMPORTANT)).appendSpace();
+        }
+        
+        if (damageInstance.isShielded()) {
+            builder.append(HariantConstants.CHARACTER_SHIELDED_DAMAGE.color(Colors.YELLOW)).appendSpace();
+        }
+        
+        if (damageInstance.isLethal()) {
+            builder.append(HariantConstants.CHARACTER_LETHAL_DAMAGE).color(Colors.RED);
+        }
+        
+        // Also set the hover
+        builder.hoverEvent(damageInstance.getDamageReport().createHoverEvent());
+        
+        player.sendMessage(builder.build());
     }
     
     private static boolean isInputDirectional(@NotNull Input input) {

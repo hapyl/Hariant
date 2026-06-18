@@ -14,7 +14,6 @@ import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.event.HariantHealEvent;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -24,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements Listener {
     
@@ -53,7 +53,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
     private final DeathMessage deathMessage = DeathMessage.createWithDefaultKiller("{player} bled to death");
     
     ElementalAnomalyBleed() {
-        super(Key.ofString("bleed"), Component.text("Bleed"));
+        super(Key.ofString("bleed"), Component.text("Bleed"), ElementType.PHYSICAL);
         
         this.setDescription(
                 Component.empty()
@@ -88,12 +88,6 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         final double damage = this.calculateBleedDamage(source);
         
         entity.getAttributes().addModifier(new ElementalAnomalyBleedAttributeModifier(modifierKey, source != null ? source : entity, duration, damage));
-    }
-    
-    @NotNull
-    @Override
-    public Style getStyle() {
-        return ElementType.PHYSICAL.getStyle();
     }
     
     public int calculateBleedDuration(@Nullable HariantEntity source) {
@@ -160,7 +154,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
                     DamageType.ANOMALY,
                     ElementType.PHYSICAL,
                     List.of(DamageComponent.elemental()),
-                    List.of(),
+                    Set.of(),
                     damage,
                     0
             );

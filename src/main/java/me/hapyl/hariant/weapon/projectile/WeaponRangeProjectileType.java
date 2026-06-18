@@ -14,13 +14,16 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class WeaponRangeProjectileType implements Named, Described {
     
+    // TODO (xanyjl @ Saturday, May 30) -> Maybe make this Options or something
+    
     private static final double DEFAULT_DISTANCE = 50;
     private static final double DEFAULT_STEP = 0.5;
-    private static final double DEFAULT_RADIUS = 1.5;
+    private static final double DEFAULT_RADIUS = 1.0;
+    
     private static final DamageSourceIdentity DEFAULT_DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(
             Key.ofString("ranged_projectile"),
             Component.text("Ranged Projectile"),
-            DeathMessage.createWithDefaultKiller("{player} was shot [by {killer}]")
+            DeathMessage.create("{player} was shot [by {killer}]")
     );
     
     private final Component name;
@@ -41,6 +44,18 @@ public abstract class WeaponRangeProjectileType implements Named, Described {
         this.projectileRadius = DEFAULT_RADIUS;
         this.collisionMode = CollisionMode.DEFAULT;
         this.damageSourceIdentity = DEFAULT_DAMAGE_SOURCE_IDENTITY;
+    }
+    
+    @Override
+    @Deprecated
+    public void setName(@NotNull Component name) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    @Deprecated
+    public final void setDescription(@NotNull Component description) {
+        throw new UnsupportedOperationException();
     }
     
     public double getProjectileDistance() {

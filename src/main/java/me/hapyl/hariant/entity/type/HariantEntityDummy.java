@@ -7,6 +7,7 @@ import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.component.ProgressBar;
 import me.hapyl.eterna.module.hologram.Hologram;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
@@ -18,7 +19,6 @@ import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.SoundFx;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
@@ -145,6 +145,11 @@ public class HariantEntityDummy extends HariantDisplayEntity {
         this.hologram.dispose();
     }
     
+    @Override
+    public @NotNull Component getName() {
+        return Component.text("Dummy");
+    }
+    
     @NotNull
     private static Map.Entry<ElementType, ProgressBar> createProgressBar(@NotNull ElementType elementType) {
         return Map.entry(elementType, new ProgressBar("|", 20, elementType.getStyle()));
@@ -169,7 +174,7 @@ public class HariantEntityDummy extends HariantDisplayEntity {
             
             final double dps = this.entries.stream().mapToDouble(Entry::damage).sum();
             
-            return Component.text("ᴅᴘꜱ ", NamedTextColor.RED).append(Component.text("%,.0f".formatted(dps), NamedTextColor.WHITE, TextDecoration.BOLD));
+            return Component.text("ᴅᴘꜱ ", Colors.RED).append(Component.text("%,.0f".formatted(dps), Colors.WHITE, TextDecoration.BOLD));
         }
         
         private record Entry(double damage, long timestamp) {

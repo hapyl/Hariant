@@ -7,7 +7,6 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.util.Prefixed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,21 +16,21 @@ public enum Archetype implements Prefixed, Named, Described, Styled, ComponentLi
             Component.text("💢"),
             Component.text("Damage"),
             Component.text("Excels in outputting a high amount of damage."),
-            Style.style(NamedTextColor.DARK_RED)
+            Style.style(Colors.DARK_RED)
     ),
     
     STRATEGY(
             Component.text("💡"),
             Component.text("Strategist"),
             Component.text("Strategists rely on their quick thinking to win."),
-            Style.style(NamedTextColor.YELLOW)
+            Style.style(Colors.YELLOW)
     ),
     
     SUPPORT(
             Component.text("🍀"),
             Component.text("Support"),
             Component.text("Provides buffs and healing."),
-            Style.style(NamedTextColor.GREEN)
+            Style.style(Colors.GREEN)
     ),
     
     HEXBANE(

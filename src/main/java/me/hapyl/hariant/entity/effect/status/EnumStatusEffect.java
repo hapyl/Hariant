@@ -18,8 +18,8 @@ public enum EnumStatusEffect implements StatusEffect {
     
     ARCANE_MUTE(new StatusEffectArcaneMute()),
     TALENT_LOCK(new StatusEffectTalentLock()),
-    
     RESPAWN_RESISTANCE(new StatusEffectRespawnResistance()),
+    HELLBURN(new StatusEffectHellburn()),
     
     ;
     

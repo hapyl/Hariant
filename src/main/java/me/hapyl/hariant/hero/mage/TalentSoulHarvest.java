@@ -1,20 +1,20 @@
 package me.hapyl.hariant.hero.mage;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
-import me.hapyl.hariant.hero.Definition;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -49,9 +49,9 @@ public final class TalentSoulHarvest extends TalentPassive implements Listener {
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("You start with ", NamedTextColor.DARK_GRAY))
-                         .append(Component.text(startingSouls.intValue(), NamedTextColor.DARK_GRAY))
-                         .append(Component.text(" souls.", NamedTextColor.DARK_GRAY))
+                         .append(Component.text("You start with ", Colors.DARK_GRAY))
+                         .append(Component.text(startingSouls.intValue(), Colors.DARK_GRAY))
+                         .append(Component.text(" souls.", Colors.DARK_GRAY))
         );
     }
     

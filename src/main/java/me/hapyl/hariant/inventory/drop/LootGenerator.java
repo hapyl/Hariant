@@ -7,6 +7,6 @@ import java.util.List;
 public interface LootGenerator {
     
     @NotNull
-    List<Droppable> generateLoot();
+    List<? extends Drop> generateLoot();
     
 }

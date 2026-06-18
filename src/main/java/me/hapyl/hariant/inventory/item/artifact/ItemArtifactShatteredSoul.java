@@ -13,7 +13,7 @@ import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageCalculationsEvent;
 import me.hapyl.hariant.talent.field.DisplayField;
-import me.hapyl.hariant.term.Term;
+import me.hapyl.hariant.term.Terminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -26,7 +26,7 @@ public final class ItemArtifactShatteredSoul extends ItemArtifact {
     public ItemArtifactShatteredSoul(@NotNull Key key) {
         super(key, Component.text("Shattered Soul"), Icon.ofTexture("932a6f27680e38d3c6f63f70a28b4130817bd99c6126e6c9285a3d9c82afa1c9"), new ArtifactSetSoulFracture(key));
         
-        setDescription(Component.text("A shattered soul that seem to be stuck in time, trying to escape, but never succeeded."));
+        setDescription(Component.text("A shattered soul that seem to be stuck in time, trying to escape, but never succeeds."));
     }
     
     private static class ArtifactSetSoulFracture extends ArtifactSet implements Listener {
@@ -53,7 +53,7 @@ public final class ItemArtifactShatteredSoul extends ItemArtifact {
                              .append(Component.text("Increases "))
                              .append(ElementType.AETHER.asComponentDamage())
                              .append(Component.text(" of "))
-                             .append(Component.text("ranged", Term.TERM_STYLE))
+                             .append(Component.text("ranged", Terminology.TERM_STYLE))
                              .append(Component.text(" attacks by "))
                              .append(aetherDamageBonus)
                              .append(Component.text("."))

@@ -17,7 +17,6 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -44,7 +43,7 @@ public final class TalentAlchemicalCauldron extends Talent {
                 Component.empty()
                          .append(Component.text("Place an alchemical cauldron in front of you."))
                          .appendNewline()
-                         .append(Component.text("Put your stick inside to start brewing a toxic concoction!", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC))
+                         .append(Component.text("Put your stick inside to start brewing a toxic concoction!", Colors.DARK_GRAY, TextDecoration.ITALIC))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After the cauldron finishes brewing, you can pull out the stick infused with "))
@@ -54,7 +53,7 @@ public final class TalentAlchemicalCauldron extends Talent {
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("The cooldown of this talent starts after the brewing is done.", NamedTextColor.DARK_GRAY))
+                         .append(Component.text("The cooldown of this talent starts after the brewing is done.", Colors.DARK_GRAY))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("The cauldron can be destroyed!", Colors.ERROR))

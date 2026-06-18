@@ -1,6 +1,7 @@
 package me.hapyl.hariant.weapon.projectile;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -11,8 +12,6 @@ import me.hapyl.hariant.weapon.ability.Ability;
 import me.hapyl.hariant.weapon.ability.AbilityType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
 public class WeaponRangeProjectile extends WeaponRange {
@@ -32,6 +31,10 @@ public class WeaponRangeProjectile extends WeaponRange {
         
         // Set ability
         this.setAbility(AbilityType.RIGHT_CLICK, new WeaponProjectileAbility(this));
+    }
+    
+    public @NotNull WeaponRangeProjectileType getProjectileType() {
+        return projectileType;
     }
     
     @NotNull
@@ -59,7 +62,7 @@ public class WeaponRangeProjectile extends WeaponRange {
             final TextComponent.Builder description = Component.text();
             
             description.append(Component.text("Shoot a "))
-                       .append(projectileName.color(NamedTextColor.GOLD))
+                       .append(projectileName.color(Colors.GOLD))
                        .append(Component.text(" projectile forward that deals "))
                        .append(rangedAttack.getElementType().asComponentDamage())
                        .append(Component.text("."));
@@ -70,8 +73,8 @@ public class WeaponRangeProjectile extends WeaponRange {
             
             description.append(
                     Component.empty()
-                             .append(projectileName.color(NamedTextColor.GOLD))
-                             .append(Component.text(" (Projectile Type)", NamedTextColor.DARK_GRAY))
+                             .append(projectileName.color(Colors.GOLD))
+                             .append(Component.text(" (Projectile Type)", Colors.DARK_GRAY))
             );
             description.appendNewline();
             description.append(weapon.projectileType.getDescription());

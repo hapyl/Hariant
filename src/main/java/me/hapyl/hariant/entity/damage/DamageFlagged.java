@@ -1,15 +1,15 @@
 package me.hapyl.hariant.entity.damage;
 
-import me.hapyl.eterna.module.annotate.Immutable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.List;
+import java.util.Set;
 
 public interface DamageFlagged {
     
     @NotNull
-    @Immutable
-    List<? extends DamageFlag> getDamageFlags();
+    @Unmodifiable
+    Set<? extends DamageFlag> getDamageFlags();
     
     default boolean isFlagged(@NotNull DamageFlag damageFlag) {
         return getDamageFlags().contains(damageFlag);

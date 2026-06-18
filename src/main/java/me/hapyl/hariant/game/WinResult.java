@@ -1,10 +1,10 @@
 package me.hapyl.hariant.game;
 
-import me.hapyl.eterna.module.annotate.Immutable;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamEntry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class WinResult {
     }
     
     @NotNull
-    @Immutable
+    @Unmodifiable
     public List<EnumTeam> getWinningTeams() {
         return winningTeams;
     }

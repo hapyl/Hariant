@@ -2,14 +2,13 @@ package me.hapyl.hariant.inventory.item.artifact;
 
 import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.hero.HeroInstance;
-import me.hapyl.hariant.inventory.item.AbstractItem;
-import me.hapyl.hariant.inventory.item.Item;
 import me.hapyl.hariant.inventory.item.ItemInstance;
 import me.hapyl.hariant.util.Owned;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +18,7 @@ import java.util.UUID;
 
 public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInstance> {
     
-    private static final Style STYLE_EQUIPPED_BY = Style.style(NamedTextColor.WHITE, TextDecoration.UNDERLINED);
+    private static final Style STYLE_EQUIPPED_BY = Style.style(Colors.WHITE, TextDecoration.UNDERLINED);
     
     /**
      * Defines the {@link HeroInstance} this {@link ItemArtifactInstance} is currently equipped by, or {@code null} if not equipped.
@@ -70,8 +69,8 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
         
         builder.addLore(
                 Component.empty()
-                         .append(artifactSet.getName().color(NamedTextColor.GREEN))
-                         .append(artifactSetCount == 0 ? Component.empty() : Component.text(" (%s/%s)".formatted(artifactSetCount, artifactSet.lastPieceCount()), NamedTextColor.GRAY))
+                         .append(artifactSet.getName().color(Colors.GREEN))
+                         .append(artifactSetCount == 0 ? Component.empty() : Component.text(" (%s/%s)".formatted(artifactSetCount, artifactSet.lastPieceCount()), Colors.GRAY))
         );
         
         int index = 0;
@@ -91,7 +90,7 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
             builder.addLore(
                     Component.empty()
                              .append(Component.text(" "))
-                             .append(pieceCount.getName().color(NamedTextColor.DARK_GRAY))
+                             .append(pieceCount.getName().color(Colors.DARK_GRAY))
                              .append(Component.text("  "))
                              .append(
                                      Components.checkmark(isPieceBonusActive)
@@ -101,13 +100,7 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
                              .append()
             );
             
-            builder.addWrappedLore(
-                    pieceDescription,
-                    _component -> Component.empty()
-                                           .append(Component.text("  "))
-                                           .append(_component)
-                                           .style(Style.style(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))
-            );
+            builder.addWrappedLore(pieceDescription, HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_2);
         }
         
         if (owner != null) {

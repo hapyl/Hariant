@@ -5,9 +5,10 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.util.decimal.DecimalFormat;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 
-public interface Cooldown extends ComponentFormatter {
+public interface Cooldown extends ComponentFormatter, ComponentLike {
     
     @NotNull
     Key getCooldownKey(); // We technically can extend Keyed and make this getKey(), but we might need to use a separate key for cooldowns and object
@@ -37,7 +38,7 @@ public interface Cooldown extends ComponentFormatter {
     
     @NotNull
     default Component getCooldownFormatted() {
-        return DecimalFormat.SECONDS.format(this.getCooldownSeconds()).color(Colors.FORMAT_TICK);
+        return DecimalFormat.SECONDS.format(this.getCooldownSeconds()).color(Colors.TICK);
     }
     
     @NotNull
@@ -47,7 +48,13 @@ public interface Cooldown extends ComponentFormatter {
     
     @NotNull
     static Cooldown ofSeconds(@NotNull Key key, final float cooldownSeconds) {
-        return new CooldownImpl(key, (int) cooldownSeconds * 20);
+        return new CooldownImpl(key, (int) (cooldownSeconds * 20));
+    }
+    
+    @NotNull
+    @Override
+    default Component asComponent() {
+        return getCooldownFormatted();
     }
     
 }

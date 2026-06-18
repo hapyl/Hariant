@@ -3,9 +3,10 @@ package me.hapyl.hariant.inventory.item.artifact;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.hariant.util.ComparableOrdinal;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 
-public enum PieceCount implements Named, ComparableOrdinal<PieceCount> {
+public enum PieceCount implements Named, ComparableOrdinal<PieceCount>, ComponentLike {
     
     NONE(""),
     ONE_PIECE("①"),
@@ -26,6 +27,12 @@ public enum PieceCount implements Named, ComparableOrdinal<PieceCount> {
     }
     
     @NotNull
+    @Override
+    public Component asComponent() {
+        return name;
+    }
+    
+    @NotNull
     public static PieceCount valueOf(final int count) {
         return switch (count) {
             case 0 -> NONE;
@@ -33,7 +40,8 @@ public enum PieceCount implements Named, ComparableOrdinal<PieceCount> {
             case 2 -> TWO_PIECE;
             case 3 -> THREE_PIECE;
             case 4 -> FOUR_PIECE;
-            default -> throw new IllegalArgumentException("Unsupported value: %s".formatted(count));
+            default -> throw new IllegalArgumentException("Illegal artifact piece count: %s".formatted(count));
         };
     }
+    
 }

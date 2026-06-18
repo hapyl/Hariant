@@ -6,9 +6,11 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
+import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +26,7 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
     private final int soakedDuration = Tick.fromSeconds(8);
     
     ElementalAnomalySoaked() {
-        super(Key.ofString("soaked"), Component.text("Soaked"));
+        super(Key.ofString("soaked"), Component.text("Soaked"), ElementType.WATER);
         
         this.setDescription(
                 Component.empty()
@@ -60,6 +62,11 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
         return (int) (soakedDuration * (1 + (maxHealth / (maxHealth + 5000) + elementalMastery / 1000)));
     }
     
+    @Override
+    public @NotNull Style getStyle() {
+        return ElementType.WATER.getStyle();
+    }
+    
     public class ElementalAnomalySoakedAttributeModifier extends AttributeModifier {
         ElementalAnomalySoakedAttributeModifier(@NotNull HariantEntity applier, int duration) {
             super(modifierKey, ElementalAnomalySoaked.this.getName(), applier, duration);
@@ -78,5 +85,4 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
             entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.SPLASH, 2, 0.25f, 0.4f, 0.25f, 0.0f);
         }
     }
-    
 }

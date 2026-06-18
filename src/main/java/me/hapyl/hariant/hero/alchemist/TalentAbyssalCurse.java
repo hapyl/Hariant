@@ -11,26 +11,26 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.HariantRandom;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
-import me.hapyl.hariant.hero.Definition;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
-import me.hapyl.hariant.talent.ultimate.TalentUltimateResource;
+import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.HariantTask;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.task.executor.Executable;
 import me.hapyl.hariant.task.executor.ExecutorService;
+import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
@@ -71,7 +71,7 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
     };
     
     public TalentAbyssalCurse(@NotNull Key key) {
-        super(key, Component.text("Abyssal Curse"), Icon.ofMaterial(Material.FERMENTED_SPIDER_EYE), TalentUltimateResource.ENERGY, 60);
+        super(key, Component.text("Abyssal Curse"), Icon.ofMaterial(Material.FERMENTED_SPIDER_EYE), UltimateResourceType.ENERGY, 60);
         
         this.setDurationSeconds(10);
         this.setCooldownSeconds(30);
@@ -86,14 +86,14 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Hit a "))
-                         .append(Component.text("player", NamedTextColor.WHITE, TextDecoration.UNDERLINED))
+                         .append(Component.text("player", Colors.WHITE, TextDecoration.UNDERLINED))
                          .append(Component.text(" to transfer the curse to that player."))
                          .appendNewline()
-                         .append(Component.text("Other players can also transfer the curse.", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC))
+                         .append(Component.text("Other players can also transfer the curse.", Colors.DARK_GRAY, TextDecoration.ITALIC))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After te curse becomes "))
-                         .append(Component.text("unstable", NamedTextColor.DARK_RED))
+                         .append(Component.text("unstable", Colors.DARK_RED))
                          .append(Component.text(", it explodes, dealing "))
                          .append(ElementType.AETHER.asComponentDamage())
                          .append(Component.text(" equal to "))
@@ -133,6 +133,11 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         final HariantEntity attacker = ev.getAttacker();
         
         if (!(entity instanceof HariantPlayer playerEntity) || !(attacker instanceof HariantPlayer)) {
+            return;
+        }
+        
+        // Make sure the damage is MELEE
+        if (ev.getDamageType() != DamageType.MELEE) {
             return;
         }
         
@@ -192,9 +197,9 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                     Component.empty()
                              .append(Definition.ABYSSAL_CURSE.getPrefixStyled())
                              .appendSpace()
-                             .append(Component.text("You transferred the curse to ", NamedTextColor.LIGHT_PURPLE))
-                             .append(player.getName().color(NamedTextColor.DARK_PURPLE))
-                             .append(Component.text("!", NamedTextColor.LIGHT_PURPLE))
+                             .append(Component.text("You transferred the curse to ", Colors.LIGHT_PURPLE))
+                             .append(player.getName().color(Colors.DARK_PURPLE))
+                             .append(Component.text("!", Colors.LIGHT_PURPLE))
             );
             
             previousBearer.playSound(Sound.ENTITY_EVOKER_CAST_SPELL, 0.75f);
@@ -212,9 +217,9 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                     Component.empty()
                              .append(Definition.ABYSSAL_CORROSION.getPrefixStyled())
                              .appendSpace()
-                             .append(Component.text("Hit another player to transfer the curse or ", NamedTextColor.LIGHT_PURPLE))
+                             .append(Component.text("Hit another player to transfer the curse or ", Colors.LIGHT_PURPLE))
                              .append(Component.text("die", Colors.ERROR, TextDecoration.BOLD))
-                             .append(Component.text("!", NamedTextColor.LIGHT_PURPLE))
+                             .append(Component.text("!", Colors.LIGHT_PURPLE))
             );
             
             player.playSound(Sound.ENTITY_GHAST_HURT, 1.5f);

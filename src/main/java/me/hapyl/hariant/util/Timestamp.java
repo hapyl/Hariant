@@ -39,4 +39,5 @@ public final class Timestamp implements ComponentLike {
     public static Timestamp ofNow() {
         return new Timestamp(System.currentTimeMillis());
     }
+    
 }

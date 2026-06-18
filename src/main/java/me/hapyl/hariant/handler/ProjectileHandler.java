@@ -3,14 +3,14 @@ package me.hapyl.hariant.handler;
 import com.google.common.collect.Maps;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
-import me.hapyl.hariant.attribute.instance.AttributesBase;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.NormalAttack;
-import me.hapyl.hariant.entity.damage.component.DamageComponentCritical;
+import me.hapyl.hariant.entity.damage.DamageFlag;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.KnockbackSource;
 import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.event.HariantProjectileLaunchEvent;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -61,19 +61,15 @@ public final class ProjectileHandler implements Listener {
             return;
         }
         
-        final DamageSource damageSource = rangedAttack.createDamageSource(entity)
-                                                      // Replace critical component because arrows always crit if they're fully charged
-                                                      .replaceComponent(DamageComponentCritical.class, new DamageComponentCritical() {
-                                                          @Override
-                                                          public double getCritChance(@NotNull AttributesBase attributes) {
-                                                              if (projectile instanceof Arrow arrow && arrow.isCritical()) {
-                                                                  return 1.0;
-                                                              }
-                                                              
-                                                              return super.getCritChance(attributes);
-                                                          }
-                                                      })
-                                                      .build();
+        final DamageSource.Builder damageSourceBuilder = rangedAttack.createDamageSource(entity);
+        
+        // If the project is an arrow, and it's fully charged (critical), add `FORCE_CRITICAL` tag
+        if (projectile instanceof Arrow arrow && arrow.isCritical()) {
+            damageSourceBuilder.damageFlag(DamageFlag.FORCE_CRITICAL);
+        }
+        
+        // Build damage source, create projectile and call entity `onShoot`
+        final DamageSource damageSource = damageSourceBuilder.build();
         
         createProjectile(projectile, damageSource);
         
@@ -107,6 +103,7 @@ public final class ProjectileHandler implements Listener {
             final HariantEntity attacker = projectile.getShooter();
             
             attacker.attack(entity, projectile.getDamageSource(), KnockbackSource.create(projectile, HariantConstants.RANGE_KNOCKBACK_STRENGTH));
+            playHitSound(attacker);
         }
     }
     
@@ -120,6 +117,10 @@ public final class ProjectileHandler implements Listener {
         }
         
         PROJECTILES.put(projectile, hariantProjectile);
+    }
+    
+    public static void playHitSound(@NotNull HariantEntity entity) {
+        entity.playSound(Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f);
     }
     
 }

@@ -5,9 +5,9 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.hero.HeroInstance;
+import me.hapyl.hariant.inventory.item.artifact.ArtifactSet;
 import me.hapyl.hariant.inventory.item.artifact.ArtifactSlot;
 import me.hapyl.hariant.inventory.item.artifact.ItemArtifactInstance;
-import me.hapyl.hariant.inventory.item.artifact.ArtifactSet;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
@@ -39,7 +39,7 @@ public class MenuHeroArtifactEquip extends MenuHeroAbstract {
             ArtifactSlot.SLOT_4, new int[] { 16, 34, 43 }
     );
     
-    private static final Icon NON_ELEMENTAL_BAR_ICON = Icon.ofMaterial(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+    private static final Icon NON_ELEMENTAL_BAR_ICON = Icon.ofMaterial(Material.GRAY_STAINED_GLASS_PANE);
     
     private final HeroInstance heroInstance;
     

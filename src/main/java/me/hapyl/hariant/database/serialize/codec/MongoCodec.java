@@ -35,4 +35,10 @@ public interface MongoCodec<T, D> {
         document.put(key, serialize(t));
     }
     
+    default void writeNullable(@NotNull Document document, @NotNull String key, @Nullable T t) {
+        if (t != null) {
+            this.write(document, key, t);
+        }
+    }
+    
 }

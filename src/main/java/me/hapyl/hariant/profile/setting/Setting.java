@@ -5,9 +5,12 @@ import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
+import me.hapyl.hariant.menu.Menu;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import org.bson.Document;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 
 public interface Setting<I> extends Keyed, Named, Described, Icon {
@@ -40,39 +43,11 @@ public interface Setting<I> extends Keyed, Named, Described, Icon {
     void setValue(@NotNull Document document, @NotNull I value);
     
     @NotNull
-    static Setting<Boolean> ofBoolean(
-            @NotNull Key key,
-            @NotNull Component name,
-            @NotNull Component description,
-            @NotNull Icon icon,
-            @NotNull SettingCategory category,
-            boolean defaultValue
-    ) {
-        return new SettingImpl<>(key, name, description, icon, category, Boolean.class, defaultValue);
-    }
+    ItemBuilder menuButton(@NotNull SettingEntry settingEntry);
+    
+    void menuClick(@NotNull Player player, @NotNull SettingEntry settingEntry, @NotNull Menu menuSettings, @NotNull ClickType clickType);
     
     @NotNull
-    static Setting<Integer> ofInteger(
-            @NotNull Key key,
-            @NotNull Component name,
-            @NotNull Component description,
-            @NotNull Icon icon,
-            @NotNull SettingCategory category,
-            int defaultValue
-    ) {
-        return new SettingImpl<>(key, name, description, icon, category, Integer.class, defaultValue);
-    }
-    
-    @NotNull
-    static <E extends Enum<E>> Setting<E> ofEnum(
-            @NotNull Key key,
-            @NotNull Component name,
-            @NotNull Component description,
-            @NotNull Icon icon,
-            @NotNull SettingCategory category,
-            @NotNull E defaultValue
-    ) {
-        return new SettingImplEnum<>(key, name, description, icon, category, defaultValue);
-    }
+    ItemBuilder menuFormat(@NotNull SettingEntry settingEntry, @NotNull ItemBuilder builder);
     
 }

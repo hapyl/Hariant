@@ -2,6 +2,7 @@ package me.hapyl.hariant.element;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
+import me.hapyl.hariant.entity.HariantEntity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
@@ -56,6 +57,11 @@ public enum ElementType implements Element {
     @Override
     public ElementalAnomaly getElementalAnomaly() {
         return element.getElementalAnomaly();
+    }
+    
+    @Override
+    public void tickEntity(@NotNull HariantEntity entity) {
+        element.tickEntity(entity);
     }
     
 }

@@ -1,9 +1,9 @@
 package me.hapyl.hariant.security;
 
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.util.HexId;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
@@ -65,13 +65,13 @@ public class KickReasonImpl implements KickReason {
     @Override
     public Component asComponent() {
         final TextComponent.Builder builder = Component.text();
-        builder.append(Component.text("ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ᴋɪᴄᴋᴇᴅ", NamedTextColor.DARK_RED, TextDecoration.BOLD));
+        builder.append(Component.text("ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ᴋɪᴄᴋᴇᴅ", Colors.DARK_RED, TextDecoration.BOLD));
         builder.appendNewline();
         builder.appendNewline();
         builder.appendNewline();
         
         // Append reason
-        builder.append(Component.text("Reason:", NamedTextColor.GRAY));
+        builder.append(Component.text("Reason:", Colors.GRAY));
         builder.appendNewline();
         builder.append(Component.text(reason));
         
@@ -80,15 +80,15 @@ public class KickReasonImpl implements KickReason {
             builder.appendNewline();
             builder.appendNewline();
             
-            builder.append(Component.text("Details:", NamedTextColor.GRAY));
+            builder.append(Component.text("Details:", Colors.GRAY));
             builder.appendNewline();
-            builder.append(Component.text(details, NamedTextColor.DARK_GRAY));
+            builder.append(Component.text(details, Colors.DARK_GRAY));
         }
         
         // Append id
         builder.appendNewline();
         builder.appendNewline();
-        builder.append(Component.text("Punishment Id: %s".formatted(hexId), NamedTextColor.DARK_GRAY));
+        builder.append(Component.text("Punishment Id: %s".formatted(hexId), Colors.DARK_GRAY));
         
         return builder.build();
     }

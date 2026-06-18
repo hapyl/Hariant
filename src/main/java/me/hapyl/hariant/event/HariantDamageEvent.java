@@ -2,17 +2,16 @@ package me.hapyl.hariant.event;
 
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageFlag;
-import me.hapyl.hariant.entity.damage.DamageFlagged;
-import me.hapyl.hariant.entity.damage.DamageInstance;
-import me.hapyl.hariant.entity.damage.DamageType;
+import me.hapyl.hariant.entity.damage.*;
+import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.util.Identified;
+import me.hapyl.hariant.util.decimal.Decimal;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Set;
 
 public class HariantDamageEvent extends HariantEvent implements Cancellable, DamageFlagged {
     
@@ -21,9 +20,15 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
     private final DamageInstance damageInstance;
     
     private boolean cancel;
+    private boolean startCooldownIfCancelled;
     
     public HariantDamageEvent(@NotNull DamageInstance damageInstance) {
         this.damageInstance = damageInstance;
+    }
+    
+    @NotNull
+    public DamageSource getDamageSource() {
+        return damageInstance.getSource();
     }
     
     @NotNull
@@ -62,8 +67,7 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
     }
     
     @Override
-    @NotNull
-    public List<? extends DamageFlag> getDamageFlags() {
+    public @NotNull Set<? extends DamageFlag> getDamageFlags() {
         return damageInstance.getSource().getDamageFlags();
     }
     
@@ -80,8 +84,12 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
         return damageInstance.getDamage();
     }
     
-    public void multiplyDamage(@NotNull Identified identity, double multiplier) {
-        this.damageInstance.multiplyDamage(identity, multiplier);
+    public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final double value) {
+        damageInstance.mutateDamage(identity, mutator, value);
+    }
+    
+    public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final Decimal value) {
+        damageInstance.mutateDamage(identity, mutator, value);
     }
     
     @Override
@@ -92,6 +100,15 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
     @Override
     public void setCancelled(boolean cancel) {
         this.cancel = cancel;
+    }
+    
+    public void setCancelled(boolean cancel, boolean startCooldownIfCancelled) {
+        this.cancel = cancel;
+        this.startCooldownIfCancelled = startCooldownIfCancelled;
+    }
+    
+    public boolean isStartCooldownIfCancelled() {
+        return startCooldownIfCancelled;
     }
     
     @NotNull

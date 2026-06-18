@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.alchemist;
 
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.heal.HealingSource;
@@ -9,7 +10,6 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
 import org.bukkit.Sound;
@@ -40,7 +40,7 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("If you "))
-                         .append(Component.text("don't take", NamedTextColor.GRAY, TextDecoration.UNDERLINED))
+                         .append(Component.text("don't take", Colors.GRAY, TextDecoration.UNDERLINED))
                          .append(Component.text(" damage in "))
                          .append(this.getDurationFormatted())
                          .append(Component.text(" after using this potion, heal for an additional "))
@@ -106,8 +106,8 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
                 player.heal(HealingSource.create(extraHealing));
                 
                 player.sendTitleSubtitle(
-                        Component.text("\uD83D\uDC9E", NamedTextColor.DARK_GREEN),
-                        Component.text("ʜᴇᴀʟᴇᴅ!", NamedTextColor.GREEN),
+                        Component.text("\uD83D\uDC9E", Colors.DARK_GREEN),
+                        Component.text("ʜᴇᴀʟᴇᴅ!", Colors.GREEN),
                         5, 10, 5
                 );
                 
@@ -120,8 +120,8 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
         public void cancel() {
             // Fx
             player.sendTitleSubtitle(
-                    Component.text("\uD83D\uDC9E", NamedTextColor.DARK_RED),
-                    Component.text("ʜᴇᴀʟɪɴɢ ᴄᴀɴᴄᴇʟʟᴇᴅ, ʏᴏᴜ ᴛᴏᴏᴋ ᴅᴀᴍᴀɢᴇ!", NamedTextColor.RED),
+                    Component.text("\uD83D\uDC9E", Colors.DARK_RED),
+                    Component.text("ʜᴇᴀʟɪɴɢ ᴄᴀɴᴄᴇʟʟᴇᴅ, ʏᴏᴜ ᴛᴏᴏᴋ ᴅᴀᴍᴀɢᴇ!", Colors.RED),
                     5, 10, 5
             );
             

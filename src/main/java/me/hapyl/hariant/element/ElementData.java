@@ -7,13 +7,14 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.event.HariantElementalAnomalyEvent;
+import me.hapyl.hariant.util.Resettable;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class ElementData implements ElementHandler, Ticking {
+public class ElementData implements ElementHandler, Ticking, Resettable {
     
     private final HariantEntity entity;
     private final Map<ElementType, Double> elementUnits;
@@ -71,6 +72,11 @@ public class ElementData implements ElementHandler, Ticking {
             elementUnits.computeIfPresent(elementType, (_elementType, _value) -> {
                 final double newValue = _value - HariantConstants.ELEMENTAL_UNITS_DECREMENT_PER_TICK;
                 
+                // If new value is higher than 0, it means that the element is currently present on an entity, call tick method
+                if (newValue > 0) {
+                    elementType.tickEntity(entity);
+                }
+                
                 return newValue <= 0.0 ? null : newValue;
             });
         }
@@ -83,7 +89,12 @@ public class ElementData implements ElementHandler, Ticking {
         
         final double elementalMastery = source.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
         
-        return units * (1 - elementalMastery / 500);
+        return units * (1 + elementalMastery / 500);
+    }
+    
+    @Override
+    public void reset() {
+        elementUnits.clear();
     }
     
 }

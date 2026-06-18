@@ -17,7 +17,7 @@ public interface TalentContext {
     }
     
     @NotNull
-    static TalentContext of(@NotNull Object object) {
+    static TalentContext create(@NotNull Object object) {
         return new TalentContextImpl(object);
     }
     

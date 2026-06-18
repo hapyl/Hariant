@@ -6,7 +6,7 @@ import me.hapyl.hariant.util.ImmutableLocation;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 
-public class BattlegroundRailway extends BattlegroundImpl {
+public final class BattlegroundRailway extends BattlegroundImpl {
     BattlegroundRailway() {
         super(Component.text("Railway"), Icon.ofMaterial(Material.RAIL));
         

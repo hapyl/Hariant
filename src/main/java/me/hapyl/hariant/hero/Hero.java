@@ -22,6 +22,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.handler.HariantEventHandler;
 import me.hapyl.hariant.inventory.item.ItemCreator;
 import me.hapyl.hariant.profile.ui.ActionbarSupplier;
+import me.hapyl.hariant.registry.Registrable;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentIndex;
 import me.hapyl.hariant.talent.TalentPassive;
@@ -29,8 +30,6 @@ import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.weapon.Weapon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
@@ -47,7 +46,7 @@ public abstract class Hero
         implements
         Keyed, Named, Described, Attributable,
         HariantEventHandler, ComponentLike, HeadComponent,
-        SmallCapsComponent, ActionbarSupplier, ItemCreator, DebugListener {
+        SmallCapsComponent, ActionbarSupplier, ItemCreator, DebugListener, Registrable {
     
     private final Key key;
     private final Component name;
@@ -92,10 +91,11 @@ public abstract class Hero
         
         // Profile
         builder.addLore(Component.text("ᴘʀᴏꜰɪʟᴇ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
-        builder.addLore(Component.text(" Archetype: ", Colors.GRAY).append(profile.getArchetype()));
-        builder.addLore(Component.text(" Element: ", Colors.GRAY).append(profile.getElementType()));
-        builder.addLore(Component.text(" Affiliation: ", Colors.GRAY).append(profile.getAffiliation()));
-        builder.addLore(Component.text(" Gender: ", Colors.GRAY).append(profile.getGender()));
+        builder.addLore(Component.text(" Archetype: ", Colors.LIGHT_GRAY).append(profile.getArchetype()));
+        builder.addLore(Component.text(" Element: ", Colors.LIGHT_GRAY).append(profile.getElementType()));
+        builder.addLore(Component.text(" Affiliation: ", Colors.LIGHT_GRAY).append(profile.getAffiliation()));
+        builder.addLore(Component.text(" Gender: ", Colors.LIGHT_GRAY).append(profile.getGender()));
+        builder.addLore(Component.text(" Race: ", Colors.LIGHT_GRAY).append(profile.getRace()));
         builder.addLore();
         
         // Attributes
@@ -108,7 +108,7 @@ public abstract class Hero
         
         // Description
         builder.addLore(Component.text("ᴅᴇꜱᴄʀɪᴘᴛɪᴏɴ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
-        builder.addWrappedLore(description, _component -> _component.style(Style.style(NamedTextColor.DARK_GRAY, TextDecoration.ITALIC)));
+        builder.addWrappedLore(description, HariantConstants.COMPONENT_STYLER_DESCRIPTION);
         
         return builder;
     }
@@ -224,15 +224,18 @@ public abstract class Hero
     }
     
     public int getWeaponSlot(@NotNull HariantPlayer player) {
-        return HariantConstants.WEAPON_SLOT;
+        return HariantConstants.DEFAULT_WEAPON_SLOT;
     }
     
     public void giveWeapon(@NotNull HariantPlayer player) {
+        this.giveWeapon(player, this.getWeapon(player));
+    }
+    
+    public void giveWeapon(@NotNull HariantPlayer player, @NotNull Weapon weapon) {
         final PlayerInventory inventory = player.getInventory();
-        
         final int weaponSlot = this.getWeaponSlot(player);
         
-        inventory.setItem(weaponSlot, this.getWeapon(player).createItem());
+        inventory.setItem(weaponSlot, weapon.createItem());
         inventory.setHeldItemSlot(weaponSlot);
     }
     
@@ -267,6 +270,14 @@ public abstract class Hero
     
     @Override
     public void debugOnCooldownReset(@NotNull HariantPlayer player) {
+    }
+    
+    @Override
+    public void onRegister() {
+    }
+    
+    @Override
+    public void onUnregister() {
     }
     
 }

@@ -2,6 +2,7 @@ package me.hapyl.hariant.game.type;
 
 import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.math.Tick;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.game.WinResult;
@@ -12,13 +13,14 @@ import me.hapyl.hariant.team.TeamData;
 import me.hapyl.hariant.team.TeamDataMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class GameTypeDeathmatch extends GameTypeImpl {
     
@@ -38,13 +40,13 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
     
     @Override
     public void formatScoreboard(@NotNull PlayerProfile profile, @NotNull GameInstance gameInstance, @NotNull ComponentList components) {
-        components.append(Component.text("TOP TEAMS", NamedTextColor.GOLD, TextDecoration.BOLD));
+        components.append(Component.text("TOP TEAMS", Colors.GOLD, TextDecoration.BOLD));
         
         final TeamDataMap teamDataMap = gameInstance.getTeamData();
         final List<TeamData> topTeams = teamDataMap.stream().sorted(Comparator.reverseOrder()).limit(TOP_TEAMS_LIMIT).toList();
         
         for (int i = 0; i < TOP_TEAMS_LIMIT; i++) {
-            final TextComponent teamNumber = Component.text(" #%s. ".formatted(i + 1), NamedTextColor.GRAY);
+            final TextComponent teamNumber = Component.text(" #%s. ".formatted(i + 1), Colors.GRAY);
             
             if (i < topTeams.size()) {
                 final TeamData teamData = topTeams.get(i);
@@ -57,15 +59,15 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
                                  .appendSpace()
                                  .append(team.formatPlayerNames())
                                  .appendSpace()
-                                 .append(Component.text("(", NamedTextColor.DARK_GRAY))
-                                 .append(Component.text("⚔ ", NamedTextColor.RED))
+                                 .append(Component.text("(", Colors.DARK_GRAY))
+                                 .append(Component.text("⚔ ", Colors.RED))
                                  .append(Component.text(teamData.kills))
-                                 .append(Component.text(")", NamedTextColor.DARK_GRAY))
+                                 .append(Component.text(")", Colors.DARK_GRAY))
                                  .append()
                 );
             }
             else {
-                components.append(teamNumber.append(Component.text("...", NamedTextColor.DARK_GRAY)));
+                components.append(teamNumber.append(Component.text("...", Colors.DARK_GRAY)));
             }
         }
     }
@@ -94,6 +96,20 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
     
     @Override
     public void onKill(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
+    }
+    
+    @Override
+    @NotNull
+    public List<EnumTeam> getWiningTeamsWhenTimeLimit(@NotNull GameInstance gameInstance) {
+        return gameInstance.getTeamData()
+                           .stream()
+                           .collect(Collectors.groupingBy(TeamData::getTeam, Collectors.summingInt(TeamData::getKills)))
+                           .entrySet()
+                           .stream()
+                           .max(Map.Entry.comparingByValue())
+                           .map(Map.Entry::getKey)
+                           .stream()
+                           .toList();
     }
     
 }
