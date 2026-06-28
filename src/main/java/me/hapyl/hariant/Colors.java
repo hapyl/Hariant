@@ -14,7 +14,7 @@ import net.kyori.adventure.text.format.TextColor;
 @UtilityClass
 public final class Colors {
     
-    // *-* Vanilla colors *-* //
+    // *-* Vanilla Colors *-* //
     
     public static final TextColor BLACK = NamedTextColor.BLACK;
     public static final TextColor DARK_BLUE = NamedTextColor.DARK_BLUE;
@@ -77,7 +77,8 @@ public final class Colors {
     public static final TextColor RESOURCE_CAT_COINS = TextColor.color(0xF2AA24);
     public static final TextColor RESOURCE_RUBY = TextColor.color(0xE0283E);
     
-    public static final TextColor ARCHETYPE_HEXBANE = TextColor.color(0x5C3D2E);
+    public static final TextColor ARCHETYPE_HEXBANE = TextColor.color(0x735136);
+    public static final TextColor ARCHETYPE_DEFENSE = TextColor.color(0xE1C62A);
     
     public static final TextColor FLOWER_DEAD = TextColor.color(0x372E2B);
     public static final TextColor FLOWER_ROSE = TextColor.color(0xEC4346);
@@ -120,7 +121,7 @@ public final class Colors {
     
     public static final TextColor RESTLESS_SOUL = TextColor.color(0x19B4BF);
     public static final TextColor CHAOS = TextColor.color(0x660499);
-    public static final TextColor VOID = TextColor.color(0x3A2A4C);
+    public static final TextColor VOID = TextColor.color(0x5F3087);
     
     private Colors() {
     }

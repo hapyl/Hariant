@@ -10,4 +10,8 @@ public interface Instance<O> {
     @NotNull
     O getOrigin();
     
+    void onInstanceCreated();
+    
+    void onInstanceDestroyed();
+    
 }

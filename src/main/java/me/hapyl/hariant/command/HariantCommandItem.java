@@ -16,7 +16,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.UUID;
 
 public final class HariantCommandItem extends HariantPlayerCommand {
     
@@ -170,9 +169,7 @@ public final class HariantCommandItem extends HariantPlayerCommand {
                     return;
                 }
                 
-                final ItemInstance newInstance = item.newInstance(database, UUID.randomUUID());
-                
-                database.inventory.createItem(newInstance);
+                final ItemInstance itemInstance = database.inventory.createItem(item);
                 
                 HariantLogger.success(
                         player,
@@ -180,7 +177,7 @@ public final class HariantCommandItem extends HariantPlayerCommand {
                                  .append(Component.text("Created "))
                                  .append(item.getName())
                                  .append(Component.text(" for %s! ".formatted(target.getName())))
-                                 .hoverEvent(newInstance.createHoverEvent())
+                                 .hoverEvent(itemInstance.createHoverEvent())
                 );
             }
             

@@ -6,7 +6,6 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.HariantLogger;
-import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.task.HariantTask;
 import me.hapyl.hariant.task.Scheduler;
 import net.kyori.adventure.text.Component;
@@ -47,7 +46,7 @@ public class GameInstanceCountdown extends HariantTask {
         else {
             final Component subtitle = SUBTITLE_COMPONENTS.getOrDefault(secondsBeforeTheGameStarts, Component.empty());
             final Title title = Title.title(TITLE_COMPONENT, subtitle, 0, 25, 5);
-            final float pitch = (1.5f - (1.5f * (float) secondsBeforeTheGameStarts / HariantConstants.GAME_START_COUNTDOWN_IN_SECONDS));
+            final float pitch = 2 - (1.5f * ((float) secondsBeforeTheGameStarts / HariantConstants.GAME_START_COUNTDOWN_IN_SECONDS));
             
             Bukkit.getOnlinePlayers().forEach(player -> {
                 player.showTitle(title);
@@ -61,16 +60,11 @@ public class GameInstanceCountdown extends HariantTask {
         secondsBeforeTheGameStarts--;
     }
     
-    public void cancel(@Nullable PlayerProfile canceller) {
+    public void cancel(@Nullable Component reason) {
         this.cancel();
         
-        if (canceller != null) {
-            HariantLogger.PREFIX_INFO.broadcastMessage(
-                    Component.empty()
-                             .append(canceller.getNameFormatted())
-                             .appendSpace()
-                             .append(Component.text("cancelled the countdown!", Colors.ERROR))
-            );
+        if (reason != null) {
+            HariantLogger.PREFIX_ERROR.broadcastMessage(reason);
         }
     }
     

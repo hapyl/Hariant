@@ -40,6 +40,13 @@ public enum Archetype implements Prefixed, Named, Described, Styled, ComponentLi
             Style.style(Colors.ARCHETYPE_HEXBANE)
     ),
     
+    DEFENSE(
+            Component.text("🛡"),
+            Component.text("Defense"),
+            Component.text("Protects allies through defensive force."),
+            Style.style(Colors.ARCHETYPE_DEFENSE)
+    ),
+    
     ;
     
     private final Component prefix;

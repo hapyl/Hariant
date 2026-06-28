@@ -6,6 +6,7 @@ import me.hapyl.eterna.module.util.Buildable;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,8 @@ public interface ShieldStrength {
             this.elementalStrengthMap = Maps.newEnumMap(ElementType.class);
         }
         
-        public @SelfReturn Builder ofElement(@NotNull ElementType elementType, double strength) {
+        @SelfReturn
+        public Builder ofElement(@NotNull ElementType elementType, double strength) {
             if (strength < HariantConstants.SHIELD_STRENGTH_MINIMUM) {
                 throw new IllegalArgumentException("Shield strength cannot be lower than %s!".formatted(HariantConstants.SHIELD_STRENGTH_MINIMUM));
             }
@@ -44,6 +46,11 @@ public interface ShieldStrength {
             
             elementalStrengthMap.put(elementType, strength);
             return this;
+        }
+        
+        @SelfReturn
+        public Builder ofElement(@NotNull ElementType elementType, @NotNull Decimal decimal) {
+            return this.ofElement(elementType, decimal.doubleValue());
         }
         
         @Override

@@ -4,7 +4,6 @@ import me.hapyl.eterna.module.entity.Entities;
 import me.hapyl.eterna.module.location.Distanced;
 import me.hapyl.eterna.module.location.Located;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
-import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.ImmunityResult;
@@ -17,17 +16,19 @@ import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Bee;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class BeePet extends HariantEntity implements Pet, Distanced, Located, Removable {
+public class BeePet extends HariantEntity implements Pet, Distanced, Located {
     
     private static final Attributes BEE_ATTRIBUTES = Attributes.base(1, 1, 1);
     
     private final HariantPlayer player;
     private final Component name;
     
-    public HariantEntity target;
+    public @Nullable BeeTarget target;
+    public int targetCooldown;
     
     BeePet(@NotNull HariantPlayer player, @NotNull Location location) {
         super(createBee(location), BEE_ATTRIBUTES);
@@ -86,6 +87,11 @@ public class BeePet extends HariantEntity implements Pet, Distanced, Located, Re
         setAngry(false);
     }
     
+    public void unsetTarget(int cooldown) {
+        this.target = null;
+        this.targetCooldown = cooldown;
+    }
+    
     @NotNull
     private static Bee createBee(@NotNull Location location) {
         return Entities.BEE.spawn(location, self -> {
@@ -95,4 +101,5 @@ public class BeePet extends HariantEntity implements Pet, Distanced, Located, Re
             self.setSilent(true);
         });
     }
+    
 }

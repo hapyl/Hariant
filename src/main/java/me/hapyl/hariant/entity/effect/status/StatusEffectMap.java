@@ -3,8 +3,7 @@ package me.hapyl.hariant.entity.effect.status;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.AssistSource;
-import me.hapyl.hariant.entity.effect.EffectType;
+import me.hapyl.hariant.event.HariantEffectEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -45,10 +44,7 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     
     @Override
     public void addEffect(@NotNull EnumStatusEffect effect, int duration, @NotNull HariantEntity applier) {
-        final EffectType effectType = effect.getEffectType();
-        
-        // If effect is a DEBUFF, check for Effect Resistance and cancel if entity resisted the effect
-        if (effectType == EffectType.DEBUFF && entity.hasEffectResistance(AssistSource.create(applier, effect))) {
+        if (HariantEffectEvent.callEvent(entity, applier, effect)) {
             return;
         }
         
@@ -65,12 +61,6 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
             
             // Call event
             effect.onApply(entity, applier, duration);
-        }
-        
-        // Call event if applier exists
-        switch (effectType) {
-            case BUFF -> entity.triggerBuff(applier);
-            case DEBUFF -> entity.triggerDebuff(applier);
         }
     }
     

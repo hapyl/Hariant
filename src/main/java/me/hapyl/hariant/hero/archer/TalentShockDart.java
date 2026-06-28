@@ -43,8 +43,8 @@ import java.util.stream.Stream;
 
 public final class TalentShockDart extends Talent implements Listener {
     
-    @DisplayField private final AttributeScaling arrowDamage = AttributeScaling.of(AttributeType.ATTACK, 67);
-    @DisplayField private final AttributeScaling explosionMaxDamage = AttributeScaling.of(AttributeType.ATTACK, 345);
+    @DisplayField private final AttributeScaling arrowDamage = AttributeScaling.create(AttributeType.ATTACK, 67);
+    @DisplayField private final AttributeScaling explosionMaxDamage = AttributeScaling.create(AttributeType.ATTACK, 345);
     
     @DisplayField private final Decimal explosionRadius = Decimal.ofValue(4.0);
     @DisplayField private final Decimal explosionDelay = Decimal.ofSeconds(1.2f);

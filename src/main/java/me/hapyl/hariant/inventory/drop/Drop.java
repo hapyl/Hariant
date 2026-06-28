@@ -1,44 +1,20 @@
 package me.hapyl.hariant.inventory.drop;
 
-import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.registry.Keyed;
+import me.hapyl.hariant.util.Hoverable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Represents a generated {@link Droppable}.
- */
-public final class Drop {
+public interface Drop extends Keyed, Hoverable {
     
-    private final Droppable droppable;
-    private final DropTier dropTier;
+    @Override
+    @NotNull Key getKey();
     
-    private final double dropChance;
-    private final int amount;
+    @NotNull Component getNameStyled();
     
-    Drop(@NotNull Droppable droppable, @NotNull DropTier dropTier, double dropChance, int amount) {
-        this.droppable = droppable;
-        this.amount = amount;
-        this.dropChance = dropChance;
-        this.dropTier = dropTier;
-    }
-    
-    public @NotNull Droppable getDroppable() {
-        return droppable;
-    }
-    
-    public @NotNull DropTier getDropTier() {
-        return dropTier;
-    }
-    
-    public double getDropChance() {
-        return dropChance;
-    }
-    
-    public int getAmount() {
-        return amount;
-    }
-    
-    public void drop(@NotNull PlayerProfile profile) {
-        droppable.drop(profile, this);
-    }
+    @Override
+    @NotNull HoverEvent<?> createHoverEvent();
     
 }

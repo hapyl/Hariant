@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-public final class Timestamp implements ComponentLike {
+public final class Timestamp implements ComponentLike, Comparable<Timestamp> {
     
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     
@@ -28,6 +28,11 @@ public final class Timestamp implements ComponentLike {
     @Override
     public Component asComponent() {
         return component;
+    }
+    
+    @Override
+    public int compareTo(@NotNull Timestamp that) {
+        return Long.compare(this.timestamp, that.timestamp);
     }
     
     @NotNull

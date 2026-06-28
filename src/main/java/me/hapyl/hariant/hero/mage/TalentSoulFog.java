@@ -49,7 +49,7 @@ public class TalentSoulFog extends Talent {
     @DisplayField private final Decimal soulFogExplosionRadius = Decimal.ofValue(3);
     @DisplayField private final Decimal soulFogExplosionAetherAnomalyApplication = Decimal.ofElementalApplication(ElementType.AETHER, 200);
     
-    @DisplayField private final AttributeScaling soulFogExplosionDamage = AttributeScaling.of(AttributeType.ATTACK, 241);
+    @DisplayField private final AttributeScaling soulFogExplosionDamage = AttributeScaling.create(AttributeType.ATTACK, 241);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             this,

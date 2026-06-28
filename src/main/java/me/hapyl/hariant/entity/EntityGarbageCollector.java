@@ -1,51 +1,61 @@
 package me.hapyl.hariant.entity;
 
 import me.hapyl.hariant.Hariant;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
+import org.bukkit.Chunk;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
 import java.util.logging.Logger;
 
-// FIXME (xanyjl @ Sunday, May 24) -> This doesn't work for some reason?
 public class EntityGarbageCollector implements Listener {
     
-    private static final String GARBAGE_ENTITY_TAG = "__garbage_entity__";
+    private static final NamespacedKey GARBAGE_KEY = new NamespacedKey(Hariant.getPlugin(), "garbage_entity");
+    private static final String GARBAGE_VALUE = UUID.randomUUID().toString().substring(0, 8);
+    
+    public EntityGarbageCollector() {
+    }
     
     public static void add(@NotNull Entity entity) {
-        entity.addScoreboardTag(GARBAGE_ENTITY_TAG);
+        entity.getPersistentDataContainer().set(GARBAGE_KEY, PersistentDataType.STRING, GARBAGE_VALUE);
     }
     
     public static void add(@NotNull HariantEntity entity) {
         entity.listGarbage().forEach(EntityGarbageCollector::add);
     }
     
-    public static void clearGarbage() {
-        int entitiesRemoved = 0;
+    private static boolean isGarbageEntity(@NotNull Entity entity) {
+        final PersistentDataContainer persistentDataContainer = entity.getPersistentDataContainer();
+        final String value = persistentDataContainer.get(GARBAGE_KEY, PersistentDataType.STRING);
         
-        for (World world : Bukkit.getWorlds()) {
-            for (Entity entity : world.getEntities()) {
-                if (isGarbageEntity(entity)) {
-                    entity.remove();
-                    entitiesRemoved++;
-                }
+        return value != null && !value.equals(GARBAGE_VALUE);
+    }
+    
+    @EventHandler
+    public void handleChunkLoadEvent(ChunkLoadEvent ev) {
+        final Chunk chunk = ev.getChunk();
+        int removedEntities = 0;
+        
+        for (Entity entity : chunk.getEntities()) {
+            if (isGarbageEntity(entity)) {
+                entity.remove();
+                removedEntities++;
             }
+        }
+        
+        if (removedEntities == 0) {
+            return;
         }
         
         final Logger logger = Hariant.getPlugin().getLogger();
         
-        if (entitiesRemoved == 0) {
-            logger.info("No garbage entities detected.");
-        }
-        else {
-            logger.info("Removed %s garbage entities!".formatted(entitiesRemoved));
-        }
-    }
-    
-    private static boolean isGarbageEntity(@NotNull Entity entity) {
-        return entity.getScoreboardTags().contains(GARBAGE_ENTITY_TAG);
+        logger.info("Removed %s garbage entities in chunk [%s, %s]!".formatted(removedEntities, chunk.getX(), chunk.getZ()));
     }
     
 }

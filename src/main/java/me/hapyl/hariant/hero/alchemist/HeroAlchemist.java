@@ -1,10 +1,7 @@
 package me.hapyl.hariant.hero.alchemist;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
-import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.eterna.module.text.RomanNumber;
-import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
@@ -12,12 +9,10 @@ import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.*;
 import me.hapyl.hariant.talent.TalentRegistry;
-import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.weapon.Weapon;
 import me.hapyl.hariant.weapon.WeaponMelee;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -39,8 +34,9 @@ public class HeroAlchemist extends Hero {
         super(
                 key,
                 Component.text("Alchemist"),
-                Attributes.base(1250, 80, 50)
-                          .adjust(AttributeType.MOVEMENT_SPEED, 115),
+                Attributes.base(1000, 80, 50)
+                          .adjust(AttributeType.MOVEMENT_SPEED, 115)
+                          .adjust(AttributeType.TOXIC_RESISTANCE, 60),
                 new WeaponAlchemistStick()
         );
         
@@ -154,45 +150,7 @@ public class HeroAlchemist extends Hero {
     @NotNull
     @Override
     public List<Component> supplyActionbar(@NotNull HariantPlayer player) {
-        final HeroDataAlchemist heroData = player.getHeroData(HeroRegistry.ALCHEMIST, HeroDataAlchemist::new);
-        
-        final AlchemistPotionInstance potionInstance = heroData.getPotionInstance();
-        final HariantEntityAlchemicalCauldron alchemicalCauldron = heroData.getAlchemicalCauldron();
-        final int alchemicalMadness = heroData.getAlchemicalMadness();
-        
-        final Style abyssalCorrosionStyle = Definition.ABYSSAL_CORROSION.getStyle();
-        final int abyssalCorrosionLevel = heroData.getAbyssalCorrosionLevel();
-        
-        return List.of(
-                // Append corrosion
-                Component.empty()
-                         .append(Definition.ABYSSAL_CORROSION.getPrefixStyled())
-                         .appendSpace()
-                         .append(Component.text("%.0f".formatted(heroData.getAbyssalCorrosion()), abyssalCorrosionStyle))
-                         .appendSpace()
-                         .append(
-                                 abyssalCorrosionLevel == 0
-                                 ? Component.text("✗", abyssalCorrosionStyle)
-                                 : Component.text(RomanNumber.toRoman(abyssalCorrosionLevel), abyssalCorrosionStyle)
-                         ),
-                
-                // Append current potion
-                potionInstance != null
-                ? Component.empty()
-                           .append(Component.text("\uD83E\uDDEA ", Colors.DARK_PURPLE))
-                           .append(Component.text(Tick.format(potionInstance.currentTick()), Colors.LIGHT_PURPLE))
-                : Component.empty(),
-                
-                // Append cauldron
-                alchemicalCauldron != null
-                ? alchemicalCauldron.asComponent()
-                : Component.empty(),
-                
-                // Append madness
-                alchemicalMadness > 0
-                ? heroData.getAlchemicalMadnessFormatted()
-                : Component.empty()
-        );
+        return player.getHeroData(HeroRegistry.ALCHEMIST, HeroDataAlchemist::new).supplyActionbar(player);
     }
     
     public int getCurseDuration(@NotNull HariantPlayer player, int baseDuration) {
@@ -200,7 +158,7 @@ public class HeroAlchemist extends Hero {
         final HeroDataAlchemist heroData = player.getHeroData(this, HeroDataAlchemist::new);
         final double abyssalCorrosion = heroData.getAbyssalCorrosion();
         
-        return (int) (baseDuration * (1 - (((int) (abyssalCorrosion / passiveTalent.abyssalCurseInstabilityDecrementThreshold.doubleValue())) * passiveTalent.abyssalCurseInstabilityDecrement.doubleValue())));
+        return (int) (baseDuration * (1 - ((double) Math.floorDiv((int) abyssalCorrosion, passiveTalent.instabilityDecrementThreshold.intValue()) * passiveTalent.instabilityDecrement.doubleValue())));
     }
     
     private static class WeaponAlchemistStick extends WeaponMelee {

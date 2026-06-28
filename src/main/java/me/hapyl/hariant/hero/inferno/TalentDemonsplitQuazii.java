@@ -10,7 +10,6 @@ import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.entity.Pet;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.mutator.Decay;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -27,7 +26,6 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public final class TalentDemonsplitQuazii extends TalentDemonsplit {
@@ -37,10 +35,10 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
     @DisplayField private final Decimal beamGrowthDelay = Decimal.ofSeconds(2);
     @DisplayField private final Decimal beamRadius = Decimal.ofValue(0.6);
     
-    @DisplayField private final Decimal decayWorthOfMaxHealth = Decimal.ofPercentage(25);
+    @DisplayField private final Decimal decayWorthOfMaxHealth = Decimal.ofPercentage(20);
     @DisplayField private final Decimal decayDuration = Decimal.ofSeconds(6);
     
-    @DisplayField private final Decimal healingPerEnemyHitWithBeamOfMaxHealth = Decimal.ofPercentage(30);
+    @DisplayField private final Decimal healingPerEnemyHitWithBeamOfMaxHealth = Decimal.ofPercentage(20);
     
     public TalentDemonsplitQuazii(@NotNull Key key) {
         super(key, InfernoDemonType.QUAZII);

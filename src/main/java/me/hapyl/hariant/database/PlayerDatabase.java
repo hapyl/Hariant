@@ -203,7 +203,7 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
     }
     
     private <E extends PlayerDatabaseEntry> E deserialize(@NotNull String parent, @NotNull Class<E> clazz, @NotNull ProblemReporter problemReporter) {
-        final E deserialize = MongoSerializable.deserialize(parent, clazz, this, root, problemReporter);
+        final E deserialize = MongoSerializable.Deserializer.deserialize(parent, clazz, this, root, problemReporter);
         
         // Add to the list for serialization
         entries.add(deserialize);

@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public class AttributeModifier
         implements
         Effect, TickDuration, TickingEntity, Streamable<AttributeModifier.Entry>,
-        AttributeModifierAdder, ComponentDisplayable, Named, AssistSource {
+        AttributeModifierAdder, ComponentDisplayable, AssistSource {
     
     protected final Set<Entry> entries;
     protected final int duration;

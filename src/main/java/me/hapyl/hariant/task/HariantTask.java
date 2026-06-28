@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.annotate.EventLike;
 import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.hariant.game.GameInstance;
+import me.hapyl.hariant.util.Cancellable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 

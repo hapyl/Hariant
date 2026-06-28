@@ -2,12 +2,14 @@ package me.hapyl.hariant.task.executor;
 
 import com.google.common.collect.Lists;
 import me.hapyl.eterna.module.annotate.SelfReturn;
-import me.hapyl.hariant.entity.player.HariantPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
 
+/**
+ * The {@link ExecutorService} is an {@link Executable} that allows chaining {@link Executable} calls.
+ */
 public class ExecutorService implements Executable {
     
     private final Promise promise;
@@ -16,12 +18,9 @@ public class ExecutorService implements Executable {
     @Nullable
     private Executable executable;
     
-    public ExecutorService(@NotNull HariantPlayer player) {
+    public ExecutorService() {
         this.promise = new Promise();
         this.executables = Lists.newLinkedList();
-        
-        // Delegate this service to player
-        player.delegate(this);
     }
     
     @SelfReturn
@@ -49,11 +48,13 @@ public class ExecutorService implements Executable {
     
     @Override
     public void cancel() {
+        // Cancel current executable
         if (executable != null) {
             executable.cancel();
         }
         
         executables.clear();
+        promise.fulfil();
     }
     
 }

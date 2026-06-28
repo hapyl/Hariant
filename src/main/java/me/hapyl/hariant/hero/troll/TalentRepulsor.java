@@ -2,7 +2,8 @@ package me.hapyl.hariant.hero.troll;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.entity.damage.AssistSource;
+import me.hapyl.hariant.entity.effect.Effect;
+import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -20,7 +21,7 @@ import org.bukkit.Sound;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-public final class TalentRepulsor extends Talent {
+public final class TalentRepulsor extends Talent implements Effect {
     
     @DisplayField private final Decimal radius = Decimal.ofValue(10);
     @DisplayField private final Decimal strength = Decimal.ofValue(1.2);
@@ -49,12 +50,11 @@ public final class TalentRepulsor extends Talent {
         player.collectNearbyEntities(radius)
               .filter(player::canAffect)
               .forEach(entity -> {
-                  if (entity.hasEffectResistance(AssistSource.create(player, this))) {
+                  if (entity.triggerEffect(player, this)) {
                       return;
                   }
                   
                   entity.setVelocity(new Vector(0, strength.doubleValue(), 0));
-                  entity.triggerDebuff(player);
                   
                   // Fx
                   final Location location = entity.getLocation();
@@ -68,5 +68,10 @@ public final class TalentRepulsor extends Talent {
         player.playSound(Sound.ENTITY_BREEZE_SHOOT, 1.25f);
         
         return Response.ok();
+    }
+    
+    @Override
+    public @NotNull EffectType getEffectType() {
+        return EffectType.DEBUFF;
     }
 }

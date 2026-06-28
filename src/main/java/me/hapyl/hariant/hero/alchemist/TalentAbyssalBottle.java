@@ -46,7 +46,7 @@ public final class TalentAbyssalBottle extends Talent implements MenuHeroTalents
                                               .put(2, new TalentAlchemistPotionSpeed(this))
                                               .put(3, new TalentAlchemistPotionAttack(this))
                                               .put(4, new TalentAlchemistPotionInvisibility(this))
-                                              .put(5, new TalentAlchemistPotionDefense(this))
+                                              .put(5, new TalentAlchemistPotionExplosion(this))
                                               .makeMap();
         
         this.setDescription(

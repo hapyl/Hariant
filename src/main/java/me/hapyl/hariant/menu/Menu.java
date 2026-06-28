@@ -52,6 +52,11 @@ public abstract class Menu extends PlayerMenu {
     }
     
     @Override
+    public int getReturnButtonSlot() {
+        return getMenuSize() - 8;
+    }
+    
+    @Override
     public final void onOpen() {
         this.fillRow(0, ItemStacks.blackBar());
         this.fillRow(this.getMenuHeight() - 1, ItemStacks.blackBar());
@@ -67,7 +72,7 @@ public abstract class Menu extends PlayerMenu {
     }
     
     @Override
-    public final void openMenu() {
+    public void openMenu() {
         if (Hariant.entityExists(player.getUniqueId())) {
             HariantLogger.error(player, Component.text("Menus cannot be opened in current state!"));
             return;

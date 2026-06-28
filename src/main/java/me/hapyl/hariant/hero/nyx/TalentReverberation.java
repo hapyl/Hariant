@@ -2,7 +2,6 @@ package me.hapyl.hariant.hero.nyx;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
@@ -11,6 +10,7 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.heal.HealingSource;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.shield.Shield;
 import me.hapyl.hariant.entity.shield.ShieldStrength;
@@ -32,14 +32,16 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentReverberation extends TalentPassive implements Listener {
     
-    @DisplayField public final AttributeScaling roseDamage = AttributeScaling.of(AttributeType.ATTACK, 45);
+    @DisplayField public final AttributeScaling roseDamage = AttributeScaling.create(AttributeType.ATTACK, 50);
+    
     @DisplayField public final Decimal roseBloomDelay = Decimal.ofSeconds(0.8f);
-    @DisplayField public final Decimal roseExplosionRadius = Decimal.ofValue(0.6);
-    @DisplayField public final Decimal roseElementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 200);
+    @DisplayField public final Decimal roseExplosionRadius = Decimal.ofValue(1.2);
+    @DisplayField public final Decimal roseElementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 250);
     
     @DisplayField private final Decimal voidShieldCapacityOfNyxMaxHealth = Decimal.ofPercentage(10);
     @DisplayField private final Decimal voidShieldHealingOfNyxMaxHealth = Decimal.ofPercentage(10);
     @DisplayField private final Decimal voidShieldAetherStrength = Decimal.ofPercentage(250);
+    @DisplayField private final Decimal voidShieldDuration = Decimal.ofSeconds(6);
     
     @DisplayField private final Decimal effectResistanceIncrease = Decimal.ofAttribute(AttributeType.EFFECT_RESISTANCE, 25);
     @DisplayField private final Decimal effectResistanceDuration = Decimal.ofSeconds(6);
@@ -69,25 +71,18 @@ public final class TalentReverberation extends TalentPassive implements Listener
                          .append(Component.text(" at the enemy's location."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("After "))
-                         .append(Component.text("a short delay, the rose blooms to life once again and explodes, dealing "))
-                         .append(ElementType.AETHER.asComponentAreaOfEffectDamage())
-                         .append(Component.text(" and applies "))
-                         .appendNewline() // fnl
-                         .append(ElementType.AETHER)
-                         .append(Component.text(" anomaly."))
-                         .appendNewline()
-                         .appendNewline()
                          .append(Component.text("Additionally, the "))
                          .append(Component.text("teammate", Colors.GREEN))
                          .append(Component.text(" who triggered the assist gains a "))
                          .append(Component.text("Void Shield", Colors.VOID))
+                         .append(Component.text(" for "))
+                         .append(voidShieldDuration)
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Void Shield", Colors.GOLD))
                          .appendNewline()
-                         .append(Component.text("Whenever the shield is broken or refreshes, it "))
+                         .append(Component.text("Whenever the shield is broken, expired or refreshed, it "))
                          .append(Component.text("heals", Colors.GREEN))
                          .append(Component.text(" its target and increases their "))
                          .append(AttributeType.EFFECT_RESISTANCE)
@@ -101,9 +96,10 @@ public final class TalentReverberation extends TalentPassive implements Listener
     
     @EventHandler
     public void handleHariantEffectEvent(HariantEffectEvent ev) {
+        final HariantEntity entity = ev.getEntity();
         final HariantEntity applier = ev.getApplier();
         
-        if (!(applier instanceof HariantPlayer player) || ev.getEffectType() != EffectType.DEBUFF) {
+        if (entity.equals(applier) || !(applier instanceof HariantPlayer player) || ev.getEffect().getEffectType() != EffectType.DEBUFF || ev.hasResisted()) {
             return;
         }
         
@@ -111,7 +107,6 @@ public final class TalentReverberation extends TalentPassive implements Listener
         
         // Find Nyx in the team without cooldown
         final HariantPlayer nyx = player.getPlayerTeam().getPlayers()
-                                        .stream()
                                         .filter(other -> {
                                             return other.getHero().equals(HeroRegistry.NYX)
                                                    && !other.hasCooldown(this)
@@ -128,7 +123,7 @@ public final class TalentReverberation extends TalentPassive implements Listener
         nyx.setCooldown(this);
         
         // Assist the player
-        this.assist(ev.getEntity(), player, nyx);
+        this.assist(entity, player, nyx);
     }
     
     public void assist(@NotNull HariantEntity entity, @NotNull HariantPlayer attacker, @NotNull HariantPlayer nyx) {
@@ -136,47 +131,37 @@ public final class TalentReverberation extends TalentPassive implements Listener
         this.createRose(nyx, entity.getLocation());
         
         // Create shield
-        attacker.setShield(new VoidShield(attacker, nyx.getMaxHealth() * voidShieldCapacityOfNyxMaxHealth.doubleValue(), nyx));
+        attacker.setShield(new VoidShield(attacker, nyx, nyx.getMaxHealth() * voidShieldCapacityOfNyxMaxHealth.doubleValue()));
     }
     
     public void createRose(@NotNull HariantPlayer player, @NotNull Location location) {
-        player.delegate(new WiltedRose(player, location, this));
+        player.delegate(new WiltedRose(player, location, this), DelegateType.INTERRUPTABLE);
     }
     
     public class VoidShield extends Shield {
         
-        private final HariantPlayer nyx;
         private final HealingSource healingSource;
         
-        VoidShield(@NotNull HariantEntity entity, double maximumCapacity, @NotNull HariantPlayer nyx) {
-            super(entity, shieldStrength, maximumCapacity, HariantConstants.INDEFINITE_DURATION);
+        VoidShield(@NotNull HariantEntity entity, @NotNull HariantPlayer applier, double maximumCapacity) {
+            super(entity, applier, shieldStrength, maximumCapacity, voidShieldDuration.intValue());
             
-            this.nyx = nyx;
-            this.healingSource = HealingSource.create(nyx.getMaxHealth() * voidShieldHealingOfNyxMaxHealth.doubleValue(), nyx);
+            this.healingSource = HealingSource.create(applier.getMaxHealth() * voidShieldHealingOfNyxMaxHealth.doubleValue(), applier);
         }
         
         @Override
         public void onRemove(@NotNull Cause cause) {
-            if (cause != Cause.BROKE && cause != Cause.REPLACED) {
+            // Don't heal if entity hsa died
+            if (cause == Cause.ENTITY_DIED) {
                 return;
             }
             
             // If the shield broke, heal the target by nyx
             entity.heal(healingSource);
-            entity.getAttributes().addModifier(new AttributeModifierReverberation(nyx));
+            entity.getAttributes().addModifier(new AttributeModifierReverberation(applier));
             
             // Fx
             entity.playWorldSound(Sound.ENTITY_ENDERMAN_TELEPORT, 0.75f);
             entity.playWorldSound(Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.25f);
-        }
-        
-        @Override
-        public @NotNull Component asComponent() {
-            return super.asComponent()
-                        .appendSpace()
-                        .append(Component.text("[", Colors.GRAY))
-                        .append(nyx.asHeadComponent())
-                        .append(Component.text("]", Colors.GRAY));
         }
         
         @Override

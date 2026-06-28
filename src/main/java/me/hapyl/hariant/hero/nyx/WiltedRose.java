@@ -94,7 +94,7 @@ public final class WiltedRose extends HariantTickingTask {
     public void bloom() {
         final DamageSource damageSource = new WilterRoseDamageSource(player, talent.roseDamage.getScaledValue(player), talent.roseElementalApplication.doubleValue());
         
-        player.collectNearbyEntities(location, talent.roseExplosionRadius)
+        player.collectNearbyEntities(location.add(0, 1, 0), talent.roseExplosionRadius)
               .filter(player::canAffect)
               .forEach(entity -> {
                   entity.damage(damageSource);

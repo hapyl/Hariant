@@ -1,4 +1,4 @@
-package me.hapyl.hariant.task;
+package me.hapyl.hariant.util;
 
 public interface Cancellable {
     

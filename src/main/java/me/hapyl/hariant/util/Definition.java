@@ -6,6 +6,7 @@ import me.hapyl.hariant.Colors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
 public enum Definition implements Prefixed, Named, Styled, ComponentLike {
@@ -38,6 +39,12 @@ public enum Definition implements Prefixed, Named, Styled, ComponentLike {
             Component.text("\uD83D\uDC94"),
             Component.text("Decay"),
             Style.style(Colors.DECAY)
+    ),
+    
+    QUANTUM_ENERGY(
+            Component.text("⚛"),
+            Component.text("Quantum Energy"),
+            Style.style(TextColor.color(0x7B2FFF))
     ),
     
     ;

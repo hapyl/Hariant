@@ -5,6 +5,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -20,10 +21,10 @@ import java.util.logging.Logger;
 
 public final class HariantLogger {
     
-    public static final Prefix PREFIX_INFO = Prefix.create(Component.text("ℹ", TextColor.color(0xB6CFE1)), Component.space());
-    public static final Prefix PREFIX_ERROR = defaultPrefix(Component.text("✘", TextColor.color(0xAF0000)));
-    public static final Prefix PREFIX_SUCCESS = defaultPrefix(Component.text("✔", TextColor.color(0x12CD08)));
-    public static final Prefix PREFIX_SYSTEM = defaultPrefix(Component.text("SYSTEM", TextColor.color(0xFF2F31), TextDecoration.BOLD));
+    public static final Prefix PREFIX_INFO = create(Component.text("ℹ", TextColor.color(0xB6CFE1)), Style.style(Colors.GRAY));
+    public static final Prefix PREFIX_SUCCESS = createDefault(Component.text("✔", TextColor.color(0x12CD08)), Style.style(Colors.SUCCESS));
+    public static final Prefix PREFIX_ERROR = createDefault(Component.text("✘", TextColor.color(0xAF0000)), Style.style(Colors.ERROR));
+    public static final Prefix PREFIX_SYSTEM = createDefault(Component.text("SYSTEM", TextColor.color(0xFF2F31), TextDecoration.BOLD), Style.style(TextColor.color(0xD6BEB8)));
     
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss");
     private static final Logger LOGGER = Hariant.getPlugin().getLogger();
@@ -32,19 +33,19 @@ public final class HariantLogger {
     }
     
     public static void info(@NotNull Audience audience, @NotNull Component message) {
-        PREFIX_INFO.sendMessage(audience, message.color(Colors.DEFAULT_COLOR));
+        PREFIX_INFO.sendMessage(audience, message);
     }
     
     public static void success(@NotNull Audience audience, @NotNull Component message) {
-        PREFIX_SUCCESS.sendMessage(audience, message.color(Colors.SUCCESS));
+        PREFIX_SUCCESS.sendMessage(audience, message);
     }
     
     public static void error(@NotNull Audience audience, @NotNull Component message) {
-        PREFIX_ERROR.sendMessage(audience, message.color(Colors.ERROR));
+        PREFIX_ERROR.sendMessage(audience, message);
     }
     
     public static void system(@NotNull Audience audience, @NotNull Component message) {
-        PREFIX_SYSTEM.sendMessage(audience, message.color(TextColor.color(0xD6BEB8)));
+        PREFIX_SYSTEM.sendMessage(audience, message);
     }
     
     public static void debug(@NotNull Object object) {
@@ -98,14 +99,17 @@ public final class HariantLogger {
         return LOGGER;
     }
     
-    @NotNull
-    private static Prefix defaultPrefix(@NotNull Component prefix) {
-        return Prefix.create(
+    private static @NotNull Prefix create(@NotNull Component prefix, @NotNull Style messageStyle) {
+        return new HariantPrefix(prefix, Component.space(), messageStyle);
+    }
+    
+    private static @NotNull Prefix createDefault(@NotNull Component prefix, @NotNull Style messageStyle) {
+        return create(
                 Component.empty()
                          .append(Component.text("「", Colors.DARK_GRAY))
                          .append(prefix)
                          .append(Component.text("」", Colors.DARK_GRAY)),
-                Component.space()
+                messageStyle
         );
     }
     
@@ -130,6 +134,47 @@ public final class HariantLogger {
         default void messageSystem(@NotNull Component message) {
             system(this, message);
         }
+    }
+    
+    public static class HariantPrefix implements Prefix {
+        
+        private final Component prefix;
+        private final Component separator;
+        private final Style messageStyle;
+        
+        HariantPrefix(@NotNull Component prefix, @NotNull Component separator, @NotNull Style messageStyle) {
+            this.prefix = prefix;
+            this.separator = separator;
+            this.messageStyle = messageStyle;
+        }
+        
+        @Override
+        public @NotNull Component getPrefix() {
+            return prefix;
+        }
+        
+        @Override
+        public @NotNull Component getSeparator() {
+            return separator;
+        }
+        
+        @Override
+        public void sendMessage(@NotNull Audience audience, @NotNull Component message) {
+            audience.sendMessage(this.prefix(message));
+        }
+        
+        @Override
+        public void broadcastMessage(@NotNull Component message) {
+            Bukkit.broadcast(this.prefix(message));
+        }
+        
+        private @NotNull Component prefix(@NotNull Component message) {
+            return Component.empty()
+                            .append(prefix)
+                            .append(separator)
+                            .append(message.style(messageStyle));
+        }
+        
     }
     
 }

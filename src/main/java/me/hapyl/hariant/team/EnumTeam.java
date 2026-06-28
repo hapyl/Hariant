@@ -267,12 +267,11 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
     }
     
     @NotNull
-    public List<HariantPlayer> getPlayers() {
+    public Stream<HariantPlayer> getPlayers() {
         return entries.stream()
                       .map(entry -> Hariant.getEntity(entry.getUuid(), HariantPlayer.class))
                       .filter(Optional::isPresent)
-                      .map(Optional::get)
-                      .toList();
+                      .map(Optional::get);
     }
     
     @NotNull

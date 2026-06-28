@@ -18,8 +18,12 @@ public final class ItemRegistry extends StaticRegistry<Item> {
     public static final ItemArtifact ARTIFACT_ANTIQUE_POCKET_WATCH;
     public static final ItemArtifact ARTIFACT_INFERNAL_CRUCIBLE;
     public static final ItemArtifact ARTIFACT_LIGHTNING_IN_A_BOTTLE;
+    public static final ItemArtifact ARTIFACT_VOID_RIFT;
+    public static final ItemArtifact ARTIFACT_CUIRASS;
     
     private static final StaticRegistryMap<Item> REGISTRY;
+    
+    // TODO (xanyjl @ Monday, June 22) -> We might need to add a sub-map for artifacts?
     
     static {
         REGISTRY = StaticRegistry.requestRegistry(ItemRegistry.class);
@@ -33,6 +37,8 @@ public final class ItemRegistry extends StaticRegistry<Item> {
         ARTIFACT_ANTIQUE_POCKET_WATCH = REGISTRY.register("artifact_antique_pocket_watch", ItemArtifactAntiquePocketWatch::new);
         ARTIFACT_INFERNAL_CRUCIBLE = REGISTRY.register("artifact_infernal_crucible", ItemArtifactInfernalCrucible::new);
         ARTIFACT_LIGHTNING_IN_A_BOTTLE = REGISTRY.register("artifact_lightning_in_a_bottle", ItemArtifactLightningInABottle::new);
+        ARTIFACT_VOID_RIFT = REGISTRY.register("artifact_void_rift", ItemArtifactVoidRift::new);
+        ARTIFACT_CUIRASS = REGISTRY.register("artifact_cuirass", ItemArtifactCuirass::new);
     }
     
     @NotNull

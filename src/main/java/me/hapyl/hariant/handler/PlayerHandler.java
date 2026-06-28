@@ -8,6 +8,7 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.database.rank.RankFormatter;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.SitHandler;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.frozen.FrozenHandler;
@@ -72,7 +73,12 @@ public final class PlayerHandler implements Listener {
             );
         }
         
-        // TODO Cancel countdown if player joined
+        Hariant.cancelCountdown(
+                Component.empty()
+                         .append(Component.text("The countdown was cancelled because "))
+                         .append(profile.getNameFormatted())
+                         .append(Component.text(" has joined."))
+        );
     }
     
     @EventHandler(priority = EventPriority.LOWEST)
@@ -280,7 +286,9 @@ public final class PlayerHandler implements Listener {
             return;
         }
         
-        if (hariantPlayer.isBlockDismount()) {
+        final SitHandler sitHandler = hariantPlayer.getSitHandler();
+        
+        if (sitHandler != null && !sitHandler.allowDismount()) {
             ev.setCancelled(true);
         }
     }

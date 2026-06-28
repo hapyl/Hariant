@@ -210,7 +210,7 @@ public interface HariantConstants {
      */
     @NotNull Component CHARACTER_LETHAL_DAMAGE = Component.text("☠");
     
-    static @NotNull ComponentStyler createStylerWithPadding(int padding) {
+    private static @NotNull ComponentStyler createStylerWithPadding(int padding) {
         return ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(padding).build();
     }
     

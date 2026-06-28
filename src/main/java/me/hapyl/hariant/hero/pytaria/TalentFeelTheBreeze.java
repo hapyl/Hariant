@@ -22,17 +22,19 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentFeelTheBreeze extends TalentUltimate {
     
-    @DisplayField public final Decimal numberOfBees = Decimal.ofValue(10);
-    @DisplayField public final Decimal delayBeforeBeesCanTarget = Decimal.ofSeconds(1.5f);
+    public final @DisplayField Decimal numberOfBees = Decimal.ofValue(5);
+    public final @DisplayField Decimal delayBeforeBeesCanTarget = Decimal.ofSeconds(1.5f);
+    public final @DisplayField Decimal beeGivesUpAfterChasingFor = Decimal.ofSeconds(10);
+    public final @DisplayField Decimal beeTargetLossCooldown = Decimal.ofSeconds(2);
     
-    @DisplayField public final Decimal maxStrayDistance = Decimal.ofValue(16);
-    @DisplayField public final Decimal stingDistance = Decimal.ofValue(1.5);
-    @DisplayField public final Decimal enemyLookupRadius = Decimal.ofValue(5);
+    public final @DisplayField Decimal maxStrayDistance = Decimal.ofValue(16);
+    public final @DisplayField Decimal stingDistance = Decimal.ofValue(1.5);
+    public final @DisplayField Decimal enemyLookupRadius = Decimal.ofValue(5);
     
-    @DisplayField public final AttributeScaling beeDamage = AttributeScaling.of(AttributeType.ATTACK, 124);
-    @DisplayField public final AttributeScaling beeDamageIvy = AttributeScaling.of(AttributeType.ATTACK, 166);
+    public final @DisplayField AttributeScaling beeDamage = AttributeScaling.create(AttributeType.ATTACK, 164);
+    public final @DisplayField AttributeScaling beeDamageIvy = AttributeScaling.create(AttributeType.ATTACK, 204);
     
-    @DisplayField public final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 25);
+    public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 100);
     
     public TalentFeelTheBreeze(@NotNull Key key) {
         super(key, Component.text("Feel the Breeze"), Icon.ofTexture("d4579f1ea3864269c2148d827c0887b0c5ed43a975b102a01afb644efb85ccfd"), UltimateResourceType.ENERGY, 60);

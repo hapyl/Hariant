@@ -8,6 +8,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
@@ -67,70 +68,17 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
         final int duration = calculateDuration(source);
         final double damage = calculateDamage(source);
         
-        final Location location = entity.getLocation().add(0, 0.25, 0);
-        final DamageSource damageSource = DamageSource.builder(damageSourceIdentity, damage)
-                                                      .source(source)
-                                                      .elementType(ElementType.TOXIC)
-                                                      .damageType(DamageType.ANOMALY)
-                                                      .damageFlag(DamageFlag.CANNOT_KILL)
-                                                      .build();
-        
-        
-        new HariantTickingTask(Scheduler.ofTimer()) {
-            @Override
-            public void run(int tick) {
-                if (tick > duration) {
-                    this.cancel();
-                    return;
-                }
-                
-                // Affect entities
-                entity.collectNearbyEntities(cloudRadius)
-                      .filter(entity -> source == null || source.canAffect(entity))
-                      .forEach(entity -> {
-                          // Deal damage
-                          if (tick % cloudDamagePeriod == 0) {
-                              entity.damage(damageSource);
-                              
-                              // Apply modifier
-                              entity.getAttributes().addModifier(new AttributeModifierInfested(source != null ? source : entity));
-                          }
-                          
-                          // Display warning
-                          entity.showWarning(WarningType.DANGER, 5);
-                      });
-                
-                // Fx
-                final double radians = Math.toRadians(tick * 5);
-                
-                final double x = Math.sin(radians) * cloudRadius;
-                final double y = Math.sin(Math.toRadians(tick * 10)) * 0.2;
-                final double z = Math.cos(radians) * cloudRadius;
-                
-                LocationHelper.offset(location, x, y, z, this::drawParticle);
-                LocationHelper.offset(location, -x, y, -z, this::drawParticle);
-                
-                // Inner fx
-                final double offset = Math.min(radians, cloudRadius * 0.5);
-                
-                entity.spawnWorldParticle(location, Particle.TRIAL_OMEN, 10, offset, offset, offset, 0.125f);
-            }
-            
-            private void drawParticle(@NotNull Location location) {
-                entity.spawnWorldParticle(
-                        location,
-                        Particle.DUST_COLOR_TRANSITION,
-                        10,
-                        0, 0, 0,
-                        0.25f,
-                        new Particle.DustTransition(
-                                Color.fromRGB(161, 237, 128),
-                                Color.fromRGB(40, 125, 4),
-                                1
-                        )
-                );
-            }
-        };
+        new Infested(
+                entity,
+                source,
+                duration,
+                DamageSource.builder(damageSourceIdentity, damage)
+                            .source(source)
+                            .elementType(ElementType.TOXIC)
+                            .damageType(DamageType.ANOMALY)
+                            .damageFlag(DamageFlag.CANNOT_KILL)
+                            .build()
+        );
     }
     
     public int calculateDuration(@Nullable HariantEntity source) {
@@ -159,6 +107,87 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
             
             of(AttributeType.DEFENSE, AttributeModifierType.ADDITIVE, -defenseReduction.doubleValue());
         }
+    }
+    
+    private class Infested extends HariantTickingTask implements EntityCollector {
+        
+        private final HariantEntity entity;
+        private final Location location;
+        
+        private final @Nullable HariantEntity source;
+        
+        private final int duration;
+        private final DamageSource damageSource;
+        
+        public Infested(@NotNull HariantEntity entity, @Nullable HariantEntity source, int duration, @NotNull DamageSource damageSource) {
+            super(Scheduler.ofTimer());
+            
+            this.entity = entity;
+            this.location = entity.getLocation().add(0, 0.25, 0);
+            this.source = source;
+            this.duration = duration;
+            this.damageSource = damageSource;
+        }
+        
+        @Override
+        public void run(int tick) {
+            if (tick > duration) {
+                this.cancel();
+                return;
+            }
+            
+            // Affect entities
+            this.collectNearbyEntities(cloudRadius)
+                .filter(entity -> source == null || source.canAffect(entity))
+                .forEach(entity -> {
+                    // Deal damage
+                    if (tick % cloudDamagePeriod == 0) {
+                        entity.damage(damageSource);
+                        
+                        // Apply modifier
+                        entity.getAttributes().addModifier(new AttributeModifierInfested(source != null ? source : entity));
+                    }
+                    
+                    // Display warning
+                    entity.showWarning(WarningType.DANGER, 5);
+                });
+            
+            // Fx
+            final double radians = Math.toRadians(tick * 5);
+            
+            final double x = Math.sin(radians) * cloudRadius;
+            final double y = Math.sin(Math.toRadians(tick * 10)) * 0.2;
+            final double z = Math.cos(radians) * cloudRadius;
+            
+            LocationHelper.offset(location, x, y, z, this::drawParticle);
+            LocationHelper.offset(location, -x, y, -z, this::drawParticle);
+            
+            // Inner fx
+            final double offset = Math.min(radians, cloudRadius * 0.5);
+            
+            entity.spawnWorldParticle(location, Particle.TRIAL_OMEN, 10, offset, offset, offset, 0.125f);
+        }
+        
+        @Override
+        public @NotNull Location getLocation() {
+            return location;
+        }
+        
+        private void drawParticle(@NotNull Location location) {
+            entity.spawnWorldParticle(
+                    location,
+                    Particle.DUST_COLOR_TRANSITION,
+                    10,
+                    0, 0, 0,
+                    0.25f,
+                    new Particle.DustTransition(
+                            Color.fromRGB(161, 237, 128),
+                            Color.fromRGB(40, 125, 4),
+                            1
+                    )
+            );
+        }
+        
     }
     
 }

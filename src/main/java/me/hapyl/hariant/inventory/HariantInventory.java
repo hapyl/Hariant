@@ -14,11 +14,10 @@ import me.hapyl.hariant.inventory.item.*;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class HariantInventory extends PlayerDatabaseEntry {
     
@@ -68,7 +67,7 @@ public class HariantInventory extends PlayerDatabaseEntry {
                 return;
             }
             
-            final Key key = MongoCodecs.KEY.read(doc, "key").orElse(null);
+            final Key key = MongoCodecs.ofKey().read(doc, "key").orElse(null);
             
             if (key == null) {
                 problemReporter.report(Problem.severe(HariantInventory.class, "Missing key `key` in `%s`!".formatted(uuid)));
@@ -109,6 +108,8 @@ public class HariantInventory extends PlayerDatabaseEntry {
         });
     }
     
+    // *-* Resources *-* //
+    
     public boolean hasResource(@NotNull Resource resource, int amount) {
         return materials.getOrDefault(resource, 0) >= amount;
     }
@@ -132,17 +133,24 @@ public class HariantInventory extends PlayerDatabaseEntry {
         this.addResource(resource, -amount);
     }
     
-    public void createItem(@NotNull ItemInstance newInstance) {
-        // TODO @Feb 15, 2026 (xanyjl) -> Add a check whether the item can be added
+    // *-* Items *-* //
+    
+    public @NotNull ItemInstance createItem(@NotNull Item item) {
+        // TODO (xanyjl @ Tuesday, June 23) -> Add a check whether the item can be added
         
-        items.put(newInstance.getUuid(), newInstance);
+        final ItemInstance itemInstance = item.newInstance(database, UUID.randomUUID());
+        itemInstance.onInstanceCreated();
+        
+        items.put(itemInstance.getUuid(), itemInstance);
+        
+        return itemInstance;
     }
     
     public boolean destroyItem(@NotNull UUID uuid) {
         final ItemInstance destroyedItem = items.remove(uuid);
         
         if (destroyedItem != null) {
-            destroyedItem.onDestroy();
+            destroyedItem.onInstanceDestroyed();
             return true;
         }
         
@@ -157,12 +165,10 @@ public class HariantInventory extends PlayerDatabaseEntry {
     }
     
     @NotNull
-    public <I extends ItemInstance> List<I> getItemsByClass(@NotNull Class<I> instanceClass, @NotNull Predicate<I> filter) {
+    public <I extends ItemInstance> Stream<I> getItemsByClass(@NotNull Class<I> instanceClass) {
         return items.values().stream()
                     .filter(instanceClass::isInstance)
-                    .map(instanceClass::cast)
-                    .filter(filter)
-                    .toList();
+                    .map(instanceClass::cast);
     }
     
 }

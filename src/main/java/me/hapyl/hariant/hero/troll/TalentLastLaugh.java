@@ -38,8 +38,6 @@ public final class TalentLastLaugh extends TalentPassive implements Listener {
                          .append(DamageType.MELEE)
                          .append(Component.text(" has "))
                          .append(chance)
-                         .appendSpace()
-                         // Don't add base chance term because it looks kinda weird, the chance display fields conveys it
                          .append(Component.text(" base chance to instantly kill the enemy."))
         );
     }

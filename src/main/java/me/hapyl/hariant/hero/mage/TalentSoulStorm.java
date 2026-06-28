@@ -11,7 +11,6 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.executor.Executable;
-import me.hapyl.hariant.task.executor.ExecutorService;
 import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
@@ -82,10 +81,10 @@ public final class TalentSoulStorm extends TalentUltimate {
         heroData.decrementSouls(soulsUsed);
         
         // TODO (xanyjl @ Saturday, May 30) -> Animation
-        return new ExecutorService(player)
-                .then(Executable.await(promise -> {
-                    heroData.createSoulStorm(soulStormCharges, maximumSoulStormCharges.intValue(), promise);
-                }));
+        
+        return Executable.await(promise -> {
+            heroData.createSoulStorm(soulStormCharges, maximumSoulStormCharges.intValue(), promise);
+        });
     }
     
     @NotNull

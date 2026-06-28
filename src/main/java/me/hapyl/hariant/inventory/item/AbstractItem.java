@@ -82,9 +82,12 @@ public abstract class AbstractItem implements Keyed, Named, Described, FlavorTex
     }
     
     @NotNull
-    @Override
     public Component getName() {
         return name;
+    }
+    
+    public @NotNull Component getNameStyled() {
+        return name.style(rarity.getStyle());
     }
     
     @NotNull

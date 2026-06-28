@@ -17,6 +17,10 @@ import java.lang.reflect.Field;
  * <p>
  * Note that the field type <b>must</b> implement {@link ComponentFormatter}.
  * </p>
+ *
+ * <p>
+ * Fields annotated by {@link DisplayField} always assumed to be @{@link NotNull}.
+ * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })

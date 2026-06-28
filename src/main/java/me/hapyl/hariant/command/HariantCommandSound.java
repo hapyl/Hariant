@@ -43,7 +43,7 @@ public final class HariantCommandSound extends HariantPlayerCommand {
         }
         
         player.playSound(player, sound, 3, pitch);
-        HariantLogger.success(player, Component.text("Played `%s` @ %.1f pitch.".formatted(key.asMinimalString(), pitch)));
+        HariantLogger.success(player, Component.text("Played `%s` @ %.2f pitch.".formatted(key.asMinimalString(), pitch)));
     }
     
     @Override

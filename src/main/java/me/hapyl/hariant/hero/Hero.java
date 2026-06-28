@@ -59,6 +59,7 @@ public abstract class Hero
     private final Map<TalentIndex, Talent> talentsMapped;
     
     private Component description;
+    private @NotNull List<? extends AttributeType> recommendedAttributes;
     
     public Hero(@NotNull Key key, @NotNull Component name, @NotNull Attributes attributes, @NotNull Weapon weapon) {
         this.key = key;
@@ -77,9 +78,18 @@ public abstract class Hero
                 TalentIndex.TALENT_PASSIVE, this.getPassiveTalent(),
                 TalentIndex.TALENT_ULTIMATE, this.getUltimateTalent()
         );
+        this.recommendedAttributes = List.of();
         
         AutoRegisteredListener.Registry.register(this);
         StrictNamingConvention.Validator.validate(this);
+    }
+    
+    public @NotNull List<? extends AttributeType> getRecommendedAttributes() {
+        return recommendedAttributes;
+    }
+    
+    public void setRecommendedAttributes(@NotNull List<? extends AttributeType> recommendedAttributes) {
+        this.recommendedAttributes = recommendedAttributes;
     }
     
     @Override
@@ -99,7 +109,7 @@ public abstract class Hero
         builder.addLore();
         
         // Attributes
-        builder.addLore(Component.text("ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
+        builder.addLore(Component.text("ʙᴀꜱᴇ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         builder.addLore(attributes.createLore(AttributeType.MAX_HEALTH));
         builder.addLore(attributes.createLore(AttributeType.ATTACK));
         builder.addLore(attributes.createLore(AttributeType.DEFENSE));
@@ -108,7 +118,7 @@ public abstract class Hero
         
         // Description
         builder.addLore(Component.text("ᴅᴇꜱᴄʀɪᴘᴛɪᴏɴ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
-        builder.addWrappedLore(description, HariantConstants.COMPONENT_STYLER_DESCRIPTION);
+        builder.addWrappedLore(description, HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_1);
         
         return builder;
     }
@@ -227,16 +237,16 @@ public abstract class Hero
         return HariantConstants.DEFAULT_WEAPON_SLOT;
     }
     
-    public void giveWeapon(@NotNull HariantPlayer player) {
-        this.giveWeapon(player, this.getWeapon(player));
-    }
-    
-    public void giveWeapon(@NotNull HariantPlayer player, @NotNull Weapon weapon) {
+    public final void giveWeapon(@NotNull HariantPlayer player, @NotNull Weapon weapon) {
         final PlayerInventory inventory = player.getInventory();
         final int weaponSlot = this.getWeaponSlot(player);
         
         inventory.setItem(weaponSlot, weapon.createItem());
         inventory.setHeldItemSlot(weaponSlot);
+    }
+    
+    public void giveWeapon(@NotNull HariantPlayer player) {
+        this.giveWeapon(player, this.getWeapon(player));
     }
     
     @Override
@@ -269,7 +279,7 @@ public abstract class Hero
     }
     
     @Override
-    public void debugOnCooldownReset(@NotNull HariantPlayer player) {
+    public void onDebugCooldownReset(@NotNull HariantPlayer player) {
     }
     
     @Override

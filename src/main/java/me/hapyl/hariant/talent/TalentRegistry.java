@@ -2,8 +2,10 @@ package me.hapyl.hariant.talent;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.hero.blast_knight.TalentNaniteRush;
 import me.hapyl.hariant.hero.alchemist.*;
 import me.hapyl.hariant.hero.archer.*;
+import me.hapyl.hariant.hero.blast_knight.*;
 import me.hapyl.hariant.hero.inferno.*;
 import me.hapyl.hariant.hero.mage.*;
 import me.hapyl.hariant.hero.nyx.*;
@@ -85,6 +87,15 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentReverberation REVERBERATION;
     public static final TalentImpalement IMPALEMENT;
     
+    /**
+     * {@link HeroBlastKnight}
+     */
+    public static final TalentQuantumWard QUANTUM_WARD;
+    public static final TalentShieldRam SHIELD_RAM;
+    public static final TalentQuantumDischarge QUANTUM_DISCHARGE;
+    public static final TalentQuantumShield QUANTUM_SHIELD;
+    public static final TalentNaniteRush NANITE_RUSH;
+    
     private static final StaticRegistryMap<Talent> REGISTRY;
     private static final TalentUltimate DUMMY_ULTIMATE;
     
@@ -133,6 +144,12 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         DUAL_VERDICT = REGISTRY.register("dual_verdict", TalentDualVerdict::new);
         REVERBERATION = REGISTRY.register("reverberation", TalentReverberation::new);
         IMPALEMENT = REGISTRY.register("impalement", TalentImpalement::new);
+        
+        QUANTUM_WARD = REGISTRY.register("quantum_ward", TalentQuantumWard::new);
+        SHIELD_RAM = REGISTRY.register("shield_ram", TalentShieldRam::new);
+        QUANTUM_DISCHARGE = REGISTRY.register("quantum_discharge", TalentQuantumDischarge::new);
+        NANITE_RUSH = REGISTRY.register("nanite_rush", TalentNaniteRush::new);
+        QUANTUM_SHIELD = REGISTRY.register("quantum_shield", TalentQuantumShield::new);
     }
     
     @NotNull

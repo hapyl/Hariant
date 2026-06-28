@@ -4,14 +4,15 @@ import com.google.common.collect.Lists;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.PlayerMenuTitle;
+import me.hapyl.eterna.module.inventory.menu.PlayerPageMenu;
+import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPattern;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPatternApplier;
-import me.hapyl.hariant.Colors;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.LinkedList;
@@ -19,7 +20,11 @@ import java.util.List;
 
 public abstract class MenuPage<T> extends Menu {
     
-    private static final int NO_CONTENTS_SLOT = 22;
+    private static final int NUMBER_OF_ITEMS_PER_PAGE = 28;
+    
+    private static final int SLOT_NO_CONTENTS = 22;
+    private static final int SLOT_BUTTON_PREVIOUS = 51;
+    private static final int SLOT_BUTTON_NEXT = 52;
     
     private LinkedList<? extends T> contents;
     private int currentPage;
@@ -41,20 +46,34 @@ public abstract class MenuPage<T> extends Menu {
     public abstract void onClick(@NotNull T t, @NotNull ClickType clickType);
     
     @Override
+    public final void openMenu() {
+        super.openMenu();
+    }
+    
+    public void openMenu(@Range(from = 1, to = Integer.MAX_VALUE) int page) {
+        this.currentPage = page;
+        this.openMenu();
+    }
+    
+    public @NotNull ItemStack getItemNoContents() {
+        return PlayerPageMenu.ITEM_EMPTY_CONTENTS;
+    }
+    
+    @Override
     @OverridingMethodsMustInvokeSuper
     public void updateMenu() {
         if (contents.isEmpty()) {
-            setItem(
-                    NO_CONTENTS_SLOT,
-                    new ItemBuilder(Material.STRUCTURE_VOID)
-                            .setName(Component.text("Nothing to Show!", Colors.ERROR))
-                            .asIcon()
-            );
+            setItem(SLOT_NO_CONTENTS, getItemNoContents());
         }
         else {
             final SlotPatternApplier slotPatternApplier = newSlotPatternApplier(SlotPattern.INNER_LEFT_TO_RIGHT, ChestSize.SIZE_2, ChestSize.SIZE_5);
             
-            for (T content : contents) {
+            final int startIndex = (currentPage - 1) * NUMBER_OF_ITEMS_PER_PAGE;
+            final int endIndex = Math.min(startIndex + NUMBER_OF_ITEMS_PER_PAGE, contents.size());
+            
+            for (int i = startIndex; i < endIndex; i++) {
+                final T content = contents.get(i);
+                
                 slotPatternApplier.add(
                         createBuilder(content).asIcon(),
                         (menu, player, clickType, slot, hotbarNumber) -> onClick(content, clickType)
@@ -62,10 +81,24 @@ public abstract class MenuPage<T> extends Menu {
             }
             
             slotPatternApplier.apply();
-            
-            // FIXME (xanyjl @ Friday, May 29) -> Cannot switch pages
-            
-            // Set arrows
+        }
+        
+        // Set previous arrow
+        if (currentPage > 1) {
+            setItem(
+                    SLOT_BUTTON_PREVIOUS,
+                    PlayerPageMenu.ITEM_ARROW_PREVIOUS,
+                    PlayerMenuAction.of(player -> this.openMenu(currentPage - 1))
+            );
+        }
+        
+        // Set next arrow
+        if (currentPage < (int) Math.ceil((double) contents.size() / NUMBER_OF_ITEMS_PER_PAGE)) {
+            setItem(
+                    SLOT_BUTTON_NEXT,
+                    PlayerPageMenu.ITEM_ARROW_NEXT,
+                    PlayerMenuAction.of(player -> this.openMenu(currentPage + 1))
+            );
         }
     }
     

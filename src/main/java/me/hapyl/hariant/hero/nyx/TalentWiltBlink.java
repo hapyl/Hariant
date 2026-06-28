@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.nyx;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -38,6 +39,18 @@ public class TalentWiltBlink extends Talent {
                          .append(Component.text(" rose at your current location and "))
                          .append(Component.text("blink", Colors.LIGHT_PURPLE))
                          .append(Component.text(" forward."))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("Wilted Rose", Colors.GOLD))
+                         .appendNewline()
+                         .append(
+                                 Component.empty()
+                                          .append(Component.text("The rose blooms to life once again and explodes, dealing "))
+                                          .append(ElementType.AETHER.asComponentDamage())
+                                          .append(Component.text(" and applies "))
+                                          .append(ElementType.AETHER)
+                                          .append(Component.text(" anomaly."))
+                         )
         );
     }
     

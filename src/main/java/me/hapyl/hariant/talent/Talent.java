@@ -37,6 +37,8 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
 @AutoRegisteredListener
 @StrictNamingConvention(startsWith = "Talent")
@@ -395,6 +397,12 @@ public abstract class Talent
         }
         
         return builder.toString();
+    }
+    
+    public static @NotNull List<? extends Component> createSubloreComponent(@NotNull IntFunction<Component> prefixSupplier, @NotNull Component... components) {
+        return IntStream.range(0, components.length)
+                        .mapToObj(i -> prefixSupplier.apply(i).append(components[i]))
+                        .toList();
     }
     
 }

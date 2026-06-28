@@ -5,6 +5,7 @@ import io.papermc.paper.datacomponent.item.PotionContents;
 import me.hapyl.eterna.module.annotate.ForceLowercase;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -50,7 +51,7 @@ public abstract class TalentAlchemistPotion extends Talent {
             
             // Fx
             player.playWorldSound(Sound.ENTITY_WITCH_DRINK, 1.0f);
-        }, talent.drinkDelay.intValue()));
+        }, talent.drinkDelay.intValue()), DelegateType.INTERRUPTABLE);
         
         // Fx
         player.playWorldSound(Sound.BLOCK_DECORATED_POT_INSERT, 0.0f);

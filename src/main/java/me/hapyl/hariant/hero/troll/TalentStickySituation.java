@@ -14,7 +14,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.VanillaAttribute;
+import me.hapyl.hariant.entity.VanillaAttributeModifier;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentContext;
@@ -54,7 +54,14 @@ public final class TalentStickySituation extends TalentUltimate implements Liste
     
     @DisplayField private final Decimal jumpStrengthReduction = Decimal.ofPercentage(75);
     
-    private final Key modifierKey = Key.ofString("sticky_situation");
+    private final Key modifierKey = Key.ofString("sticky_situation_modifier");
+    
+    private final VanillaAttributeModifier vanillaAttributeModifier = VanillaAttributeModifier.create(
+            modifierKey,
+            Attribute.JUMP_STRENGTH,
+            VanillaAttributeModifier.Operation.MULTIPLICATIVE,
+            -jumpStrengthReduction.doubleValue()
+    );
     
     public TalentStickySituation(@NotNull Key key) {
         super(key, Component.text("Sticky Situation"), Icon.ofMaterial(Material.COBWEB), UltimateResourceType.ENERGY, 50);
@@ -80,6 +87,7 @@ public final class TalentStickySituation extends TalentUltimate implements Liste
                          .append(Component.text("cobwebs", COBWEB_COLOR))
                          .append(Component.text(" can be cleared by hand or by touching them."))
                          .appendNewline()
+                         .appendNewline()
                          .append(Component.text("Only one batch of cobwebs may exist at any given time.", Colors.DARK_GRAY))
         );
     }
@@ -87,7 +95,7 @@ public final class TalentStickySituation extends TalentUltimate implements Liste
     @Override
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
         return Executable.execute(() -> {
-            player.getHeroData(HeroRegistry.TROLL, HeroDataTroll::new).createStickSituation();
+            player.getHeroData(HeroRegistry.TROLL, HeroDataTroll::new).createStickSituation(new StickySituation(player));
             
             // Fx
             player.playWorldSound(Sound.ENTITY_SPIDER_AMBIENT, 1.0f);
@@ -116,21 +124,19 @@ public final class TalentStickySituation extends TalentUltimate implements Liste
                }));
     }
     
-    public static class StickySituation implements Ticking, Disposable {
+    public class StickySituation implements Ticking, Disposable {
         
         private static final DisplayModel MODEL = BDEngine.parse(
                 "{Passengers:[{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:cobweb\",Properties:{}},transformation:[1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f]}]}"
         );
         
         private final HariantPlayer player;
-        private final TalentStickySituation talentStickySituation;
         
         private final Map<Block, DisplayEntity> blockDisplayEntityMap;
         private final BoundingBox boundingBox;
         
-        StickySituation(@NotNull HariantPlayer player, @NotNull TalentStickySituation talentStickySituation) {
+        StickySituation(@NotNull HariantPlayer player) {
             this.player = player;
-            this.talentStickySituation = talentStickySituation;
             this.blockDisplayEntityMap = Maps.newHashMap();
             
             // Create cobwebs
@@ -175,10 +181,10 @@ public final class TalentStickySituation extends TalentUltimate implements Liste
         public void tick() {
             // The collision is done via checking if a nearby entity collides with the bounding box of the cobweb,
             // which isn't the best solution, but that's what I came up with in CF, and could not find a better
-            // way to recreate it better. -h
+            // way to recreate it. -h
             final List<HariantEntity> entitiesWithinBoundingBox = player.collectNearbyEntities(boundingBox)
                                                                         .filter(player::canAffect)
-                                                                        .filter(entity -> !entity.getAttributes().hasModifier(talentStickySituation.modifierKey))
+                                                                        .filter(entity -> !entity.getAttributes().hasModifier(modifierKey))
                                                                         .toList();
             
             final Iterator<Map.Entry<Block, DisplayEntity>> iterator = blockDisplayEntityMap.entrySet().iterator();
@@ -195,7 +201,7 @@ public final class TalentStickySituation extends TalentUltimate implements Liste
                 for (HariantEntity entity : entitiesWithinBoundingBox) {
                     if (entity.getBoundingBox().overlaps(blockBoundingBox)) {
                         // Apply modifier
-                        entity.getAttributes().addModifier(new ModifierStickySituation(player, talentStickySituation));
+                        entity.getAttributes().addModifier(new ModifierStickySituation(player));
                         
                         // Remove from the hash map
                         iterator.remove();
@@ -230,31 +236,21 @@ public final class TalentStickySituation extends TalentUltimate implements Liste
         }
     }
     
-    private static class ModifierStickySituation extends AttributeModifier {
+    private class ModifierStickySituation extends AttributeModifier {
         
-        private static final Key JUMP_MODIFIER_KEY = Key.ofString("sticky_situation");
-        
-        private final TalentStickySituation talentStickySituation;
-        
-        ModifierStickySituation(@NotNull HariantPlayer player, @NotNull TalentStickySituation talentStickySituation) {
-            super(talentStickySituation, player, talentStickySituation.speedReductionDuration.intValue());
-            super.of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.ADDITIVE, -talentStickySituation.speedReduction.doubleValue());
-            
-            this.talentStickySituation = talentStickySituation;
+        ModifierStickySituation(@NotNull HariantPlayer player) {
+            super(modifierKey, TalentStickySituation.this.getName(), player, speedReductionDuration.intValue());
+            super.of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.ADDITIVE, -speedReduction.doubleValue());
         }
         
         @Override
         public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
-            entity.addVanillaAttributeModifier(
-                    VanillaAttribute.builder(JUMP_MODIFIER_KEY, Attribute.JUMP_STRENGTH)
-                                    .amount(-talentStickySituation.jumpStrengthReduction.doubleValue())
-                                    .operation(VanillaAttribute.Operation.MULTIPLICATIVE)
-            );
+            entity.addVanillaAttributeModifier(vanillaAttributeModifier);
         }
         
         @Override
         public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
-            entity.removeVanillaAttributeModifier(JUMP_MODIFIER_KEY, Attribute.JUMP_STRENGTH);
+            entity.removeVanillaAttributeModifier(vanillaAttributeModifier);
         }
     }
     

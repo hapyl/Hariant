@@ -5,6 +5,7 @@ import me.hapyl.eterna.module.command.CommandProcessor;
 import me.hapyl.eterna.module.command.SimpleCommand;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.math.Tick;
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.TypeConverter;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -20,6 +21,8 @@ import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
 import me.hapyl.hariant.entity.damage.AssistSource;
+import me.hapyl.hariant.entity.effect.Effect;
+import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.mutator.Decay;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.shield.Shield;
@@ -30,6 +33,7 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.inventory.drop.DropSummary;
 import me.hapyl.hariant.inventory.drop.DropTable;
 import me.hapyl.hariant.menu.hero.MenuHeroUnlock;
+import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamData;
 import net.kyori.adventure.text.Component;
@@ -41,8 +45,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class HariantCommandRegistry {
     
@@ -62,6 +68,10 @@ public final class HariantCommandRegistry {
         register("team", HariantCommandTeam::new);
         register("sound", HariantCommandSound::new);
         register("achievement", HariantCommandAchievement::new);
+        register("status_effect", HariantCommandStatusEffect::new);
+        register("color", HariantCommandColor::new);
+        register("trim", HariantCommandTrim::new);
+        register("dump_item", HariantCommandDumpItem::new);
         
         register("show_attributes", context -> {
             final HariantPlayer player = context.getHariantPlayer();
@@ -241,7 +251,7 @@ public final class HariantCommandRegistry {
             final double strength = context.get(1).toDouble(1.0);
             final int duration = context.get(2).toInt(200);
             
-            player.setShield(new Shield(player, ShieldStrength.strength(strength), amount, duration));
+            player.setShield(new Shield(player, player, ShieldStrength.strength(strength), amount, duration));
             player.messageSuccess(Component.text("Applied shield with capacity %s and strength %s for %s!".formatted(amount, strength, Tick.format(duration))));
         });
         
@@ -300,14 +310,30 @@ public final class HariantCommandRegistry {
             
             final DropTable dropTable = battleground.getDropTable();
             final DropSummary dropSummary = DropSummary.create();
+            final PlayerProfile profile = Hariant.getPlayerProfile(player);
             
             HariantLogger.info(player, Component.text("Rolling drop tables %,d times!".formatted(times)));
             
             for (int i = 0; i < times; i++) {
-                dropSummary.append(dropTable.generateLoot());
+                dropSummary.append(dropTable.generateLoot(profile));
             }
             
             dropSummary.showSummary(player);
+        });
+        
+        register("trigger_effect", context -> {
+            final HariantPlayer player = context.getHariantPlayer();
+            final EffectType effectType = context.get(0).toEnum(EffectType.class);
+            
+            if (effectType == null) {
+                player.messageError(Component.text(
+                        "Invalid effect type, must be one of the following: " + Arrays.stream(EffectType.values()).map(Enum::name).map(String::toLowerCase).collect(Collectors.joining(", "))
+                ));
+                return;
+            }
+            
+            player.triggerEffect(player, Effect.create(Key.ofString("dummy_effect"), Component.text("Command"), effectType));
+            player.messageSuccess(Component.text("Triggered %s effect!".formatted(effectType)));
         });
     }
     

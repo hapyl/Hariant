@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 public class StatusEffectHellburn extends StatusEffectImpl implements Listener {
     
     StatusEffectHellburn() {
-        super(Key.ofString("hellburn"), Component.text("Hellburn"), EffectType.DEBUFF);
+        super(Key.ofString("effect_hellburn"), Component.text("Hellburn"), EffectType.DEBUFF);
     }
     
     @Override

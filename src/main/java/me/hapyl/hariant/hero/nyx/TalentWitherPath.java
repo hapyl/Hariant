@@ -13,11 +13,11 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.EntityCollector;
-import me.hapyl.hariant.entity.HariantRandom;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -27,6 +27,7 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingStepTask;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
+import me.hapyl.hariant.util.BoundingBoxBlueprint;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -40,16 +41,18 @@ import java.util.Set;
 
 public final class TalentWitherPath extends Talent {
     
-    @DisplayField private final Decimal maximumDistance = Decimal.ofValue(20);
+    private final @DisplayField Decimal maximumDistance = Decimal.ofValue(20);
     
-    @DisplayField private final Decimal maxHealthDecrease = Decimal.ofPercentage(10);
-    @DisplayField private final Decimal maxHealthDecreaseDuration = Decimal.ofSeconds(8);
+    private final @DisplayField Decimal maxHealthDecrease = Decimal.ofPercentage(10);
+    private final @DisplayField Decimal maxHealthDecreaseDuration = Decimal.ofSeconds(8);
     
-    @DisplayField private final AttributeScaling spikeDamage = AttributeScaling.of(AttributeType.ATTACK, 43);
-    @DisplayField private final Decimal spikeElementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 250);
-    @DisplayField private final Decimal spikeKnockbackStrength = Decimal.ofValue(0.8);
+    private final @DisplayField AttributeScaling spikeDamage = AttributeScaling.create(AttributeType.ATTACK, 43);
+    private final @DisplayField Decimal spikeElementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 250);
+    private final @DisplayField Decimal spikeKnockbackStrength = Decimal.ofValue(0.8);
     
-    @DisplayField private final Decimal roseBloomDelay = Decimal.ofSeconds(0.6f);
+    private final @DisplayField Decimal roseBloomDelay = Decimal.ofSeconds(0.5f);
+    
+    private final @DisplayField BoundingBoxBlueprint spikeBoundingBox = BoundingBoxBlueprint.define(1, 2, 1);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             this,
@@ -61,7 +64,7 @@ public final class TalentWitherPath extends Talent {
     );
     
     private final DisplayModel spikeModel = BDEngine.parse(
-            "/summon block_display ~-0.5 ~ ~-0.5 {Passengers:[{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.9176f,0f,0f,-0.534375f,0f,1.1217289526f,0.114521332f,0.1875f,0f,-0.1168631544f,1.0992506104f,-0.4525f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[1.1147f,0f,0f,-0.633125f,0f,1.3499401278f,-0.048395637f,-0.043125f,0f,0.1181425467f,0.552986322f,-1f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.8125f,0f,0f,-0.481875f,0f,1.1623829612f,-0.0590454078f,1.1875f,0f,0.0780439075f,0.8794200361f,-0.454375f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.6262f,0f,0f,-0.375f,0f,0.9000424421f,-0.0876635895f,2.3275f,0f,0.1045983387f,0.7543231768f,-0.3125f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.3528f,0f,0f,-0.25f,0f,0.8469721019f,-0.1460859529f,3.176875f,0f,0.2517681842f,0.4914470311f,-0.0625f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.8462f,0f,0f,-0.50625f,0f,0.5625f,0f,-0.0625f,0f,0f,0.9744f,-0.4375f,0f,0f,0f,1f]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-257834520,-1136529793,1624999221,1637553739],properties:[{name:\"textures\",value:\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGU3NjBiYmMxMTNjMjczZmFjNDA4OTZmYTIwODlhNTZjYzc0NmE3OWE3YTgyNzVmNjM4NTdlNjllNmY3NzAzYSJ9fX0=\"}]}}},item_display:\"none\",transformation:[0.7538f,0f,0f,-0.0625f,0f,0.5604578268f,-0.0795079552f,2f,0f,0.0657382258f,0.6778530335f,-0.4375f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.9302881162f,0.0025997107f,-0.001420246f,-0.53875f,-0.0040171574f,0.5601862817f,0.0831780627f,0.5475f,0.0024440459f,-0.0687890351f,0.6773102338f,-0.05875f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.876f,0f,0f,-0.385f,0f,0.5615217897f,-0.03737921f,1.2775f,0f,0.0447232561f,0.4693137913f,-0.75f,0f,0f,0f,1f]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;1678623160,-488207078,-486924982,-179125769],properties:[{name:\"textures\",value:\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQyNmFiODg4Mjk4YWRmMWVmZmQ4MTFjODA3NGRlZjA5NzgwZTdkOWQxMmJhNGM3N2I3M2ZkYTk5ODJkZDBmZSJ9fX0=\"}]}}},item_display:\"none\",transformation:[0.9005f,0f,0f,-0.3825f,0f,0.5625f,0f,0.704375f,0f,0f,0.684f,0.53875f,0f,0f,0f,1f]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-1297495472,-891907469,-494113125,-555964497],properties:[{name:\"textures\",value:\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQyNmFiODg4Mjk4YWRmMWVmZmQ4MTFjODA3NGRlZjA5NzgwZTdkOWQxMmJhNGM3N2I3M2ZkYTk5ODJkZDBmZSJ9fX0=\"}]}}},item_display:\"none\",transformation:[0.9005f,0f,0f,0.305625f,0f,0.5625f,0f,1.513125f,0f,0f,0.684f,-0.75f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:wither_rose\",Properties:{}},transformation:[0.089718521f,-0.650683435f,-0.3945320663f,-0.2275f,-0.3023181059f,0.3932802613f,-0.4985845398f,1.174375f,0.5806987083f,0.3052772403f,-0.1986129788f,0.21375f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:wither_rose\",Properties:{}},transformation:[-0.4841963689f,0.0397041695f,0.5971701425f,0.375f,-0.1722238588f,0.5705147725f,-0.2171430732f,1.625f,-0.5433665694f,-0.216209235f,-0.463315947f,-0.3575f,0f,0f,0f,1f]}]}"
+            "/summon block_display ~-0.5 ~ ~-0.5 {Passengers:[{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.4667f,0f,0f,-0.3101919661f,0f,0.2483909257f,0.0202476462f,-0.085843288f,0f,-0.0101935295f,0.4933847108f,-0.1623124255f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.3407f,0f,0f,-0.2472782786f,0f,0.3692891638f,0.0170821576f,0.1751420906f,0f,-0.0151549818f,0.4162496365f,-0.1344122125f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.3129f,0f,0f,-0.2332767161f,0f,0.3048367445f,0.0611981421f,0.5446129764f,0f,-0.0474005193f,0.3935704224f,-0.1495746519f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.277f,0f,0f,-0.215625f,0f,0.3175338626f,-0.0102827772f,0.918125f,0f,0.0102730765f,0.3178337057f,-0.16125f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.2561f,0f,0f,-0.205f,0f,0.2472996315f,-0.0232833854f,1.265f,0f,0.021121843f,0.2726074907f,-0.126875f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:obsidian\",Properties:{}},transformation:[0.2269f,0f,0f,-0.19f,0f,0.2415084157f,-0.0600603469f,1.54125f,0f,0.0661350522f,0.2193251347f,-0.069375f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.3053f,0f,0f,-0.2319699036f,0f,0.1528713259f,0.0112596267f,0.0708883493f,0f,-0.006273572f,0.2743690595f,-0.0068887962f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.2885f,0f,0f,-0.2235689661f,0f,0.1528713259f,0.0144210149f,0.4776298894f,0f,-0.006273572f,0.3514042179f,-0.123659425f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.2987f,0f,0f,-0.2017265286f,0f,0.1528713259f,0.0101238231f,0.2066059228f,0f,-0.006273572f,0.2466923554f,0.0352642894f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.2987f,0f,0f,-0.3116854661f,0f,0.1528713259f,0.0101238231f,0.0200416124f,0f,-0.006273572f,0.2466923554f,-0.1521401723f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.3171951766f,0.000798579f,-0.0004790785f,-0.2347702161f,-0.0015045314f,0.1524578728f,0.0425799292f,0.6482781507f,0.0008923547f,-0.0268141621f,0.2420833743f,-0.0115874509f,0f,0f,0f,1f]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-147679533,1505651642,1942719646,2043773913],properties:[{name:\"textures\",value:\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQyNmFiODg4Mjk4YWRmMWVmZmQ4MTFjODA3NGRlZjA5NzgwZTdkOWQxMmJhNGM3N2I3M2ZkYTk5ODJkZDBmZSJ9fX0=\"}]}}},item_display:\"none\",transformation:[0.3071f,0f,0f,0.0282724714f,0f,0.1528713259f,0.0101238231f,0.2214101828f,0f,-0.006273572f,0.2466923554f,0.2397562385f,0f,0f,0f,1f]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-854602365,587614551,-1715240414,-119252126],properties:[{name:\"textures\",value:\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQyNmFiODg4Mjk4YWRmMWVmZmQ4MTFjODA3NGRlZjA5NzgwZTdkOWQxMmJhNGM3N2I3M2ZkYTk5ODJkZDBmZSJ9fX0=\"}]}}},item_display:\"none\",transformation:[0.3071f,0f,0f,-0.1813775911f,0f,0.1528713259f,0.0101238231f,0.6998259404f,0f,-0.006273572f,0.2466923554f,0.2020531327f,0f,0f,0f,1f]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-965550667,1953947936,1364731667,-321727878],properties:[{name:\"textures\",value:\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQyNmFiODg4Mjk4YWRmMWVmZmQ4MTFjODA3NGRlZjA5NzgwZTdkOWQxMmJhNGM3N2I3M2ZkYTk5ODJkZDBmZSJ9fX0=\"}]}}},item_display:\"none\",transformation:[0.3071f,0f,0f,-0.2926433411f,0f,0.1528713259f,0.0101238231f,0.1564539412f,0f,-0.006273572f,0.2466923554f,-0.1117144645f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:wither_rose\",Properties:{}},transformation:[0.014838747f,0.196367889f,0.1484622036f,-0.0725387786f,-0.0871316788f,0.1605352218f,-0.1601858049f,0.3727186335f,-0.2413929848f,-0.0448357129f,0.0663114051f,0.218720335f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:wither_rose\",Properties:{}},transformation:[0.1738707248f,-0.1023397254f,-0.1293207788f,-0.0598440286f,-0.0825976461f,0.1354184874f,-0.1614192088f,0.37149112f,0.175157424f,0.164705311f,0.0523118555f,0.1888088869f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:wither_rose\",Properties:{}},transformation:[0.0361614075f,-0.1961974616f,-0.1442773666f,-0.1285450286f,-0.0991042387f,0.1592489279f,-0.1460285482f,0.8227602262f,0.2047163708f,0.1117498323f,-0.0452077936f,0.0796319103f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0.2525f,0f,0f,-0.205f,0f,0.1528713259f,0.0120017943f,0.78875f,0f,-0.006273572f,0.2924538373f,-0.1525f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0f,-0.0061095571f,0.2305059797f,-0.188125f,0f,0.14887469f,0.0094595625f,1.15375f,-0.2225f,0f,0f,0.11f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:crying_obsidian\",Properties:{}},transformation:[0f,-0.0061095571f,0.1965345739f,-0.17125f,0f,0.14887469f,0.0080654354f,1.42125f,-0.2055f,0f,0f,0.155625f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:wither_rose\",Properties:{}},transformation:[-0.1588583687f,-0.1951748047f,-0.0333737617f,-0.04125f,-0.0991042387f,0.1592489279f,-0.1460285482f,1.29875f,0.1340912322f,-0.1135264929f,-0.1474648946f,-0.131875f,0f,0f,0f,1f]}]}"
     );
     
     private final Cooldown damageCooldown = Cooldown.ofSeconds(Key.ofString("wither_path_damage_cooldown"), 0.5f);
@@ -96,14 +99,11 @@ public final class TalentWitherPath extends Talent {
     
     @Override
     public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        new WitherPath(player);
+        player.delegate(new WitherPath(player), DelegateType.INTERRUPTABLE);
         return Response.ok();
     }
     
-    private class WitherPath extends HariantTickingStepTask implements EntityCollector, Coordinates {
-        
-        private static final Color OUTLINE_COLOR = Color.fromRGB(91, 5, 171);
-        private static final BlockData SPIKE_BLOCK_DATA = Material.OBSIDIAN.createBlockData();
+    private class WitherPath extends HariantTickingStepTask {
         
         private final HariantPlayer player;
         private final Location location;
@@ -130,91 +130,99 @@ public final class TalentWitherPath extends Talent {
             final boolean playFx = modulo(3);
             
             LocationHelper.offset(location, x, y, z, () -> {
-                createSpike(location, playFx);
+                player.delegate(new WitherSpike(player, location, damageSource, playFx), DelegateType.PERSISTENT);
             });
             
             return distance++ > maximumDistance.doubleValue();
         }
         
-        public void createSpike(@NotNull Location location, boolean playFx) {
-            final Location anchored = LocationHelper.anchor(location);
-            final HariantRandom random = player.random;
+    }
+    
+    private class WitherSpike extends HariantTickingTask implements EntityCollector, Coordinates {
+        
+        private static final Color OUTLINE_COLOR = Color.fromRGB(91, 5, 171);
+        private static final BlockData SPIKE_BLOCK_DATA = Material.OBSIDIAN.createBlockData();
+        
+        private final HariantPlayer player;
+        private final Location location;
+        
+        private final DisplayEntity displayRose;
+        private final DisplayEntity displaySpike;
+        
+        private final BoundingBox boundingBox;
+        private final DamageSource damageSource;
+        
+        private final boolean playFx;
+        
+        WitherSpike(@NotNull HariantPlayer player, @NotNull Location location, @NotNull DamageSource damageSource, boolean playFx) {
+            super(Scheduler.ofTimer());
             
-            anchored.add(random.nextDouble(), random.nextDouble() * 0.5, random.nextDouble());
-            anchored.setYaw(location.getYaw() + player.random.nextFloat(160, 200));
-            anchored.setPitch(random.nextFloat() * 15);
+            this.player = player;
             
-            final DisplayEntity displayRose = witherRoseModel.spawn(anchored);
-            final DisplayEntity displaySpike = spikeModel.spawn(LocationHelper.copyOf(anchored).subtract(0, 10, 0), self -> {
-                self.setTeleportDuration(2);
-            });
+            this.location = LocationHelper.anchor(LocationHelper.copyOf(location));
+            this.location.add(player.random.nextDouble(), player.random.nextDouble() * 0.5, player.random.nextDouble());
+            this.location.setYaw(location.getYaw() + player.random.nextFloat(160, 200));
+            this.location.setPitch(player.random.nextFloat() * 15);
+            
+            this.displayRose = witherRoseModel.spawn(this.location);
+            this.displaySpike = spikeModel.spawn(LocationHelper.copyOf(this.location).subtract(0, 10, 0), self -> self.setTeleportDuration(2));
+            
+            this.boundingBox = spikeBoundingBox.create(this.location);
+            this.damageSource = damageSource;
+            this.playFx = playFx;
             
             // Play rose fx
             if (playFx) {
-                player.playWorldSound(location, Sound.BLOCK_SWEET_BERRY_BUSH_PLACE, 0.5f);
+                player.playWorldSound(this.location, Sound.BLOCK_SWEET_BERRY_BUSH_PLACE, 0.5f);
+            }
+        }
+        
+        @Override
+        public void run(int tick) {
+            // Cleanup
+            if (tick > getDuration()) {
+                this.cancel();
+                return;
             }
             
-            final BoundingBox boundingBox = LocationHelper.toBoundingBox(anchored, 1, 2, 1);
-            final int roseBloomDelay = TalentWitherPath.this.roseBloomDelay.intValue();
+            // Bloom into a spike
+            if (tick == roseBloomDelay.intValue()) {
+                displaySpike.teleport(location);
+                
+                // Affect entities
+                collectNearbyEntities(boundingBox)
+                        .filter(player::canAffect)
+                        .forEach(entity -> {
+                            // Deal damage
+                            entity.damage(damageSource);
+                            entity.getAttributes().addModifierIfAbsent(new AttributeModifierWitherPath(player));
+                            entity.knockback(KnockbackSource.create(this, spikeKnockbackStrength.doubleValue()));
+                        });
+                
+                // Fx
+                if (playFx) {
+                    player.playWorldSound(location, Sound.ENTITY_EVOKER_FANGS_ATTACK, 0.75f);
+                }
+            }
+            else if (tick < roseBloomDelay.intValue()) {
+                // Display warning
+                collectNearbyEntities(boundingBox)
+                        .filter(player::canAffect)
+                        .forEach(entity -> {
+                            entity.showWarning(WarningType.WARNING, roseBloomDelay.intValue());
+                        });
+            }
             
-            player.delegate(
-                    new HariantTickingTask(Scheduler.ofTimer()) {
-                        @Override
-                        public void run(int tick) {
-                            // Cleanup
-                            if (tick > getDuration()) {
-                                this.cancel();
-                                return;
-                            }
-                            
-                            // Bloom into a spike
-                            if (tick == roseBloomDelay) {
-                                displaySpike.teleport(anchored);
-                                
-                                // Affect entities
-                                collectNearbyEntities(boundingBox)
-                                        .filter(player::canAffect)
-                                        .forEach(entity -> {
-                                            // Deal damage
-                                            entity.damage(damageSource);
-                                            
-                                            entity.getAttributes().addModifierIfAbsent(new AttributeModifierWitherPath(player));
-                                            
-                                            // Check for effect resistance and knockback
-                                            if (!entity.hasEffectResistance(AssistSource.create(player, TalentWitherPath.this))) {
-                                                entity.knockback(KnockbackSource.create(WitherPath.this, spikeKnockbackStrength.doubleValue()));
-                                            }
-                                        });
-                                
-                                // Fx
-                                if (playFx) {
-                                    player.playWorldSound(location, Sound.ENTITY_EVOKER_FANGS_ATTACK, 0.75f);
-                                }
-                            }
-                            else if (tick < roseBloomDelay) {
-                                // Display warning
-                                collectNearbyEntities(boundingBox)
-                                        .filter(player::canAffect)
-                                        .forEach(entity -> {
-                                            entity.showWarning(WarningType.WARNING, roseBloomDelay);
-                                        });
-                            }
-                            
-                        }
-                        
-                        @Override
-                        public void onCancel() {
-                            super.onCancel();
-                            
-                            displayRose.remove();
-                            displaySpike.remove();
-                            
-                            // Fx
-                            player.spawnWorldParticle(anchored, Particle.BLOCK, 50, 0.5, 2, 0.5, 0.075f, SPIKE_BLOCK_DATA);
-                            player.playWorldSound(anchored, Sound.BLOCK_STONE_BREAK, 0.75f);
-                        }
-                    }
-            );
+        }
+        
+        @Override
+        public void onCancel() {
+            displayRose.remove();
+            displaySpike.remove();
+            
+            // Fx
+            player.spawnWorldParticle(location, Particle.BLOCK, 50, 0.5, 2, 0.5, 0.075f, SPIKE_BLOCK_DATA);
+            player.playWorldSound(location, Sound.BLOCK_STONE_BREAK, 0.75f);
         }
         
         @Override
@@ -241,16 +249,17 @@ public final class TalentWitherPath extends Talent {
         public double z() {
             return location.z();
         }
+        
     }
     
     private class DamageSourceWitherPath extends DamageSourceImpl {
-        public DamageSourceWitherPath(@NotNull HariantPlayer player, double damage) {
+        DamageSourceWitherPath(@NotNull HariantPlayer player, double damage) {
             super(damageSourceIdentity, player, DamageType.TALENT, ElementType.AETHER, DamageComponent.common(), Set.of(), damage, spikeElementalApplication.doubleValue(), damageCooldown);
         }
     }
     
     private class AttributeModifierWitherPath extends AttributeModifier {
-        public AttributeModifierWitherPath(@NotNull HariantPlayer player) {
+        AttributeModifierWitherPath(@NotNull HariantPlayer player) {
             super(TalentWitherPath.this, player, maxHealthDecreaseDuration.intValue());
             
             of(AttributeType.MAX_HEALTH, AttributeModifierType.ADDITIVE, -maxHealthDecrease.doubleValue());

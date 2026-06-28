@@ -38,7 +38,7 @@ public final class TalentChainLightning extends Talent implements Listener {
     private static final Color ARROW_COLOR = Color.fromRGB(Colors.ELEMENT_ELECTRIC.value());
     private static final ParticleBuilder PARTICLE_CHAIN_LIGHTNING = ParticleBuilder.dustColorTransition(Color.fromRGB(240, 213, 79), Color.fromRGB(252, 186, 3), 1);
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.of(AttributeType.ATTACK, 207);
+    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 207);
     @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 200);
     
     @DisplayField private final Decimal maxChainReaction = Decimal.ofValue(2);

@@ -7,6 +7,7 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.Cancel;
 import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -20,7 +21,7 @@ public class StatusEffectArcaneMute extends StatusEffectImpl implements Listener
     public static final Component ARCANE_MUTE_PREFIX = Component.text("⛧", Colors.BLOOD_PURPLE);
     
     StatusEffectArcaneMute() {
-        super(Key.ofString("arcane_mute"), Component.text("Arcane Mute"), EffectType.DEBUFF);
+        super(Key.ofString("effect_arcane_mute"), Component.text("Arcane Mute"), EffectType.DEBUFF);
     }
     
     @Override
@@ -53,7 +54,7 @@ public class StatusEffectArcaneMute extends StatusEffectImpl implements Listener
             return;
         }
         
-        ev.setCancelled(HariantTalentPreconditionEvent.cancel(Component.text("Arcane Mute")));
+        ev.setCancel(Cancel.cancel(Component.text("Arcane Mute")));
     }
     
 }

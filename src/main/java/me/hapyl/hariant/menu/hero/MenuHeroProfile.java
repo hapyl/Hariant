@@ -6,10 +6,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
-import me.hapyl.hariant.hero.Affiliation;
-import me.hapyl.hariant.hero.Hero;
-import me.hapyl.hariant.hero.HeroInstance;
-import me.hapyl.hariant.hero.HeroProfile;
+import me.hapyl.hariant.hero.*;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.weapon.Weapon;
 import net.kyori.adventure.text.Component;
@@ -19,6 +16,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 public class MenuHeroProfile extends MenuHeroAbstract {
     
@@ -78,17 +78,13 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         builder.setName(Component.text("Attributes"));
         builder.addLore();
         
+        final Map<? extends AttributeType, ? extends Double> sumArtifactAffixes = heroInstance.sumArtifactAffixes();
         
         // Base attributes
         builder.addLore(Component.text("ʙᴀꜱᴇ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         
         for (AttributeType attributeType : AttributeType.getBaseAttributes()) {
-            builder.addLore(
-                    Component.empty()
-                             .appendSpace()
-                             .append(attributes.createRelativeArrow(attributeType))
-                             .append(attributes.createLore(attributeType))
-            );
+            builder.addLore(attributes.createLore(attributeType, sumArtifactAffixes.get(attributeType)));
         }
         
         // Advanced attributes
@@ -96,43 +92,36 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         builder.addLore(Component.text("ᴀᴅᴠᴀɴᴄᴇᴅ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         
         for (AttributeType attributeType : AttributeType.getAdvancedAttributes()) {
-            attributes.createLore(attributeType);
-            builder.addLore(
-                    Component.empty()
-                             .appendSpace()
-                             .append(attributes.createRelativeArrow(attributeType))
-                             .appendSpace()
-                             .append(attributeType)
-                             .appendSpace()
-                             .append(attributeType.format(attributes.base(attributeType)))
-            );
+            builder.addLore(attributes.createLore(attributeType, sumArtifactAffixes.get(attributeType)));
         }
         
         builder.addLore();
         builder.addLore(Component.text("ᴇʟᴇᴍᴇɴᴛᴀʟ ᴀᴛᴛʀɪʙᴜᴛᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
-        
-        builder.addLore(Component.text(" (Element) (Resistance/DMG Bonus)", Colors.DARK_GRAY));
+        builder.addLore(Component.text(" (Element)  (RES/DMG Bonus)", Colors.DARK_GRAY));
         
         // Elemental attributes
         for (ElementType elementType : ElementType.values()) {
             final AttributeType elementalResistanceAttribute = AttributeType.getElementalResistanceAttribute(elementType);
             final AttributeType elementalDamageBonusAttribute = AttributeType.getElementalDamageBonusAttribute(elementType);
             
-            final Component elementalResistance = elementalResistanceAttribute.format(attributes.get(elementalResistanceAttribute));
-            final Component elementalDamageBonus = elementalDamageBonusAttribute.format(attributes.get(elementalDamageBonusAttribute));
-            
             builder.addLore(
                     Component.empty()
-                             .appendSpace()
+                             .append(Component.text(" "))
                              .append(elementType.asComponent())
-                             .append(Component.text("   "))
-                             .append(elementalResistance.color(Colors.GREEN))
-                             .append(Component.text(" / ", Colors.GRAY))
-                             .append(elementalDamageBonus.color(Colors.RED))
+                             .append(Component.text("    "))
+                             .append(createElementalLore(attributes, elementalResistanceAttribute, sumArtifactAffixes.get(elementalResistanceAttribute)).color(Colors.GREEN))
+                             .append(Component.text(" / ", Colors.DARK_GRAY))
+                             .append(createElementalLore(attributes, elementalDamageBonusAttribute, sumArtifactAffixes.get(elementalDamageBonusAttribute)).color(Colors.RED))
             );
         }
         
         return builder.asIcon();
+    }
+    
+    private static @NotNull Component createElementalLore(@NotNull Attributes attributes, @NotNull AttributeType attributeType, @Nullable Double externalValue) {
+        return Component.empty()
+                        .append(attributeType.format(attributes.get(attributeType) + (externalValue != null ? externalValue : 0)))
+                        .append(Attributes.createExternalValueComponent(externalValue));
     }
     
     @NotNull
@@ -147,6 +136,10 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         });
         
         return builder.asIcon();
+    }
+    
+    private static @NotNull Component fromArtifacts(@Nullable Double value) {
+        return value != null ? Component.text(" +%,.0f".formatted(value), Colors.GREEN) : Component.empty();
     }
     
 }

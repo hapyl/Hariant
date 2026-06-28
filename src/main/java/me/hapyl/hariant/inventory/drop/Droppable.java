@@ -8,35 +8,28 @@ import me.hapyl.hariant.inventory.item.Item;
 import me.hapyl.hariant.inventory.item.Resource;
 import me.hapyl.hariant.inventory.item.ResourceRegistry;
 import me.hapyl.hariant.profile.PlayerProfile;
-import me.hapyl.hariant.util.Hoverable;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-public interface Droppable extends Keyed, Named, Hoverable {
+public interface Droppable extends Keyed, Named {
     
     @Override
     @NotNull Key getKey();
     
-    @NotNull
     @Override
-    Component getName();
+    @NotNull Component getName();
+    
+    @NotNull Amount getAmount();
     
     @Range(from = 0, to = Integer.MAX_VALUE)
     int getWeight();
-    
-    @NotNull
-    Amount getAmount();
-    
-    void drop(@NotNull PlayerProfile profile, @NotNull Drop drop);
     
     default boolean isGuaranteedDrop() {
         return this.getWeight() == HariantConstants.GUARANTEED_DROP_CHANCE;
     }
     
-    @Override
-    @NotNull HoverEvent<?> createHoverEvent();
+    @NotNull Drop drop(@NotNull PlayerProfile profile, int amount);
     
     static @NotNull Droppable ofItem(@NotNull Item item, final int weight) {
         return new DroppableItemImpl(item, weight);
@@ -53,4 +46,5 @@ public interface Droppable extends Keyed, Named, Hoverable {
     static @NotNull Droppable ofHeroRecruitVoucher() {
         return ofResource(ResourceRegistry.HERO_RECRUIT_VOUCHER, 1, Amount.fixed(1));
     }
+    
 }

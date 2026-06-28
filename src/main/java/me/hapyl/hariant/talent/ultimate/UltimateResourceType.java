@@ -24,6 +24,11 @@ public enum UltimateResourceType implements Prefixed, Named, Styled, ComponentLi
             return 4;
         }
         
+        @Override
+        public double regenerateOnAssist() {
+            return 2;
+        }
+        
         @NotNull
         @Override
         public AttributeType getEffectiveAttribute() {

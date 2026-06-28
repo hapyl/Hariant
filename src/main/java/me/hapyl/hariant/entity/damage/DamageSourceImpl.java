@@ -51,6 +51,7 @@ public class DamageSourceImpl implements DamageSource {
     public DamageSourceImpl(@NotNull DamageSourceIdentity damageSourceIdentity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull List<? extends DamageComponent> damageComponents, @NotNull Set<DamageFlag> damageFlags, double damage, double elementUnits, @NotNull Cooldown cooldown) {
         this(damageSourceIdentity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, cooldown.getCooldownKey(), cooldown.getCooldown());
     }
+    
     // #render
     
     @NotNull

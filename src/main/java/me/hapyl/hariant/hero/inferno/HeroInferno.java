@@ -2,7 +2,6 @@ package me.hapyl.hariant.hero.inferno;
 
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
@@ -93,19 +92,7 @@ public class HeroInferno extends Hero implements Listener {
     
     @Override
     public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
-        final HeroDataInferno data = player.getHeroData(this, HeroDataInferno::new);
-        
-        return List.of(
-                data.currentDemon != null
-                ? Component.empty()
-                           .append(Race.DEMON.getPrefix().color(Colors.DARK_RED))
-                           .appendSpace()
-                           .append(data.currentDemon.getDemonType().getDemonName().color(Colors.HELL))
-                           .appendSpace()
-                           .append(data.currentDemon.currentTickFormatted().color(Colors.NUMBER))
-                           .append()
-                : Component.empty()
-        );
+        return player.getHeroData(this, HeroDataInferno::new).supplyActionbar(player);
     }
     
     @EventHandler
@@ -141,7 +128,7 @@ public class HeroInferno extends Hero implements Listener {
         );
         
         WeaponDemonhandNormalAttack() {
-            super(ElementType.FIRE, AttributeType.ATTACK, 87, 10);
+            super(ElementType.FIRE, AttributeType.ATTACK, 66, 10);
         }
         
         @NotNull

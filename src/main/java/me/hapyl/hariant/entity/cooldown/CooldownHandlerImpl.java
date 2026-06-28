@@ -43,7 +43,7 @@ public final class CooldownHandlerImpl implements CooldownHandler {
             
             this.cooldowns.put(
                     key,
-                    new CooldownInstance(duration == HariantConstants.INDEFINITE_COOLDOWN ? HariantConstants.INDEFINITE_COOLDOWN : entity.ticksAlive() + duration)
+                    new CooldownInstance(duration == HariantConstants.INDEFINITE_COOLDOWN ? HariantConstants.INDEFINITE_COOLDOWN : entity.localTicks() + duration)
             );
         }
         
@@ -57,7 +57,7 @@ public final class CooldownHandlerImpl implements CooldownHandler {
         return instance != null
                ? instance.isIndefinite()
                  ? HariantConstants.INDEFINITE_COOLDOWN
-                 : instance.endTick - entity.ticksAlive()
+                 : instance.endTick - entity.localTicks()
                : 0;
     }
     
@@ -65,7 +65,7 @@ public final class CooldownHandlerImpl implements CooldownHandler {
     public boolean hasCooldown(@NotNull Key key) {
         final CooldownInstance instance = cooldowns.get(key);
         
-        return instance != null && (instance.isIndefinite() || entity.ticksAlive() < instance.endTick);
+        return instance != null && (instance.isIndefinite() || entity.localTicks() < instance.endTick);
     }
     
     @Override
@@ -78,7 +78,7 @@ public final class CooldownHandlerImpl implements CooldownHandler {
     public String toString() {
         return this.cooldowns.entrySet()
                              .stream()
-                             .map(entry -> "%s = %s".formatted(entry.getKey(), entry.getValue().endTick - entity.ticksAlive()))
+                             .map(entry -> "%s = %s".formatted(entry.getKey(), entry.getValue().endTick - entity.localTicks()))
                              .collect(Collectors.joining(", ", "{", "}"));
     }
     

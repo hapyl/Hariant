@@ -1,9 +1,7 @@
 package me.hapyl.hariant.inventory.drop;
 
-import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.inventory.item.Resource;
 import me.hapyl.hariant.profile.PlayerProfile;
-import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 
 public final class DroppableResourceImpl extends DroppableImpl {
@@ -17,15 +15,10 @@ public final class DroppableResourceImpl extends DroppableImpl {
     }
     
     @Override
-    public void drop(@NotNull PlayerProfile profile, @NotNull Drop drop) {
-        final PlayerDatabase database = profile.getDatabase();
+    public @NotNull Drop drop(@NotNull PlayerProfile profile, int amount) {
+        profile.getDatabase().inventory.addResource(resource, amount);
         
-        database.inventory.addResource(resource, drop.getAmount());
-    }
-    
-    @Override
-    public @NotNull HoverEvent<?> createHoverEvent() {
-        return resource.createBuilder().asIcon().asHoverEvent();
+        return resource;
     }
     
 }

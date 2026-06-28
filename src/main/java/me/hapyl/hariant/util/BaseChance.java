@@ -19,7 +19,7 @@ public class BaseChance implements ComponentFormatter, ComponentLike {
     
     private BaseChance(@Percentage(Percentage.Type.DECIMAL) double chance) {
         this.chance = chance;
-        this.component = Component.text("%,.1f%% ".formatted(chance * DIVISOR), Colors.ATTRIBUTE_LUCK).append(AttributeType.LUCK.getPrefix().color(Colors.ATTRIBUTE_LUCK));
+        this.component = Component.text("%,.1f%% ".formatted(chance * DIVISOR), Colors.ATTRIBUTE_LUCK).append(AttributeType.LUCK.getPrefixStyled());
     }
     
     @NotNull

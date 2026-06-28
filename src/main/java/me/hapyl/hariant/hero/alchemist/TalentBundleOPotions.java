@@ -12,6 +12,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
+import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
@@ -51,6 +52,7 @@ public class TalentBundleOPotions extends Talent implements Listener {
         super(key, Component.text("Bundle o' Potions"), Icon.ofMaterial(Material.BUNDLE));
         
         this.setCooldownSeconds(10);
+        this.setTalentType(TalentType.IMPAIR);
         
         this.setDescription(
                 Component.empty()

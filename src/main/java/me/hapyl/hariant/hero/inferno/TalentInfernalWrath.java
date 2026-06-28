@@ -49,10 +49,10 @@ public class TalentInfernalWrath extends TalentUltimate {
     private static final int NUMBER_OF_FX_ARMOR_STANDS = 10;
     private static final ItemStack MAGMA_TEXTURE = ItemBuilder.playerHead("721d0930bd61fea4cb9027b00e94e13d62029c524ea0b3260c747457ba1bcfa1").asItemStack();
     
-    @DisplayField private final Decimal radius = Decimal.ofValue(6);
-    @DisplayField private final Decimal castingTime = Decimal.ofSeconds(4);
+    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 66);
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.of(AttributeType.ATTACK, 102);
+    @DisplayField private final Decimal radius = Decimal.ofValue(6);
+    @DisplayField private final Decimal castingTime = Decimal.ofSeconds(2.5f);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(this, DeathMessage.create("{player} suffered the wrath [of {killer}]"));
     
@@ -84,9 +84,7 @@ public class TalentInfernalWrath extends TalentUltimate {
     
     @Override
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
-        return Executable.execute(() -> {
-            player.delegate(new InfernalWrath(player));
-        });
+        return Executable.delegate(new InfernalWrath(player));
     }
     
     @Override
@@ -101,7 +99,6 @@ public class TalentInfernalWrath extends TalentUltimate {
         private final List<ArmorStand> armorStands;
         
         private final double radius = TalentInfernalWrath.this.radius.doubleValue();
-        
         private final int castingTime = TalentInfernalWrath.this.castingTime.intValue();
         
         public InfernalWrath(@NotNull HariantPlayer player) {

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 public final class GameTypeDeathmatch extends GameTypeImpl {
     
-    private static final int TOP_TEAMS_LIMIT = 3;
+    private static final int TOP_TEAMS_LIMIT = 5;
     
     private final int respawnTime = Tick.fromSeconds(3);
     private final int killGoal = 10;

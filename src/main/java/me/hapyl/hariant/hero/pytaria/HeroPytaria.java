@@ -77,7 +77,7 @@ public class HeroPytaria extends Hero {
     @NotNull
     @Override
     public List<Component> supplyActionbar(@NotNull HariantPlayer player) {
-        return List.of(player.getHeroData(HeroRegistry.PYTARIA, HeroDataPytaria::new).asComponent());
+        return player.getHeroData(HeroRegistry.PYTARIA, HeroDataPytaria::new).supplyActionbar(player);
     }
     
     public static class WeaponAnnihilallium extends WeaponMelee {
@@ -85,7 +85,7 @@ public class HeroPytaria extends Hero {
             super(
                     Key.ofString("annihilallium"),
                     Icon.ofMaterial(Material.ALLIUM),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 85, 10)
+                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 65, 10)
             );
             
             setName(Component.text("Annihilallium"));

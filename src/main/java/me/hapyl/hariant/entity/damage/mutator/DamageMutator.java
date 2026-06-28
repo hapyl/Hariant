@@ -11,25 +11,16 @@ public interface DamageMutator extends Identified {
     
     double mutate(double damage, final double value);
     
-    @NotNull
-    static DamageMutator multiply() {
-        return Holder.MULTIPLY;
+    static @NotNull DamageMutator multiply() {
+        return DamageMutatorImplMultiply.INSTANCE;
     }
     
-    @NotNull
-    static DamageMutator add() {
-        return Holder.ADD;
+    static @NotNull DamageMutator add() {
+        return DamageMutatorImplAdd.INSTANCE;
     }
     
-    @NotNull
-    static DamageMutator subtract() {
-        return Holder.SUBTRACT;
-    }
-    
-    class Holder {
-        public static final DamageMutator MULTIPLY = new DamageMutatorImplMultiply();
-        public static final DamageMutator ADD = new DamageMutatorImplAdd();
-        public static final DamageMutator SUBTRACT = new DamageMutatorImplSubtract();
+    static @NotNull DamageMutator subtract() {
+        return DamageMutatorImplSubtract.INSTANCE;
     }
     
 }

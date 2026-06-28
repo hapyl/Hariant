@@ -67,9 +67,4 @@ public interface TalentTarget {
         throw new NotImplementedException();
     }
     
-    @NotNull
-    static TalentTarget requireGameInstance() {
-        return new TalentTargetRequireGameInstance();
-    }
-    
 }

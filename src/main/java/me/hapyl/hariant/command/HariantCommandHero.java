@@ -10,6 +10,7 @@ import me.hapyl.hariant.hero.HeroDirectory;
 import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.menu.hero.MenuHeroSelection;
+import me.hapyl.hariant.profile.PlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +36,8 @@ public final class HariantCommandHero extends HariantPlayerCommand {
                 return;
             }
             
-            final HeroDirectory heroDirectory = Hariant.getPlayerDatabase(player).heroDirectory;
+            final PlayerProfile profile = Hariant.getPlayerProfile(player);
+            final HeroDirectory heroDirectory = profile.getDatabase().heroDirectory;
             final HeroInstance heroInstance = heroDirectory.getHero(hero).orElse(null);
             
             if (heroInstance == null) {
@@ -43,7 +45,7 @@ public final class HariantCommandHero extends HariantPlayerCommand {
                 return;
             }
             
-            heroDirectory.trySelectHero(player, heroInstance);
+            profile.setSelectedHero(heroInstance);
         }
     }
     

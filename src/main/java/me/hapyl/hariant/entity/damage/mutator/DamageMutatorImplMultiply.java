@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class DamageMutatorImplMultiply implements DamageMutator {
     
-    DamageMutatorImplMultiply() {
+    static final @NotNull DamageMutator INSTANCE = new DamageMutatorImplMultiply();
+    
+    private DamageMutatorImplMultiply() {
     }
     
     @NotNull

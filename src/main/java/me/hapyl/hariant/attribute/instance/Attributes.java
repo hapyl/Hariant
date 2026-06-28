@@ -50,17 +50,24 @@ public class Attributes implements AttributesBase {
         return this;
     }
     
-    @NotNull
-    public Component createLore(@NotNull AttributeType attributeType) {
+    public @NotNull Component createLore(@NotNull AttributeType attributeType, @Nullable Double externalValue) {
+        return createLore0(attributeType, externalValue != null ? externalValue : 0).append(createExternalValueComponent(externalValue));
+    }
+    
+    public @NotNull Component createLore(@NotNull AttributeType attributeType) {
+        return createLore0(attributeType, 0);
+    }
+    
+    private @NotNull Component createLore0(@NotNull AttributeType attributeType, double externalValue) {
         return Component.empty()
+                        .append(this.createRelativeArrow(attributeType))
                         .appendSpace()
                         .append(attributeType.asComponent())
                         .appendSpace()
-                        .append(attributeType.format(this.get(attributeType)));
+                        .append(attributeType.format(attributeType.clamp(this.get(attributeType) + externalValue)));
     }
     
-    @NotNull
-    public Component createRelativeArrow(@NotNull AttributeType attributeType) {
+    public @NotNull Component createRelativeArrow(@NotNull AttributeType attributeType) {
         final double baseValue = this.base(attributeType);
         final double defaultValue = attributeType.defaultValue();
         
@@ -97,6 +104,10 @@ public class Attributes implements AttributesBase {
     @NotNull
     public static Attributes copyOf(@NotNull Attributes attributes) {
         return new Attributes(attributes);
+    }
+    
+    public static @NotNull Component createExternalValueComponent(@Nullable Double externalValue) {
+        return externalValue != null ? Component.text(" +%,.0f".formatted(externalValue), Colors.GREEN) : Component.empty();
     }
     
 }

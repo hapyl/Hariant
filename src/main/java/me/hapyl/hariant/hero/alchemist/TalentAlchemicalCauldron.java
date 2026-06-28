@@ -17,7 +17,6 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -27,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
 public final class TalentAlchemicalCauldron extends Talent {
     
     @DisplayField public final Decimal cauldronHealth = Decimal.ofValue(500);
+    @DisplayField public final Decimal cauldronElementalApplication = Decimal.ofElementalApplication(ElementType.TOXIC, 10);
+    @DisplayField public final Decimal cauldronElementalApplicationRadius = Decimal.ofValue(1.5);
     
     @DisplayField public final Decimal infusionDuration = Decimal.ofSeconds(15);
     @DisplayField public final Decimal toxicDamageIncrease = Decimal.ofAttribute(AttributeType.TOXIC_DAMAGE_BONUS, 40);
@@ -34,7 +35,7 @@ public final class TalentAlchemicalCauldron extends Talent {
     public TalentAlchemicalCauldron(@NotNull Key key) {
         super(key, Component.text("Alchemical Cauldron"), Icon.ofMaterial(Material.CAULDRON));
         
-        this.setDurationSeconds(15); // Brewing duration
+        this.setDurationSeconds(10); // Brewing duration
         this.setCooldownSeconds(30);
         
         this.setTalentType(TalentType.ENHANCE);
@@ -43,7 +44,7 @@ public final class TalentAlchemicalCauldron extends Talent {
                 Component.empty()
                          .append(Component.text("Place an alchemical cauldron in front of you."))
                          .appendNewline()
-                         .append(Component.text("Put your stick inside to start brewing a toxic concoction!", Colors.DARK_GRAY, TextDecoration.ITALIC))
+                         .append(Component.text("Put your stick inside to start brewing a toxic concoction!", Colors.DARK_GRAY))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After the cauldron finishes brewing, you can pull out the stick infused with "))
@@ -85,4 +86,5 @@ public final class TalentAlchemicalCauldron extends Talent {
         
         return Response.await();
     }
+    
 }

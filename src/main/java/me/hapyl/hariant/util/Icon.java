@@ -5,6 +5,7 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.inventory.item.ItemCreator;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -51,8 +52,11 @@ public interface Icon extends ItemCreator {
         return ofTexture(Holder.TEXTURE);
     }
     
-    @NotNull
-    private static ItemBuilder createBuilder(@NotNull Material material) {
+    static @NotNull ItemStack createIcon(@NotNull Material material) {
+        return Icon.ofMaterial(material).createIcon();
+    }
+    
+    private static @NotNull ItemBuilder createBuilder(@NotNull Material material) {
         return new ItemBuilder(HariantConstants.DUMMY_MATERIAL).setItemModel(material).unsetComponents();
     }
     

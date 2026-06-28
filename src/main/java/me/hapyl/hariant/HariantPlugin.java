@@ -11,7 +11,6 @@ import me.hapyl.hariant.event.HariantEntityMoveEvent;
 import me.hapyl.hariant.game.booster.BoosterHandler;
 import me.hapyl.hariant.handler.*;
 import me.hapyl.hariant.npc.NpcHandler;
-import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.weapon.ability.AbilityHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
@@ -28,7 +27,7 @@ public final class HariantPlugin extends JavaPlugin {
     /**
      * Defines the minimum EternaAPI version plugin requires, using any versions below that will shut down the server.
      */
-    public static final String REQUIRED_ETERNA_VERSION = "6.2.14";
+    public static final String REQUIRED_ETERNA_VERSION = "6.2.16";
     
     private HariantConfig config;
     private Database database;
@@ -36,13 +35,13 @@ public final class HariantPlugin extends JavaPlugin {
     
     @Override
     public void onDisable() {
-        Hariant.handler.onDestroy();
+        Hariant.HANDLER.onDestroy();
         database.close();
     }
     
     @Override
     public void onEnable() {
-        Hariant.plugin = this;
+        Hariant.PLUGIN = this;
         
         // Instantiate EternaAPI
         EternaAPI.instantiate(this, REQUIRED_ETERNA_VERSION);
@@ -65,7 +64,7 @@ public final class HariantPlugin extends JavaPlugin {
         pluginManager.registerEvents(databaseSyncer, this);
         
         // Load manager
-        Hariant.handler = new Hariant(this);
+        Hariant.HANDLER = new Hariant(this);
         
         // Load listeners
         pluginManager.registerEvents(new PlayerHandler(), this);
@@ -87,9 +86,6 @@ public final class HariantPlugin extends JavaPlugin {
                 Bukkit.getServer().unloadWorld(world, false);
             }
         }
-        
-        // Remove garbage entities
-        InternalTasks.later(EntityGarbageCollector::clearGarbage, 20);
     }
     
     @NotNull
@@ -109,7 +105,7 @@ public final class HariantPlugin extends JavaPlugin {
     
     @NotNull
     public static RuntimeException severeExceptionShutdownServer(@NotNull RuntimeException ex) {
-        final Logger logger = Hariant.plugin.getLogger();
+        final Logger logger = Hariant.PLUGIN.getLogger();
         
         logger.severe("");
         logger.severe("+---------------------------------------------------------+");
@@ -119,7 +115,7 @@ public final class HariantPlugin extends JavaPlugin {
         logger.severe("+---------------------------------------------------------+");
         logger.severe("");
         
-        Bukkit.getScheduler().runTask(Hariant.plugin, () -> Bukkit.getServer().shutdown());
+        Bukkit.getScheduler().runTask(Hariant.PLUGIN, () -> Bukkit.getServer().shutdown());
         return ex;
     }
     

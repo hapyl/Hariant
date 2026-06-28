@@ -26,13 +26,14 @@ public class ElementData implements ElementHandler, Ticking, Resettable {
     
     @Override
     public void applyElement(@NotNull ElementSource elementSource) {
-        final ElementType elementType = elementSource.getElementType();
-        final HariantEntity source = elementSource.getSource();
         final double elementUnits = elementSource.getElementUnits();
         
         if (elementUnits <= 0) {
             return;
         }
+        
+        final ElementType elementType = elementSource.getElementType();
+        final HariantEntity source = elementSource.getSource();
         
         // Scale units by the source's Elemental Mastery
         double units = this.calculateElementBuildUp(elementUnits, source);

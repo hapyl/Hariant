@@ -18,6 +18,7 @@ import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
@@ -50,13 +51,13 @@ import java.util.Set;
 
 public final class TalentRoseIvy extends Talent implements Listener {
     
-    @DisplayField public final AttributeScaling damage = AttributeScaling.of(AttributeType.ATTACK, 54);
-    @DisplayField public final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 20);
+    @DisplayField public final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 54);
+    @DisplayField public final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 50);
     
     @DisplayField private final Decimal radius = Decimal.ofValue(3);
     @DisplayField private final Decimal affectPeriod = Decimal.ofSeconds(0.5f);
     @DisplayField private final Decimal effectDuration = Decimal.ofSeconds(0.5f);
-    @DisplayField private final Decimal speedDecrease = Decimal.ofPercentage(-25);
+    @DisplayField private final Decimal speedDecrease = Decimal.ofPercentage(25);
     
     private final Key modifierKey = Key.ofString("rose_ivy");
     
@@ -117,7 +118,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
         
         final Location origin = LocationHelper.anchor(projectile.getLocation());
         
-        player.delegate(new RoseIvyTask(player, origin));
+        player.delegate(new RoseIvyTask(player, origin), DelegateType.PERSISTENT);
         
         player.playWorldSound(origin, Sound.ENTITY_CAMEL_SADDLE, 0.0f);
         player.playWorldSound(origin, Sound.ENTITY_PLAYER_HURT_SWEET_BERRY_BUSH, 0.0f);
@@ -152,7 +153,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
         RoseIvyModifier(@NotNull HariantEntity applier) {
             super(modifierKey, TalentRoseIvy.this.getName(), applier, effectDuration.intValue());
             
-            this.of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.ADDITIVE, speedDecrease.doubleValue());
+            this.of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.ADDITIVE, -speedDecrease.doubleValue());
         }
         
         @Override
@@ -161,6 +162,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
     }
     
     private class RoseIvyTask extends HariantTickingTask implements EntityCollector {
+        
         private static final BlockData PARTICLE_DATA = Material.SWEET_BERRY_BUSH.createBlockData();
         
         private final HariantPlayer player;

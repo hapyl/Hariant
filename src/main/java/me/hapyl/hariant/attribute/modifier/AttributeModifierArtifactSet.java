@@ -3,7 +3,7 @@ package me.hapyl.hariant.attribute.modifier;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.Capitalizable;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.inventory.item.artifact.ArtifactSet;
+import me.hapyl.hariant.inventory.item.artifact.set.ArtifactSet;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;

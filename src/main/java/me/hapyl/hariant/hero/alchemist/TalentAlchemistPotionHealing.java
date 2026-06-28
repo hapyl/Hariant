@@ -7,6 +7,7 @@ import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
+import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -21,16 +22,17 @@ import static org.bukkit.Sound.BLOCK_BREWING_STAND_BREW;
 
 public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion implements Listener {
     
-    @DisplayField private final Decimal healing = Decimal.ofPercentage(30);
-    @DisplayField private final Decimal extraHealing = Decimal.ofPercentage(10);
+    @DisplayField private final Decimal healing = Decimal.ofPercentage(15);
+    @DisplayField private final Decimal extraHealing = Decimal.ofPercentage(15);
     
     TalentAlchemistPotionHealing(@NotNull TalentAbyssalBottle talent) {
         super(talent, "healing", Component.text("Potion of Healing"), Color.fromRGB(209, 13, 19), 20);
         
         // This is also used for extra healing delay
-        this.setDurationSeconds(3);
+        setDurationSeconds(3);
+        setTalentType(TalentType.SUPPORT);
         
-        this.setDescription(
+        setDescription(
                 Component.empty()
                          .append(Component.text("Heals your for "))
                          .append(healing)

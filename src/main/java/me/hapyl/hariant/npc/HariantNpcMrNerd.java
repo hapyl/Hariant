@@ -25,8 +25,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 public class HariantNpcMrNerd extends HariantNpc {
     
     private final HariantDialog dialogFirstMeeting;
@@ -84,6 +82,7 @@ public class HariantNpcMrNerd extends HariantNpc {
         }
     }
     
+    // TODO (xanyjl @ Friday, June 26) -> This needs to be a Page menu later
     private class ArtifactCreatingMenu extends Menu {
         public ArtifactCreatingMenu(@NotNull Player player) {
             super(player, () -> Component.text("Artifact Creating Menu"), ChestSize.SIZE_6);
@@ -106,13 +105,15 @@ public class HariantNpcMrNerd extends HariantNpc {
                             builder.addLore(Component.text("                                            ", Colors.DARK_GRAY, TextDecoration.STRIKETHROUGH));
                             builder.addLore();
                             builder.addLore(ButtonComponents.left("create one artifact"));
-                            builder.addLore(ButtonComponents.right("create four artifacts"));
+                            builder.addLore(ButtonComponents.right("create ten artifacts"));
+                            builder.addLore(ButtonComponents.middle("create twenty artifacts"));
                             
                             applier.add(
                                     builder.asIcon(),
                                     PlayerMenuAction.builder()
                                                     .left(player -> createArtifacts(item, 1))
-                                                    .right(player -> createArtifacts(item, 4))
+                                                    .right(player -> createArtifacts(item, 10))
+                                                    .middle(player -> createArtifacts(item, 20))
                                                     .build()
                             );
                         });
@@ -124,7 +125,7 @@ public class HariantNpcMrNerd extends HariantNpc {
             final PlayerDatabase database = Hariant.getPlayerDatabase(player);
             
             for (int i = 0; i < amount; i++) {
-                database.inventory.createItem(artifact.newInstance(database, UUID.randomUUID()));
+                database.inventory.createItem(artifact);
             }
             
             dialogCreating.startForcefully(player);

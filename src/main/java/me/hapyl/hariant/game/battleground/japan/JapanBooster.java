@@ -1,5 +1,6 @@
 package me.hapyl.hariant.game.battleground.japan;
 
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.booster.Booster;
 import me.hapyl.hariant.task.HariantTask;
@@ -38,7 +39,7 @@ public final class JapanBooster implements Booster {
             
             player.setVelocity(vector);
             player.playWorldSound(Sound.ENTITY_WITHER_SHOOT, 1.25f);
-        }, horizontalDelay));
+        }, horizontalDelay), DelegateType.PERSISTENT);
     }
     
 }

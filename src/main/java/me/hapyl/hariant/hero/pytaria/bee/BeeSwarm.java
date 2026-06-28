@@ -83,30 +83,37 @@ public class BeeSwarm extends HariantTickingTask {
             // If the bee has a target, check whether they're dead and reset target
             if (bee.target != null) {
                 // If target has died or too far away, stop going towards them
-                final double distanceToSquared = bee.distanceToSquared(bee.target);
+                final double distanceToSquared = bee.distanceToSquared(bee.target.getEntity());
+                final int chasingFor = bee.target.incrementChasingFor();
                 
-                if (player.canAffect(bee.target) || distanceToSquared > talent.maxStrayDistance.doubleValueSquared()) {
-                    bee.target = null;
+                if (!player.canAffect(bee.target.getEntity()) || distanceToSquared > talent.maxStrayDistance.doubleValueSquared() || chasingFor > talent.beeGivesUpAfterChasingFor.intValue()) {
+                    bee.unsetTarget(talent.beeTargetLossCooldown.intValue());
                 }
             }
             // If the bee doesn't have a target, check for the closest entity to the bee
             else {
-                final HariantEntity target = player.collectNearbyEntities(location, talent.enemyLookupRadius)
-                                                   .filter(player::canAffect)
-                                                   .min(Comparator.comparingDouble(bee::distanceToSquared))
-                                                   .orElse(null);
-                
-                // If there is a new target, assign it, otherwise go towards pytaria
-                if (target != null) {
-                    bee.target = target;
+                // Check for target cooldown
+                if (bee.targetCooldown > 0) {
+                    bee.targetCooldown--;
+                }
+                else {
+                    final HariantEntity target = player.collectNearbyEntities(location, talent.enemyLookupRadius)
+                                                       .filter(player::canAffect)
+                                                       .min(Comparator.comparingDouble(bee::distanceToSquared))
+                                                       .orElse(null);
                     
-                    // Play target fx
-                    player.playWorldSound(bee.getLocation(), Sound.ENTITY_BEE_HURT, 0.25f, 1.0f);
+                    // If there is a new target, assign it, otherwise go towards pytaria
+                    if (target != null) {
+                        bee.target = new BeeTarget(target);
+                        
+                        // Play target fx
+                        player.playWorldSound(bee.getLocation(), Sound.ENTITY_BEE_HURT, 0.25f, 1.0f);
+                    }
                 }
             }
             
             // Randomize the destination
-            final Location destination = bee.target != null ? bee.target.getMidpointLocation() : player.getMidpointLocation();
+            final Location destination = bee.target != null ? bee.target.getEntity().getMidpointLocation() : player.getMidpointLocation();
             final double distanceToSquared = bee.distanceToSquared(destination);
             
             final HariantRandom random = player.getRandom();
@@ -115,11 +122,11 @@ public class BeeSwarm extends HariantTickingTask {
             if (distanceToSquared < talent.stingDistance.doubleValueSquared()) {
                 // If the target exists, deal damage and FUCKING DIE
                 if (bee.target != null) {
-                    final double damage = bee.target.hasEffect(EnumStatusEffect.ROSE_IVY)
+                    final double damage = bee.target.getEntity().hasEffect(EnumStatusEffect.ROSE_IVY)
                                           ? talent.beeDamageIvy.getScaledValue(player)
                                           : talent.beeDamage.getScaledValue(player);
                     
-                    bee.target.damage(new BeeSwarmDamageSource(player, damage));
+                    bee.target.getEntity().damage(new BeeSwarmDamageSource(player, damage));
                     
                     bee.remove();
                     iterator.remove();

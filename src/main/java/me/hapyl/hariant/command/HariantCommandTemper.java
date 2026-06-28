@@ -71,10 +71,10 @@ public final class HariantCommandTemper extends HariantPlayerCommand {
                     Component.empty()
                              .append(Component.text("Added modifier for "))
                              .append(attributeType)
-                             .appendSpace()
+                             .append(Component.text(": "))
                              .append(modifierType.format(value))
                              .appendSpace()
-                             .append(Component.text(" (%s)".formatted(modifierType.name()), Colors.DARK_GRAY))
+                             .append(Component.text("(%s)".formatted(modifierType.name()), Colors.DARK_GRAY))
             );
         }
     }

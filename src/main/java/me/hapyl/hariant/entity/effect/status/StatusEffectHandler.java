@@ -26,4 +26,5 @@ public interface StatusEffectHandler {
     
     @NotNull
     Stream<StatusEffectInstance> getEffects();
+    
 }

@@ -3,33 +3,60 @@
 
 * Combat Tag
 * Trigger game type win on player leave
-* Consider snapping to weapon when using a talent, instead of just cancelling the event
-* Add sound fx to mage
-* Add ultimate to mage
-* Remove SLIME sound in mage
 
 * Implement exp
 * Add inventory
 * ~~Make the drops look better~~
-  + ~~Hoverable drops~~
-  + ~~Notification for rare drops~~
-  + ~~Split dropping and notifications.~~
+    + ~~Hoverable drops~~
+    + ~~Notification for rare drops~~
+    + ~~Split dropping and notifications.~~
 
 * Cannot see friendly invisibility
 * Add fall DMG resistance effect
 * Add fx to sakura healing
 * Implement auto-ready
-* Next hero - Blast Knight
+* Achievement families
+* Add recommended stats to heroes
+* Add artifact customizer to Mr. Nerd
 
-### [Artifact]
+[ **Urgent** ]
+* ~~Nerf alchemist~~
 
-* Energy refunding artifact
+* Blast Knight:
+    * ~~Regen energy when teammate is hit~~
+    * ~~Increase shield blocking angle~~
+
+* Add total damage dealt/taken to game report
+* ~~Increase curse DMG~~
+* ~~Show players on game end~~
+* Inferno is a little too strong
+* Don't spawn particles if entity is invisibile
+
+* Next Hero - Shark
 
 ---------------------------------------------------------
 
+* ~~Something wrong with toxic cloud~~
+* ~~Duplicate message is wrong~~
+* ~~Can duplicate hero if switched during countdown~~
+* ~~Next hero - Blast Knight~~
 # FIXED
 
-
+* ~~Start countdown sound pitch~~
+* ~~Add more slots to deathmatch scoreboard~~
+* ~~You can die after death~~
+* ~~Wilted Rose hitbox is fucked~~
+* ~~Remove invisibility on damage taken as well~~
+* ~~Nyx is too week (Hp, Def)~~
+* ~~Map feature description has wrong padding~~
+* ~~Bees spam aggro sound~~
+* ~~Fix drops grouping artifacts~~
+* ~~Heal after the game ends~~
+* ~~Energy refunding artifact~~
+* ~~Consider snapping to weapon when using a talent, instead of just cancelling the event~~
+* ~~Add sound fx to mage~~
+* ~~Add ultimate to mage~~
+* ~~Remove SLIME sound in mage~~
 * ~~Verdict healing too little~~
 * ~~Weird verdict dmg~~
 * ~~Cannot se friendly invisibility on start~~

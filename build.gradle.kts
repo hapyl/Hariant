@@ -24,7 +24,7 @@ dependencies {
     paperweight.paperDevBundle("26.1.2.build.+")
 
     implementation("org.mongodb:mongo-java-driver:3.12.12")
-    implementation("me.hapyl:eternaapi:6.2.15-SNAPSHOT")
+    implementation("me.hapyl:eternaapi:6.2.16-SNAPSHOT")
 }
 
 group = "me.hapyl"

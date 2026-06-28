@@ -2,12 +2,17 @@ package me.hapyl.hariant.hero.mage;
 
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
+import me.hapyl.hariant.profile.ui.ActionbarSupplier;
 import me.hapyl.hariant.talent.TalentRegistry;
 import me.hapyl.hariant.task.executor.Promise;
+import me.hapyl.hariant.util.Definition;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class HeroDataMage extends HeroData<HeroMage> {
+import java.util.List;
+
+public class HeroDataMage extends HeroData<HeroMage> implements ActionbarSupplier {
     
     private int souls;
     private SoulStorm soulStorm;
@@ -60,6 +65,11 @@ public class HeroDataMage extends HeroData<HeroMage> {
     
     public boolean hasSoulStorm() {
         return soulStorm != null;
+    }
+    
+    @Override
+    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+        return List.of(Definition.SOUL_FRAGMENT.prefix(Component.text(souls)));
     }
     
     private void disposeOfSoulStorm() {

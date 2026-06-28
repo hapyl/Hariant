@@ -1,11 +1,13 @@
 package me.hapyl.hariant.inventory.item.artifact;
 
+import me.hapyl.eterna.module.annotate.StrictEnumOrdinal;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.hariant.util.ComparableOrdinal;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 
+@StrictEnumOrdinal
 public enum PieceCount implements Named, ComparableOrdinal<PieceCount>, ComponentLike {
     
     NONE(""),

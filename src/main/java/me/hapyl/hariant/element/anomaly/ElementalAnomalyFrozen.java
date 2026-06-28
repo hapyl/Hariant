@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implements Listener {
     
-    private final int frozenDuration = Tick.fromSeconds(4);
+    private final int frozenDuration = Tick.fromSeconds(5);
     
     private final Decimal damageMultiplier = Decimal.ofPercentage(200);
     

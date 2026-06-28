@@ -6,8 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ItemCreator {
     
-    @NotNull
-    ItemBuilder createBuilder();
+    @NotNull ItemBuilder createBuilder();
     
     @NotNull
     default ItemStack createItem() {

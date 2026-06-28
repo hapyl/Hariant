@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.alchemist;
 
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.talent.TalentType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;
@@ -13,10 +14,13 @@ public final class TalentAlchemistPotionInvisibility extends TalentAlchemistPoti
                 "invisibility",
                 Component.text("Potion of Invisibility"),
                 Color.fromRGB(110, 138, 150),
-                15
+                30
         );
         
-        this.setDescription(EnumStatusEffect.INVISIBILITY.getDescription());
+        setTalentType(TalentType.SUPPORT);
+        
+        setDescription(EnumStatusEffect.INVISIBILITY.getDescription());
+        setDurationSeconds(8);
     }
     
     @NotNull

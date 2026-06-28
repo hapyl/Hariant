@@ -2,7 +2,8 @@ package me.hapyl.hariant.hero.troll;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.entity.damage.AssistSource;
+import me.hapyl.hariant.entity.effect.Effect;
+import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -18,7 +19,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
-public final class TalentSpin extends Talent {
+public final class TalentSpin extends Talent implements Effect {
     
     @DisplayField private final Decimal radius = Decimal.ofValue(30);
     @DisplayField private final Decimal rotationDegrees = Decimal.ofValue(180, value -> Component.text("%.0f°".formatted(value)));
@@ -49,7 +50,7 @@ public final class TalentSpin extends Talent {
         player.collectNearbyEntities(radius)
               .filter(player::canAffect)
               .forEach(entity -> {
-                  if (entity.hasEffectResistance(AssistSource.create(player, this))) {
+                  if (entity.triggerEffect(player, this)) {
                       return;
                   }
                   
@@ -57,7 +58,6 @@ public final class TalentSpin extends Talent {
                   location.setYaw(location.getYaw() + rotationDegrees.floatValue());
                   
                   entity.teleport(location);
-                  entity.triggerDebuff(player);
                   
                   // Fx
                   entity.playSound(Sound.ENTITY_BLAZE_HURT, 2.0f);
@@ -69,4 +69,10 @@ public final class TalentSpin extends Talent {
         
         return Response.ok();
     }
+    
+    @Override
+    public @NotNull EffectType getEffectType() {
+        return EffectType.DEBUFF;
+    }
+    
 }

@@ -89,10 +89,6 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
         return this.doubleValue() * this.doubleValue();
     }
     
-    public @NotNull Component textValue() {
-        return Component.text(NumberToWord.toWord((int) value));
-    }
-    
     @NotNull
     @Override
     public abstract Component format();

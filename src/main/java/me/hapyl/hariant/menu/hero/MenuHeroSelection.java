@@ -65,7 +65,7 @@ public class MenuHeroSelection extends MenuPage<Hero> {
         }
         
         if (clickType.isLeftClick()) {
-            heroDirectory.trySelectHero(player, heroInstance);
+            profile.setSelectedHero(heroInstance);
             this.openMenu();
         }
         else if (clickType.isRightClick()) {

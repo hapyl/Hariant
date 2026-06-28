@@ -6,7 +6,6 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.*;
 import me.hapyl.hariant.talent.TalentRegistry;
-import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.weapon.Weapon;
 import me.hapyl.hariant.weapon.projectile.WeaponRangeProjectile;
 import net.kyori.adventure.text.Component;
@@ -84,16 +83,11 @@ public class HeroMage extends Hero {
     @NotNull
     @Override
     public List<Component> supplyActionbar(@NotNull HariantPlayer player) {
-        final HeroDataMage heroData = player.getHeroData(this, HeroDataMage::new);
-        final int souls = heroData.getSouls();
-        
-        return List.of(
-                Definition.SOUL_FRAGMENT.prefix(Component.text(souls))
-        );
+        return player.getHeroData(this, HeroDataMage::new).supplyActionbar(player);
     }
     
     @Override
-    public void debugOnCooldownReset(@NotNull HariantPlayer player) {
+    public void onDebugCooldownReset(@NotNull HariantPlayer player) {
         player.getHeroData(this, HeroDataMage::new).incrementSouls(999);
     }
     

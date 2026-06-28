@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.alchemist;
 
 import com.google.common.collect.Sets;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.CollectionUtils;
 import me.hapyl.hariant.Colors;
@@ -11,10 +12,9 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.HariantRandom;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
@@ -40,6 +40,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -48,11 +49,11 @@ import static org.bukkit.Sound.ENTITY_EVOKER_PREPARE_ATTACK;
 
 public final class TalentAbyssalCurse extends TalentUltimate implements Listener {
     
-    @DisplayField private final Decimal castingDuration = Decimal.ofSeconds(1.2f);
-    @DisplayField private final Decimal curseTransferCooldown = Decimal.ofSeconds(0.25f);
-    @DisplayField private final Decimal curseDamage = Decimal.ofPercentage(200);
+    private final @DisplayField Decimal castingDuration = Decimal.ofSeconds(1.5f);
+    private final @DisplayField Decimal curseTransferCooldown = Decimal.ofSeconds(0.25f);
+    private final @DisplayField Decimal curseDamage = Decimal.ofPercentage(150);
     
-    private final Set<AbyssalCurse> curses = Sets.newHashSet();
+    private final Set<AbyssalCurse> globalCurses = Sets.newHashSet();
     
     private final Style curseStyle = Style.style(Colors.ABYSSAL_CURSE, TextDecoration.BOLD);
     private final Style curseStyleObfuscated = Style.style(Colors.ABYSSAL_CURSE, TextDecoration.BOLD, TextDecoration.OBFUSCATED);
@@ -89,7 +90,7 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                          .append(Component.text("player", Colors.WHITE, TextDecoration.UNDERLINED))
                          .append(Component.text(" to transfer the curse to that player."))
                          .appendNewline()
-                         .append(Component.text("Other players can also transfer the curse.", Colors.DARK_GRAY, TextDecoration.ITALIC))
+                         .append(Component.text("Other players can also transfer the curse.", Colors.DARK_GRAY))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After te curse becomes "))
@@ -106,14 +107,8 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
     
     @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
-        return TalentTarget.none();
-    }
-    
-    @NotNull
-    @Override
     public Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
-        return new ExecutorService(player)
+        return new ExecutorService()
                 .then(Executable.execute(() -> {
                     // Fx
                     player.spawnWorldParticle(player.getMidpointLocation(), Particle.ENCHANT, 100, 0, 0, 0, 1.0f);
@@ -123,12 +118,18 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                     final int curseDuration = HeroRegistry.ALCHEMIST.getCurseDuration(player, this.getDuration());
                     
                     // Store in the global hash set for faster lookup
-                    curses.add(new AbyssalCurse(player, curseDuration));
+                    globalCurses.add(new AbyssalCurse(player, curseDuration));
                 }, castingDuration.intValue()));
     }
     
-    @EventHandler
-    public void handleHariantDamageEvent(HariantDamageEvent ev) {
+    @NotNull
+    @Override
+    public TalentTarget target(@NotNull HariantPlayer player) {
+        return TalentTarget.none();
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void handleHariantAttackEvent(HariantAttackEvent ev) {
         final HariantEntity entity = ev.getEntity();
         final HariantEntity attacker = ev.getAttacker();
         
@@ -136,19 +137,37 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
             return;
         }
         
-        // Make sure the damage is MELEE
-        if (ev.getDamageType() != DamageType.MELEE) {
-            return;
-        }
-        
         // Check whether there is a curse whose bearer is the entity
-        final AbyssalCurse curse = curses.stream().filter(_curse -> _curse.bearer.equals(attacker)).findAny().orElse(null);
+        globalCurses.stream()
+                    .filter(_curse -> _curse.bearer.equals(attacker))
+                    .findAny()
+                    .ifPresent(curse -> curse.transfer(playerEntity));
         
-        if (curse == null) {
-            return;
+    }
+    
+    @NotNull
+    public static Component obfuscate(@NotNull String string, int numberOfCharsToObfuscate, @NotNull Style style, @NotNull Style styleObfuscated) {
+        final int length = string.length();
+        
+        if (length < numberOfCharsToObfuscate) {
+            throw new IllegalArgumentException("String length cannot be lower than numbers of chars to obfuscate!");
         }
         
-        curse.transfer(playerEntity);
+        final Set<Integer> obfuscatedIndexes = Sets.newHashSet();
+        
+        while (obfuscatedIndexes.size() < numberOfCharsToObfuscate) {
+            obfuscatedIndexes.add(Hariant.getRandom().nextInt(length));
+        }
+        
+        final TextComponent.Builder builder = Component.text();
+        
+        for (int i = 0; i < length; i++) {
+            final char ch = string.charAt(i);
+            
+            builder.append(Component.text(ch, obfuscatedIndexes.contains(i) ? styleObfuscated : style));
+        }
+        
+        return builder.build();
     }
     
     private class AbyssalCurse extends HariantTickingTask {
@@ -156,8 +175,8 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         private final HariantPlayer player;
         private final int duration;
         
-        @NotNull
-        private HariantPlayer bearer;
+        private @NotNull HariantPlayer bearer;
+        private @Nullable HariantEntity lastTransferer;
         
         private long lastTransfer;
         
@@ -182,14 +201,23 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
             
             // Transfer cooldown check
             final long currentTimeMillis = System.currentTimeMillis();
+            final long transferCooldownInMillis = curseTransferCooldown.intValue() * 50L;
+            final long timePassedSinceLastTransfer = currentTimeMillis - lastTransfer;
             
-            if (currentTimeMillis - lastTransfer < curseTransferCooldown.intValue() * 50L) {
+            if (timePassedSinceLastTransfer < transferCooldownInMillis) {
+                player.messageError(
+                        Component.empty()
+                                 .append(Component.text("Cannot transfer curse for another "))
+                                 .append(Component.text(Tick.format((int) ((transferCooldownInMillis - timePassedSinceLastTransfer) / 50))))
+                                 .append(Component.text("!"))
+                );
                 return;
             }
             
             final HariantPlayer previousBearer = bearer;
             
             this.bearer = player;
+            this.lastTransferer = previousBearer;
             this.lastTransfer = currentTimeMillis;
             
             // Fx
@@ -218,7 +246,7 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                              .append(Definition.ABYSSAL_CORROSION.getPrefixStyled())
                              .appendSpace()
                              .append(Component.text("Hit another player to transfer the curse or ", Colors.LIGHT_PURPLE))
-                             .append(Component.text("die", Colors.ERROR, TextDecoration.BOLD))
+                             .append(Component.text("DIE", Colors.ERROR, TextDecoration.BOLD))
                              .append(Component.text("!", Colors.LIGHT_PURPLE))
             );
             
@@ -269,11 +297,9 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         
         public void boom() {
             bearer.damage(
-                    DamageSource.builder(
-                                        DamageSourceIdentity.create(TalentAbyssalCurse.this, deathMessage),
-                                        bearer.getMaxHealth() * curseDamage.doubleValue()
-                                )
-                                .source(player)
+                    DamageSource.builder(DamageSourceIdentity.create(TalentAbyssalCurse.this, deathMessage), bearer.getMaxHealth() * curseDamage.doubleValue())
+                                // If the last bearer is the one who applied the curse, source the kill to whoever last transferred the curse
+                                .source(bearer.equals(player) ? lastTransferer : player)
                                 .elementType(ElementType.AETHER)
                                 .build()
             );
@@ -350,33 +376,8 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         
         @Override
         public void onCancel() {
-            curses.remove(this);
+            globalCurses.remove(this);
         }
-    }
-    
-    @NotNull
-    public static Component obfuscate(@NotNull String string, int numberOfCharsToObfuscate, @NotNull Style style, @NotNull Style styleObfuscated) {
-        final int length = string.length();
-        
-        if (length < numberOfCharsToObfuscate) {
-            throw new IllegalArgumentException("String length cannot be lower than numbers of chars to obfuscate!");
-        }
-        
-        final Set<Integer> obfuscatedIndexes = Sets.newHashSet();
-        
-        while (obfuscatedIndexes.size() < numberOfCharsToObfuscate) {
-            obfuscatedIndexes.add(Hariant.getRandom().nextInt(length));
-        }
-        
-        final TextComponent.Builder builder = Component.text();
-        
-        for (int i = 0; i < length; i++) {
-            final char ch = string.charAt(i);
-            
-            builder.append(Component.text(ch, obfuscatedIndexes.contains(i) ? styleObfuscated : style));
-        }
-        
-        return builder.build();
     }
     
 }

@@ -2,7 +2,6 @@ package me.hapyl.hariant.hero.troll;
 
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
-import me.hapyl.hariant.talent.TalentRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
@@ -30,12 +29,9 @@ public final class HeroDataTroll extends HeroData<HeroTroll> {
         }
     }
     
-    public void createStickSituation() {
-        if (stickySituation != null) {
-            stickySituation.dispose();
-        }
-        
-        stickySituation = new TalentStickySituation.StickySituation(player, TalentRegistry.STICKY_SITUATION);
+    public void createStickSituation(@NotNull TalentStickySituation.StickySituation stickySituation) {
+        this.destroyStickSituation();
+        this.stickySituation = stickySituation;
     }
     
     public void destroyStickSituation() {

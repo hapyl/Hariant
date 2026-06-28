@@ -20,6 +20,7 @@ public enum EnumStatusEffect implements StatusEffect {
     TALENT_LOCK(new StatusEffectTalentLock()),
     RESPAWN_RESISTANCE(new StatusEffectRespawnResistance()),
     HELLBURN(new StatusEffectHellburn()),
+    STUNNED(new StatusEffectStunned()),
     
     ;
     

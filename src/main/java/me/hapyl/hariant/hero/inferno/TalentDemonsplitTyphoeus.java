@@ -34,14 +34,14 @@ import java.util.Set;
 
 public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements Listener {
     
-    @DisplayField private final Decimal fireResistanceReduction = Decimal.ofAttribute(AttributeType.FIRE_RESISTANCE, 25);
-    @DisplayField private final Decimal fireResistanceReductionDuration = Decimal.ofSeconds(12);
+    @DisplayField private final Decimal fireResistanceReduction = Decimal.ofAttribute(AttributeType.FIRE_RESISTANCE, 20);
+    @DisplayField private final Decimal fireResistanceReductionDuration = Decimal.ofSeconds(6);
     
     @DisplayField private final Decimal hellfireAuraRadius = Decimal.ofValue(3);
     
     @DisplayField private final Decimal repeatWindow = Decimal.ofSeconds(5);
-    @DisplayField private final Decimal repeatMultiplier = Decimal.ofPercentage(70);
-    @DisplayField private final Decimal repeatRadius = Decimal.ofValue(6);
+    @DisplayField private final Decimal repeatMultiplier = Decimal.ofPercentage(30);
+    @DisplayField private final Decimal repeatRadius = Decimal.ofValue(3);
     
     private final Key hellfireAuraKey = Key.ofString("hellfire_aura");
     private final Component hellfireAuraName = Component.text("Hellfire Aura");
@@ -187,7 +187,7 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
             super.tick();
             
             // Hellfire aura
-            if (ticksAlive() % 5 != 0) {
+            if (localTicks() % 5 != 0) {
                 return;
             }
             

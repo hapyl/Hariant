@@ -16,6 +16,7 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.heal.HealingSource;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
@@ -49,7 +50,7 @@ public final class TalentDualVerdict extends Talent {
     @DisplayField private final Decimal dropletRadius = Decimal.ofValue(0.75);
     
     @DisplayField private final Decimal dropletHealingOfMaxNyxHealth = Decimal.ofPercentage(10);
-    @DisplayField private final Decimal dropletMaxHealthDecrease = Decimal.ofPercentage(5);
+    @DisplayField private final Decimal dropletMaxHealthDecrease = Decimal.ofPercentage(10);
     @DisplayField private final Decimal dropletMaxHealthDecreaseDuration = Decimal.ofSeconds(8);
     
     @DisplayField private final Decimal initialRadius = Decimal.ofValue(3);
@@ -119,7 +120,7 @@ public final class TalentDualVerdict extends Talent {
         final HeroDataNyx heroData = player.getHeroData(HeroRegistry.NYX, HeroDataNyx::new);
         final Location location = player.getLocation();
         
-        player.delegate(new DualVerdict(player, heroData, location));
+        player.delegate(new DualVerdict(player, heroData, location), DelegateType.INTERRUPTABLE);
         return Response.ok();
     }
     
@@ -266,13 +267,13 @@ public final class TalentDualVerdict extends Talent {
             }
             
             final HariantEntity entity = collectNearbyEntities(dropletRadius)
-                    .filter(HariantPlayer.class::isInstance)
-                    .min(Comparator.comparingDouble(player::distanceToSquared))
+                    .min(Comparator.comparingDouble(_entity -> _entity.distanceToSquared(location)))
                     .orElse(null);
             
             if (entity != null) {
                 // If the entity is a teammate, heal them
-                if (player.isTeammate(entity)) {
+                if (player.isSelfOrTeammate(entity)) {
+                    
                     // If the teammate is full health, ignore them
                     if (entity.isFullHealth()) {
                         return false;
@@ -282,9 +283,11 @@ public final class TalentDualVerdict extends Talent {
                 }
                 // Otherwise damage nyx and decrement entity energy
                 else {
+                    // De-buff Max Health
+                    entity.getAttributes().addModifier(new AttributeModifierDualVerdict(player));
+                    
                     // If entity is a player, decrement energy
                     if (entity instanceof HariantPlayer playerEntity && playerEntity.getHero().getUltimateTalent().getUltimateResourceType() == UltimateResourceType.ENERGY) {
-                        playerEntity.getAttributes().addModifier(new AttributeModifierDualVerdict(player));
                         
                         // Fx to player
                         playerEntity.playSound(Sound.ENTITY_BEE_HURT, 0.5f);
@@ -296,7 +299,7 @@ public final class TalentDualVerdict extends Talent {
             }
             
             // Animate droplet
-            final double y = Math.sin(Math.toRadians(player.ticksAlive() * 5)) * 0.2;
+            final double y = Math.sin(Math.toRadians(player.localTicks() * 5)) * 0.2;
             
             final Location dropletLocation = droplet.getLocation();
             dropletLocation.setY(location.y() + y);
@@ -323,7 +326,7 @@ public final class TalentDualVerdict extends Talent {
         AttributeModifierDualVerdict(@NotNull HariantPlayer player) {
             super(TalentDualVerdict.this, player, dropletMaxHealthDecreaseDuration.intValue());
             
-            of(AttributeType.MAX_HEALTH, AttributeModifierType.ADDITIVE, dropletMaxHealthDecrease.doubleValue());
+            of(AttributeType.MAX_HEALTH, AttributeModifierType.ADDITIVE, -dropletMaxHealthDecrease.doubleValue());
         }
     }
     

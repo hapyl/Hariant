@@ -24,4 +24,12 @@ public class InstanceImpl<O> implements Instance<O> {
         return origin;
     }
     
+    @Override
+    public void onInstanceCreated() {
+    }
+    
+    @Override
+    public void onInstanceDestroyed() {
+    }
+    
 }

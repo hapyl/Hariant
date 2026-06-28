@@ -1,7 +1,7 @@
 package me.hapyl.hariant.task.executor;
 
-import me.hapyl.hariant.task.Cancellable;
 import me.hapyl.hariant.task.Scheduler;
+import me.hapyl.hariant.util.Cancellable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -20,8 +20,7 @@ public interface Executable extends Cancellable {
      * @param runnable - The runnable to execute.
      * @return a new executable.
      */
-    @NotNull
-    static Executable execute(@NotNull Runnable runnable) {
+    static @NotNull Executable execute(@NotNull Runnable runnable) {
         return new ExecutableScheduledImpl(runnable, Scheduler.ofNow());
     }
     
@@ -32,8 +31,7 @@ public interface Executable extends Cancellable {
      * @param delay    - The delay, in ticks.
      * @return a new executable.
      */
-    @NotNull
-    static Executable later(@NotNull Runnable runnable, final int delay) {
+    static @NotNull Executable later(@NotNull Runnable runnable, final int delay) {
         return new ExecutableScheduledImpl(runnable, Scheduler.ofDelayed(delay));
     }
     
@@ -43,8 +41,7 @@ public interface Executable extends Cancellable {
      * @param handler - The while loop handler.
      * @return a new executable.
      */
-    @NotNull
-    static Executable whilst(@NotNull While handler) {
+    static @NotNull Executable whilst(@NotNull While handler) {
         return new ExecutableWhilstImpl(handler);
     }
     
@@ -54,9 +51,18 @@ public interface Executable extends Cancellable {
      * @param consumer - The consumer of the promise that must be fulfilled.
      * @return a new executable.
      */
-    @NotNull
-    static Executable await(@NotNull Consumer<Promise> consumer) {
+    static @NotNull Executable await(@NotNull Consumer<Promise> consumer) {
         return new ExecutableAwaitImpl(consumer);
+    }
+    
+    /**
+     * Creates an {@link Executable} that delegate cancelling of it to the given {@link Cancellable}.
+     *
+     * @param cancellable - The cancellable to delegate to.
+     * @return a new executable.
+     */
+    static @NotNull Executable delegate(@NotNull Cancellable cancellable) {
+        return new ExecutableDelegateImpl(cancellable);
     }
     
 }

@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero;
 
 import me.hapyl.hariant.hero.alchemist.HeroAlchemist;
 import me.hapyl.hariant.hero.archer.HeroArcher;
+import me.hapyl.hariant.hero.blast_knight.HeroBlastKnight;
 import me.hapyl.hariant.hero.inferno.HeroInferno;
 import me.hapyl.hariant.hero.mage.HeroMage;
 import me.hapyl.hariant.hero.nyx.HeroNyx;
@@ -22,6 +23,7 @@ public final class HeroRegistry extends StaticRegistry<Hero> {
     public static final HeroTroll TROLL;
     public static final HeroInferno INFERNO;
     public static final HeroNyx NYX;
+    public static final HeroBlastKnight BLAST_KNIGHT;
     
     private static final StaticRegistryMap<Hero> REGISTRY;
     private static final List<Hero> DEFAULT_HEROES;
@@ -36,6 +38,7 @@ public final class HeroRegistry extends StaticRegistry<Hero> {
         TROLL = REGISTRY.register("troll", HeroTroll::new);
         INFERNO = REGISTRY.register("inferno", HeroInferno::new);
         NYX = REGISTRY.register("nyx", HeroNyx::new);
+        BLAST_KNIGHT = REGISTRY.register("blast_knight", HeroBlastKnight::new);
         
         // Assign default heroes, which are: [ ARCHER, PYTARIA, ALCHEMIST, MAGE ]
         DEFAULT_HEROES = List.of(ARCHER, PYTARIA, ALCHEMIST, MAGE);

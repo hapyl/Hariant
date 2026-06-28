@@ -1,20 +1,15 @@
 package me.hapyl.hariant.game.battleground.clouds;
 
 import me.hapyl.eterna.module.math.Tick;
-import me.hapyl.hariant.HariantLogger;
+import me.hapyl.hariant.entity.SitHandler;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.booster.Booster;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.ImmutableLocation;
-import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 public final class CloudsBooster implements Booster {
     
@@ -41,8 +36,7 @@ public final class CloudsBooster implements Booster {
     
     @Override
     public void boost(@NotNull HariantPlayer player) {
-        player.setBlockDismount(true);
-        player.delegate(new CloudsBoosterTask(player, this));
+        player.delegate(new CloudsBoosterTask(player, this), DelegateType.PERSISTENT);
         
         // Fx
         player.playWorldSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 2.0f);
@@ -52,14 +46,14 @@ public final class CloudsBooster implements Booster {
         
         private final HariantPlayer player;
         private final CloudsBooster cloudsBooster;
-        private final Entity entity;
+        private final SitHandler sitHandler;
         
         CloudsBoosterTask(@NotNull HariantPlayer player, @NotNull CloudsBooster cloudsBooster) {
             super(Scheduler.ofTimer());
             
             this.player = player;
             this.cloudsBooster = cloudsBooster;
-            this.entity = createArmorStand(player);
+            this.sitHandler = player.setSitting(player.getCenterLocation(), false);
         }
         
         @Override
@@ -79,26 +73,14 @@ public final class CloudsBooster implements Booster {
             final double y = (cloudsBooster.to.y() - cloudsBooster.from.y()) * progressEased + angle;
             final double z = (cloudsBooster.to.z() - cloudsBooster.from.z()) * progressEased + 0.5;
             
-            entity.teleport(cloudsBooster.from.toLocation(cloudsBooster.from.getWorld()).add(x, y, z));
+            sitHandler.move(cloudsBooster.from.toLocation(cloudsBooster.from.getWorld()).add(x, y, z));
         }
         
         @Override
         public void onCancel() {
-            player.setBlockDismount(false);
-            entity.remove();
+            player.unsetSitting();
         }
         
-        private static @NotNull Entity createArmorStand(@NotNull HariantPlayer player) {
-            return player.getWorld().spawn(player.getCenterLocation(), ArmorStand.class, self -> {
-                self.setInvisible(true);
-                self.setMarker(true);
-                self.setSilent(true);
-                
-                Objects.requireNonNull(self.getAttribute(Attribute.SCALE)).setBaseValue(0.1);
-                
-                self.addPassenger(player.getHandle());
-            });
-        }
     }
     
 }

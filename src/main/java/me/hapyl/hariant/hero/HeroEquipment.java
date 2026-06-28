@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
+// #norender
 public class HeroEquipment implements HeadComponent {
     
     private static final String BASE_64_PATTERN = "{\"textures\" : {\"SKIN\" : {\"url\" : \"https://textures.minecraft.net/texture/%s\"}}}";
@@ -81,11 +82,15 @@ public class HeroEquipment implements HeadComponent {
         return this.equipment[INDEX_BOOTS];
     }
     
+    // *-* Chest Plate *-* //
+    
     public void setChestPlate(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
         this.equipment[INDEX_CHEST_PLATE] = createItem(material, null, trimPattern, trimMaterial);
     }
     
-    // *-* Chest Plate *-* //
+    public void setChestPlate(@NotNull Material material) {
+        this.setChestPlate(material, null, null);
+    }
     
     public void setChestPlate(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
         this.equipment[INDEX_CHEST_PLATE] = createItem(Material.LEATHER_CHESTPLATE, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial);
@@ -95,11 +100,15 @@ public class HeroEquipment implements HeadComponent {
         this.setChestPlate(colorRed, colorGreen, colorBlue, null, null);
     }
     
+    // *-* Leggings *-* //
+    
     public void setLeggings(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
         this.equipment[INDEX_LEGGINGS] = createItem(material, null, trimPattern, trimMaterial);
     }
     
-    // *-* Leggings *-* //
+    public void setLeggings(@NotNull Material material) {
+        this.setLeggings(material, null, null);
+    }
     
     public void setLeggings(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
         this.equipment[INDEX_LEGGINGS] = createItem(Material.LEATHER_LEGGINGS, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial);
@@ -109,11 +118,15 @@ public class HeroEquipment implements HeadComponent {
         this.setLeggings(colorRed, colorGreen, colorBlue, null, null);
     }
     
+    // *-* Boots *-* //
+    
     public void setBoots(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
         this.equipment[INDEX_BOOTS] = createItem(material, null, trimPattern, trimMaterial);
     }
     
-    // *-* Boots *-* //
+    public void setBoots(@NotNull Material material) {
+        this.setBoots(material, null, null);
+    }
     
     public void setBoots(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
         this.equipment[INDEX_BOOTS] = createItem(Material.LEATHER_BOOTS, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial);

@@ -12,7 +12,6 @@ import me.hapyl.eterna.module.reflect.glowing.Glowing;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Handle;
-import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -29,6 +28,7 @@ import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.damage.tracker.CombatTracker;
+import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectHandler;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
@@ -64,12 +64,10 @@ import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.TriState;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
@@ -82,6 +80,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
@@ -92,10 +91,10 @@ public class HariantEntity
         implements
         Handle<LivingEntity>, Ticking, Attributable, Located,
         ForwardingAudience.Single, UniquelyIdentified, Lifecycle,
-        Removable, Coordinates, SoundPlayer, ParticleSpawner,
-        EntityCollector, Distanced, Attacker, TeamEntryProvider,
-        StatusEffectHandler, HeadComponent, DeathComponent, CooldownHandler,
-        Elemental, ElementHandler, HariantLogger.Sender, EffectHandler {
+        Coordinates, SoundPlayer, ParticleSpawner, EntityCollector,
+        Distanced, Attacker, TeamEntryProvider, StatusEffectHandler,
+        HeadComponent, DeathComponent, CooldownHandler, Elemental,
+        ElementHandler, HariantLogger.Sender, EffectHandler, TickSupplier {
     
     private static final ComponentDisplay EFFECT_RESISTANCE_DISPLAY = new ComponentDisplay(
             Component.text("ᴇꜰꜰᴇᴄᴛ ʀᴇꜱ", AttributeType.EFFECT_RESISTANCE.getStyle()),
@@ -129,23 +128,26 @@ public class HariantEntity
     
     protected final LivingEntity entity;
     protected final AttributesInstance attributes;
-    protected final StatusEffectMap effectMap;
     protected final CombatTracker combatTracker;
-    protected final CooldownHandler cooldownHandler;
-    protected final EntityTicker ticker;
     protected final ElementData elementData;
-    protected final LinkedHashMap<Class<? extends HealthMutator>, HealthMutator> healthMutators;
+    
+    private final StatusEffectMap effectMap;
+    private final CooldownHandler cooldownHandler;
+    private final EntityTicker ticker;
+    private final LinkedHashMap<Class<? extends HealthMutator>, HealthMutator> healthMutators;
     
     @Nullable protected HariantEntity lastAttacker;
     
     protected double health;
-    protected boolean deferDeath;
     
-    @Nullable protected FrozenHandler frozenHandler;
-    @Nullable protected Shield shield;
+    private @Nullable FrozenHandler frozenHandler;
+    private @Nullable Shield shield;
+    private @Nullable SitHandler sitHandler;
     
-    @Nullable private SoundFx soundHurt;
-    @Nullable private SoundFx soundDeath;
+    private @Nullable RemovalReason removalReason;
+    
+    private @Nullable SoundFx soundHurt;
+    private @Nullable SoundFx soundDeath;
     
     public HariantEntity(@NotNull LivingEntity entity, @NotNull Attributes attributes) {
         this.entity = entity;
@@ -165,19 +167,46 @@ public class HariantEntity
         this.soundDeath = SoundFx.createNullable(entity.getDeathSound());
     }
     
+    public @Nullable SitHandler getSitHandler() {
+        return sitHandler;
+    }
+    
+    public @NotNull SitHandler setSitting(@NotNull Location location, boolean allowDismount) {
+        this.unsetSitting();
+        
+        this.sitHandler = new SitHandlerImpl(this, location, allowDismount);
+        this.sitHandler.onMount();
+        
+        return sitHandler;
+    }
+    
+    public void unsetSitting() {
+        if (this.sitHandler != null) {
+            this.sitHandler.onDismount();
+            this.sitHandler = null;
+        }
+    }
+    
     public @Nullable Shield getShield() {
         return shield;
     }
     
     public void setShield(@Nullable Shield shield) {
-        if (this.shield != null) {
-            this.shield.onRemove0(Shield.Cause.REPLACED);
+        if (shield != null) {
+            // Call event
+            if (new HariantShieldCreateEvent(shield).callEvent()) {
+                return;
+            }
+            
+            this.shield = shield;
+            this.shield.onCreate0();
+            return;
         }
         
-        this.shield = shield;
-        
-        if (shield != null) {
-            shield.onCreate0();
+        // If entity already has a shield, call removal on it
+        if (this.shield != null) {
+            this.shield.onRemove0(Shield.Cause.REPLACED);
+            this.shield = null;
         }
     }
     
@@ -275,12 +304,13 @@ public class HariantEntity
     public DamageResult damage(@NotNull DamageSource source) {
         final ImmunityResult immunityResult = this.isImmuneTo(source);
         
-        if (immunityResult.isImmune()) {
-            return immunityResult.isSilent() ? DamageResult.IMMUNE : broadcastImmune();
+        // Don't damage already dead entities
+        if (source.getDamage() <= 0 || this.isDead()) {
+            return DamageResult.IMMUNE;
         }
         
-        if (source.getDamage() <= 0) {
-            return DamageResult.IMMUNE;
+        if (immunityResult.isImmune()) {
+            return immunityResult.isSilent() ? DamageResult.IMMUNE : broadcastImmune();
         }
         
         // Check for cooldown
@@ -370,7 +400,6 @@ public class HariantEntity
             }
             
             this.die(source);
-            
             return DamageResult.DEAD;
         }
         
@@ -395,11 +424,12 @@ public class HariantEntity
     }
     
     public boolean die(@NotNull DamageSource damageSource) {
-        if (this.deferDeath) {
+        // If already scheduled for removal, return
+        if (this.removalReason != null) {
             return false;
         }
         
-        this.deferDeath = true;
+        this.removalReason = RemovalReason.DIED;
         this.health = 0.0;
         
         // Reassign damager if exists
@@ -540,6 +570,11 @@ public class HariantEntity
     public void onInteract(@NotNull HariantPlayer player) {
     }
     
+    @EventLike
+    public void onRemove(@NotNull RemovalReason removalReason) {
+        entity.remove();
+    }
+    
     /**
      * Gets whether this {@link HariantEntity} can affect the given {@link HariantEntity} in any context.
      *
@@ -666,7 +701,9 @@ public class HariantEntity
         
         final Vector velocity = entity.getVelocity();
         
-        // TODO @Mar 10, 2026 (xanyjl) -> Maybe add knockback event?
+        if (new HariantKnockbackEvent(this, cause, velocity).callEvent()) {
+            return;
+        }
         
         entity.setVelocity(
                 new Vector(
@@ -760,25 +797,31 @@ public class HariantEntity
         return health >= getMaxHealth();
     }
     
-    private void tickShield() {
-        if (shield == null) {
-            return;
-        }
-        
-        shield.tick();
-        
-        if (shield.isOver()) {
-            shield.onRemove0(Shield.Cause.EXPIRED);
-            shield = null;
-        }
+    @EventLike
+    public void onFrozenTick(@NotNull FrozenHandler frozenHandler) {
+        entity.setFreezeTicks(100);
+    }
+    
+    @EventLike
+    public void onFreeze(@NotNull FrozenHandler frozenHandler) {
+        playWorldSound(Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 2.0f);
+    }
+    
+    @EventLike
+    public void onUnfreeze(@NotNull FrozenHandler frozenHandler) {
+        entity.setFreezeTicks(0);
     }
     
     @ApiStatus.Internal
     public final void tick0() {
-        // Handler deferred death
-        if (this.deferDeath) {
-            this.deferDeath = false;
+        // Handle removal
+        if (this.removalReason != null) {
+            this.onRemove(this.removalReason);
             this.onDestroy();
+            
+            // We're fine to nullate the removal reason, because `onRemove()` promises to remove the bukkit entity, and if
+            // it doesn't it means that we don't care to remove it (eg: player)
+            this.removalReason = null;
             return;
         }
         
@@ -884,52 +927,58 @@ public class HariantEntity
         return entity;
     }
     
-    @NotNull
-    public org.bukkit.attribute.AttributeInstance getVanillaAttribute(@NotNull Attribute attribute) {
-        return Objects.requireNonNull(entity.getAttribute(attribute), "Unsupported attribute: %s".formatted(attribute.getKey().getKey()));
-    }
-    
     @Override
     @NotNull
     public UUID getUuid() {
         return entity.getUniqueId();
     }
     
-    @Override
+    /**
+     * Marks this entity for removal.
+     */
     public final void remove() {
-        // Removal is a little wonky and done via the following:
-        // 1. `onDestroy()` is called, that MUST remove the bukkit entity (Unless it's a player)
-        // 2. Bukkit entity removed
-        // 3. `Hariant#tick` calls `entities#removeIf()` that removes HariantEntity if the `shouldRemove` is true, which
-        //    only is true if the bukkit entity is dead.
-        // 4. Done! Both bukkit entity and HariantEntity is removed.
-        this.onDestroy();
-    }
-    
-    @Override
-    public final boolean shouldRemove() {
-        // Always unregister dead bukkit entities
-        return entity.isDead();
+        this.removalReason = RemovalReason.REMOVAL;
     }
     
     /**
-     * Called whenever this {@link HariantEntity} is created.
+     * Gets whether this entity should be destroyed.
      */
+    public boolean shouldRemove() {
+        return entity.isDead();
+    }
+    
     @Override
     public void onCreate() {
     }
     
-    /**
-     * Called whenever this {@link HariantEntity} is destroyed, and <b>must</b> remove the bukkit entity, by either setting
-     * its health to {@code 0} or by calling {@link Entity#remove()} method.
-     *
-     * <p>
-     * Players must reset the states but not remove the player.
-     * </p>
-     */
+    @OverridingMethodsMustInvokeSuper
     @Override
     public void onDestroy() {
-        entity.remove();
+        lastAttacker = null;
+        health = 0;
+        
+        ticker.reset();
+        attributes.reset();
+        combatTracker.reset();
+        effectMap.resetEffects();
+        cooldownHandler.resetCooldowns();
+        elementData.reset();
+        healthMutators.clear();
+        
+        if (frozenHandler != null) {
+            frozenHandler.unfreeze();
+            frozenHandler = null;
+        }
+        
+        if (shield != null) {
+            shield.onRemove0(Shield.Cause.ENTITY_DIED);
+            shield = null;
+        }
+        
+        if (sitHandler != null) {
+            sitHandler.onDismount();
+            sitHandler = null;
+        }
     }
     
     @NotNull
@@ -974,12 +1023,12 @@ public class HariantEntity
     
     @Override
     public void playWorldSound(@NotNull Sound sound, float volume, @Range(from = 0, to = 2) float pitch) {
-        this.playWorldSound(getLocation(), sound, pitch, pitch);
+        this.playWorldSound0(this.getLocation(), sound, volume, pitch);
     }
     
     @Override
     public void playWorldSound(@NotNull Location location, @NotNull Sound sound, float volume, @Range(from = 0, to = 2) float pitch) {
-        getWorld().playSound(location, sound, soundCategory(), volume, Math.clamp(pitch, 0f, 2f));
+        this.playWorldSound0(location, sound, volume, pitch);
     }
     
     @NotNull
@@ -1032,7 +1081,8 @@ public class HariantEntity
         return new Vector(-vector.getZ(), 0.0, vector.getX()).normalize().multiply(offset);
     }
     
-    public int ticksAlive() {
+    @Override
+    public int localTicks() {
         return ticker.life.value();
     }
     
@@ -1048,12 +1098,9 @@ public class HariantEntity
         return this.equals(other) || this.isTeammate(other);
     }
     
-    public boolean isSelfOrTeammateOrCannotSee(@Nullable HariantEntity other) {
-        return other != null && (this.equals(other) || this.isTeammate(other) || !this.canSeeInvisible(other));
-    }
-    
     public boolean isTeammate(@Nullable HariantEntity other) {
-        if (other == null) {
+        // Explicit self check, we're NOT out own teammate
+        if (other == null || this.equals(other)) {
             return false;
         }
         
@@ -1063,6 +1110,18 @@ public class HariantEntity
         return thisTeam != null && thisTeam == thatTeam;
     }
     
+    /**
+     * Checks whether the entity has effect resistance.
+     *
+     * <p>
+     * Note that this method should be treated as internal and not be called manually, prefer using {@link EffectHandler#triggerEffect(HariantEntity, Effect)},
+     * which has proper handling of effects, including effect resistance.
+     * </p>
+     *
+     * @param assistSource - The assist source.
+     * @return {@code true} if the entity has effect resistance; {@code false} otherwise.
+     */
+    @ApiStatus.Internal
     public boolean hasEffectResistance(@NotNull AssistSource assistSource) {
         final HariantEntity source = assistSource.source();
         
@@ -1215,13 +1274,8 @@ public class HariantEntity
     }
     
     @Override
-    public void triggerBuff(@NotNull HariantEntity applier) {
-        HariantEffectEvent.triggerDummyEvent(this, applier, true);
-    }
-    
-    @Override
-    public void triggerDebuff(@NotNull HariantEntity applier) {
-        HariantEffectEvent.triggerDummyEvent(this, applier, false);
+    public boolean triggerEffect(@NotNull HariantEntity applier, @NotNull Effect effect) {
+        return HariantEffectEvent.callEvent(this, applier, effect);
     }
     
     @Override
@@ -1394,18 +1448,23 @@ public class HariantEntity
         return entity.getBoundingBox();
     }
     
-    public void addVanillaAttributeModifier(@NotNull VanillaAttribute vanillaAttribute) {
-        final AttributeInstance attribute = getVanillaAttribute(vanillaAttribute.getAttribute());
+    public void addVanillaAttributeModifier(@NotNull VanillaAttributeModifier vanillaAttributeModifier) {
+        final AttributeInstance attribute = this.getVanillaAttribute(vanillaAttributeModifier.getAttribute());
         
         // Always remove the attribute because bukkit likes to throw exception when you breathe
-        attribute.removeModifier(vanillaAttribute.getKey().asNamespacedKey());
+        attribute.removeModifier(vanillaAttributeModifier.getModifierKey());
         
-        // We use transient modifier because we don't care about restarts
-        attribute.addTransientModifier(vanillaAttribute.build());
+        // Apply modifier if the value isn't 0
+        final AttributeModifier modifier = vanillaAttributeModifier.getModifier();
+        
+        if (modifier.getAmount() != 0) {
+            // We use transient modifier because we don't care about restarts
+            attribute.addTransientModifier(modifier);
+        }
     }
     
-    public void removeVanillaAttributeModifier(@NotNull Key key, @NotNull Attribute attribute) {
-        getVanillaAttribute(attribute).removeModifier(key.asNamespacedKey());
+    public void removeVanillaAttributeModifier(@NotNull VanillaAttributeModifier vanillaAttributeModifier) {
+        this.getVanillaAttribute(vanillaAttributeModifier.getAttribute()).removeModifier(vanillaAttributeModifier.getModifier().getKey());
     }
     
     public @NotNull <T> Drawable drawableOf(@NotNull Particle particle, int amount, double x, double y, double z, float speed, T data) {
@@ -1420,6 +1479,11 @@ public class HariantEntity
         return Objects.requireNonNull(entity.getEquipment(), "Equipment is not supported for %s!".formatted(entity));
     }
     
+    @NotNull
+    public Input getCurrentInput() {
+        return NoInput.INSTANCE;
+    }
+    
     protected void playDamageFx(@NotNull Supplier<@Nullable SoundFx> supplier) {
         entity.playHurtAnimation(0);
         
@@ -1427,6 +1491,27 @@ public class HariantEntity
         
         if (soundFx != null) {
             this.playWorldSound(soundFx.sound(), soundFx.pitch());
+        }
+    }
+    
+    protected @NotNull org.bukkit.attribute.AttributeInstance getVanillaAttribute(@NotNull Attribute attribute) {
+        return Objects.requireNonNull(entity.getAttribute(attribute), "Unsupported attribute: %s".formatted(attribute.getKey().getKey()));
+    }
+    
+    private void playWorldSound0(@NotNull Location location, @NotNull Sound sound, float volume, @Range(from = 0, to = 2) float pitch) {
+        getWorld().playSound(location, sound, soundCategory(), volume, Math.clamp(pitch, 0f, 2f));
+    }
+    
+    private void tickShield() {
+        if (shield == null) {
+            return;
+        }
+        
+        shield.tick();
+        
+        if (shield.isOver()) {
+            shield.onRemove0(Shield.Cause.EXPIRED);
+            shield = null;
         }
     }
     
@@ -1459,7 +1544,7 @@ public class HariantEntity
     @NotNull
     private Location getLocationInFront0(double distance, boolean fromEyes) {
         final Location location = fromEyes ? this.getEyeLocation() : this.getLocation();
-        final Vector vector = location.getDirection().normalize().setY(0).multiply(distance);
+        final Vector vector = location.getDirection().normalize().multiply(distance).setY(0);
         
         return location.add(vector);
     }
@@ -1473,6 +1558,57 @@ public class HariantEntity
         
         if (subtitle != null) {
             this.sendTitlePart(TitlePart.SUBTITLE, subtitle);
+        }
+    }
+    
+    private static <T> void resetNullableField(@Nullable T field, @NotNull Consumer<T> reset) {
+        if (field == null) {
+            return;
+        }
+        
+        reset.accept(field);
+    }
+    
+    public static class NoInput implements Input {
+        
+        public static final NoInput INSTANCE = new NoInput();
+        
+        private NoInput() {
+        }
+        
+        @Override
+        public boolean isForward() {
+            return false;
+        }
+        
+        @Override
+        public boolean isBackward() {
+            return false;
+        }
+        
+        @Override
+        public boolean isLeft() {
+            return false;
+        }
+        
+        @Override
+        public boolean isRight() {
+            return false;
+        }
+        
+        @Override
+        public boolean isJump() {
+            return false;
+        }
+        
+        @Override
+        public boolean isSneak() {
+            return false;
+        }
+        
+        @Override
+        public boolean isSprint() {
+            return false;
         }
     }
     

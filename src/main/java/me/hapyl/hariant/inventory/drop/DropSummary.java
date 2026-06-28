@@ -1,9 +1,7 @@
 package me.hapyl.hariant.inventory.drop;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.annotate.SelfReturn;
-import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
@@ -13,8 +11,11 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class DropSummary {
     
@@ -24,15 +25,21 @@ public final class DropSummary {
     
     private static final Comparator<Entry> COMPARATOR = Comparator.comparingDouble(Entry::getChance).reversed();
     
-    private final List<Drop> drops;
+    private final List<DropResult> drops;
     
     private DropSummary() {
         this.drops = Lists.newArrayList();
     }
     
     @SelfReturn
-    public DropSummary append(@NotNull List<? extends Drop> drop) {
-        this.drops.addAll(drop);
+    public DropSummary append(@NotNull DropResult dropResult) {
+        this.drops.add(dropResult);
+        return this;
+    }
+    
+    @SelfReturn
+    public DropSummary append(@NotNull DropSummary summary) {
+        this.drops.addAll(summary.drops);
         return this;
     }
     
@@ -52,68 +59,58 @@ public final class DropSummary {
         audience.playSound(Sound.sound(SOUND_KEY, Sound.Source.UI, 3, 0.75f));
     }
     
+    @Override
+    public String toString() {
+        return drops.stream()
+                    .map(drop -> "%s:%s".formatted(drop.getDrop().getKeyAsString(), drop.getAmount()))
+                    .collect(Collectors.joining(", ", "[", "]"));
+    }
+    
     private @NotNull List<? extends Entry> createSummary() {
-        final Map<Key, Entry> summary = Maps.newHashMap();
-        
-        for (Drop drop : drops) {
-            summary.compute(drop.getDroppable().getKey(), (key, _entry) -> {
-                final Entry entry = _entry != null ? _entry : new Entry(drop);
-                
-                entry.amount += drop.getAmount();
-                
-                return entry;
-            });
-        }
-        
-        return summary.values().stream().sorted(COMPARATOR).toList();
+        return Stream.concat(
+                // Sum up multi-drops to a single entry
+                drops.stream()
+                     .filter(drop -> drop.getAmount() > 1)
+                     .collect(Collectors.groupingBy(
+                             Function.identity(),
+                             Collectors.summingInt(DropResult::getAmount)
+                     ))
+                     .entrySet()
+                     .stream()
+                     .map(entry -> new Entry(entry.getKey(), entry.getValue())),
+                // Append single drops as-is
+                drops.stream()
+                     .filter(drop -> drop.getAmount() == 1)
+                     .map(drop -> new Entry(drop, 1))
+        ).sorted(COMPARATOR).toList();
     }
     
     public static @NotNull DropSummary create() {
         return new DropSummary();
     }
     
-    public static @NotNull DropSummary create(@NotNull List<? extends Drop> drop) {
-        return new DropSummary().append(drop);
-    }
-    
-    @Override
-    public String toString() {
-        return drops.stream()
-                    .map(drop -> "%s:%s".formatted(drop.getDroppable().getKeyAsString(), drop.getAmount()))
-                    .collect(Collectors.joining(", ", "[", "]"));
-    }
-    
-    private static class Entry implements ComponentLike {
-        
-        private final Drop drop;
-        private final double chance;
-        
-        private int amount;
-        
-        private Entry(@NotNull Drop drop) {
-            this.drop = drop;
-            this.chance = drop.getDropChance();
-        }
+    private record Entry(@NotNull DropResult dropResult, int totalAmount) implements ComponentLike {
         
         public double getChance() {
-            return chance;
-        }
-        
-        public int getAmount() {
-            return amount;
+            return dropResult.getChance();
         }
         
         @Override
         public @NotNull Component asComponent() {
             final TextComponent.Builder builder = Component.text();
+            final Drop drop = dropResult.getDrop();
             
-            builder.append(Component.text("%,d".formatted(amount), Colors.GOLD));
-            builder.append(Component.text(" x ", Colors.DARK_GRAY));
-            builder.append(drop.getDroppable().getName());
-            builder.hoverEvent(drop.getDroppable().createHoverEvent());
+            // If total amount greater tha none, append it
+            if (totalAmount > 1) {
+                builder.append(Component.text("%,d".formatted(totalAmount), Colors.GOLD));
+                builder.append(Component.text(" x ", Colors.DARK_GRAY));
+            }
+            
+            builder.append(drop.getNameStyled());
+            builder.hoverEvent(drop.createHoverEvent());
             
             // If it's a rare drop, append the rarity at the end
-            final DropTier dropTier = drop.getDropTier();
+            final DropTier dropTier = dropResult.getDropTier();
             
             if (dropTier.isOrHigher(RARE_DROP_THRESHOLD)) {
                 builder.append(Component.text(" (", Colors.DARK_GRAY));

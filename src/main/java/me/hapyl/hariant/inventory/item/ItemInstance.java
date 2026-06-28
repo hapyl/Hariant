@@ -1,13 +1,13 @@
 package me.hapyl.hariant.inventory.item;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
-import me.hapyl.hariant.Colors;
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.database.InstanceImpl;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializable;
 import me.hapyl.hariant.database.serialize.codec.MongoCodecs;
-import me.hapyl.hariant.util.Destroyable;
+import me.hapyl.hariant.inventory.drop.Drop;
 import me.hapyl.hariant.util.Hoverable;
 import me.hapyl.hariant.util.Timestamp;
 import me.hapyl.hariant.util.UniquelyIdentified;
@@ -24,8 +24,8 @@ public class ItemInstance
         extends
         InstanceImpl<Item>
         implements
-        UniquelyIdentified, MongoSerializable, ItemCreator,
-        Destroyable, Hoverable {
+        UniquelyIdentified, MongoSerializable, ItemCreator, Hoverable,
+        Drop {
     
     private final UUID uuid;
     
@@ -53,46 +53,36 @@ public class ItemInstance
     @Override
     @OverridingMethodsMustInvokeSuper
     public void write(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
-        MongoCodecs.KEY.write(document, "key", origin.getKey());
-        MongoCodecs.TIMESTAMP.write(document, "timestamp", timestamp);
+        MongoCodecs.ofKey().write(document, "key", origin.getKey());
+        MongoCodecs.ofTimestamp().write(document, "timestamp", timestamp);
     }
     
     @Override
     @OverridingMethodsMustInvokeSuper
     public void read(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
         // We skip `key` because it's set on init stage via `origin`
-        timestamp = MongoCodecs.TIMESTAMP.read(document, "timestamp").orElseGet(Timestamp::ofNow);
+        timestamp = MongoCodecs.ofTimestamp().read(document, "timestamp").orElseGet(Timestamp::ofNow);
     }
     
     @Override
-    @NotNull
-    public ItemBuilder createBuilder() {
+    public @NotNull ItemBuilder createBuilder() {
         return origin.getIcon().createBuilder();
     }
     
     @Override
-    public void onDestroy() {
+    public @NotNull Key getKey() {
+        return origin.getKey();
+    }
+    
+    @Override
+    public @NotNull Component getNameStyled() {
+        return origin.getNameStyled();
     }
     
     @NotNull
     @Override
     public HoverEvent<?> createHoverEvent() {
-        return HoverEvent.showText(
-                Component.empty()
-                         .append(Component.text("UUID: ", Colors.DARK_AQUA))
-                         .append(Component.text(uuid.toString(), Colors.AQUA))
-                         .appendNewline()
-                         .append(Component.text("Instance: ", Colors.DARK_AQUA))
-                         .append(Component.text(this.getClass().getSimpleName(), Colors.AQUA))
-                         .appendNewline()
-                         .append(Component.text("Timestamp: ", Colors.DARK_AQUA))
-                         .append(timestamp.asComponent().color(Colors.AQUA))
-        );
-    }
-    
-    @Override
-    public String toString() {
-        return "%s(%s, %s)".formatted(this.getClass().getSimpleName(), origin.getClass().getSimpleName(), uuid.toString());
+        return createItem().asHoverEvent();
     }
     
     @Override
@@ -108,6 +98,11 @@ public class ItemInstance
         
         final ItemInstance that = (ItemInstance) object;
         return Objects.equals(this.uuid, that.uuid);
+    }
+    
+    @Override
+    public String toString() {
+        return "%s(%s, %s)".formatted(this.getClass().getSimpleName(), origin.getClass().getSimpleName(), uuid.toString());
     }
     
 }

@@ -98,8 +98,8 @@ public final class AchievementProgress implements MongoSerializable {
         document.put("progress", progress);
         
         // Write timestamps
-        MongoCodecs.TIMESTAMP.writeNullable(document, "completed_at", completedAt);
-        MongoCodecs.TIMESTAMP.writeNullable(document, "rewards_claimed_at", rewardsClaimedAt);
+        MongoCodecs.ofTimestamp().writeNullable(document, "completed_at", completedAt);
+        MongoCodecs.ofTimestamp().writeNullable(document, "rewards_claimed_at", rewardsClaimedAt);
     }
     
     @Override
@@ -108,8 +108,8 @@ public final class AchievementProgress implements MongoSerializable {
         this.progress = document.get("progress", 0.0);
         
         // Read timestamps
-        this.completedAt = MongoCodecs.TIMESTAMP.read(document, "completed_at").orElse(null);
-        this.rewardsClaimedAt = MongoCodecs.TIMESTAMP.read(document, "rewards_claimed_at").orElse(null);
+        this.completedAt = MongoCodecs.ofTimestamp().read(document, "completed_at").orElse(null);
+        this.rewardsClaimedAt = MongoCodecs.ofTimestamp().read(document, "rewards_claimed_at").orElse(null);
     }
     
     static @NotNull AchievementProgress fromDocument(@NotNull Achievement achievement, @NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {

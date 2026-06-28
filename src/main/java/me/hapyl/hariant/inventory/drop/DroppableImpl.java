@@ -24,22 +24,20 @@ public abstract class DroppableImpl implements Droppable {
         return key;
     }
     
-    @NotNull
     @Override
-    public final Component getName() {
+    public final @NotNull Component getName() {
         return name;
+    }
+    
+    @Override
+    public final @NotNull Amount getAmount() {
+        return amount;
     }
     
     @Range(from = 0, to = Integer.MAX_VALUE)
     @Override
     public final int getWeight() {
         return weight;
-    }
-    
-    @NotNull
-    @Override
-    public final Amount getAmount() {
-        return amount;
     }
     
 }

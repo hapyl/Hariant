@@ -1,7 +1,6 @@
 package me.hapyl.hariant.game.battleground;
 
 import com.google.common.collect.Lists;
-import me.hapyl.eterna.module.component.ComponentStyler;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Colors;
@@ -14,7 +13,6 @@ import me.hapyl.hariant.inventory.drop.DropTier;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.ImmutableLocation;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 

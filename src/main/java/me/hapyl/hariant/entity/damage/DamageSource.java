@@ -64,7 +64,7 @@ public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
         builder.damageType = this.getDamageType();
         builder.elementType = this.getElementType();
         builder.damageComponents = this.getDamageComponents();
-        builder.damageFlags.addAll(this.getDamageFlags());
+        builder.damageFlags = this.getDamageFlags();
         builder.cooldownKey = this.getCooldownKey();
         builder.cooldown = this.getCooldown();
         return builder;
@@ -103,7 +103,7 @@ public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
         private final double damage;
         
         private @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents;
-        private @NotNull @Unmodifiable Set<DamageFlag> damageFlags;
+        private @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags;
         
         private @Nullable HariantEntity source;
         private @NotNull ElementType elementType;

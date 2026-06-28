@@ -13,6 +13,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -61,7 +62,7 @@ public final class TalentFirePit extends Talent {
     @DisplayField private final Decimal transformationDelay = Decimal.ofSeconds(1f);
     @DisplayField private final Decimal totalStages = Decimal.ofValue(firePitsMaterials.length);
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.of(AttributeType.ATTACK, 84);
+    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 84);
     @DisplayField private final Decimal damagePeriod = Decimal.ofSeconds(0.5f);
     @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 250);
     
@@ -112,7 +113,7 @@ public final class TalentFirePit extends Talent {
         for (int[] offset : firePitsOffsets) {
             final Location firePitLocation = LocationHelper.anchor(LocationHelper.copyOf(location).add(offset[0], 0, offset[1]));
             
-            player.delegate(new FirePit(player, firePitLocation));
+            player.delegate(new FirePit(player, firePitLocation), DelegateType.INTERRUPTABLE);
         }
         
         return Response.ok();

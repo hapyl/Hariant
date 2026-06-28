@@ -9,7 +9,7 @@ public abstract class ExecutableImpl implements Executable {
     // Private to enforce calling `super.execute()`
     private final Promise promise;
     
-    ExecutableImpl() {
+    public ExecutableImpl() {
         this.promise = new Promise();
     }
     

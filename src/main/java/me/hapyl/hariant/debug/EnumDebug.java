@@ -20,7 +20,7 @@ public enum EnumDebug implements Debug {
             player.resetUltimate();
             player.chargeUltimate();
             
-            player.getHero().debugOnCooldownReset(player);
+            player.getHero().onDebugCooldownReset(player);
             
             player.messageSuccess(Component.text("Reset cooldowns and charged ultimate!"));
         }

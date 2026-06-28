@@ -9,8 +9,7 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifiable;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.effect.EffectType;
-import me.hapyl.hariant.event.HariantAttributeEvent;
+import me.hapyl.hariant.event.HariantEffectEvent;
 import me.hapyl.hariant.util.Resettable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,10 +48,10 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     
     @Override
     public void addModifier(@NotNull AttributeModifier attributeModifier) {
-        // Check for effect resistance for negative modifiers
         final HariantEntity applier = attributeModifier.getApplier();
         
-        if (attributeModifier.getEffectType() == EffectType.DEBUFF && entity.hasEffectResistance(attributeModifier)) {
+        // Check for effect resistance for negative modifiers
+        if (HariantEffectEvent.callEvent(entity, applier, attributeModifier)) {
             return;
         }
         
@@ -68,9 +67,6 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
         if (!modifierExists) {
             attributeModifier.display(entity.getMidpointLocation());
         }
-        
-        // Trigger buff/debuff
-        new HariantAttributeEvent(entity, attributeModifier).callEvent();
     }
     
     @Override

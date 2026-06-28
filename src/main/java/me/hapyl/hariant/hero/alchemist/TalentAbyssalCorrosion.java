@@ -13,14 +13,15 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentAbyssalCorrosion extends TalentPassive {
     
-    @DisplayField public final Decimal corrosionDecrementPerSecond = Decimal.ofValue(0.75);
-    @DisplayField public final Decimal abyssalCurseInstabilityDecrementThreshold = Decimal.ofValue(10);
-    @DisplayField public final Decimal abyssalCurseInstabilityDecrement = Decimal.ofPercentage(5);
-    @DisplayField public final Decimal maximumCorrosion = Decimal.ofValue(100);
+    public final @DisplayField Decimal instabilityDecrement = Decimal.ofPercentage(5);
+    public final @DisplayField Decimal instabilityDecrementThreshold = Decimal.ofValue(10);
     
-    @DisplayField public final Decimal corrosionThreshold1 = Decimal.ofValue(40);
-    @DisplayField public final Decimal corrosionThreshold2 = Decimal.ofValue(60);
-    @DisplayField public final Decimal corrosionThreshold3 = Decimal.ofValue(80);
+    public final @DisplayField Decimal corrosionDecrementPerSecond = Decimal.ofValue(0.75);
+    public final @DisplayField Decimal maximumCorrosion = Decimal.ofValue(100);
+    
+    public final @DisplayField Decimal corrosionThreshold1 = Decimal.ofValue(40);
+    public final @DisplayField Decimal corrosionThreshold2 = Decimal.ofValue(60);
+    public final @DisplayField Decimal corrosionThreshold3 = Decimal.ofValue(80);
     
     public final double corrosionDecrementPerTick = corrosionDecrementPerSecond.doubleValue() / 20;
     
@@ -31,12 +32,10 @@ public final class TalentAbyssalCorrosion extends TalentPassive {
                 Component.empty()
                          .append(Component.text("Consuming potions created by the Abyss increases your "))
                          .append(Definition.ABYSSAL_CORROSION)
-                         .append(Component.text(", that slowly dissipates over time."))
+                         .append(Component.text(" that slowly dissipates over time."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("Having a high amount of "))
-                         .append(Definition.ABYSSAL_CORROSION)
-                         .append(Component.text(" puts a toll on your body and soul, while also "))
+                         .append(Component.text("The corrosion puts a toll on your body and soul, while also "))
                          .append(Component.text("decreasing", Colors.TICK))
                          .append(Component.text(" the time it takes before "))
                          .append(Definition.ABYSSAL_CURSE)

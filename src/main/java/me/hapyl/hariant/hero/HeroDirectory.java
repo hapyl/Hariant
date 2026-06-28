@@ -2,15 +2,12 @@ package me.hapyl.hariant.hero;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseEntry;
 import me.hapyl.hariant.database.problem.Problem;
 import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializableConstructor;
-import net.kyori.adventure.text.Component;
 import org.bson.Document;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -133,18 +130,6 @@ public final class HeroDirectory extends PlayerDatabaseEntry {
         if (this.heroes.isEmpty()) {
             HeroRegistry.defaultHeroes().forEach(this::createHero);
         }
-    }
-    
-    public void trySelectHero(@NotNull Player player, @NotNull HeroInstance heroInstance) {
-        final Hero hero = heroInstance.getOrigin();
-        
-        if (selectedHero.equals(hero)) {
-            HariantLogger.error(player, Component.text("This hero is already selected!"));
-            return;
-        }
-        
-        setSelectedHero(heroInstance);
-        HariantLogger.success(player, Component.empty().append(Component.text("Selected ")).append(hero).append(Component.text("!")));
     }
     
 }

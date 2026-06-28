@@ -31,13 +31,13 @@ public class HeroNyx extends Hero {
         super(
                 key,
                 Component.text("Nyx"),
-                Attributes.base(800, 100, 100)
-                          .adjust(AttributeType.DEFENSE, 80)
-                          .adjust(AttributeType.EFFECT_RESISTANCE, 20),
+                Attributes.base(1000, 100, 80)
+                          .adjust(AttributeType.EFFECT_RESISTANCE, 25),
                 new WeaponNyx()
         );
         
         final HeroProfile profile = getProfile();
+        profile.setAffiliation(Affiliation.THE_WITHERS);
         profile.setElementType(ElementType.AETHER);
         profile.setArchetype(Archetype.SUPPORT);
         profile.setGender(Gender.FEMALE);

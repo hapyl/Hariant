@@ -3,6 +3,7 @@ package me.hapyl.hariant.handler;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.entity.Entities;
 import me.hapyl.eterna.module.player.PlayerLib;
+import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.event.HariantSitEvent;
 import net.kyori.adventure.text.Component;
@@ -49,6 +50,11 @@ public final class PlayerSitHandler implements Listener {
         }
         
         if (bed.getPart() != Bed.Part.FOOT) {
+            return;
+        }
+        
+        // If a game in progress, don't allow sitting
+        if (Hariant.isGameInProgress()) {
             return;
         }
         

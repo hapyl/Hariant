@@ -8,6 +8,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantTalentUltimateEvent;
 import me.hapyl.hariant.talent.Response;
@@ -107,7 +108,7 @@ public abstract class TalentUltimate extends Talent implements Duration {
         
         // If ultimate currently in use, show how much time is left
         if (player.isUsingUltimate()) {
-            final int ticksAlive = player.ticksAlive();
+            final int ticksAlive = player.localTicks();
             final int durationTimeLeft = Math.max(0, getDuration() - (ticksAlive - player.getUsedUltimateAt()));
             
             builder.append(Component.text("IN USE", resourceColor, TextDecoration.BOLD));
@@ -183,6 +184,9 @@ public abstract class TalentUltimate extends Talent implements Duration {
         player.setUsingUltimate(true);
         
         final Executable executable = execute(player, context, ultimateResource);
+        
+        // Ultimates always delegate to player and can only be cancelled on death
+        player.delegate(executable, DelegateType.PERSISTENT);
         
         executable.execute().then(() -> {
             player.setUsingUltimate(false);

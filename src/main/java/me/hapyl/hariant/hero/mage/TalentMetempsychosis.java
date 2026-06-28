@@ -3,6 +3,7 @@ package me.hapyl.hariant.hero.mage;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -62,86 +63,12 @@ public final class TalentMetempsychosis extends Talent {
     @Override
     public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
         final Location targetLocation = context.retrieve(Location.class);
-        final int duration = getDuration();
         
-        player.delegate(
-                new HariantTickingTask(Scheduler.ofTimer()) {
-                    @Override
-                    public void run(int tick) {
-                        if (tick > duration) {
-                            transmigrate(player, targetLocation);
-                            this.cancel();
-                        }
-                        
-                        // Fx
-                        final double radians = Math.toRadians(tick * 15);
-                        
-                        final double x = Math.sin(radians) * 0.8;
-                        final double z = Math.cos(radians) * 0.8;
-                        
-                        LocationHelper.offset(targetLocation, x, 0, z, () -> player.spawnWorldParticle(targetLocation, Particle.SOUL, 0, 0, 0.25f, 0, 0.75f));
-                        LocationHelper.offset(targetLocation, -x, 0, -z, () -> player.spawnWorldParticle(targetLocation, Particle.SCULK_SOUL, 0, 0, 0.25f, 0, 0.75f));
-                        
-                        if (modulo(2)) {
-                            final float pitch = 0.75f + (float) tick / duration;
-                            
-                            player.playWorldSound(targetLocation, Sound.ENTITY_WARDEN_LISTENING, pitch);
-                        }
-                    }
-                }
-        );
-        
+        player.delegate(new Metempsychosis(player, targetLocation), DelegateType.INTERRUPTABLE);
         return Response.ok();
     }
     
-    public void transmigrate(@NotNull HariantPlayer player, @NotNull Location destination) {
-        final Location location = player.getLocation();
-        
-        final double fromX = location.getX();
-        final double fromY = location.getY();
-        final double fromZ = location.getZ();
-        
-        final double toX = destination.getX();
-        final double toY = destination.getY();
-        final double toZ = destination.getZ();
-        
-        player.setGameMode(GameMode.SPECTATOR);
-        
-        // Don't delegate, player is invulnerable
-        new HariantTickingTask(Scheduler.ofTimer()) {
-            @Override
-            public void run(int tick) {
-                final double progress = (double) tick / transmigrationDuration.intValue();
-                
-                if (progress > 1.0) {
-                    player.setGameMode(GameMode.SURVIVAL);
-                    this.cancel();
-                    return;
-                }
-                
-                final double x = fromX + (toX - fromX) * progress;
-                final double y = fromY + (toY - fromY) * progress + Math.sin(progress * Math.PI) * 1.25;
-                final double z = fromZ + (toZ - fromZ) * progress;
-                
-                location.set(x, y, z);
-                
-                player.teleport(location);
-                
-                // Offset higher for fx AFTER teleportation
-                location.add(0, 0.5, 0);
-                
-                // Fx
-                player.spawnWorldParticle(location, Particle.SOUL, 3, 0.2, 0.2, 0.2, 0.075f);
-            }
-        };
-        
-        // Fx
-        player.playWorldSound(Sound.BLOCK_SOUL_SAND_BREAK, 0.0f);
-        player.playWorldSound(Sound.PARTICLE_SOUL_ESCAPE, 0.75f);
-        player.playWorldSound(Sound.ENTITY_WARDEN_SONIC_CHARGE, 1.25f);
-    }
-    
-    public class TalentTargetMetempsychosis implements TalentTarget {
+    private class TalentTargetMetempsychosis implements TalentTarget {
         
         @Override
         public @Nullable TalentContext createContext(@NotNull HariantPlayer player) {
@@ -196,7 +123,90 @@ public final class TalentMetempsychosis extends Talent {
         private static @NotNull TalentContext createContext(@NotNull Block block) {
             return TalentContext.create(block.getLocation().add(0.5, block.getBoundingBox().getMaxY() - block.getY(), 0.5));
         }
+    }
+    
+    private class Metempsychosis extends HariantTickingTask {
         
+        private final @NotNull HariantPlayer player;
+        private final Location targetLocation;
+        private final int duration;
+        
+        public Metempsychosis(@NotNull HariantPlayer player, Location targetLocation) {
+            super(Scheduler.ofTimer());
+            this.player = player;
+            this.targetLocation = targetLocation;
+            this.duration = getDuration();
+        }
+        
+        @Override
+        public void run(int tick) {
+            if (tick > duration) {
+                transmigrate(player, targetLocation);
+                this.cancel();
+            }
+            
+            // Fx
+            final double radians = Math.toRadians(tick * 15);
+            
+            final double x = Math.sin(radians) * 0.8;
+            final double z = Math.cos(radians) * 0.8;
+            
+            LocationHelper.offset(targetLocation, x, 0, z, () -> player.spawnWorldParticle(targetLocation, Particle.SOUL, 0, 0, 0.25f, 0, 0.75f));
+            LocationHelper.offset(targetLocation, -x, 0, -z, () -> player.spawnWorldParticle(targetLocation, Particle.SCULK_SOUL, 0, 0, 0.25f, 0, 0.75f));
+            
+            if (modulo(2)) {
+                final float pitch = 0.75f + (float) tick / duration;
+                
+                player.playWorldSound(targetLocation, Sound.ENTITY_WARDEN_LISTENING, pitch);
+            }
+        }
+        
+        public void transmigrate(@NotNull HariantPlayer player, @NotNull Location destination) {
+            final Location location = player.getLocation();
+            
+            final double fromX = location.getX();
+            final double fromY = location.getY();
+            final double fromZ = location.getZ();
+            
+            final double toX = destination.getX();
+            final double toY = destination.getY();
+            final double toZ = destination.getZ();
+            
+            player.setGameMode(GameMode.SPECTATOR);
+            
+            // Don't delegate, player is invulnerable
+            new HariantTickingTask(Scheduler.ofTimer()) {
+                @Override
+                public void run(int tick) {
+                    final double progress = (double) tick / transmigrationDuration.intValue();
+                    
+                    if (progress > 1.0) {
+                        player.setGameMode(GameMode.SURVIVAL);
+                        this.cancel();
+                        return;
+                    }
+                    
+                    final double x = fromX + (toX - fromX) * progress;
+                    final double y = fromY + (toY - fromY) * progress + Math.sin(progress * Math.PI) * 1.25;
+                    final double z = fromZ + (toZ - fromZ) * progress;
+                    
+                    location.set(x, y, z);
+                    
+                    player.teleport(location);
+                    
+                    // Offset higher for fx AFTER teleportation
+                    location.add(0, 0.5, 0);
+                    
+                    // Fx
+                    player.spawnWorldParticle(location, Particle.SOUL, 3, 0.2, 0.2, 0.2, 0.075f);
+                }
+            };
+            
+            // Fx
+            player.playWorldSound(Sound.BLOCK_SOUL_SAND_BREAK, 0.0f);
+            player.playWorldSound(Sound.PARTICLE_SOUL_ESCAPE, 0.75f);
+            player.playWorldSound(Sound.ENTITY_WARDEN_SONIC_CHARGE, 1.25f);
+        }
     }
     
 }

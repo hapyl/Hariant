@@ -14,11 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
     
     StatusEffectAbyssalCorrosion(int level) {
-        super(
-                Key.ofString("abyssal_corrosion_level_" + level),
-                Component.text("Abyssal Corrosion (Level %s)"),
-                EffectType.DEBUFF
-        );
+        super(Key.ofString("effect_abyssal_corrosion_level_" + level), Component.text("Abyssal Corrosion (Level %s)"), EffectType.DEBUFF);
     }
     
     public static class Level1 extends StatusEffectAbyssalCorrosion {
@@ -31,13 +27,12 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
             // Add poison effect to make hearts go green
             entity.addVanillaEffect(PotionEffectType.POISON, 0, 2);
         }
-        
     }
     
     public static class Level2 extends StatusEffectAbyssalCorrosion {
         
         private static final int DAMAGE_PERIOD = 20;
-        private static final double DAMAGE = 2;
+        private static final double DAMAGE = 4;
         
         private static final DamageSourceIdentity IDENTITY = DamageSourceIdentity.create(
                 Key.ofString("abyssal_corrosion"),
@@ -51,12 +46,13 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         
         @Override
         public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
-            if (entity.ticksAlive() % DAMAGE_PERIOD != 0) {
+            if (entity.localTicks() % DAMAGE_PERIOD != 0) {
                 return;
             }
             
             entity.damage(
-                    DamageSource.builder(IDENTITY, DAMAGE).source(applier)
+                    DamageSource.builder(IDENTITY, DAMAGE)
+                                .source(applier)
                                 .elementType(ElementType.TOXIC)
                                 .build()
             );

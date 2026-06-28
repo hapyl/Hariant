@@ -8,6 +8,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
@@ -57,7 +58,7 @@ public final class TalentFlowerBreeze extends Talent {
         super(key, Component.text("Flower Breeze"), Icon.ofMaterial(Material.RED_DYE));
         
         this.setCooldownSeconds(16);
-        this.setDurationSeconds(6);
+        this.setDurationSeconds(4);
         
         this.setTalentType(TalentType.ENHANCE);
         
@@ -103,6 +104,7 @@ public final class TalentFlowerBreeze extends Talent {
         player.addVanillaEffect(PotionEffectType.SLOWNESS, 2, 10);
         
         player.delegate(
+                // Just a fx that removes flowers, don't care keep it a task
                 new HariantDurationTask(20) {
                     @Override
                     public void run(int tick, int duration) {
@@ -126,7 +128,8 @@ public final class TalentFlowerBreeze extends Talent {
                             self.setVelocity(new Vector(player.getRandom().nextSignedDouble(0.25), 0.75, player.getRandom().nextSignedDouble(0.25)));
                         });
                     }
-                }
+                },
+                DelegateType.PERSISTENT
         );
         
         return Response.ok();

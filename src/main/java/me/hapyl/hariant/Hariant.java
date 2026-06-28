@@ -55,8 +55,8 @@ public final class Hariant implements Runnable, Lifecycle {
     public static final Component GAME_NAME = Component.text("ʜᴀʀɪᴀɴᴛ", Colors.BRAND_COLOR, TextDecoration.BOLD);
     public static final Component UPDATE_TOPIC = Component.text("Nothing much!", Colors.SUCCESS);
     
-    @Singleton static HariantPlugin plugin;
-    @Singleton static Hariant handler;
+    @Singleton static HariantPlugin PLUGIN;
+    @Singleton static Hariant HANDLER;
     
     private final Map<UUID, PlayerProfile> profiles;
     private final Map<UUID, HariantEntity> entityMap;
@@ -88,7 +88,11 @@ public final class Hariant implements Runnable, Lifecycle {
         // Tick entities
         final Collection<HariantEntity> entities = entityMap.values();
         
+        // Removes entities from the map if they should be removed; which is `true` for non-players entities
+        // when bukkit entity is dead, and always `false` for players.
         entities.removeIf(HariantEntity::shouldRemove);
+        
+        // Ticks entities internally, which handles removal
         entities.forEach(HariantEntity::tick0);
         
         // Tick profiles
@@ -127,17 +131,17 @@ public final class Hariant implements Runnable, Lifecycle {
     // *-* Static Members *-* //
     
     public static void startNewGameInstance() {
-        handler.currentGameInstance = new GameInstanceImpl(handler.selectedGameType, handler.selectedBattleground);
-        handler.currentGameInstance.onCreate();
+        HANDLER.currentGameInstance = new GameInstanceImpl(HANDLER.selectedGameType, HANDLER.selectedBattleground);
+        HANDLER.currentGameInstance.onCreate();
         
         // Call team update
-        handler.profiles.values().forEach(profile -> {
+        HANDLER.profiles.values().forEach(profile -> {
             recreatePlayer(profile.getPlayer(), profile.getSelectedHeroInstance());
             
-            profile.handleInstanceCreated(handler.currentGameInstance);
+            profile.handleInstanceCreated(HANDLER.currentGameInstance);
         });
         
-        final int timeBeforePlayerReveal = handler.currentGameInstance.getBattleground().getTimeBeforePlayerReveal();
+        final int timeBeforePlayerReveal = HANDLER.currentGameInstance.getBattleground().getTimeBeforePlayerReveal();
         
         // Hide all players
         getPlayers().forEach(player -> {
@@ -162,17 +166,17 @@ public final class Hariant implements Runnable, Lifecycle {
                 player.sendMessage(Component.text(" Fight to death!", Colors.RED));
             });
             
-            handler.currentGameInstance.setState(GameInstanceState.IN_PROGRESS);
+            HANDLER.currentGameInstance.setState(GameInstanceState.IN_PROGRESS);
         }, timeBeforePlayerReveal);
     }
     
     public static void endCurrentGameInstance(@NotNull WinResult result) {
-        if (handler.currentGameInstance == null || handler.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS) {
+        if (HANDLER.currentGameInstance == null || HANDLER.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS) {
             return;
         }
         
-        handler.currentGameInstance.setState(GameInstanceState.POST_GAME);
-        handler.currentGameInstance.onDestroy();
+        HANDLER.currentGameInstance.setState(GameInstanceState.POST_GAME);
+        HANDLER.currentGameInstance.onDestroy();
         
         // Keep the reference, we'll need it later
         final List<HariantPlayer> players = getPlayers().toList();
@@ -200,10 +204,10 @@ public final class Hariant implements Runnable, Lifecycle {
             @Override
             public void run() {
                 if (tick++ > HariantConstants.GAME_END_DELAY) {
-                    handler.currentGameInstance.setState(GameInstanceState.FINISHED);
+                    HANDLER.currentGameInstance.setState(GameInstanceState.FINISHED);
                     
                     // Destroy players AFTER setting the state
-                    getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(handler.currentGameInstance));
+                    getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(HANDLER.currentGameInstance));
                     
                     // Cleanup tasks
                     HariantTask.cancelAllTasks();
@@ -211,8 +215,8 @@ public final class Hariant implements Runnable, Lifecycle {
                     // Destroy non-players entities
                     clearEntities();
                     
+                    HANDLER.currentGameInstance = null; // Nullate instance at the very end
                     this.cancel();
-                    handler.currentGameInstance = null; // Nullate instance at the very end
                     return;
                 }
                 
@@ -226,15 +230,15 @@ public final class Hariant implements Runnable, Lifecycle {
                     );
                 });
             }
-        }.runTaskTimer(plugin, 0, 1);
+        }.runTaskTimer(PLUGIN, 0, 1);
     }
     
     public static boolean endCurrentGameInstanceIfWinConditionMet() {
-        if (handler.currentGameInstance == null || handler.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS) {
+        if (HANDLER.currentGameInstance == null || HANDLER.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS) {
             return false;
         }
         
-        final WinResult winResult = handler.currentGameInstance.getType().checkWinCondition(handler.currentGameInstance);
+        final WinResult winResult = HANDLER.currentGameInstance.getType().checkWinCondition(HANDLER.currentGameInstance);
         
         if (winResult != null) {
             endCurrentGameInstance(winResult);
@@ -246,17 +250,17 @@ public final class Hariant implements Runnable, Lifecycle {
     
     @NotNull
     public static BooleanExplained canStartNewGameInstance() {
-        if (handler.currentGameInstance != null) {
+        if (HANDLER.currentGameInstance != null) {
             return BooleanExplained.ofFalse(Component.text("A game is already in progress!", Colors.RED));
         }
         
-        if (!handler.selectedBattleground.isSelectable() || handler.selectedBattleground.getSpawnLocations().isEmpty()) {
+        if (!HANDLER.selectedBattleground.isSelectable() || HANDLER.selectedBattleground.getSpawnLocations().isEmpty()) {
             return BooleanExplained.ofFalse(Component.text("Selected battleground is invalid!", Colors.RED));
         }
         
         // TODO @Feb 14, 2026 (xanyjl) -> Add tutorial check
         
-        final int minimumTeamsRequired = handler.selectedGameType.getMinimumTeamsRequired();
+        final int minimumTeamsRequired = HANDLER.selectedGameType.getMinimumTeamsRequired();
         
         final Set<EnumTeam> populatedTeams = EnumTeam.getPopulatedTeams();
         final int populatedTeamsSize = populatedTeams.size();
@@ -270,7 +274,7 @@ public final class Hariant implements Runnable, Lifecycle {
         }
         
         // Check for duplicate teams if game type doesn't allow it
-        if (!handler.selectedGameType.allowDuplicateHeroes()) {
+        if (!HANDLER.selectedGameType.allowDuplicateHeroes()) {
             for (EnumTeam team : populatedTeams) {
                 final Map<Hero, List<PlayerProfile>> profilesWithDuplicateHeroes
                         = team.getPlayerProfiles()
@@ -307,7 +311,7 @@ public final class Hariant implements Runnable, Lifecycle {
                             HariantLogger.error(
                                     player,
                                     Component.empty()
-                                             .append(Component.text("You and"))
+                                             .append(Component.text("You and "))
                                              .append(othersNames)
                                              .append(Component.text(" both have "))
                                              .append(duplicateHero.getName())
@@ -342,22 +346,22 @@ public final class Hariant implements Runnable, Lifecycle {
     
     @NotNull
     public static Optional<GameInstance> getCurrentGameInstance() {
-        return Optional.ofNullable(handler.currentGameInstance);
+        return Optional.ofNullable(HANDLER.currentGameInstance);
     }
     
     @NotNull
     public static HariantPlugin getPlugin() {
-        return plugin;
+        return PLUGIN;
     }
     
     @NotNull
     public static Random getRandom() {
-        return handler.theRandom;
+        return HANDLER.theRandom;
     }
     
     @NotNull
     public static EnumBattleground getSelectedBattleground() {
-        return handler.selectedBattleground;
+        return HANDLER.selectedBattleground;
     }
     
     public static void setSelectedBattleground(@NotNull EnumBattleground battleground) {
@@ -365,23 +369,23 @@ public final class Hariant implements Runnable, Lifecycle {
             throw new IllegalArgumentException("This battleground cannot be selected!");
         }
         
-        handler.selectedBattleground = battleground;
-        plugin.config().setSelectedBattleground(battleground);
+        HANDLER.selectedBattleground = battleground;
+        PLUGIN.config().setSelectedBattleground(battleground);
     }
     
     @NotNull
     public static EnumGameType getSelectedGameType() {
-        return handler.selectedGameType;
+        return HANDLER.selectedGameType;
     }
     
     public static void setSelectedGameType(@NotNull EnumGameType gameType) {
-        handler.selectedGameType = gameType;
-        plugin.config().setSelectedGameType(gameType);
+        HANDLER.selectedGameType = gameType;
+        PLUGIN.config().setSelectedGameType(gameType);
     }
     
     @NotNull
     public static Optional<PlayerProfile> getPlayerProfile(@NotNull UUID uuid) {
-        return Optional.ofNullable(handler.profiles.get(uuid));
+        return Optional.ofNullable(HANDLER.profiles.get(uuid));
     }
     
     @NotNull
@@ -399,7 +403,7 @@ public final class Hariant implements Runnable, Lifecycle {
     
     @NotNull
     public static Stream<PlayerProfile> getPlayerProfiles() {
-        return handler.profiles.values().stream();
+        return HANDLER.profiles.values().stream();
     }
     
     /**
@@ -435,12 +439,12 @@ public final class Hariant implements Runnable, Lifecycle {
      */
     @NotNull
     public static PlayerDatabase getPlayerDatabase(@NotNull UUID uuid) {
-        return new PlayerDatabaseView(plugin.getDatabase(), uuid);
+        return new PlayerDatabaseView(PLUGIN.getDatabase(), uuid);
     }
     
     @NotNull
     public static <E extends HariantEntity> Optional<E> getEntity(@NotNull UUID uuid, @NotNull Class<E> clazz) {
-        final HariantEntity hariantEntity = handler.entityMap.get(uuid);
+        final HariantEntity hariantEntity = HANDLER.entityMap.get(uuid);
         
         return clazz.isInstance(hariantEntity) ? Optional.of(clazz.cast(hariantEntity)) : Optional.empty();
     }
@@ -462,7 +466,7 @@ public final class Hariant implements Runnable, Lifecycle {
     
     @Nullable
     public static HariantEntity getEntityOrNull(@NotNull Entity entity) {
-        return handler.entityMap.get(entity.getUniqueId());
+        return HANDLER.entityMap.get(entity.getUniqueId());
     }
     
     @NotNull
@@ -480,14 +484,14 @@ public final class Hariant implements Runnable, Lifecycle {
     @NotNull
     public static <H extends HariantEntity> H createEntity(@NotNull EntitySpawner<H> spawner) {
         final H entity = spawner.spawn();
-        handler.entityMap.put(entity.getUuid(), entity);
+        HANDLER.entityMap.put(entity.getUuid(), entity);
         entity.onCreate();
         
         return entity;
     }
     
     public static void destroyEntity(@NotNull UUID uuid) {
-        final HariantEntity entity = handler.entityMap.remove(uuid);
+        final HariantEntity entity = HANDLER.entityMap.remove(uuid);
         
         if (entity != null) {
             entity.onDestroy();
@@ -498,12 +502,12 @@ public final class Hariant implements Runnable, Lifecycle {
     public static HariantPlayer createPlayer(@NotNull Player player, @NotNull HeroInstance heroInstance) {
         final UUID uniqueId = player.getUniqueId();
         
-        if (handler.entityMap.containsKey(uniqueId)) {
+        if (HANDLER.entityMap.containsKey(uniqueId)) {
             throw new IllegalStateException("HariantPlayer already exists for `%s`!".formatted(player.getName()));
         }
         
         return createEntity(() -> new HariantPlayer(
-                Objects.requireNonNull(handler.profiles.get(player.getUniqueId()), "Cannot create HariantPlayer without a profile!"),
+                Objects.requireNonNull(HANDLER.profiles.get(player.getUniqueId()), "Cannot create HariantPlayer without a profile!"),
                 player,
                 heroInstance
         ));
@@ -519,19 +523,19 @@ public final class Hariant implements Runnable, Lifecycle {
     public static PlayerProfile createProfile(@NotNull Player player) {
         final UUID uuid = player.getUniqueId();
         
-        if (handler.profiles.containsKey(uuid)) {
+        if (HANDLER.profiles.containsKey(uuid)) {
             throw new IllegalStateException("Profile already exists for %s!".formatted(player.getName()));
         }
         
         final PlayerProfile profile = new PlayerProfile(player);
-        handler.profiles.put(uuid, profile);
+        HANDLER.profiles.put(uuid, profile);
         profile.onCreate();
         
         return profile;
     }
     
     public static void destroyProfile(@NotNull Player player) {
-        final PlayerProfile profile = handler.profiles.remove(player.getUniqueId());
+        final PlayerProfile profile = HANDLER.profiles.remove(player.getUniqueId());
         
         if (profile != null) {
             profile.onDestroy();
@@ -539,36 +543,36 @@ public final class Hariant implements Runnable, Lifecycle {
     }
     
     public static boolean isGameInProgress() {
-        return handler.currentGameInstance != null;
+        return HANDLER.currentGameInstance != null;
     }
     
     public static boolean isGameInProgressButNotActive() {
-        return handler.currentGameInstance != null && handler.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS;
+        return HANDLER.currentGameInstance != null && HANDLER.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS;
     }
     
     @NotNull
     public static SecurityManager getSecurityManager() {
-        return handler.securityManager;
+        return HANDLER.securityManager;
     }
     
     public static void hideBukkitEntity(@NotNull Entity entity) {
-        Bukkit.getOnlinePlayers().forEach(player -> player.hideEntity(plugin, entity));
+        Bukkit.getOnlinePlayers().forEach(player -> player.hideEntity(PLUGIN, entity));
     }
     
     public static void showBukkitEntity(@NotNull Entity entity) {
-        Bukkit.getOnlinePlayers().forEach(player -> player.showEntity(plugin, entity));
+        Bukkit.getOnlinePlayers().forEach(player -> player.showEntity(PLUGIN, entity));
     }
     
     public static void hideBukkitEntity(@NotNull Player player, @NotNull Entity entity) {
-        player.hideEntity(plugin, entity);
+        player.hideEntity(PLUGIN, entity);
     }
     
     public static void showBukkitEntity(@NotNull Player player, @NotNull Entity entity) {
-        player.showEntity(plugin, entity);
+        player.showEntity(PLUGIN, entity);
     }
     
     public static int getPlayerProfileCount() {
-        return handler.profiles.size();
+        return HANDLER.profiles.size();
     }
     
     public static void globalBlockChange(@NotNull Location location, @NotNull BlockData blockData) {
@@ -580,18 +584,23 @@ public final class Hariant implements Runnable, Lifecycle {
     }
     
     public static boolean entityExists(@NotNull UUID uniqueId) {
-        return handler.entityMap.containsKey(uniqueId);
+        return HANDLER.entityMap.containsKey(uniqueId);
     }
     
     public static void onPlayerReady(@NotNull PlayerProfile playerProfile) {
         // If there is a countdown already, cancel it
-        if (handler.countdown != null) {
-            cancelCountdown(playerProfile);
+        if (HANDLER.countdown != null) {
+            cancelCountdown(
+                    Component.empty()
+                             .append(playerProfile.getNameFormatted())
+                             .appendSpace()
+                             .append(Component.text("cancelled the countdown!", Colors.ERROR))
+            );
             return;
         }
         
         // Check whether all players are ready
-        final Collection<? extends PlayerProfile> nonSpectatorProfiles = handler.profiles.values()
+        final Collection<? extends PlayerProfile> nonSpectatorProfiles = HANDLER.profiles.values()
                                                                                          .stream()
                                                                                          .filter(Predicate.not(PlayerProfile::isSpectator))
                                                                                          .toList();
@@ -613,7 +622,7 @@ public final class Hariant implements Runnable, Lifecycle {
                 
                 HariantLogger.PREFIX_ERROR.broadcastMessage(
                         Component.empty()
-                                 .append(Component.text("Failed to start the game!", Colors.ERROR))
+                                 .append(Component.text("Failed to start the game!"))
                                  .appendSpace()
                                  .append(booleanExplained.explain())
                 );
@@ -626,29 +635,29 @@ public final class Hariant implements Runnable, Lifecycle {
     }
     
     public static void startCountdown() {
-        if (handler.countdown != null) {
-            handler.countdown.cancel();
+        if (HANDLER.countdown != null) {
+            HANDLER.countdown.cancel();
         }
         
-        handler.countdown = new GameInstanceCountdown();
+        HANDLER.countdown = new GameInstanceCountdown();
     }
     
-    public static void cancelCountdown(@Nullable PlayerProfile canceller) {
-        if (handler.countdown == null) {
+    public static void cancelCountdown(@Nullable Component reason) {
+        if (HANDLER.countdown == null) {
             return;
         }
         
-        handler.countdown.cancel(canceller);
-        handler.countdown = null;
+        HANDLER.countdown.cancel(reason);
+        HANDLER.countdown = null;
     }
     
     @NotNull
     public static String getVersion() {
-        return plugin.getPluginMeta().getVersion().replace("-SNAPSHOT", "");
+        return PLUGIN.getPluginMeta().getVersion().replace("-SNAPSHOT", "");
     }
     
     private static void clearEntities() {
-        handler.entityMap.values().removeIf(entity -> {
+        HANDLER.entityMap.values().removeIf(entity -> {
             if (entity.isPersistent()) {
                 return false;
             }

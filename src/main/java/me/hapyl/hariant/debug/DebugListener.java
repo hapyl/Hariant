@@ -5,6 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DebugListener {
     
-    void debugOnCooldownReset(@NotNull HariantPlayer player);
+    void onDebugCooldownReset(@NotNull HariantPlayer player);
     
 }

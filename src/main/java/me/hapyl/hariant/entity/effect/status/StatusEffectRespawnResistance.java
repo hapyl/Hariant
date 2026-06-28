@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class StatusEffectRespawnResistance extends StatusEffectImpl {
     StatusEffectRespawnResistance() {
-        super(Key.ofString("respawn_resistance"), Component.text("Respawn Resistance"), EffectType.BUFF);
+        super(Key.ofString("effect_respawn_resistance"), Component.text("Respawn Resistance"), EffectType.BUFF);
     }
     
     @Override

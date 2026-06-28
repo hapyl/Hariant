@@ -8,7 +8,6 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
 import me.hapyl.hariant.lobby.MenuGameManagement;
-import me.hapyl.hariant.profile.message.EnumMessageChannel;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -47,9 +46,9 @@ public class MenuBattlegroundSelection extends Menu {
                     HariantLogger.PREFIX_INFO.broadcastMessage(
                             Component.empty()
                                      .append(playerProfile.getNameFormatted())
-                                     .append(Component.text(" selected ", Colors.SUCCESS))
+                                     .append(Component.text(" selected "))
                                      .append(battleground.getName().color(Colors.GOLD))
-                                     .append(Component.text("!", Colors.SUCCESS))
+                                     .append(Component.text("!"))
                     );
                     
                     this.broadcastUpdate();

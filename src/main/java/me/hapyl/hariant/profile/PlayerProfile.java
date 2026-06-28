@@ -10,6 +10,7 @@ import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.rank.FormatRules;
 import me.hapyl.hariant.database.rank.PlayerRank;
@@ -22,7 +23,7 @@ import me.hapyl.hariant.game.battleground.Battleground;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
-import me.hapyl.hariant.inventory.drop.DropTable;
+import me.hapyl.hariant.inventory.drop.DropSummary;
 import me.hapyl.hariant.lobby.EnumLobbyItem;
 import me.hapyl.hariant.profile.message.MessageChannel;
 import me.hapyl.hariant.profile.setting.Setting;
@@ -41,6 +42,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.object.ObjectContents;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -157,6 +159,26 @@ public final class PlayerProfile
     @NotNull
     public HeroInstance getSelectedHeroInstance() {
         return database.heroDirectory.getSelectedHeroInstance();
+    }
+    
+    public void setSelectedHero(@NotNull HeroInstance heroInstance) {
+        final Hero hero = heroInstance.getOrigin();
+        
+        if (database.heroDirectory.getSelectedHero().equals(hero)) {
+            HariantLogger.error(player, Component.text("This hero is already selected!"));
+            return;
+        }
+        
+        database.heroDirectory.setSelectedHero(heroInstance);
+        HariantLogger.success(player, Component.empty().append(Component.text("Selected ")).append(hero).append(Component.text("!")));
+        
+        // Cancel countdown if it was active
+        Hariant.cancelCountdown(
+                Component.empty()
+                         .append(Component.text("The countdown was cancelled because "))
+                         .append(this.getNameFormatted())
+                         .append(Component.text(" changed their hero!"))
+        );
     }
     
     @Override
@@ -321,11 +343,15 @@ public final class PlayerProfile
         
         this.teleportToSpawnAndGiveLobbyItems();
         this.player.setGameMode(GameMode.SURVIVAL);
+        this.player.setHealth(Objects.requireNonNull(player.getAttribute(Attribute.MAX_HEALTH)).getValue());
+        
+        // Show player to all other players
+        Hariant.showBukkitEntity(player);
         
         // Generate loot
-        final DropTable dropTable = gameInstance.getBattleground().getDropTable();
+        final DropSummary dropSummary = gameInstance.getBattleground().getDropTable().generateLoot(this);
         
-        dropTable.generateLootDropShowSummary(this);
+        dropSummary.showSummary(this);
     }
     
     public void teleportToSpawnAndGiveLobbyItems() {
