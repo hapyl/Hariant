@@ -1,6 +1,7 @@
 package me.hapyl.hariant.event;
 
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.heal.HealingSource;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -8,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 public class HariantHealEvent extends HariantEntityEvent implements Cancellable {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
+    
+    private final @NotNull HealingSource healingSource;
     
     private final double healthBeforeHealing;
     private final double healthAfterHealing;
@@ -17,13 +20,18 @@ public class HariantHealEvent extends HariantEntityEvent implements Cancellable 
     
     private boolean cancel;
     
-    public HariantHealEvent(@NotNull HariantEntity entity, double healthBeforeHealing, double healthAfterHealing, double actualHealing, double excessHealing) {
+    public HariantHealEvent(@NotNull HariantEntity entity, @NotNull HealingSource healingSource, double healthBeforeHealing, double healthAfterHealing, double actualHealing, double excessHealing) {
         super(entity);
         
+        this.healingSource = healingSource;
         this.healthBeforeHealing = healthBeforeHealing;
         this.healthAfterHealing = healthAfterHealing;
         this.actualHealing = actualHealing;
         this.excessHealing = excessHealing;
+    }
+    
+    public @NotNull HealingSource getHealingSource() {
+        return healingSource;
     }
     
     public double getHealthBeforeHealing() {

@@ -21,6 +21,7 @@ import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
 import me.hapyl.hariant.entity.damage.AssistSource;
+import me.hapyl.hariant.entity.damage.tracker.CombatData;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.mutator.Decay;
@@ -30,22 +31,28 @@ import me.hapyl.hariant.entity.shield.ShieldStrength;
 import me.hapyl.hariant.entity.type.HariantEntityDummy;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
 import me.hapyl.hariant.hero.HeroRegistry;
+import me.hapyl.hariant.hero.shark.BloodScent;
 import me.hapyl.hariant.inventory.drop.DropSummary;
 import me.hapyl.hariant.inventory.drop.DropTable;
 import me.hapyl.hariant.menu.hero.MenuHeroUnlock;
 import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.hariant.task.HariantTickingStepTask;
+import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -334,6 +341,75 @@ public final class HariantCommandRegistry {
             
             player.triggerEffect(player, Effect.create(Key.ofString("dummy_effect"), Component.text("Command"), effectType));
             player.messageSuccess(Component.text("Triggered %s effect!".formatted(effectType)));
+        });
+        
+        register("create_blood_scent", context -> {
+            class Holder {
+                static BloodScent bloodScent;
+            }
+            
+            final HariantPlayer player = context.getHariantPlayer();
+            
+            if (Holder.bloodScent != null) {
+                player.setGameMode(GameMode.SPECTATOR);
+                
+                if (context.get(0).toString().equals("follow")) {
+                    final Queue<? extends Location> path = Holder.bloodScent.computePath();
+                    player.sendMessage(Component.text("Following the trail."));
+                    
+                    new HariantTickingStepTask(Scheduler.ofTimer(), 1) {
+                        @Override
+                        public boolean run(int tick, int step) {
+                            final Location location = path.poll();
+                            final Location next = path.peek();
+                            
+                            if (location == null) {
+                                player.setGameMode(GameMode.SURVIVAL);
+                                player.sendMessage(Component.text("Finished following the trail."));
+                                return true;
+                            }
+                            
+                            // If next exists, merge yaw and pitch
+                            
+                            if (next != null) {
+                                final Vector direction = next.toVector().subtract(location.toVector()).normalize();
+                                final double PI_2 = Math.PI * 2;
+                                
+                                final double x = direction.getX();
+                                final double z = direction.getZ();
+                                
+                                final float yaw = (float) Math.toDegrees((Math.atan2(-x, z) + PI_2) % PI_2);
+                                final float pitch = (float) Math.toDegrees(Math.atan2(-direction.getY(), Math.sqrt(x * x + z * z))) * 0.1f;
+                                
+                                location.setYaw(yaw);
+                                location.setPitch(pitch);
+                                
+                                player.teleport(location);
+                            }
+                            
+                            return false;
+                        }
+                    };
+                    
+                    return;
+                }
+                
+                Holder.bloodScent.cancel();
+                Holder.bloodScent = null;
+                
+                player.messageSuccess(Component.text("Removed blood scent."));
+                return;
+            }
+            
+            Holder.bloodScent = new BloodScent(player);
+            player.messageSuccess(Component.text("Created blood scent."));
+        });
+        
+        register("show_damage_feedback", context -> {
+            final HariantPlayer player = context.getHariantPlayer();
+            
+            player.sendMessage(Component.text("Total DMG Dealt [HOVER]").hoverEvent(player.getCombatTracker().createHoverEvent(CombatData.Type.OUTGOING)));
+            player.sendMessage(Component.text("Total DMG Taken [HOVER]").hoverEvent(player.getCombatTracker().createHoverEvent(CombatData.Type.INCOMING)));
         });
     }
     

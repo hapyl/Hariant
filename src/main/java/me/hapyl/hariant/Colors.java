@@ -122,6 +122,7 @@ public final class Colors {
     public static final TextColor RESTLESS_SOUL = TextColor.color(0x19B4BF);
     public static final TextColor CHAOS = TextColor.color(0x660499);
     public static final TextColor VOID = TextColor.color(0x5F3087);
+    public static final TextColor SHARK = TextColor.color(0x96B7C0);
     
     private Colors() {
     }

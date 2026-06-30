@@ -1,6 +1,8 @@
 package me.hapyl.hariant.profile.setting;
 
 import me.hapyl.eterna.module.component.ButtonComponents;
+import me.hapyl.eterna.module.component.ComponentStyler;
+import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Enums;
@@ -20,20 +22,16 @@ import org.jetbrains.annotations.NotNull;
 public final class SettingImplEnum<E extends Enum<E> & ComponentLike> extends SettingImpl<E> {
     
     private static final Style CONSTANT_STYLE = Style.style(Colors.DARK_GRAY);
-    private static final Style CONSTANT_STYLE_CURRENT = Style.style(Colors.GRAY);
+    private static final Style CONSTANT_STYLE_CURRENT = Style.style(Colors.GREEN);
     
     private static final Component ARROW_PREFIX = Component.text(" ➥ ", Colors.GREEN);
+    private static final Component EMPTY_PREFIX = Component.text("    ");
+    
+    private static final ComponentStyler DESCRIPTION_STYLER = ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(5).build();
     
     private final Class<E> enumClass;
     
-    SettingImplEnum(
-            @NotNull Key key,
-            @NotNull Component name,
-            @NotNull Component description,
-            @NotNull Icon icon,
-            @NotNull SettingCategory category,
-            @NotNull E defaultValue
-    ) {
+    SettingImplEnum(@NotNull Key key, @NotNull Component name, @NotNull Component description, @NotNull Icon icon, @NotNull SettingCategory category, @NotNull E defaultValue) {
         super(key, name, description, icon, category, defaultValue);
         
         this.enumClass = defaultValue.getDeclaringClass();
@@ -84,10 +82,15 @@ public final class SettingImplEnum<E extends Enum<E> & ComponentLike> extends Se
             final Component component = enumConstant.asComponent();
             
             if (isCurrentValue) {
-                builder.addLore(Component.empty().append(ARROW_PREFIX).append(component.style(CONSTANT_STYLE_CURRENT)));
+                builder.addLore(ARROW_PREFIX.append(component.style(CONSTANT_STYLE_CURRENT)));
+                
+                // If enum has a description, append it
+                if (enumConstant instanceof Described described) {
+                    builder.addWrappedLore(described.getDescription(), DESCRIPTION_STYLER);
+                }
             }
             else {
-                builder.addLore(Component.empty().append(Component.text("    ")).append(component.style(CONSTANT_STYLE)));
+                builder.addLore(EMPTY_PREFIX.append(component.style(CONSTANT_STYLE)));
             }
         }
         

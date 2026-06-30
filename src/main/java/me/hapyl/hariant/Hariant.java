@@ -3,6 +3,7 @@ package me.hapyl.hariant;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.math.Tick;
+import me.hapyl.eterna.module.player.PlayerLib;
 import me.hapyl.hariant.annotate.Singleton;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseView;
@@ -31,6 +32,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -86,13 +88,19 @@ public final class Hariant implements Runnable, Lifecycle {
     @Override
     public void run() {
         // Tick entities
-        final Collection<HariantEntity> entities = entityMap.values();
+        final Collection<? extends HariantEntity> entities = entityMap.values();
         
-        // Removes entities from the map if they should be removed; which is `true` for non-players entities
-        // when bukkit entity is dead, and always `false` for players.
-        entities.removeIf(HariantEntity::shouldRemove);
+        // Remove entities from the map if, well, they should be removed
+        entities.removeIf(entity -> {
+            if (entity.shouldRemove()) {
+                entity.onDestroy();
+                return true;
+            }
+            
+            return false;
+        });
         
-        // Ticks entities internally, which handles removal
+        // Ticks entities internally, which handles internal removal
         entities.forEach(HariantEntity::tick0);
         
         // Tick profiles
@@ -599,6 +607,22 @@ public final class Hariant implements Runnable, Lifecycle {
             return;
         }
         
+        // Send readiness message BEFORE checking for whether we can start the game
+        final boolean ready = playerProfile.isReady();
+        
+        HariantLogger.PREFIX_INFO.broadcastMessage(
+                Component.empty()
+                         .append(playerProfile.getNameFormatted())
+                         .appendSpace()
+                         .append(
+                                 ready
+                                 ? Component.text("is now ready.", Colors.SUCCESS)
+                                 : Component.text("is no longer ready.", Colors.ERROR)
+                         )
+        );
+        
+        PlayerLib.playSound(Sound.BLOCK_NOTE_BLOCK_HAT, ready ? 0.75f : 0.5f);
+        
         // Check whether all players are ready
         final Collection<? extends PlayerProfile> nonSpectatorProfiles = HANDLER.profiles.values()
                                                                                          .stream()
@@ -649,6 +673,10 @@ public final class Hariant implements Runnable, Lifecycle {
         
         HANDLER.countdown.cancel(reason);
         HANDLER.countdown = null;
+    }
+    
+    public static boolean isCountdownActive() {
+        return HANDLER.countdown != null;
     }
     
     @NotNull

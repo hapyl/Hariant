@@ -279,7 +279,7 @@ public final class TalentDualVerdict extends Talent {
                         return false;
                     }
                     
-                    entity.heal(HealingSource.create(player.getMaxHealth() * dropletHealingOfMaxNyxHealth.doubleValue(), player));
+                    entity.heal(HealingSource.create(player.getMaxHealth() * dropletHealingOfMaxNyxHealth.doubleValue(), TalentDualVerdict.this, player));
                 }
                 // Otherwise damage nyx and decrement entity energy
                 else {

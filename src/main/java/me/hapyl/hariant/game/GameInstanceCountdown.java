@@ -65,6 +65,7 @@ public class GameInstanceCountdown extends HariantTask {
         
         if (reason != null) {
             HariantLogger.PREFIX_ERROR.broadcastMessage(reason);
+            PlayerLib.playSound(Sound.BLOCK_NOTE_BLOCK_BASS, 0.0f);
         }
     }
     

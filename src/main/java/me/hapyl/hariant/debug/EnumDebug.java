@@ -31,7 +31,7 @@ public enum EnumDebug implements Debug {
         public void debug(@NotNull HariantPlayer player, @NotNull ArgumentList args) {
             final double healing = args.get(0).toDouble(1);
             
-            player.heal(HealingSource.create(healing, null));
+            player.heal(HealingSource.create(healing, Component.text("Debug")));
             player.messageSuccess(Component.text("Healed for %.0f!".formatted(healing), Colors.GREEN));
         }
     },

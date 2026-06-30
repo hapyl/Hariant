@@ -65,11 +65,9 @@ public final class Settings {
                          .append(Component.text("Whether you'll see combat feedback in chat, which includes:"))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text(" • ", Colors.DARK_GRAY))
-                         .append(Component.text("Damage dealt/taken."))
-                         .appendNewline()
-                         .append(Component.text(" • ", Colors.DARK_GRAY))
-                         .append(Component.text("Damage done/received.")),
+                         .append(createDotWithNewLines(Component.text("Damage dealt/taken.")))
+                         .append(createDotWithNewLines(Component.text("Healing done/receieved.")))
+                         .append(createDotWithNewLines(Component.text("Total damage dealt/taken after death."))),
                 Icon.ofMaterial(Material.SWEET_BERRIES),
                 SettingCategory.QUALITY_OF_LIFE,
                 false
@@ -113,6 +111,13 @@ public final class Settings {
         return categorySettings != null ? List.copyOf(categorySettings) : List.of();
     }
     
+    private static @NotNull Component createDotWithNewLines(@NotNull Component component) {
+        return Component.empty()
+                        .append(Component.text(" • ", Colors.DARK_GRAY))
+                        .append(component)
+                        .appendNewline();
+    }
+    
     @NotNull
     private static <T, S extends Setting<T>> S register(@NotNull S setting) {
         SETTINGS.compute(setting.getCategory(), Compute.listAdd(setting));
@@ -125,28 +130,12 @@ public final class Settings {
     }
     
     @NotNull
-    private static Setting<Integer> ofInteger(
-            @NotNull Key key,
-            @NotNull Component name,
-            @NotNull Component description,
-            @NotNull Icon icon,
-            @NotNull SettingCategory category,
-            int defaultValue,
-            int minValue,
-            int maxValue
-    ) {
+    private static Setting<Integer> ofInteger(@NotNull Key key, @NotNull Component name, @NotNull Component description, @NotNull Icon icon, @NotNull SettingCategory category, int defaultValue, int minValue, int maxValue) {
         return register(new SettingImplPrimitiveInteger(key, name, description, icon, category, defaultValue, minValue, maxValue));
     }
     
     @NotNull
-    private static <E extends Enum<E> & ComponentLike> Setting<E> ofEnum(
-            @NotNull Key key,
-            @NotNull Component name,
-            @NotNull Component description,
-            @NotNull Icon icon,
-            @NotNull SettingCategory category,
-            @NotNull E defaultValue
-    ) {
+    private static <E extends Enum<E> & ComponentLike> Setting<E> ofEnum(@NotNull Key key, @NotNull Component name, @NotNull Component description, @NotNull Icon icon, @NotNull SettingCategory category, @NotNull E defaultValue) {
         return register(new SettingImplEnum<>(key, name, description, icon, category, defaultValue));
     }
     

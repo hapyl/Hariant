@@ -145,7 +145,7 @@ public final class TalentReverberation extends TalentPassive implements Listener
         VoidShield(@NotNull HariantEntity entity, @NotNull HariantPlayer applier, double maximumCapacity) {
             super(entity, applier, shieldStrength, maximumCapacity, voidShieldDuration.intValue());
             
-            this.healingSource = HealingSource.create(applier.getMaxHealth() * voidShieldHealingOfNyxMaxHealth.doubleValue(), applier);
+            this.healingSource = HealingSource.create(applier.getMaxHealth() * voidShieldHealingOfNyxMaxHealth.doubleValue(), TalentReverberation.this, applier);
         }
         
         @Override

@@ -1,6 +1,7 @@
 package me.hapyl.hariant.inventory.drop;
 
 import com.google.common.collect.Lists;
+import io.papermc.paper.registry.keys.SoundEventKeys;
 import me.hapyl.eterna.module.annotate.SelfReturn;
 import me.hapyl.hariant.Colors;
 import net.kyori.adventure.audience.Audience;
@@ -21,7 +22,9 @@ public final class DropSummary {
     
     private static final Component PREFIX_BULLET = Component.text(" + ", Colors.GREEN);
     private static final DropTier RARE_DROP_THRESHOLD = DropTier.VERY_RARE;
-    private static final net.kyori.adventure.key.Key SOUND_KEY = net.kyori.adventure.key.Key.key("block.chest.close");
+    
+    private static final Sound SOUND_1 = Sound.sound(SoundEventKeys.BLOCK_CHEST_CLOSE, Sound.Source.UI, 3, 0.5f);
+    private static final Sound SOUND_2 = Sound.sound(SoundEventKeys.BLOCK_CHEST_CLOSE, Sound.Source.UI, 3, 0.75f);
     
     private static final Comparator<Entry> COMPARATOR = Comparator.comparingDouble(Entry::getChance).reversed();
     
@@ -55,8 +58,8 @@ public final class DropSummary {
         // TODO (xanyjl @ Tuesday, June 16) -> Add sfx for rare items?
         
         // Sfx
-        audience.playSound(Sound.sound(SOUND_KEY, Sound.Source.UI, 3, 0.50f));
-        audience.playSound(Sound.sound(SOUND_KEY, Sound.Source.UI, 3, 0.75f));
+        audience.playSound(SOUND_1);
+        audience.playSound(SOUND_2);
     }
     
     @Override

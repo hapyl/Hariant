@@ -67,6 +67,9 @@ public final class PlayerProfile
     
     private static final Style PING_STYLE = Style.style(Colors.YELLOW, TextDecoration.UNDERLINED);
     
+    private static final int AUTO_READY_DELAY_ON_JOIN = 20;
+    private static final int AUTO_READY_DELAY = 60;
+    
     private final Player player;
     private final PlayerDatabase database;
     
@@ -203,6 +206,9 @@ public final class PlayerProfile
                 teleportToSpawnAndGiveLobbyItems();
             }
         }
+        
+        // Schedule auto-ready
+        AutoReady.scheduleAutoReady(this, AutoReady.ALWAYS_EXCEPT_ON_JOIN, AUTO_READY_DELAY_ON_JOIN);
     }
     
     @Override
@@ -352,6 +358,9 @@ public final class PlayerProfile
         final DropSummary dropSummary = gameInstance.getBattleground().getDropTable().generateLoot(this);
         
         dropSummary.showSummary(this);
+        
+        // Schedule auto ready
+        AutoReady.scheduleAutoReady(this, null, AUTO_READY_DELAY);
     }
     
     public void teleportToSpawnAndGiveLobbyItems() {

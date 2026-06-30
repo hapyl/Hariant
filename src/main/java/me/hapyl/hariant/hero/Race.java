@@ -30,8 +30,15 @@ public enum Race implements Prefixed, Named, Described, Styled, ComponentLike {
     ELF(
             Component.text("\uD83E\uDDDD"),
             Component.text("Elf"),
-            Component.text("A race of beings that originates from before the times of The Kingdom."),
+            Component.text("A race of beings that originates from long before the Kingdom."),
             Colors.SKIN_COLOR_0
+    ),
+    
+    SHARK(
+            Component.text("\uD83E\uDD88"),
+            Component.text("Shark"),
+            Component.text("An apex predator."),
+            Colors.SHARK
     ),
     
     ;

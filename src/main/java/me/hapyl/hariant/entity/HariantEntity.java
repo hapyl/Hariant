@@ -27,6 +27,7 @@ import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
+import me.hapyl.hariant.entity.damage.tracker.CombatData;
 import me.hapyl.hariant.entity.damage.tracker.CombatTracker;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectHandler;
@@ -103,14 +104,8 @@ public class HariantEntity
             1.75f
     );
     
-    private static final Component DEFAULT_HEAD_COMPONENT = Component.object(
-            ObjectContents.playerHead()
-                          .profileProperty(PlayerHeadObjectContents.property(
-                                  "textures",
-                                  "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5OWIwNWI5YTFkYjRkMjliNWU2NzNkNzdhZTU0YTc3ZWFiNjY4MTg1ODYwMzVjOGEyMDA1YWViODEwNjAyYSJ9fX0="
-                          ))
-                          .build()
-    ).color(Colors.WHITE);
+    private static final String HEAD_TEXTURE_URL = "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/%s\"}}}";
+    private static final Component DEFAULT_HEAD_COMPONENT = createHeadComponent("da99b05b9a1db4d29b5e673d77ae54a77eab66818586035c8a2005aeb810602a");
     
     private static final Cooldown COOLDOWN_EFFECT_RESISTANCE = Cooldown.ofSeconds(Key.ofString("environment_no_damage_ticks"), 1);
     
@@ -372,7 +367,7 @@ public class HariantEntity
         final double damage = damageInstance.getDamage();
         final double health = getFinalHealth();
         
-        final boolean isLethal = health - damage <= 0.0;
+        final boolean isLethal = health - damage <= 0.0 && !source.isFlagged(DamageFlag.CANNOT_KILL);
         
         if (isLethal) {
             damageInstance.markLethal();
@@ -384,8 +379,8 @@ public class HariantEntity
             this.lastAttacker.onDamageDealt(source, this);
         }
         
-        // Increment damage deal in the tracker; we use self as the attacker for environment damage
-        this.combatTracker.incrementDamageDealt(attacker != null ? attacker : this, source.getIdentity(), damage);
+        // Pass the damage to trackers
+        this.incrementTrackerDamage(attacker, source, damage, isLethal);
         
         // Call monitor event
         new HariantMonitorDamageEvent(this, damageInstance).callEvent();
@@ -395,7 +390,7 @@ public class HariantEntity
         
         // Check whether damage can kill and call death event
         if (isLethal) {
-            if (source.isFlagged(DamageFlag.CANNOT_KILL) || new HariantDeathEvent(this, damageInstance).callEvent()) {
+            if (new HariantDeathEvent(this, damageInstance).callEvent()) {
                 return DamageResult.IMMUNE;
             }
             
@@ -416,6 +411,13 @@ public class HariantEntity
         source.startCooldownIfExists(this);
         
         return DamageResult.OK;
+    }
+    
+    private void incrementTrackerDamage(@Nullable HariantEntity attacker, @NotNull DamageSource source, double damage, boolean isLethal) {
+        final @NotNull HariantEntity that = attacker != null ? attacker : this;
+        
+        this.combatTracker.incrementDamage(CombatData.Type.INCOMING, that, source.getIdentity(), damage, isLethal);
+        that.combatTracker.incrementDamage(CombatData.Type.OUTGOING, this, source.getIdentity(), damage, isLethal);
     }
     
     @NotNull
@@ -494,8 +496,12 @@ public class HariantEntity
     }
     
     public boolean heal(@NotNull HealingSource healingSource) {
-        @Nullable final HariantEntity healer = healingSource.healer();
-        double healingAmount = healingSource.amount();
+        if (this.isDead()) {
+            return false;
+        }
+        
+        @Nullable final HariantEntity healer = healingSource.getHealer();
+        double healingAmount = healingSource.getAmount();
         
         // If healer exists, and it's not self, increment the healing by MENDING
         if (healer != null && !this.isSelf(healer)) {
@@ -514,7 +520,7 @@ public class HariantEntity
         final double excessHealing = Math.max(0, healthAfterHealing - maxHealth);
         
         // Call healing event
-        if (new HariantHealEvent(this, healthBeforeHealing, healthAfterHealing, actualHealing, excessHealing).callEvent()) {
+        if (new HariantHealEvent(this, healingSource, healthBeforeHealing, healthAfterHealing, actualHealing, excessHealing).callEvent()) {
             return false;
         }
         
@@ -817,7 +823,6 @@ public class HariantEntity
         // Handle removal
         if (this.removalReason != null) {
             this.onRemove(this.removalReason);
-            this.onDestroy();
             
             // We're fine to nullate the removal reason, because `onRemove()` promises to remove the bukkit entity, and if
             // it doesn't it means that we don't care to remove it (eg: player)
@@ -949,6 +954,8 @@ public class HariantEntity
     
     @Override
     public void onCreate() {
+        // Mark as garbage entity
+        EntityGarbageCollector.add(this);
     }
     
     @OverridingMethodsMustInvokeSuper
@@ -956,6 +963,8 @@ public class HariantEntity
     public void onDestroy() {
         lastAttacker = null;
         health = 0;
+        
+        // FIXME (xanyjl @ Monday, June 29) -> This shit is being called twice, move reset to death maybe, wtf?
         
         ticker.reset();
         attributes.reset();
@@ -1043,6 +1052,11 @@ public class HariantEntity
     
     @Override
     public <T> void spawnWorldParticle(@NotNull Location location, @NotNull Particle particle, int amount, double x, double y, double z, float speed, @Nullable T data) {
+        // Don't spawn world particle if the entity is invisible
+        if (this.isInvisible()) {
+            return;
+        }
+        
         getWorld().spawnParticle(particle, location, amount, x, y, z, speed, data);
     }
     
@@ -1494,7 +1508,7 @@ public class HariantEntity
         }
     }
     
-    protected @NotNull org.bukkit.attribute.AttributeInstance getVanillaAttribute(@NotNull Attribute attribute) {
+    public @NotNull org.bukkit.attribute.AttributeInstance getVanillaAttribute(@NotNull Attribute attribute) {
         return Objects.requireNonNull(entity.getAttribute(attribute), "Unsupported attribute: %s".formatted(attribute.getKey().getKey()));
     }
     
@@ -1610,6 +1624,14 @@ public class HariantEntity
         public boolean isSprint() {
             return false;
         }
+    }
+    
+    public static @NotNull Component createHeadComponent(@NotNull String texture) {
+        return Component.object(
+                ObjectContents.playerHead()
+                              .profileProperty(PlayerHeadObjectContents.property("textures", Base64.getEncoder().encodeToString(HEAD_TEXTURE_URL.formatted(texture).getBytes())))
+                              .build()
+        ).color(Colors.WHITE);
     }
     
 }

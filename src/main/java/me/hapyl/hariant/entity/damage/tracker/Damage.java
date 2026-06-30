@@ -7,8 +7,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class Damage implements ComponentLike {
     
-    protected final DamageSourceIdentity identity;
-    protected double damage;
+    public final DamageSourceIdentity identity;
+    
+    public double damage;
+    public boolean isLethal;
+    public int totalHits;
     
     Damage(@NotNull DamageSourceIdentity identity) {
         this.identity = identity;
@@ -31,5 +34,6 @@ public class Damage implements ComponentLike {
                         .append(identity.getName())
                         .append(Component.text(" %,.0f (%s)".formatted(damage, identity.getKeyAsString())));
     }
+    
     
 }

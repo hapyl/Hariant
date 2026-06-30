@@ -60,7 +60,7 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
         final double maxHealth = player.getMaxHealth();
         
         // Heal the player
-        player.heal(HealingSource.create(maxHealth * healing.doubleValue()));
+        player.heal(HealingSource.create(maxHealth * healing.doubleValue(), TalentAlchemistPotionHealing.this));
         
         // Schedule extra healing
         return new ExtraHealingPotionInstance(player);
@@ -91,12 +91,12 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
     
     public class ExtraHealingPotionInstance extends AlchemistPotionInstance {
         
-        private final double extraHealing;
+        private final HealingSource extraHealingSource;
         
         ExtraHealingPotionInstance(@NotNull HariantPlayer player) {
             super(player, TalentAlchemistPotionHealing.this);
             
-            this.extraHealing = TalentAlchemistPotionHealing.this.extraHealing.doubleValue() * player.getMaxHealth();
+            this.extraHealingSource = HealingSource.create(extraHealing.doubleValue() * player.getMaxHealth(), Component.text("Extra Healing"));
         }
         
         @Override
@@ -105,7 +105,7 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
             
             // Heal the player
             if (this.currentTick() == 0) {
-                player.heal(HealingSource.create(extraHealing));
+                player.heal(extraHealingSource);
                 
                 player.sendTitleSubtitle(
                         Component.text("\uD83D\uDC9E", Colors.DARK_GREEN),

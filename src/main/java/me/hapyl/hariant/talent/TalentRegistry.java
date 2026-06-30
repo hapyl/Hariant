@@ -10,6 +10,8 @@ import me.hapyl.hariant.hero.inferno.*;
 import me.hapyl.hariant.hero.mage.*;
 import me.hapyl.hariant.hero.nyx.*;
 import me.hapyl.hariant.hero.pytaria.*;
+import me.hapyl.hariant.hero.shark.HeroShark;
+import me.hapyl.hariant.hero.shark.TalentApexPredator;
 import me.hapyl.hariant.hero.troll.*;
 import me.hapyl.hariant.registry.StaticRegistry;
 import me.hapyl.hariant.registry.StaticRegistryMap;
@@ -96,6 +98,11 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentQuantumShield QUANTUM_SHIELD;
     public static final TalentNaniteRush NANITE_RUSH;
     
+    /**
+     * {@link HeroShark}
+     */
+    public static final TalentApexPredator APEX_PREDATOR;
+    
     private static final StaticRegistryMap<Talent> REGISTRY;
     private static final TalentUltimate DUMMY_ULTIMATE;
     
@@ -150,6 +157,8 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         QUANTUM_DISCHARGE = REGISTRY.register("quantum_discharge", TalentQuantumDischarge::new);
         NANITE_RUSH = REGISTRY.register("nanite_rush", TalentNaniteRush::new);
         QUANTUM_SHIELD = REGISTRY.register("quantum_shield", TalentQuantumShield::new);
+        
+        APEX_PREDATOR = REGISTRY.register("apex_predator", TalentApexPredator::new);
     }
     
     @NotNull

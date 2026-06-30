@@ -1,15 +1,11 @@
 package me.hapyl.hariant.lobby;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
-import me.hapyl.eterna.module.player.PlayerLib;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.profile.PlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,20 +24,6 @@ public final class LobbyItemReady extends LobbyItemImpl {
     public void use(@NotNull Player player) {
         final PlayerProfile profile = Hariant.getPlayerProfile(player);
         final boolean ready = !profile.isReady();
-        
-        // Have to send the message before toggling the ready status because it will send messages that appear before ready notification
-        HariantLogger.PREFIX_INFO.broadcastMessage(
-                Component.empty()
-                         .append(profile.getNameFormatted())
-                         .appendSpace()
-                         .append(
-                                 ready
-                                 ? Component.text("is now ready.", Colors.SUCCESS)
-                                 : Component.text("is no longer ready.", Colors.ERROR)
-                         )
-        );
-        
-        PlayerLib.playSound(Sound.BLOCK_NOTE_BLOCK_HAT, ready ? 0.75f : 0.5f);
         
         profile.setReady(ready);
     }

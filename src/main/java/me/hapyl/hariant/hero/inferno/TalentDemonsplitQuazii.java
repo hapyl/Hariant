@@ -109,7 +109,7 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
             final double healing = numberOfEntitiesHit * healingPerEnemyHitWithBeamOfMaxHealth.doubleValue() * maxHealth;
             
             if (healing > 0) {
-                player.heal(HealingSource.create(healing));
+                player.heal(HealingSource.create(healing, this.getName()));
                 player.messageInfo(
                         Component.empty()
                                  .append(Race.DEMON.getPrefixStyled())

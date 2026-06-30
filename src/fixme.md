@@ -6,36 +6,34 @@
 
 * Implement exp
 * Add inventory
-* ~~Make the drops look better~~
-    + ~~Hoverable drops~~
-    + ~~Notification for rare drops~~
-    + ~~Split dropping and notifications.~~
-
 * Cannot see friendly invisibility
 * Add fall DMG resistance effect
 * Add fx to sakura healing
-* Implement auto-ready
 * Achievement families
 * Add recommended stats to heroes
 * Add artifact customizer to Mr. Nerd
+* Add fx to On Fire
 
-[ **Urgent** ]
-* ~~Nerf alchemist~~
-
-* Blast Knight:
-    * ~~Regen energy when teammate is hit~~
-    * ~~Increase shield blocking angle~~
-
-* Add total damage dealt/taken to game report
-* ~~Increase curse DMG~~
-* ~~Show players on game end~~
-* Inferno is a little too strong
-* Don't spawn particles if entity is invisibile
+  [ **Urgent** ]
 
 * Next Hero - Shark
 
 ---------------------------------------------------------
 
+* ~~Make the drops look better~~
+    + ~~Hoverable drops~~
+    + ~~Notification for rare drops~~
+    + ~~Split dropping and notifications.~~
+* ~~Nerf alchemist~~
+* ~~Blast Knight:~~
+    * ~~Regen energy when teammate is hit~~
+    * ~~Increase shield blocking angle~~
+* ~~Add total damage dealt/taken to game report~~
+* ~~Don't spawn particles if entity is invisibile~~
+* ~~Implement auto-ready~~
+* ~~Increase curse DMG~~
+* ~~Show players on game end~~
+* ~~Inferno is a little too strong~~
 * ~~Something wrong with toxic cloud~~
 * ~~Duplicate message is wrong~~
 * ~~Can duplicate hero if switched during countdown~~

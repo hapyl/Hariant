@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class ImmutableLocation implements Coordinates, Located, Comparable<ImmutableLocation> {
+public final class ImmutableLocation implements Coordinates, Located, Comparable<ImmutableLocation> {
     
     private static final World WORLD = Objects.requireNonNull(Bukkit.getWorlds().getFirst(), "Unloaded world!");
     

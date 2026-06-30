@@ -1,6 +1,7 @@
 package me.hapyl.hariant.handler;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import me.hapyl.eterna.module.annotate.SelfReturn;
 import me.hapyl.eterna.module.inventory.menu.PlayerMenu;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -12,7 +13,9 @@ import me.hapyl.hariant.entity.SitHandler;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.frozen.FrozenHandler;
+import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.HariantHealEvent;
 import me.hapyl.hariant.event.HariantMonitorDamageEvent;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
@@ -20,7 +23,9 @@ import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.message.EnumMessageChannel;
 import me.hapyl.hariant.profile.setting.Settings;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import org.bukkit.GameMode;
 import org.bukkit.Input;
@@ -43,6 +48,20 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Pattern;
 
 public final class PlayerHandler implements Listener {
+    
+    private static final Component PREFIX_INCOMING_DAMAGE = createPrefix(Component.text("⚔", Colors.RED));
+    private static final Component PREFIX_OUTGOING_DAMAGE = createPrefix(Component.text("⚔", Colors.GREEN));
+    
+    private static final Component PREFIX_INCOMING_HEALING = createPrefix(Component.text("❤", Colors.RED));
+    private static final Component PREFIX_OUTGOING_HEALING = createPrefix(Component.text("❤", Colors.GREEN));
+    
+    private static final Style STYLE_IMPORTANT = Style.style(Colors.WHITE);
+    
+    private static final double MINIMUM_DAMAGE = 1.0;
+    private static final double MINIMUM_HEALING = 1.0;
+    
+    public PlayerHandler() {
+    }
     
     @EventHandler(priority = EventPriority.HIGHEST)
     public void handlePlayerJoinEvent(PlayerJoinEvent ev) {
@@ -73,6 +92,7 @@ public final class PlayerHandler implements Listener {
             );
         }
         
+        // Cancelling has go after the message because it looks goofy otherwise
         Hariant.cancelCountdown(
                 Component.empty()
                          .append(Component.text("The countdown was cancelled because "))
@@ -257,24 +277,6 @@ public final class PlayerHandler implements Listener {
     }
     
     @EventHandler
-    public void handleHariantMonitorDamageEvent(HariantMonitorDamageEvent ev) {
-        final DamageInstance damageInstance = ev.getDamageInstance();
-        final DamageSource damageSource = damageInstance.getSource();
-        
-        final HariantEntity entity = ev.getEntity();
-        final HariantEntity source = damageSource.getSource();
-        
-        final double damage = damageInstance.getDamage();
-        
-        if (entity instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
-            sendCombatFeedback(player, damage, damageInstance, damageSource, source, entity, false);
-        }
-        else if (source instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
-            sendCombatFeedback(player, damage, damageInstance, damageSource, source, entity, true);
-        }
-    }
-    
-    @EventHandler
     public void handleEntityDismountEvent(EntityDismountEvent ev) {
         if (!(ev.getEntity() instanceof Player player)) {
             return;
@@ -293,81 +295,150 @@ public final class PlayerHandler implements Listener {
         }
     }
     
-    private void sendCombatFeedback(
-            @NotNull HariantPlayer player,
-            double damage,
-            @NotNull DamageInstance damageInstance,
-            @NotNull DamageSource damageSource,
-            @Nullable HariantEntity source,
-            @NotNull HariantEntity entity,
-            boolean outgoing
-    ) {
-        class Holder {
-            private static final Component PREFIX_INCOMING_DAMAGE = Component.empty()
-                                                                             .append(Component.text("[", Colors.DARK_GRAY))
-                                                                             .append(Component.text("⚔", Colors.RED))
-                                                                             .append(Component.text("]", Colors.DARK_GRAY));
-            
-            private static final Component PREFIX_OUTGOING_DAMAGE = Component.empty()
-                                                                             .append(Component.text("[", Colors.DARK_GRAY))
-                                                                             .append(Component.text("⚔", Colors.GREEN))
-                                                                             .append(Component.text("]", Colors.DARK_GRAY));
-            
-            private static final Style STYLE_IMPORTANT = Style.style(Colors.WHITE);
+    @EventHandler
+    public void handleHariantMonitorDamageEvent(HariantMonitorDamageEvent ev) {
+        final DamageInstance damageInstance = ev.getDamageInstance();
+        final DamageSource damageSource = damageInstance.getSource();
+        
+        final HariantEntity entity = ev.getEntity();
+        final HariantEntity source = damageSource.getSource();
+        
+        final double damage = damageInstance.getDamage();
+        
+        if (damage <= MINIMUM_DAMAGE) {
+            return;
         }
         
-        final Component prefix = outgoing ? Holder.PREFIX_OUTGOING_DAMAGE : Holder.PREFIX_INCOMING_DAMAGE;
+        if (entity instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
+            sendCombatFeedback(player, damage, damageInstance, damageSource, source, entity, false);
+        }
+        else if (source instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
+            sendCombatFeedback(player, damage, damageInstance, damageSource, source, entity, true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void handleHariantHealEvent(HariantHealEvent ev) {
+        final HariantEntity entity = ev.getEntity();
         
-        final TextComponent.Builder builder = Component.text()
-                                                       .append(prefix)
-                                                       .appendSpace()
-                                                       .append(Component.text("%,.0f".formatted(damage), Holder.STYLE_IMPORTANT))
-                                                       .appendSpace();
+        final HealingSource healingSource = ev.getHealingSource();
+        final HariantEntity healer = healingSource.getHealer();
+        
+        final double actualHealing = ev.getActualHealing();
+        
+        if (actualHealing <= MINIMUM_HEALING) {
+            return;
+        }
+        
+        // Outgoing healing
+        if (healer instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
+            this.sendHealingFeedback(player, healingSource, entity, healer, actualHealing, true);
+        }
+        else if (entity instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
+            this.sendHealingFeedback(player, healingSource, entity, healer, actualHealing, false);
+        }
+    }
+    
+    private void sendCombatFeedback(@NotNull HariantPlayer player, double damage, @NotNull DamageInstance damageInstance, @NotNull DamageSource damageSource, @Nullable HariantEntity source, @NotNull HariantEntity entity, boolean outgoing) {
+        final FeedbackBuilder builder = new FeedbackBuilder(outgoing ? PREFIX_OUTGOING_DAMAGE : PREFIX_INCOMING_DAMAGE);
+        builder.append(Component.text("%,.0f".formatted(damage), STYLE_IMPORTANT));
         
         if (outgoing) {
-            builder.append(Component.text("using", Colors.GRAY))
-                   .appendSpace()
-                   .append(damageSource.getIdentity().getName().style(Holder.STYLE_IMPORTANT))
-                   .appendSpace()
-                   .append(Component.text("to", Colors.GRAY))
-                   .appendSpace()
-                   .append(entity.getName().style(Holder.STYLE_IMPORTANT))
-                   .appendSpace();
+            builder.append(Component.text("using", Colors.GRAY));
+            builder.append(damageSource.getIdentity().getName().style(STYLE_IMPORTANT));
+            builder.append(Component.text("to", Colors.GRAY));
+            builder.append(entity.getName().style(STYLE_IMPORTANT));
         }
         else {
-            builder.append(Component.text("from", Colors.GRAY))
-                   .appendSpace()
-                   .append(damageSource.getIdentity().getName().style(Holder.STYLE_IMPORTANT))
-                   .appendSpace();
+            builder.append(Component.text("from", Colors.GRAY));
+            builder.append(damageSource.getIdentity().getName().style(STYLE_IMPORTANT));
             
             if (source != null) {
-                builder.append(Component.text("by", Colors.GRAY))
-                       .appendSpace()
-                       .append(source.getName().style(Holder.STYLE_IMPORTANT))
-                       .appendSpace();
+                builder.append(Component.text("by", Colors.GRAY));
+                builder.append(source.getName().style(STYLE_IMPORTANT));
             }
         }
         
         if (damageInstance.isCritical()) {
-            builder.append(HariantConstants.CHARACTER_CRITICAL_DAMAGE.style(Holder.STYLE_IMPORTANT)).appendSpace();
+            builder.append(HariantConstants.CHARACTER_CRITICAL_DAMAGE.style(STYLE_IMPORTANT));
         }
         
         if (damageInstance.isShielded()) {
-            builder.append(HariantConstants.CHARACTER_SHIELDED_DAMAGE.color(Colors.YELLOW)).appendSpace();
+            builder.append(HariantConstants.CHARACTER_SHIELDED_DAMAGE.color(Colors.YELLOW));
         }
         
         if (damageInstance.isLethal()) {
-            builder.append(HariantConstants.CHARACTER_LETHAL_DAMAGE).color(Colors.RED);
+            builder.append(HariantConstants.CHARACTER_LETHAL_DAMAGE.color(Colors.RED));
         }
         
         // Also set the hover
         builder.hoverEvent(damageInstance.getDamageReport().createHoverEvent());
         
-        player.sendMessage(builder.build());
+        player.sendMessage(builder.asComponent());
+    }
+    
+    private void sendHealingFeedback(@NotNull HariantPlayer player, @NotNull HealingSource healingSource, @NotNull HariantEntity entity, @Nullable HariantEntity healer, double actualHealing, boolean outgoing) {
+        final FeedbackBuilder builder = new FeedbackBuilder(outgoing ? PREFIX_OUTGOING_HEALING : PREFIX_INCOMING_HEALING);
+        
+        builder.append(Component.text("+%,.0f".formatted(actualHealing), Colors.GREEN));
+        
+        if (outgoing) {
+            builder.append(Component.text("using", Colors.GRAY));
+            builder.append(healingSource.getName().style(STYLE_IMPORTANT));
+            builder.append(Component.text("to", Colors.GRAY));
+            builder.append(entity.getName().style(STYLE_IMPORTANT));
+        }
+        else {
+            builder.append(Component.text("from", Colors.GRAY));
+            builder.append(healingSource.getName().style(STYLE_IMPORTANT));
+            
+            if (healer != null) {
+                builder.append(Component.text("by", Colors.GRAY));
+                builder.append(healer.getName().style(STYLE_IMPORTANT));
+            }
+        }
+        
+        player.sendMessage(builder.asComponent());
+    }
+    
+    public static @NotNull Component createPrefix(@NotNull Component component) {
+        return Component.empty()
+                        .append(Component.text("[", Colors.DARK_GRAY))
+                        .append(component)
+                        .append(Component.text("]", Colors.DARK_GRAY));
     }
     
     private static boolean isInputDirectional(@NotNull Input input) {
         return input.isForward() || input.isBackward() || input.isLeft() || input.isRight();
+    }
+    
+    private static class FeedbackBuilder implements ComponentLike {
+        
+        private final TextComponent.Builder builder;
+        
+        private FeedbackBuilder(@NotNull Component prefix) {
+            this.builder = Component.text();
+            this.append(prefix);
+        }
+        
+        @SelfReturn
+        public FeedbackBuilder append(@NotNull Component component) {
+            builder.append(component);
+            builder.appendSpace();
+            return this;
+        }
+        
+        @SelfReturn
+        public FeedbackBuilder hoverEvent(@NotNull HoverEvent<?> hoverEvent) {
+            builder.hoverEvent(hoverEvent);
+            return this;
+        }
+        
+        @Override
+        public @NotNull Component asComponent() {
+            return builder.build();
+        }
+        
     }
     
 }

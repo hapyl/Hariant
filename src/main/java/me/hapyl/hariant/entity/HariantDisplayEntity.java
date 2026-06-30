@@ -29,9 +29,6 @@ public class HariantDisplayEntity extends HariantEntity {
         
         this.setSize(size);
         this.displayEntity = displayModel.spawn(location);
-        
-        // Mark all display entities as garbage entities
-        EntityGarbageCollector.add(this);
     }
     
     public void setSize(double size) {

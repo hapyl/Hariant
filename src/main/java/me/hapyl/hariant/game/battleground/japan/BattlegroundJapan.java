@@ -92,7 +92,7 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
         };
         
         private final Color outlineColor = Color.fromBGR(237, 57, 204);
-        private final HealingSource healingSource = HealingSource.create(1);
+        private final HealingSource healingSource = HealingSource.create(1, this);
         
         BattlegroundFeatureJapanSakura() {
             super(

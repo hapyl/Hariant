@@ -50,4 +50,5 @@ public final class DamageSourceIdentityImpl implements DamageSourceIdentity {
         final DamageSourceIdentityImpl that = (DamageSourceIdentityImpl) object;
         return Objects.equals(this.key, that.key);
     }
+    
 }

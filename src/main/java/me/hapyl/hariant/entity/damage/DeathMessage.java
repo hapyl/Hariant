@@ -31,7 +31,6 @@ public interface DeathMessage {
     
     @NotNull
     static DeathMessage createWithDefaultKiller(@NotNull String base) throws IllegalArgumentException {
-        
         if (base.contains(DeathMessageImpl.PLACEHOLDER_KILLER)) {
             throw new IllegalArgumentException("Death message must not already contain %s!".formatted(DeathMessageImpl.PLACEHOLDER_KILLER));
         }
