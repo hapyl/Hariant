@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class TalentKemuridama extends Talent {
     private static final long SMOKE_DURATION_TICKS = 60L;
-    private static final long TICK_INTERVAL = 2L;
     private static final double SMOKE_RADIUS = 4.0;
 
     public TalentKemuridama(@NotNull Key key) {
