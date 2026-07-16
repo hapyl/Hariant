@@ -5,13 +5,14 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ArtifactSetElectrifying extends ArtifactSet implements Listener {
     
-    private final Decimal electricDamageBonus = Decimal.ofAttribute(AttributeType.ELECTRIC_DAMAGE_BONUS, 20);
+    private final ArtifactSetModifier electricDamageBonus = CommonArtifactSetModifiers.ELECTRIC_DAMAGE_BONUS;
     private final Decimal energyRegeneration = Decimal.ofValue(8);
     
     private final Cooldown energyRegenerationCooldown = Cooldown.ofSeconds(Key.ofString("electrifying"), 6f);
@@ -32,15 +33,7 @@ public final class ArtifactSetElectrifying extends ArtifactSet implements Listen
         
         setArtifactTags(AttributeType.ELECTRIC_DAMAGE_BONUS);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(ElementType.ELECTRIC.asComponentDamage())
-                         .append(Component.text(" dealt by "))
-                         .append(electricDamageBonus)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, electricDamageBonus);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -107,9 +100,7 @@ public final class ArtifactSetElectrifying extends ArtifactSet implements Listen
     
     private class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetElectrifying.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            entries.add(entry(AttributeType.ELECTRIC_DAMAGE_BONUS, AttributeModifierType.FLAT, electricDamageBonus.doubleValue()));
+            super(ArtifactSetElectrifying.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, electricDamageBonus);
         }
         
     }

@@ -34,6 +34,7 @@ public class MenuTeamSelection extends Menu {
             
             final ItemBuilder builder = team.createBuilder();
             
+            builder.setAmount(Math.max(1, team.getPlayerCount()));
             builder.addLore();
             
             if (playerTeam == team) {

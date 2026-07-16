@@ -4,10 +4,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.talent.Response;
-import me.hapyl.hariant.talent.Talent;
-import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.TalentRegistry;
+import me.hapyl.hariant.talent.*;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
@@ -30,12 +27,13 @@ public class TalentWiltBlink extends Talent {
     public TalentWiltBlink(@NotNull Key key) {
         super(key, Component.text("Wilted Blink"), Icon.ofMaterial(Material.CLOSED_EYEBLOSSOM));
         
+        setTalentType(TalentType.MOVEMENT);
         setCooldownSeconds(8);
         
         setDescription(
                 Component.empty()
                          .append(Component.text("Leave a "))
-                         .append(Component.text("Wilter Rose", Colors.ARCHETYPE_HEXBANE))
+                         .append(Component.text("Wilted Rose", Colors.ARCHETYPE_HEXBANE))
                          .append(Component.text(" rose at your current location and "))
                          .append(Component.text("blink", Colors.LIGHT_PURPLE))
                          .append(Component.text(" forward."))

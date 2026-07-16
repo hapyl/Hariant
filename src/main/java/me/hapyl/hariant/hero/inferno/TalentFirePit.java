@@ -10,7 +10,9 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.DamageSource;
+import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageType;
+import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.player.DelegateType;
@@ -71,6 +73,11 @@ public final class TalentFirePit extends Talent {
     
     private final int transformationDelayPerStage = transformationDelay.intValue() / totalStages.intValue();
     private final Key damageCooldownKey = Key.ofString("fire_pit_damage");
+    
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.createWithDefaultKiller("{player} was hellburnt to death")
+    );
     
     public TalentFirePit(@NotNull Key key) {
         super(key, Component.text("Fire Pit"), Icon.ofMaterial(Material.FIRE_CHARGE));
@@ -141,12 +148,12 @@ public final class TalentFirePit extends Talent {
             this.origin = origin;
             this.boundingBox = LocationHelper.toBoundingBox(origin, 1.5, 1, 1.5);
             this.firePits = Maps.newHashMap();
-            this.damageSource = DamageSource.builder(TalentFirePit.this, damage.getScaledValue(player))
+            this.damageSource = DamageSource.builder(damageSourceIdentity, damage.getScaledValue(player))
                                             .source(player)
                                             .units(elementalApplication.doubleValue())
                                             .elementType(ElementType.FIRE)
                                             .damageType(DamageType.TALENT)
-                                            .components(DamageComponent.common())
+                                            .components(DamageComponent.ofCommon())
                                             .cooldown(damageCooldownKey, damagePeriod.intValue())
                                             .build();
             

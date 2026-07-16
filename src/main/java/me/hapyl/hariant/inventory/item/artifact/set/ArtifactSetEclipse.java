@@ -12,6 +12,8 @@ import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantShieldCreateEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.ui.ComponentDisplayAnimation;
@@ -24,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ArtifactSetEclipse extends ArtifactSet implements Listener {
     
-    private final Decimal aetherDamageBonus = Decimal.ofAttribute(AttributeType.AETHER_DAMAGE_BONUS, 20);
+    private final ArtifactSetModifier twoPieceBonus = CommonArtifactSetModifiers.MAX_HEALTH;
     
     private final Decimal fourPieceDamageIncrease = Decimal.ofAttribute(AttributeType.AETHER_DAMAGE_BONUS, 10);
     private final Decimal fourPieceDamageIncreaseDuration = Decimal.ofSeconds(6);
@@ -36,15 +38,7 @@ public final class ArtifactSetEclipse extends ArtifactSet implements Listener {
         
         setArtifactTags(AttributeType.AETHER_DAMAGE_BONUS);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(ElementType.AETHER.asComponentDamage())
-                         .append(Component.text(" dealt by "))
-                         .append(aetherDamageBonus)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, twoPieceBonus);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -99,9 +93,7 @@ public final class ArtifactSetEclipse extends ArtifactSet implements Listener {
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetEclipse.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.AETHER_DAMAGE_BONUS, AttributeModifierType.FLAT, aetherDamageBonus);
+            super(ArtifactSetEclipse.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, twoPieceBonus);
         }
         
     }

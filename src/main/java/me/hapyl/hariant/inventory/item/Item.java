@@ -16,11 +16,6 @@ public class Item extends AbstractItem implements Instantiable, Registrable {
         super(key, name, icon);
     }
     
-    @Override
-    public final int maxStackSize() {
-        return 1;
-    }
-    
     @NotNull
     @Override
     public ItemInstance newInstance(@NotNull PlayerDatabase database, @NotNull UUID uuid) {

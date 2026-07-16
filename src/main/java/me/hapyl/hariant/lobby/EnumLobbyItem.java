@@ -2,9 +2,7 @@ package me.hapyl.hariant.lobby;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,10 +12,6 @@ public enum EnumLobbyItem implements LobbyItem {
     GAME_MANAGEMENT(new LobbyItemGameManagement()),
     PLAYER_PROFILE(new LobbyItemPlayerProfile()),
     READY(new LobbyItemReady());
-    
-    private static final ItemStack ITEM_STARTING_GAME = new ItemBuilder(Material.YELLOW_DYE)
-            .setName(Component.text("Game Starting..."))
-            .asIcon();
     
     private final LobbyItem lobbyItem;
     
@@ -64,15 +58,6 @@ public enum EnumLobbyItem implements LobbyItem {
         
         for (EnumLobbyItem lobbyItem : EnumLobbyItem.values()) {
             lobbyItem.give(player);
-        }
-    }
-    
-    public static void giveReadyItem(@NotNull Player player, boolean actualItem) {
-        if (actualItem) {
-            READY.give(player);
-        }
-        else {
-            player.getInventory().setItem(READY.getSlot(), ITEM_STARTING_GAME);
         }
     }
     

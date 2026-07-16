@@ -1,7 +1,7 @@
 package me.hapyl.hariant.profile;
 
+import io.papermc.paper.registry.keys.SoundEventKeys;
 import me.hapyl.eterna.module.component.Components;
-import me.hapyl.eterna.module.player.PlayerLib;
 import me.hapyl.eterna.module.player.dialog.Dialog;
 import me.hapyl.eterna.module.player.dialog.DialogEndType;
 import me.hapyl.eterna.module.player.dialog.DialogInstance;
@@ -36,14 +36,15 @@ import me.hapyl.hariant.team.TeamEntryProvider;
 import me.hapyl.hariant.util.UniquelyIdentified;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.object.ObjectContents;
 import org.bukkit.GameMode;
-import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,6 +79,7 @@ public final class PlayerProfile
     
     private boolean spectator;
     private boolean ready;
+    private @Nullable ScheduleAutoReady scheduleAutoReady;
     
     public PlayerProfile(@NotNull Player player) {
         this.player = player;
@@ -159,11 +161,6 @@ public final class PlayerProfile
         return database.heroDirectory.getSelectedHero();
     }
     
-    @NotNull
-    public HeroInstance getSelectedHeroInstance() {
-        return database.heroDirectory.getSelectedHeroInstance();
-    }
-    
     public void setSelectedHero(@NotNull HeroInstance heroInstance) {
         final Hero hero = heroInstance.getOrigin();
         
@@ -175,13 +172,27 @@ public final class PlayerProfile
         database.heroDirectory.setSelectedHero(heroInstance);
         HariantLogger.success(player, Component.empty().append(Component.text("Selected ")).append(hero).append(Component.text("!")));
         
-        // Cancel countdown if it was active
-        Hariant.cancelCountdown(
-                Component.empty()
-                         .append(Component.text("The countdown was cancelled because "))
-                         .append(this.getNameFormatted())
-                         .append(Component.text(" changed their hero!"))
-        );
+        // If player was ready, cancel the countdown and unready
+        if (this.isReady()) {
+            this.setReady0(false, false);
+            
+            if (Hariant.isCountdownActive()) {
+                Hariant.cancelCountdown(
+                        Component.empty()
+                                 .append(Component.text("The countdown was cancelled because "))
+                                 .append(this.getNameFormatted())
+                                 .append(Component.text(" switched their hero!"))
+                );
+            }
+            else {
+                HariantLogger.error(this, Component.text("You are no longer ready because you switched heroes!"));
+            }
+        }
+    }
+    
+    @NotNull
+    public HeroInstance getSelectedHeroInstance() {
+        return database.heroDirectory.getSelectedHeroInstance();
     }
     
     @Override
@@ -208,7 +219,7 @@ public final class PlayerProfile
         }
         
         // Schedule auto-ready
-        AutoReady.scheduleAutoReady(this, AutoReady.ALWAYS_EXCEPT_ON_JOIN, AUTO_READY_DELAY_ON_JOIN);
+        this.scheduleAutoReady(new ScheduleAutoReady(this, AutoReady.ALWAYS_EXCEPT_ON_JOIN, AUTO_READY_DELAY_ON_JOIN));
     }
     
     @Override
@@ -220,6 +231,11 @@ public final class PlayerProfile
         
         // Leave team
         this.getTeam().removeEntry(this);
+        
+        // Cancel auto ready
+        if (this.scheduleAutoReady != null) {
+            this.scheduleAutoReady.cancel();
+        }
     }
     
     public boolean isSpectator() {
@@ -360,7 +376,7 @@ public final class PlayerProfile
         dropSummary.showSummary(this);
         
         // Schedule auto ready
-        AutoReady.scheduleAutoReady(this, null, AUTO_READY_DELAY);
+        this.scheduleAutoReady(new ScheduleAutoReady(this, null, AUTO_READY_DELAY));
     }
     
     public void teleportToSpawnAndGiveLobbyItems() {
@@ -394,7 +410,7 @@ public final class PlayerProfile
             if (pingsAllowed) {
                 message = message.replaceText(replacer -> replacer.matchLiteral(pingPlayerName).replacement(Component.text(pingPlayerName, PING_STYLE)));
                 
-                PlayerLib.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f);
+                this.playSound(Sound.sound(SoundEventKeys.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.UI, 3, 1.0f));
             }
         }
         
@@ -412,6 +428,66 @@ public final class PlayerProfile
     @Override
     public <I> void setSetting(@NotNull Setting<I> setting, @NotNull I value) {
         database.settings.setValue(setting, value);
+    }
+    
+    private void scheduleAutoReady(@NotNull ScheduleAutoReady scheduleAutoReady) {
+        // Ignore auto-ready if player is in creative mode
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            return;
+        }
+        
+        // Cancel existing auto-ready, if it somehow exists
+        if (this.scheduleAutoReady != null) {
+            this.scheduleAutoReady.cancel();
+        }
+        
+        this.scheduleAutoReady = scheduleAutoReady;
+    }
+    
+    public static class ScheduleAutoReady extends BukkitRunnable {
+        
+        private final PlayerProfile playerProfile;
+        private final AutoReady exception;
+        
+        ScheduleAutoReady(@NotNull PlayerProfile playerProfile, @Nullable AutoReady exception, int delay) {
+            this.playerProfile = playerProfile;
+            this.exception = exception;
+            
+            this.runTaskLater(Hariant.getPlugin(), delay);
+        }
+        
+        @Override
+        public void run() {
+            // If there is currently a countdown, return
+            if (Hariant.isCountdownActive()) {
+                return;
+            }
+            
+            // If we can't start the game instance, return
+            if (!Hariant.canStartNewGameInstance().booleanValue()) {
+                return;
+            }
+            
+            // Otherwise check for AutoReady and toggle ready after the given delay
+            final AutoReady currentAutoReady = playerProfile.getDatabase().settings.getValue(Settings.AUTO_READY);
+            
+            // If auto ready is set to NEVER or to the exception, return
+            if (currentAutoReady == AutoReady.NEVER || currentAutoReady == exception) {
+                return;
+            }
+            
+            // If player is already ready, return
+            if (playerProfile.isReady()) {
+                return;
+            }
+            
+            // Otherwise toggle ready
+            playerProfile.setReady(true);
+            
+            // Notify about auto read
+            playerProfile.sendActionBar(Component.text("Automatically readied for you!", Colors.GREEN));
+            playerProfile.playSound(Sound.sound(SoundEventKeys.BLOCK_NOTE_BLOCK_PLING, Sound.Source.UI, 3, 2.0f));
+        }
     }
     
 }

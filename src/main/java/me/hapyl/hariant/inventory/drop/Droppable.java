@@ -43,6 +43,10 @@ public interface Droppable extends Keyed, Named {
         return ofResource(ResourceRegistry.CAT_COINS, HariantConstants.GUARANTEED_DROP_CHANCE, Amount.range(100, 200));
     }
     
+    static @NotNull Droppable ofArtifactArtificer() {
+        return ofResource(ResourceRegistry.ARTIFACT_ARTIFICER, 10, Amount.range(1, 2));
+    }
+    
     static @NotNull Droppable ofHeroRecruitVoucher() {
         return ofResource(ResourceRegistry.HERO_RECRUIT_VOUCHER, 1, Amount.fixed(1));
     }

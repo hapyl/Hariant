@@ -9,6 +9,8 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.modifier.AttributeModifier;
+import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.WarningType;
@@ -22,6 +24,7 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
+import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
@@ -38,18 +41,19 @@ import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
-public class TalentSoulFog extends Talent {
+public final class TalentSoulFog extends Talent {
     
-    @DisplayField private final Decimal soulFragmentCost = Decimal.ofValue(5);
+    private final @DisplayField Decimal soulFogDelay = Decimal.ofSeconds(0.1f);
+    private final @DisplayField Decimal soulFogRadius = Decimal.ofValue(2.5);
+    private final @DisplayField Decimal soulFogAetherAnomalyApplication = Decimal.ofElementalApplication(ElementType.AETHER, 15);
     
-    @DisplayField private final Decimal soulFogDelay = Decimal.ofSeconds(0.3f);
-    @DisplayField private final Decimal soulFogRadius = Decimal.ofValue(2.5);
-    @DisplayField private final Decimal soulFogAetherAnomalyApplication = Decimal.ofElementalApplication(ElementType.AETHER, 25);
+    private final @DisplayField Decimal soulFogExplosionRadius = Decimal.ofValue(3);
+    private final @DisplayField Decimal soulFogExplosionAetherAnomalyApplication = Decimal.ofElementalApplication(ElementType.AETHER, 200);
+    private final @DisplayField Decimal soulFogExplosionSoulGenerationPerEnemyHit = Decimal.ofValue(2);
     
-    @DisplayField private final Decimal soulFogExplosionRadius = Decimal.ofValue(3);
-    @DisplayField private final Decimal soulFogExplosionAetherAnomalyApplication = Decimal.ofElementalApplication(ElementType.AETHER, 200);
+    private final @DisplayField Decimal speedDecrease = Decimal.ofPercentage(30);
     
-    @DisplayField private final AttributeScaling soulFogExplosionDamage = AttributeScaling.create(AttributeType.ATTACK, 241);
+    private final @DisplayField AttributeScaling soulFogExplosionDamage = AttributeScaling.create(AttributeType.ATTACK, 144);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             this,
@@ -63,30 +67,33 @@ public class TalentSoulFog extends Talent {
     public TalentSoulFog(@NotNull Key key) {
         super(key, Component.text("Soul Fog"), Icon.ofMaterial(Material.HEART_OF_THE_SEA));
         
+        setTalentType(TalentType.IMPAIR);
+        
         setDurationSeconds(2f);
         setCooldownSeconds(12f);
         
         setDescription(
                 Component.empty()
-                         .append(Component.text("Expend "))
-                         .append(soulFragmentCost)
-                         .appendSpace()
-                         .append(Definition.SOUL_FRAGMENT)
-                         .append(Component.text("s", Colors.SOUL))
-                         .append(Component.text(" to create a "))
+                         .append(Component.text("Create a "))
                          .append(Component.text("Fog of Souls", Colors.GRAY, TextDecoration.UNDERLINED))
-                         .append(Component.text(" in front of you that constantly applies "))
+                         .append(Component.text(" in front of you that slows "))
+                         .append(Component.text("enemies", Colors.RED))
+                         .append(Component.text(" and constantly applies "))
                          .append(ElementType.AETHER)
                          .append(Component.text(" anomaly."))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After "))
                          .append(this.getDurationFormatted())
-                         .append(Component.text(", the fog explodes violently, dealing massive "))
-                         .append(ElementType.AETHER.asComponentDamage())
-                         .append(Component.text(" and applying high amount of "))
+                         .append(Component.text(", the fog explodes violently, dealing "))
+                         .append(ElementType.AETHER.asComponentAreaOfEffectDamage())
+                         .append(Component.text(", applies high amount of "))
                          .append(ElementType.AETHER)
-                         .append(Component.text(" anomaly."))
+                         .append(Component.text(" anomaly and generates "))
+                         .append(soulFogExplosionSoulGenerationPerEnemyHit)
+                         .appendSpace()
+                         .append(Definition.SOUL_FRAGMENT)
+                         .append(Component.text(" per enemy hit."))
         );
     }
     
@@ -98,22 +105,14 @@ public class TalentSoulFog extends Talent {
     
     @Override
     public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        final HeroDataMage heroData = player.getHeroData(HeroRegistry.MAGE, HeroDataMage::new);
-        
-        final int souls = heroData.getSouls();
-        final int soulsRequirement = soulFragmentCost.intValue();
-        
-        if (souls < soulsRequirement) {
-            return Response.error("Not enough souls! (%s/%s)".formatted(souls, soulsRequirement));
-        }
-        
-        heroData.decrementSouls(soulsRequirement);
-        
         final Location location = LocationHelper.anchor(player.getLocationInFront(2));
         location.setYaw(0);
         location.setPitch(0);
         
         new SoulFog(player, location);
+        
+        // Fx
+        player.spawnWorldParticle(location, Particle.SCULK_SOUL, 20, 1, 0.2, 1, 0.1f);
         
         return Response.ok();
     }
@@ -153,6 +152,8 @@ public class TalentSoulFog extends Talent {
             player.collectNearbyEntities(location, soulFogRadius)
                   .filter(player::canAffect)
                   .forEach(entity -> {
+                      entity.getAttributes().addModifier(new SoulFogModifier(player));
+                      
                       entity.applyElement(ElementSource.create(ElementType.AETHER, player, soulFogAetherAnomalyApplication.doubleValue()));
                       entity.showWarning(WarningType.DANGER, 5);
                   });
@@ -163,7 +164,7 @@ public class TalentSoulFog extends Talent {
             player.spawnWorldParticle(location, Particle.GLOW, 10, radius, radius * 0.5, radius, 0.25f);
             
             int count = 0;
-            final double spread = Math.PI  / Math.max(1, displayEntity.size());
+            final double spread = Math.PI / Math.max(1, displayEntity.size());
             
             for (DisplayPart display : displayEntity) {
                 if (!display.isTagged("animate")) {
@@ -182,16 +183,19 @@ public class TalentSoulFog extends Talent {
                                                           .source(player)
                                                           .damageType(DamageType.TALENT)
                                                           .elementType(ElementType.AETHER)
-                                                          .components(DamageComponent.common())
+                                                          .components(DamageComponent.ofCommon())
                                                           .build();
             
-            final ElementSource elementSource = ElementSource.create(ElementType.AETHER, player, soulFogAetherAnomalyApplication.doubleValue());
+            final ElementSource elementSource = ElementSource.create(ElementType.AETHER, player, soulFogExplosionAetherAnomalyApplication.doubleValue());
             
             player.collectNearbyEntities(location, soulFogExplosionRadius)
                   .filter(player::canAffect)
                   .forEach(entity -> {
                       entity.damage(damageSource);
                       entity.applyElement(elementSource);
+                      
+                      // Increment souls
+                      player.getHeroData(HeroRegistry.MAGE, HeroDataMage::new).incrementSouls(soulFogExplosionSoulGenerationPerEnemyHit.intValue());
                   });
             
             // Fx
@@ -200,4 +204,15 @@ public class TalentSoulFog extends Talent {
         }
     }
     
+    private class SoulFogModifier extends AttributeModifier {
+        SoulFogModifier(@NotNull HariantPlayer player) {
+            super(TalentSoulFog.this, player, 5);
+            
+            of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.ADDITIVE, -speedDecrease.doubleValue());
+        }
+        
+        @Override
+        public void display(@NotNull Location location) {
+        }
+    }
 }

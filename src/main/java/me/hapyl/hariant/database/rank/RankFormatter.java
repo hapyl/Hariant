@@ -21,6 +21,12 @@ public interface RankFormatter extends Prefixed {
     @NotNull
     Style getMessageStyle();
     
+    @Override
+    default @NotNull Component getPrefixStyled() {
+        // For ranks, prefixes are already styled
+        return this.getPrefix();
+    }
+    
     default boolean displayJoinMessages() {
         return true;
     }

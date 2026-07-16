@@ -67,7 +67,7 @@ public final class TalentReverberation extends TalentPassive implements Listener
                          .append(Component.text(" impairs an "))
                          .append(Component.text("enemy", Colors.ERROR))
                          .append(Component.text(", Nyx will summon a "))
-                         .append(Component.text("Wilter Rose", Colors.ARCHETYPE_HEXBANE))
+                         .append(Component.text("Wilted Rose", Colors.ARCHETYPE_HEXBANE))
                          .append(Component.text(" at the enemy's location."))
                          .appendNewline()
                          .appendNewline()

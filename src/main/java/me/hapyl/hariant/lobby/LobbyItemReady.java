@@ -23,9 +23,8 @@ public final class LobbyItemReady extends LobbyItemImpl {
     @Override
     public void use(@NotNull Player player) {
         final PlayerProfile profile = Hariant.getPlayerProfile(player);
-        final boolean ready = !profile.isReady();
         
-        profile.setReady(ready);
+        profile.setReady(!profile.isReady());
     }
     
     @Override

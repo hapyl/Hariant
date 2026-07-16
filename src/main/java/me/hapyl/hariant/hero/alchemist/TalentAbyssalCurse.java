@@ -12,6 +12,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.HariantRandom;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantAttackEvent;
@@ -58,7 +59,10 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
     private final Style curseStyle = Style.style(Colors.ABYSSAL_CURSE, TextDecoration.BOLD);
     private final Style curseStyleObfuscated = Style.style(Colors.ABYSSAL_CURSE, TextDecoration.BOLD, TextDecoration.OBFUSCATED);
     
-    private final DeathMessage deathMessage = DeathMessage.create("{player} was consumed by the Abyss [created by {killer}]");
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.create("{player} was consumed by [{killer}'s] Abyssal Curse")
+    );
     
     private final int fallingBlocksCount = 50;
     
@@ -133,7 +137,7 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         final HariantEntity entity = ev.getEntity();
         final HariantEntity attacker = ev.getAttacker();
         
-        if (!(entity instanceof HariantPlayer playerEntity) || !(attacker instanceof HariantPlayer)) {
+        if (!(entity instanceof HariantPlayer playerEntity) || !(attacker instanceof HariantPlayer) || ev.getDamageSource().getDamageType() != DamageType.MELEE) {
             return;
         }
         
@@ -297,9 +301,9 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         
         public void boom() {
             bearer.damage(
-                    DamageSource.builder(DamageSourceIdentity.create(TalentAbyssalCurse.this, deathMessage), bearer.getMaxHealth() * curseDamage.doubleValue())
+                    DamageSource.builder(damageSourceIdentity, bearer.getMaxHealth() * curseDamage.doubleValue())
                                 // If the last bearer is the one who applied the curse, source the kill to whoever last transferred the curse
-                                .source(bearer.equals(player) ? lastTransferer : player)
+                                .source(bearer.equals(player) ? lastTransferer != null ? lastTransferer : player : player)
                                 .elementType(ElementType.AETHER)
                                 .build()
             );

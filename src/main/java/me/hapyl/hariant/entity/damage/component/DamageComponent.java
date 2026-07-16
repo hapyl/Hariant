@@ -13,7 +13,7 @@ public interface DamageComponent extends Identified {
     @Override
     @NotNull String identify();
     
-    double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot snapshotEntity, @NotNull AttributesInstanceSnapshot snapshotAttacker);
+    double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot entity, @NotNull AttributesInstanceSnapshot attacker);
     
     static @NotNull DamageComponent elemental() {
         return Holder.ELEMENTAL;
@@ -27,15 +27,15 @@ public interface DamageComponent extends Identified {
         return Holder.CRITICAL;
     }
     
-    static @NotNull List<? extends DamageComponent> common() {
+    static @NotNull List<? extends DamageComponent> ofCommon() {
         return Holder.COMMON;
     }
     
-    static @NotNull List<? extends DamageComponent> trueDamage() {
+    static @NotNull List<? extends DamageComponent> ofTrueDamage() {
         return Holder.TRUE_DAMAGE;
     }
     
-    static @NotNull List<? extends DamageComponent> environmentDamage() {
+    static @NotNull List<? extends DamageComponent> ofEnvironmentDamage() {
         return Holder.ENVIRONMENT_DAMAGE;
     }
     

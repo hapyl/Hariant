@@ -10,8 +10,7 @@ import me.hapyl.hariant.hero.inferno.*;
 import me.hapyl.hariant.hero.mage.*;
 import me.hapyl.hariant.hero.nyx.*;
 import me.hapyl.hariant.hero.pytaria.*;
-import me.hapyl.hariant.hero.shark.HeroShark;
-import me.hapyl.hariant.hero.shark.TalentApexPredator;
+import me.hapyl.hariant.hero.shark.*;
 import me.hapyl.hariant.hero.troll.*;
 import me.hapyl.hariant.registry.StaticRegistry;
 import me.hapyl.hariant.registry.StaticRegistryMap;
@@ -101,7 +100,11 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     /**
      * {@link HeroShark}
      */
+    public static final TalentSharkBite SHARK_BITE;
+    public static final TalentSubmerge SUBMERGE;
+    public static final TalentBubbleTrap BUBBLE_TRAP;
     public static final TalentApexPredator APEX_PREDATOR;
+    public static final TalentSharknado SHARKNADO;
     
     private static final StaticRegistryMap<Talent> REGISTRY;
     private static final TalentUltimate DUMMY_ULTIMATE;
@@ -158,7 +161,11 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         NANITE_RUSH = REGISTRY.register("nanite_rush", TalentNaniteRush::new);
         QUANTUM_SHIELD = REGISTRY.register("quantum_shield", TalentQuantumShield::new);
         
+        SHARK_BITE = REGISTRY.register("shark_bite", TalentSharkBite::new);
+        SUBMERGE = REGISTRY.register("submerge", TalentSubmerge::new);
+        BUBBLE_TRAP = REGISTRY.register("bubble_trap", TalentBubbleTrap::new);
         APEX_PREDATOR = REGISTRY.register("apex_predator", TalentApexPredator::new);
+        SHARKNADO = REGISTRY.register("sharknado", TalentSharknado::new);
     }
     
     @NotNull

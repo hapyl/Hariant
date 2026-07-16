@@ -11,6 +11,8 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
@@ -43,6 +45,11 @@ public final class TalentChainLightning extends Talent implements Listener {
     
     @DisplayField private final Decimal maxChainReaction = Decimal.ofValue(2);
     @DisplayField private final Decimal maxChainReactionDistance = Decimal.ofValue(6);
+    
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.create("{player} was shocked to death [by {killer}]")
+    );
     
     public TalentChainLightning(@NotNull Key key) {
         super(key, Component.text("Chain Lightning"), Icon.ofMaterial(Material.TIPPED_ARROW, builder -> builder.setPotionColor(ARROW_COLOR)));
@@ -185,7 +192,7 @@ public final class TalentChainLightning extends Talent implements Listener {
     
     public class ChainLightningArrowDamageSource extends DamageSourceArcherTalent {
         ChainLightningArrowDamageSource(@NotNull HariantEntity attacker, double damage) {
-            super(TalentChainLightning.this, attacker, damage, elementalApplication.doubleValue());
+            super(damageSourceIdentity, attacker, damage, elementalApplication.doubleValue());
         }
     }
     

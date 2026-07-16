@@ -2,7 +2,7 @@ package me.hapyl.hariant.lobby;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.profile.menu.MenuPlayerProfile;
+import me.hapyl.hariant.menu.MenuPlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

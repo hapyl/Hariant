@@ -14,14 +14,16 @@ public class Resource extends AbstractItem implements Drop {
         super(key, name, icon);
     }
     
-    @Override
     public int maxStackSize() {
-        return 1_000;
+        return 9999;
     }
     
-    @NotNull
-    public Component format(@NotNull PlayerDatabase database) {
-        return Component.text("%,d".formatted(database.inventory.getResource(this)));
+    public final @NotNull Component format(@NotNull PlayerDatabase database) {
+        return this.format(database.inventory.getResource(this));
+    }
+    
+    public @NotNull Component format(long amount) {
+        return Component.text("%,d".formatted(amount));
     }
     
     @Override

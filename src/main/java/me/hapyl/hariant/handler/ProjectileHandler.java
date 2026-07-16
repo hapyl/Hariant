@@ -65,7 +65,7 @@ public final class ProjectileHandler implements Listener {
         
         // If the project is an arrow, and it's fully charged (critical), add `FORCE_CRITICAL` tag
         if (projectile instanceof Arrow arrow && arrow.isCritical()) {
-            damageSourceBuilder.damageFlag(DamageFlag.FORCE_CRITICAL);
+            damageSourceBuilder.damageFlags(DamageFlag.FORCE_CRITICAL);
         }
         
         // Build damage source, create projectile and call entity `onShoot`

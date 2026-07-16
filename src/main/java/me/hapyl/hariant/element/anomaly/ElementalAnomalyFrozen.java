@@ -7,7 +7,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
-import me.hapyl.hariant.entity.frozen.FrozenHandler;
+import me.hapyl.hariant.entity.trap.frozen.TrapFrozen;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -41,7 +41,7 @@ public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implement
     public void handleHariantDamageEvent(HariantDamageEvent ev) {
         final HariantEntity entity = ev.getEntity();
         
-        if (!entity.isFrozen()) {
+        if (!(entity.getTrap() instanceof TrapFrozen)) {
             return;
         }
         
@@ -55,7 +55,12 @@ public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implement
     public void trigger(@NotNull HariantEntity entity, @Nullable HariantEntity source) {
         final int duration = this.calculateFrozenDuration(source);
         
-        entity.freeze(new FrozenHandler(entity, duration));
+        entity.trap(new TrapFrozen(entity, source, duration));
+    }
+    
+    @Override
+    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
+        return entity.getTrap() instanceof TrapFrozen;
     }
     
     public int calculateFrozenDuration(@Nullable HariantEntity source) {

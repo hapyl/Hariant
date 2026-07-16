@@ -17,6 +17,8 @@ public final class ArtifactSetRegistry extends StaticRegistry<ArtifactSet> {
     public static final ArtifactSet RECHARGE;
     public static final ArtifactSet ECLIPSE;
     public static final ArtifactSet BULWARK;
+    public static final ArtifactSet GLASS_CANNON;
+    public static final ArtifactSet BLOODSCENT;
     
     private static final StaticRegistryMap<ArtifactSet> REGISTRY;
     
@@ -34,6 +36,8 @@ public final class ArtifactSetRegistry extends StaticRegistry<ArtifactSet> {
         RECHARGE = REGISTRY.register("artifact_searing_recharge", ArtifactSetRecharge::new);
         ECLIPSE = REGISTRY.register("artifact_searing_eclipse", ArtifactSetEclipse::new);
         BULWARK = REGISTRY.register("artifact_set_bulwark", ArtifactSetBulwark::new);
+        GLASS_CANNON = REGISTRY.register("artifact_set_glass_cannon", ArtifactSetGlassCannon::new);
+        BLOODSCENT = REGISTRY.register("artifact_set_bloodscent", ArtifactSetBloodscent::new);
     }
     
     private ArtifactSetRegistry() {

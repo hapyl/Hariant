@@ -26,6 +26,7 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 
 public class HeroInferno extends Hero implements Listener {
     
@@ -33,11 +34,11 @@ public class HeroInferno extends Hero implements Listener {
         super(
                 key,
                 Component.text("Inferno"),
-                Attributes.base(1000, 100, 100)
+                Attributes.base(1000, 100, 0)
                           .adjust(AttributeType.CRIT_CHANCE, -100)
-                          .adjust(AttributeType.EFFECT_RESISTANCE, 70)
-                          .adjust(AttributeType.KNOCKBACK_RESISTANCE, 70)
-                          .adjust(AttributeType.FIRE_RESISTANCE, 60),
+                          .adjust(AttributeType.EFFECT_RESISTANCE, 50)
+                          .adjust(AttributeType.KNOCKBACK_RESISTANCE, 50)
+                          .adjust(AttributeType.FIRE_RESISTANCE, 40),
                 new WeaponDemonhand()
         );
         
@@ -61,6 +62,8 @@ public class HeroInferno extends Hero implements Listener {
                          .appendNewline()
                          .append(Component.text("Is it regret, banishment... or perhaps, boredom?"))
         );
+        
+        setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.ENERGY_RECHARGE, AttributeType.ELEMENTAL_MASTERY, AttributeType.VITALITY, AttributeType.FIRE_DAMAGE_BONUS));
     }
     
     @Override
@@ -128,7 +131,7 @@ public class HeroInferno extends Hero implements Listener {
         );
         
         WeaponDemonhandNormalAttack() {
-            super(ElementType.FIRE, AttributeType.ATTACK, 66, 10);
+            super(ElementType.FIRE, AttributeType.ATTACK, 52, 10);
         }
         
         @NotNull
@@ -137,7 +140,7 @@ public class HeroInferno extends Hero implements Listener {
             return DamageSource.builder(DAMAGE_SOURCE_IDENTITY, getScaledValue(attacker))
                                .elementType(elementType)
                                .source(attacker)
-                               .components(DamageComponent.trueDamage());
+                               .components(DamageComponent.ofTrueDamage());
         }
     }
     

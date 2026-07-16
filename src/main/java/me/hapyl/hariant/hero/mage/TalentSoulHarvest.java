@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentSoulHarvest extends TalentPassive implements Listener {
     
-    @DisplayField public final Decimal maximumSouls = Decimal.ofValue(20);
+    @DisplayField public final Decimal maximumSouls = Decimal.ofValue(10);
     @DisplayField public final Decimal startingSouls = Decimal.ofValue(5);
     
     @DisplayField private final Cooldown harvestCooldown = Cooldown.ofSeconds(Key.ofString("soul_harvest"), 0.25f);

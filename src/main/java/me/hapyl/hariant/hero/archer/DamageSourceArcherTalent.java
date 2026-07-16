@@ -13,6 +13,6 @@ import java.util.Set;
 
 public class DamageSourceArcherTalent extends DamageSourceImpl {
     DamageSourceArcherTalent(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity attacker, double damage, double elementUnits) {
-        super(identity, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponent.common(), Set.of(), damage, elementUnits);
+        super(identity, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponent.ofCommon(), Set.of(), damage, elementUnits);
     }
 }

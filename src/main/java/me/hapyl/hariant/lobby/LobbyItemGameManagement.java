@@ -1,6 +1,7 @@
 package me.hapyl.hariant.lobby;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.menu.MenuGameManagement;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

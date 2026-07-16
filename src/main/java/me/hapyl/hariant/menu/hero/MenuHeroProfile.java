@@ -20,13 +20,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class MenuHeroProfile extends MenuHeroAbstract {
+public class MenuHeroProfile extends AbstractMenuHero {
     
     private static final Icon ICON_AFFILIATION = Icon.ofTexture("b0aca013178a9f47913e894d3d0bfd4b0b66120825b9aab8a4d7d9bf0245abf");
     private static final ComponentStyler STYLER_AFFILIATION = ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(2).build();
     
     public MenuHeroProfile(@NotNull Player player, @NotNull HeroInstance heroInstance) {
         super(player, heroInstance, Category.PROFILE);
+        
         this.openMenu();
     }
     
@@ -101,8 +102,12 @@ public class MenuHeroProfile extends MenuHeroAbstract {
         
         // Elemental attributes
         for (ElementType elementType : ElementType.values()) {
-            final AttributeType elementalResistanceAttribute = AttributeType.getElementalResistanceAttribute(elementType);
-            final AttributeType elementalDamageBonusAttribute = AttributeType.getElementalDamageBonusAttribute(elementType);
+            final AttributeType elementalDamageAttribute = elementType.getOffensiveAttribute();
+            final AttributeType elementalResistanceAttribute = elementType.getDefensiveAttribute();
+            
+            if (elementalDamageAttribute == null || elementalResistanceAttribute == null) {
+                continue;
+            }
             
             builder.addLore(
                     Component.empty()
@@ -111,7 +116,7 @@ public class MenuHeroProfile extends MenuHeroAbstract {
                              .append(Component.text("    "))
                              .append(createElementalLore(attributes, elementalResistanceAttribute, sumArtifactAffixes.get(elementalResistanceAttribute)).color(Colors.GREEN))
                              .append(Component.text(" / ", Colors.DARK_GRAY))
-                             .append(createElementalLore(attributes, elementalDamageBonusAttribute, sumArtifactAffixes.get(elementalDamageBonusAttribute)).color(Colors.RED))
+                             .append(createElementalLore(attributes, elementalDamageAttribute, sumArtifactAffixes.get(elementalDamageAttribute)).color(Colors.RED))
             );
         }
         

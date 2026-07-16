@@ -114,11 +114,9 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
     }
     
     @Override
-    public void tick() {
-        super.tick();
-        
-        if (!super.shouldActuallyTick()) {
-            return;
+    public boolean tick() {
+        if (!super.tick()) {
+            return false;
         }
         
         if (isBrewing) {
@@ -176,6 +174,8 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
                 this.playWorldSound(Sound.BLOCK_LAVA_AMBIENT, 100, 2.0f);
             }
         }
+        
+        return true;
     }
     
     public void applyInfusion() {

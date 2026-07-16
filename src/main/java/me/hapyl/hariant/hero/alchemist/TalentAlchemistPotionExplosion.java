@@ -36,7 +36,7 @@ public final class TalentAlchemistPotionExplosion extends TalentAlchemistPotion 
     private final @DisplayField AttributeScaling elementalApplication = AttributeScaling.create(AttributeType.ELEMENTAL_MASTERY, 500);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            Key.ofString("weird_concoction"),
+            Key.ofString("damage_source_weird_concoction"),
             Component.text("Weird Concoction"),
             DeathMessage.create("{player} was toxically exploded [by {killer}]")
     );
@@ -125,7 +125,7 @@ public final class TalentAlchemistPotionExplosion extends TalentAlchemistPotion 
                     source,
                     DamageType.TALENT,
                     ElementType.TOXIC,
-                    DamageComponent.common(),
+                    DamageComponent.ofCommon(),
                     Set.of(),
                     damage,
                     elementUnits

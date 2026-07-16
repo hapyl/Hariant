@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.bukkit.Sound.ITEM_ARMOR_EQUIP_ELYTRA;
 
@@ -51,6 +52,8 @@ public class HeroAlchemist extends Hero {
         equipment.setBoots(102, 55, 38, TrimPattern.SILENCE, TrimMaterial.COPPER);
         
         setDescription(Component.text("An alchemist who was cursed by the abyss."));
+        
+        setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.ELEMENTAL_MASTERY, AttributeType.ENERGY_RECHARGE, AttributeType.TOXIC_DAMAGE_BONUS));
     }
     
     @NotNull
@@ -158,7 +161,8 @@ public class HeroAlchemist extends Hero {
         final HeroDataAlchemist heroData = player.getHeroData(this, HeroDataAlchemist::new);
         final double abyssalCorrosion = heroData.getAbyssalCorrosion();
         
-        return (int) (baseDuration * (1 - ((double) Math.floorDiv((int) abyssalCorrosion, passiveTalent.instabilityDecrementThreshold.intValue()) * passiveTalent.instabilityDecrement.doubleValue())));
+        
+        return (int) (baseDuration * (1 - ((int) (abyssalCorrosion / passiveTalent.abyssalCurseInstabilityDecrementThreshold.intValue()) * passiveTalent.abyssalCurseInstabilityDecrement.doubleValue())));
     }
     
     private static class WeaponAlchemistStick extends WeaponMelee {

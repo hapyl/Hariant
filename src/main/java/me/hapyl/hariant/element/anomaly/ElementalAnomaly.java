@@ -47,4 +47,6 @@ public interface ElementalAnomaly extends Keyed, Prefixed, Named, Described, Sty
     
     @Override
     void display(@NotNull Location location);
+    
+    boolean isAnomalyActive(@NotNull HariantEntity entity);
 }

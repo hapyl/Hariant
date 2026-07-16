@@ -4,7 +4,8 @@ import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.component.Styled;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
-import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
+import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.util.Prefixed;
 import me.hapyl.hariant.util.decimal.DecimalFormat;
@@ -12,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface Element extends Keyed, Prefixed, Named, Styled, ComponentLike, DecimalFormat {
     
@@ -21,30 +23,28 @@ public interface Element extends Keyed, Prefixed, Named, Styled, ComponentLike, 
     @NotNull
     Key getKey();
     
-    @NotNull
     @Override
-    Component getPrefix();
+    @NotNull Component getPrefix();
     
-    @NotNull
     @Override
-    default Component getPrefixStyled() {
+    default @NotNull Component getPrefixStyled() {
         return this.getPrefix().style(this.getStyle());
     }
     
-    @NotNull
     @Override
-    Component getName();
+    @NotNull Component getName();
     
     @Override
-    @NotNull
-    Style getStyle();
+    @NotNull Style getStyle();
     
-    @NotNull
     @Override
-    Component format(double value);
+    @NotNull Component format(double value);
     
-    @NotNull
-    ElementalAnomaly getElementalAnomaly();
+    @NotNull ElementalAnomalyType getElementalAnomaly();
+    
+    @Nullable AttributeType getOffensiveAttribute();
+    
+    @Nullable AttributeType getDefensiveAttribute();
     
     @NotNull
     @Override
@@ -63,10 +63,10 @@ public interface Element extends Keyed, Prefixed, Named, Styled, ComponentLike, 
         final Style style = this.getStyle();
         
         return Component.empty()
-                .append(this.getPrefixStyled())
-                .append(Component.text(" AoE ", style))
-                .append(this.getName().style(style))
-                .append(Component.text(" DMG", style));
+                        .append(this.getPrefixStyled())
+                        .append(Component.text(" AoE ", style))
+                        .append(this.getName().style(style))
+                        .append(Component.text(" DMG", style));
     }
     
     void tickEntity(@NotNull HariantEntity entity);

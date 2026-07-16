@@ -1,7 +1,0 @@
-name: Hariant
-version: '0.0.1-SNAPSHOT'
-main: "me.hapyl.hariant.HariantPlugin"
-api-version: '1.21'
-depend: [ "EternaAPI" ]
-libraries:
-  - "org.mongodb:mongo-java-driver:3.12.12"

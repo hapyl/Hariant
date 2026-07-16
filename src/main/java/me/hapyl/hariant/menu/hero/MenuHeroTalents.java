@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public class MenuHeroTalents extends MenuHeroAbstract {
+public class MenuHeroTalents extends AbstractMenuHero {
     
     private final Set<TalentIndex> showDetails;
     

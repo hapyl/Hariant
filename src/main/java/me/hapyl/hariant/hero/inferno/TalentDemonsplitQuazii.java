@@ -1,8 +1,9 @@
 package me.hapyl.hariant.hero.inferno;
 
 import com.google.common.collect.Sets;
+import me.hapyl.eterna.module.entity.PacketAttributes;
+import me.hapyl.eterna.module.entity.packet.PacketEntity;
 import me.hapyl.eterna.module.entity.packet.PacketGuardian;
-import me.hapyl.eterna.module.entity.packet.PacketLivingEntity;
 import me.hapyl.eterna.module.entity.packet.PacketSquid;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.registry.Key;
@@ -30,15 +31,15 @@ import java.util.function.Supplier;
 
 public final class TalentDemonsplitQuazii extends TalentDemonsplit {
     
-    @DisplayField private final Decimal beamHeight = Decimal.ofValue(2);
-    @DisplayField private final Decimal beamLength = Decimal.ofValue(5);
-    @DisplayField private final Decimal beamGrowthDelay = Decimal.ofSeconds(2);
-    @DisplayField private final Decimal beamRadius = Decimal.ofValue(0.6);
+    private final @DisplayField Decimal beamHeight = Decimal.ofValue(2);
+    private final @DisplayField Decimal beamLength = Decimal.ofValue(5);
+    private final @DisplayField Decimal beamGrowthDelay = Decimal.ofSeconds(2);
+    private final @DisplayField Decimal beamRadius = Decimal.ofValue(0.6);
     
-    @DisplayField private final Decimal decayWorthOfMaxHealth = Decimal.ofPercentage(20);
-    @DisplayField private final Decimal decayDuration = Decimal.ofSeconds(6);
+    private final @DisplayField Decimal decayWorthOfMaxHealth = Decimal.ofPercentage(20);
+    private final @DisplayField Decimal decayDuration = Decimal.ofSeconds(6);
     
-    @DisplayField private final Decimal healingPerEnemyHitWithBeamOfMaxHealth = Decimal.ofPercentage(20);
+    private final @DisplayField Decimal healingPerEnemyHitWithBeamOfMaxHealth = Decimal.ofPercentage(20);
     
     public TalentDemonsplitQuazii(@NotNull Key key) {
         super(key, InfernoDemonType.QUAZII);
@@ -121,10 +122,11 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
         }
         
         @Override
-        public void tick() {
+        public boolean tick() {
             super.tick();
             
             quaziiBeam.tick();
+            return true;
         }
         
         @Override
@@ -138,14 +140,14 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
     public class QuaziiBeam implements Ticking, Removable {
         
         private final HariantPlayer player;
-        private final PacketLivingEntity[] entities;
+        private final PacketEntity[] entities;
         private final Set<HariantPlayer> hitPlayers;
         
         private int tick;
         
         QuaziiBeam(@NotNull HariantPlayer player, @NotNull Location location) {
             this.player = player;
-            this.entities = new PacketLivingEntity[beamHeight.intValue() * 2];
+            this.entities = new PacketEntity[beamHeight.intValue() * 2];
             this.hitPlayers = Sets.newHashSet();
             
             // Create packet entities
@@ -162,7 +164,7 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
         
         @Override
         public void remove() {
-            for (PacketLivingEntity entity : entities) {
+            for (PacketEntity entity : entities) {
                 entity.dispose();
             }
         }
@@ -174,7 +176,7 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
             
             // Synchronize the beam with player
             for (int i = 0; i < entities.length; i++) {
-                final PacketLivingEntity entity = entities[i];
+                final PacketEntity entity = entities[i];
                 final boolean raycast = i % 2 == 0;
                 
                 final double radius = raycast ? 1 : length;
@@ -223,7 +225,7 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
         }
         
         @NotNull
-        private static <E extends PacketLivingEntity> E prepareEntity(@NotNull Supplier<E> supplier) {
+        private static <E extends PacketEntity & PacketAttributes> E prepareEntity(@NotNull Supplier<E> supplier) {
             final E entity = supplier.get();
             
             entity.setVisible(false);

@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.event.HariantElementalAnomalyEvent;
 import me.hapyl.hariant.util.Resettable;
@@ -56,12 +56,14 @@ public class ElementData implements ElementHandler, Ticking, Resettable {
     }
     
     @Override
-    public void triggerAnomaly(@NotNull ElementalAnomaly elementalAnomaly, @Nullable HariantEntity source) {
+    public void triggerAnomaly(@NotNull ElementalAnomalyType elementalAnomaly, @Nullable HariantEntity source) {
+        // Call event
+        if (new HariantElementalAnomalyEvent(entity, elementalAnomaly, source).callEvent()) {
+            return;
+        }
+        
         elementalAnomaly.trigger(entity, source);
         elementalAnomaly.display(entity.getMidpointLocation());
-        
-        // Call event
-        new HariantElementalAnomalyEvent(entity, elementalAnomaly, source).callEvent();
         
         // Fx
         entity.playWorldSound(Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 2.0f);

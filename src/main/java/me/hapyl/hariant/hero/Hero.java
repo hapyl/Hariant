@@ -19,6 +19,7 @@ import me.hapyl.hariant.debug.DebugListener;
 import me.hapyl.hariant.entity.HeadComponent;
 import me.hapyl.hariant.entity.SmallCapsComponent;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.entity.player.LifecyclePlayer;
 import me.hapyl.hariant.handler.HariantEventHandler;
 import me.hapyl.hariant.inventory.item.ItemCreator;
 import me.hapyl.hariant.profile.ui.ActionbarSupplier;
@@ -36,9 +37,11 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @AutoRegisteredListener
 @StrictNamingConvention(startsWith = "Hero")
@@ -46,7 +49,8 @@ public abstract class Hero
         implements
         Keyed, Named, Described, Attributable,
         HariantEventHandler, ComponentLike, HeadComponent,
-        SmallCapsComponent, ActionbarSupplier, ItemCreator, DebugListener, Registrable {
+        SmallCapsComponent, ActionbarSupplier, ItemCreator, DebugListener,
+        Registrable, LifecyclePlayer {
     
     private final Key key;
     private final Component name;
@@ -59,7 +63,7 @@ public abstract class Hero
     private final Map<TalentIndex, Talent> talentsMapped;
     
     private Component description;
-    private @NotNull List<? extends AttributeType> recommendedAttributes;
+    private @NotNull Set<? extends AttributeType> recommendedAttributes;
     
     public Hero(@NotNull Key key, @NotNull Component name, @NotNull Attributes attributes, @NotNull Weapon weapon) {
         this.key = key;
@@ -78,17 +82,17 @@ public abstract class Hero
                 TalentIndex.TALENT_PASSIVE, this.getPassiveTalent(),
                 TalentIndex.TALENT_ULTIMATE, this.getUltimateTalent()
         );
-        this.recommendedAttributes = List.of();
+        this.recommendedAttributes = Set.of();
         
         AutoRegisteredListener.Registry.register(this);
         StrictNamingConvention.Validator.validate(this);
     }
     
-    public @NotNull List<? extends AttributeType> getRecommendedAttributes() {
+    public @NotNull Set<? extends AttributeType> getRecommendedAttributes() {
         return recommendedAttributes;
     }
     
-    public void setRecommendedAttributes(@NotNull List<? extends AttributeType> recommendedAttributes) {
+    public void setRecommendedAttributes(@NotNull Set<? extends AttributeType> recommendedAttributes) {
         this.recommendedAttributes = recommendedAttributes;
     }
     
@@ -288,6 +292,18 @@ public abstract class Hero
     
     @Override
     public void onUnregister() {
+    }
+    
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onCreate(@NotNull HariantPlayer player) {
+        weapon.onCreate(player);
+    }
+    
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onDestroy(@NotNull HariantPlayer player) {
+        weapon.onDestroy(player);
     }
     
 }

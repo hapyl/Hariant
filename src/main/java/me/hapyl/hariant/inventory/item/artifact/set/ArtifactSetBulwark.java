@@ -11,6 +11,8 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantHealthChangeEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
@@ -19,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ArtifactSetBulwark extends ArtifactSet implements Listener {
     
-    private final Decimal defenseIncrease = Decimal.ofPercentage(20);
+    private final ArtifactSetModifier defenseIncrease = CommonArtifactSetModifiers.DEFENSE;
     
     private final Decimal fourPieceHealthThreshold = Decimal.ofPercentage(50);
     private final Decimal fourPieceEffectIncrease = Decimal.ofPercentage(100);
@@ -27,15 +29,7 @@ public final class ArtifactSetBulwark extends ArtifactSet implements Listener {
     ArtifactSetBulwark(@NotNull Key key) {
         super(key, Component.text("Bulwark"));
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(AttributeType.DEFENSE)
-                         .append(Component.text(" by "))
-                         .append(defenseIncrease)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, defenseIncrease);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -91,7 +85,7 @@ public final class ArtifactSetBulwark extends ArtifactSet implements Listener {
             super(ArtifactSetBulwark.this.getKey(), ArtifactSetBulwark.this.getName(), applier, HariantConstants.INDEFINITE_DURATION);
             this.isFourPieceBonus = isFourPieceBonus;
             
-            of(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, defenseIncrease.doubleValue() * (isFourPieceBonus ? 1 + fourPieceEffectIncrease.doubleValue() : 1));
+            of(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, defenseIncrease.getValue() * (isFourPieceBonus ? 1 + fourPieceEffectIncrease.doubleValue() : 1));
         }
     }
     

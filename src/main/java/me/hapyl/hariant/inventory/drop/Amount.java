@@ -12,7 +12,7 @@ public interface Amount extends ComponentLike {
     @Override
     @NotNull
     default Component asComponent() {
-        return Component.text(this.amount());
+        return this.amount() == 1 ? Component.empty() : Component.text(this.amount());
     }
     
     @NotNull

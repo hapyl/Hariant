@@ -11,6 +11,8 @@ import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantEffectEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
@@ -19,9 +21,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ArtifactSetFunnyPrank extends ArtifactSet implements Listener {
     
-    private final Decimal twoPieceLuckIncrease = Decimal.ofValue(80);
+    private final ArtifactSetModifier twoPieceLuckIncrease = CommonArtifactSetModifiers.LUCK;
     
-    private final Decimal fourPieceLuckIncrease = Decimal.ofPercentage(60);
+    private final Decimal fourPieceLuckIncrease = Decimal.ofPercentage(100);
     private final Decimal fourPieceBonusDuration = Decimal.ofSeconds(4);
     
     ArtifactSetFunnyPrank(@NotNull Key key) {
@@ -29,15 +31,7 @@ public final class ArtifactSetFunnyPrank extends ArtifactSet implements Listener
         
         setArtifactTags(AttributeType.LUCK);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(AttributeType.LUCK)
-                         .append(Component.text(" by "))
-                         .append(twoPieceLuckIncrease)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, twoPieceLuckIncrease);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -79,9 +73,7 @@ public final class ArtifactSetFunnyPrank extends ArtifactSet implements Listener
     
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetFunnyPrank.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.LUCK, AttributeModifierType.FLAT, twoPieceLuckIncrease.doubleValue());
+            super(ArtifactSetFunnyPrank.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, twoPieceLuckIncrease);
         }
     }
     

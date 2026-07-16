@@ -25,8 +25,8 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     
-    @DisplayField private final Decimal defenseReduction = Decimal.ofPercentage(40);
-    @DisplayField private final Decimal defenseReductionDuration = Decimal.ofSeconds(10);
+    private final @DisplayField Decimal defenseReduction = Decimal.ofPercentage(40);
+    private final @DisplayField Decimal defenseReductionDuration = Decimal.ofSeconds(10);
     
     private final int cloudDuration = Tick.fromSeconds(8);
     private final int cloudDamagePeriod = 15;
@@ -76,9 +76,14 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
                             .source(source)
                             .elementType(ElementType.TOXIC)
                             .damageType(DamageType.ANOMALY)
-                            .damageFlag(DamageFlag.CANNOT_KILL)
+                            .damageFlags(DamageFlag.CANNOT_KILL)
                             .build()
         );
+    }
+    
+    @Override
+    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
+        return false;
     }
     
     public int calculateDuration(@Nullable HariantEntity source) {

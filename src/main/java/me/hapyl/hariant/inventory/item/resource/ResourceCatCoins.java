@@ -2,7 +2,6 @@ package me.hapyl.hariant.inventory.item.resource;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.inventory.item.Rarity;
 import me.hapyl.hariant.inventory.item.Resource;
 import me.hapyl.hariant.util.Icon;
@@ -28,10 +27,9 @@ public final class ResourceCatCoins extends Resource implements Prefixed {
         return 1_000_000_000;
     }
     
-    @NotNull
     @Override
-    public Component format(@NotNull PlayerDatabase database) {
-        return PREFIX.appendSpace().append(super.format(database));
+    public @NotNull Component format(long amount) {
+        return PREFIX.appendSpace().append(super.format(amount));
     }
     
     @NotNull

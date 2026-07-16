@@ -22,14 +22,14 @@ import org.jetbrains.annotations.NotNull;
 public final class WeaponSoulEater extends WeaponRangeProjectile {
     
     // This shit has to be static because of deadlock
-    public static final int SOUL_COST = 2;
+    public static final int SOUL_COST = 1;
     
     WeaponSoulEater() {
         super(
                 Key.ofString("soul_eater"),
                 Icon.ofMaterial(Material.IRON_HOE),
-                NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 76, 10),
-                NormalAttack.ranged(ElementType.AETHER, AttributeType.ATTACK, 156, 40),
+                NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 45, 10),
+                NormalAttack.ranged(ElementType.AETHER, AttributeType.ATTACK, 78, 20),
                 new WeaponRangeProjectileTypeSoul()
         );
         

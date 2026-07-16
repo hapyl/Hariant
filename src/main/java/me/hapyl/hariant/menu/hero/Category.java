@@ -44,9 +44,9 @@ public enum Category implements SlotBound, Icon, Named, Described {
     private final Icon icon;
     private final Component name;
     private final Component description;
-    private final BiFunction<Player, HeroInstance, MenuHeroAbstract> menuSupplier;
+    private final BiFunction<Player, HeroInstance, Menu> menuSupplier;
     
-    Category(int slot, @NotNull Icon icon, @NotNull Component name, @NotNull Component description, @NotNull BiFunction<Player, HeroInstance, MenuHeroAbstract> menuSupplier) {
+    Category(int slot, @NotNull Icon icon, @NotNull Component name, @NotNull Component description, @NotNull BiFunction<Player, HeroInstance, Menu> menuSupplier) {
         this.slot = slot;
         this.icon = icon;
         this.name = name;

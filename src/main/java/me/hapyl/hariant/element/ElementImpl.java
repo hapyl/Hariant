@@ -1,9 +1,6 @@
 package me.hapyl.hariant.element;
 
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
-import me.hapyl.hariant.element.anomaly.ElementalAnomalyImpl;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.util.decimal.DecimalFormat;
 import net.kyori.adventure.text.Component;
@@ -12,22 +9,10 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class ElementImpl implements Element {
-    
-    private static final ElementalAnomalyImpl DUMMY_ANOMALY = new ElementalAnomalyImpl(
-            Key.ofString("dummy_anomaly"),
-            ELEMENT_PREFIX,
-            Component.text("Test Anomaly"),
-            Style.style(Colors.ATTRIBUTE_ELEMENTAL_MASTERY)
-    ) {
-        @Override
-        public void trigger(@NotNull HariantEntity entity, @Nullable HariantEntity source) {
-        }
-    };
+public abstract class ElementImpl implements Element {
     
     private final Key key;
     private final Component prefix;
@@ -75,14 +60,13 @@ public class ElementImpl implements Element {
         return format.format(value).style(style);
     }
     
-    @NotNull
-    @Override
-    public ElementalAnomaly getElementalAnomaly() {
-        return DUMMY_ANOMALY;
-    }
-    
     @Override
     public void tickEntity(@NotNull HariantEntity entity) {
+        // Don't spawn particles if the entity is invisible
+        if (entity.isInvisible()) {
+            return;
+        }
+        
         // Default implementation displays particles with the color of the element
         entity.spawnWorldParticle(entity.getLocation(), Particle.EFFECT, 1, 0.2, 0.2, 0.2, 1f, particle);
     }

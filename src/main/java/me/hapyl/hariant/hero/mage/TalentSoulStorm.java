@@ -17,6 +17,7 @@ import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +30,7 @@ public final class TalentSoulStorm extends TalentUltimate {
     @DisplayField private final ComponentFormatter soulToRestlessSoulConversionRatio = ComponentFormatter.format(Component.text("2/1", Colors.SUCCESS));
     
     public TalentSoulStorm(@NotNull Key key) {
-        super(key, Component.text("Soul Storm"), Icon.ofMaterial(Material.WARDEN_SPAWN_EGG), UltimateResourceType.ENERGY, 30);
+        super(key, Component.text("Soul Storm"), Icon.ofMaterial(Material.WARDEN_SPAWN_EGG), UltimateResourceType.ENERGY, 50);
         
         setTalentType(TalentType.ENHANCE);
         
@@ -70,17 +71,13 @@ public final class TalentSoulStorm extends TalentUltimate {
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
         final HeroDataMage heroData = player.getHeroData(HeroRegistry.MAGE, HeroDataMage::new);
         
-        final int soulsUsed = Math.min(
-                (heroData.getSouls() / minimumSoulsRequired.intValue()) * minimumSoulsRequired.intValue(),
-                maximumSoulsConsumed.intValue()
-        );
-        
+        final int soulsUsed = Math.min((heroData.getSouls() / minimumSoulsRequired.intValue()) * minimumSoulsRequired.intValue(), maximumSoulsConsumed.intValue());
         final int soulStormCharges = soulsUsed / minimumSoulsRequired.intValue();
         
         // Decrement souls
         heroData.decrementSouls(soulsUsed);
         
-        // TODO (xanyjl @ Saturday, May 30) -> Animation
+        player.spawnWorldParticle(player.getMidpointLocation(), Particle.SCULK_SOUL, 10, 0.1, 0.1, 0.1, 0.3f);
         
         return Executable.await(promise -> {
             heroData.createSoulStorm(soulStormCharges, maximumSoulStormCharges.intValue(), promise);

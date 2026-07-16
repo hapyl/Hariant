@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public enum EnumAnomaly implements ElementalAnomaly {
+public enum ElementalAnomalyType implements ElementalAnomaly {
     
     BLEED(new ElementalAnomalyBleed()),
     BURN(new ElementalAnomalyBurn()),
@@ -20,7 +20,7 @@ public enum EnumAnomaly implements ElementalAnomaly {
     
     private final ElementalAnomaly anomaly;
     
-    EnumAnomaly(@NotNull ElementalAnomaly anomaly) {
+    ElementalAnomalyType(@NotNull ElementalAnomaly anomaly) {
         this.anomaly = anomaly;
     }
     
@@ -68,6 +68,11 @@ public enum EnumAnomaly implements ElementalAnomaly {
     @Override
     public void display(@NotNull Location location) {
         anomaly.display(location);
+    }
+    
+    @Override
+    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
+        return anomaly.isAnomalyActive(entity);
     }
     
     @NotNull

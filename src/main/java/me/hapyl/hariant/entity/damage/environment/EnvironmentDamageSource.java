@@ -70,7 +70,7 @@ public class EnvironmentDamageSource implements DamageSource {
     @NotNull
     @Override
     public List<? extends DamageComponent> getDamageComponents() {
-        return DamageComponent.environmentDamage();
+        return DamageComponent.ofEnvironmentDamage();
     }
     
     @Override
@@ -129,6 +129,10 @@ public class EnvironmentDamageSource implements DamageSource {
     
     public boolean isFall() {
         return this instanceof EnvironmentDamageSourceFall;
+    }
+    
+    public <C extends DamageSource> boolean is(@NotNull Class<C> clazz) {
+        return clazz.isInstance(this);
     }
     
     @NotNull

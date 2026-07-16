@@ -50,7 +50,10 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
             2
     );
     
-    private final DeathMessage deathMessage = DeathMessage.createWithDefaultKiller("{player} bled to death");
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.createWithDefaultKiller("{player} bled to death")
+    );
     
     ElementalAnomalyBleed() {
         super(Key.ofString("bleed"), Component.text("Bleed"), ElementType.PHYSICAL);
@@ -87,13 +90,22 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         final int duration = this.calculateBleedDuration(source);
         final double damage = this.calculateBleedDamage(source);
         
+        
+        
         entity.getAttributes().addModifier(new ElementalAnomalyBleedAttributeModifier(modifierKey, source != null ? source : entity, duration, damage));
     }
     
+    @Override
+    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
+        return entity.getAttributes().hasModifier(modifierKey);
+    }
+    
     public int calculateBleedDuration(@Nullable HariantEntity source) {
-        final double elementalMastery = source != null ? source.getAttributes().get(AttributeType.ELEMENTAL_MASTERY) : 0;
+        if (source == null) {
+            return bleedDuration;
+        }
         
-        return (int) (bleedDuration * (1 + elementalMastery / 500));
+        return (int) (bleedDuration * (1 + source.getAttributes().get(AttributeType.ELEMENTAL_MASTERY) / 500));
     }
     
     public double calculateBleedDamage(@Nullable HariantEntity source) {
@@ -141,6 +153,8 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
                 return;
             }
             
+            // TODO (xanyjl @ Thursday, July 16) -> Change this to DoT
+            
             entity.damage(damageSource);
             entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.DUST_COLOR_TRANSITION, 3, 0.4, 0.2, 0.4, 0.015f, dustTransition);
         }
@@ -149,7 +163,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
     public class ElementalAnomalyBleedDamageSource extends DamageSourceImpl {
         ElementalAnomalyBleedDamageSource(@Nullable HariantEntity source, double damage) {
             super(
-                    DamageSourceIdentity.create(ElementalAnomalyBleed.this, deathMessage),
+                    damageSourceIdentity,
                     source,
                     DamageType.ANOMALY,
                     ElementType.PHYSICAL,

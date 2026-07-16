@@ -3,8 +3,7 @@ package me.hapyl.hariant.hero.blast_knight;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.attribute.AttributeScaling;
-import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.*;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.*;
 import me.hapyl.hariant.entity.damage.*;
@@ -34,14 +33,14 @@ import java.util.stream.Stream;
 
 public final class TalentQuantumDischarge extends Talent {
     
-    private final @DisplayField Decimal damagePerQuantumEnergyConsumed = Decimal.ofAttribute(AttributeType.ATTACK, 27);
+    private final @DisplayField AttributeScaling damagePerQuantumEnergyConsumed = AttributeScaling.create(AttributeType.ATTACK, 27);
     private final @DisplayField Decimal elementalApplicationPerQuantumEnergyConsumer = Decimal.ofElementalApplication(ElementType.AETHER, 40);
     private final @DisplayField Decimal delayPerQuantumEnergyConsumed = Decimal.ofSeconds(0.2f);
     
     private final @DisplayField Decimal novaExplosionKnockbackStrength = Decimal.ofValue(1.85);
     private final @DisplayField Decimal novaExplosionBoundingRadius = Decimal.ofValue(5);
     
-    private final @DisplayField Decimal pullStrength = Decimal.ofValue(0.25);
+    private final @DisplayField Decimal pullStrength = Decimal.ofValue(0.2);
     private final @DisplayField Decimal pullResistance = Decimal.ofValue(0.6);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
@@ -98,7 +97,7 @@ public final class TalentQuantumDischarge extends Talent {
         
         heroData.resetQuantumEnergy();
         
-        final double damage = AttributeScaling.scale(player, AttributeType.ATTACK, damagePerQuantumEnergyConsumed.doubleValue() * quantumEnergy);
+        final double damage = damagePerQuantumEnergyConsumed.getScaledValue(player) * quantumEnergy;
         final double elementalApplication = elementalApplicationPerQuantumEnergyConsumer.doubleValue() * quantumEnergy;
         final int delay = delayPerQuantumEnergyConsumed.intValue() * quantumEnergy;
         
@@ -218,7 +217,7 @@ public final class TalentQuantumDischarge extends Talent {
     private class NovaExplosionDamageSource extends DamageSourceImpl {
         
         NovaExplosionDamageSource(@Nullable HariantEntity source, double damage, double elementalApplication) {
-            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.AETHER, DamageComponent.common(), Set.of(), damage, elementalApplication);
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damage, elementalApplication);
         }
         
     }
@@ -234,7 +233,7 @@ public final class TalentQuantumDischarge extends Talent {
     
     private class PullSourceNova extends PullSource {
         public PullSourceNova(@NotNull HariantEntity source, @NotNull Location centre, int duration) {
-            super(source, centre, Component.text("Nova Pull"), duration, novaExplosionBoundingRadius.doubleValue(), pullStrength.doubleValue(), pullStrength.doubleValue());
+            super(source, centre, Component.text("Nova Pull"), duration, novaExplosionBoundingRadius.doubleValue(), pullStrength.doubleValue(), pullResistance.doubleValue());
         }
     }
     

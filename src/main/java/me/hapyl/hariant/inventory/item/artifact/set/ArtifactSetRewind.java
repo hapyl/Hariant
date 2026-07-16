@@ -8,13 +8,13 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantTalentEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.talent.Talent;
-import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ArtifactSetRewind extends ArtifactSet implements Listener {
     
-    private final Decimal cooldownReductionIncrease = Decimal.ofAttribute(AttributeType.COOLDOWN_REDUCTION, 20);
+    private final ArtifactSetModifier cooldownReductionIncrease = CommonArtifactSetModifiers.COOLDOWN_REDUCTION;
     
     private final Decimal rewindChance = Decimal.ofPercentage(25);
     private final Cooldown rewindCooldown = Cooldown.ofSeconds(Key.ofString("rewind_cooldown"), 12);
@@ -43,15 +43,7 @@ public final class ArtifactSetRewind extends ArtifactSet implements Listener {
         
         setArtifactTags(AttributeType.COOLDOWN_REDUCTION);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(AttributeType.COOLDOWN_REDUCTION)
-                         .append(Component.text(" by "))
-                         .append(cooldownReductionIncrease)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, cooldownReductionIncrease);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -101,9 +93,7 @@ public final class ArtifactSetRewind extends ArtifactSet implements Listener {
     
     private final class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantPlayer applier) {
-            super(ArtifactSetRewind.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.COOLDOWN_REDUCTION, AttributeModifierType.FLAT, cooldownReductionIncrease.doubleValue());
+            super(ArtifactSetRewind.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, cooldownReductionIncrease);
         }
     }
     

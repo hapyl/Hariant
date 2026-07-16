@@ -66,7 +66,7 @@ public final class Settings {
                          .appendNewline()
                          .appendNewline()
                          .append(createDotWithNewLines(Component.text("Damage dealt/taken.")))
-                         .append(createDotWithNewLines(Component.text("Healing done/receieved.")))
+                         .append(createDotWithNewLines(Component.text("Healing done/received.")))
                          .append(createDotWithNewLines(Component.text("Total damage dealt/taken after death."))),
                 Icon.ofMaterial(Material.SWEET_BERRIES),
                 SettingCategory.QUALITY_OF_LIFE,

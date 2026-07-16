@@ -12,6 +12,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.team.EnumTeam;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -22,7 +23,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 public abstract class InfernoDemonEntity extends HariantEntity implements InfernoDemon {
     
     protected final HariantPlayer player;
-    private final InfernoDemonType demonType;
+    protected final InfernoDemonType demonType;
     
     private final int duration;
     private int tick;
@@ -84,11 +85,14 @@ public abstract class InfernoDemonEntity extends HariantEntity implements Infern
     
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void tick() {
+    public boolean tick() {
+        // Don't tick super, we don't give a fuck about it
         tick--;
         
         // Always sync the entity to player
         teleport(player.getLocation());
+        
+        return true;
     }
     
     @Override
@@ -130,6 +134,11 @@ public abstract class InfernoDemonEntity extends HariantEntity implements Infern
     @Override
     public void swingArm() {
         entity.swingMainHand();
+    }
+    
+    @Override
+    public @NotNull Component getName() {
+        return demonType.getName();
     }
     
 }

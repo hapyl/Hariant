@@ -3,16 +3,14 @@ package me.hapyl.hariant.hero.inferno;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.geometry.Drawable;
 import me.hapyl.eterna.module.util.Removable;
-import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.Pet;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.util.Owned;
 import me.hapyl.hariant.util.TickDuration;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
-public interface InfernoDemon extends Pet, Ticking, Removable, TickDuration {
+public interface InfernoDemon extends Pet, Removable, TickDuration {
     
     @NotNull
     InfernoDemonType getDemonType();

@@ -11,7 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.type.PointedDripstone;
+import org.bukkit.block.data.type.Speleothem;
 import org.jetbrains.annotations.NotNull;
 
 public final class EnvironmentDamageSourceFall extends EnvironmentDamageSource {
@@ -55,7 +55,7 @@ public final class EnvironmentDamageSourceFall extends EnvironmentDamageSource {
                     case HAY_BLOCK -> 0.5;
                     case BLACK_BED, BLUE_BED, BROWN_BED, CYAN_BED, GRAY_BED, GREEN_BED, LIME_BED, MAGENTA_BED, ORANGE_BED, PINK_BED, PURPLE_BED, RED_BED, WHITE_BED, YELLOW_BED -> 0.25;
                     case POINTED_DRIPSTONE -> {
-                        if (!(block instanceof PointedDripstone dripstone) || dripstone.getVerticalDirection() != BlockFace.UP) {
+                        if (!(block instanceof Speleothem dripstone) || dripstone.getVerticalDirection() != BlockFace.UP) {
                             yield 1;
                         }
                         

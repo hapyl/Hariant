@@ -6,7 +6,6 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.hero.Hero;
@@ -34,7 +33,7 @@ public class MenuHeroUnlock extends Menu {
     public MenuHeroUnlock(@NotNull Player player, @NotNull Hero hero) {
         super(player, () -> Component.text("Unlock Hero"), ChestSize.SIZE_6);
         
-        this.playerDatabase = Hariant.getPlayerDatabase(player);
+        this.playerDatabase = profile.getDatabase();
         this.hero = hero;
         
         this.openMenu();

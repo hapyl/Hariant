@@ -14,8 +14,6 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.annotate.StrictNamingConvention;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantTalentEvent;
 import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
@@ -45,8 +43,7 @@ import java.util.stream.IntStream;
 public abstract class Talent
         implements
         Named, Described, Keyed, ItemCreator,
-        Registrable, Cooldown, Duration, DamageSourceIdentity,
-        Identified {
+        Registrable, Cooldown, Duration, Identified {
     
     private final List<DisplayFieldInstance> attributeFields;
     
@@ -78,12 +75,6 @@ public abstract class Talent
     @Override
     public String identify() {
         return identity;
-    }
-    
-    @NotNull
-    @Override
-    public DeathMessage getDeathMessage() {
-        return DeathMessage.DEFAULT;
     }
     
     @NotNull
@@ -245,12 +236,6 @@ public abstract class Talent
         // If a game is in progress, make sure it's IN_GAME
         if (Hariant.isGameInProgressButNotActive()) {
             player.messageError(Component.text("The game hasn't started yet!"));
-            return;
-        }
-        
-        // Check for frozen
-        if (player.isFrozen()) {
-            player.messageError(Component.text("Cannot use talents while frozen!"));
             return;
         }
         

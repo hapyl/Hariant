@@ -19,6 +19,8 @@ import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Set;
+
 public class HeroNyx extends Hero {
     
     private final Particle.DustTransition particleDataDustTransition = new Particle.DustTransition(
@@ -50,6 +52,8 @@ public class HeroNyx extends Hero {
         equipment.setBoots(Material.NETHERITE_BOOTS, TrimPattern.DUNE, TrimMaterial.NETHERITE);
         
         setDescription(Component.text("`Chaos... brings victory...`"));
+        
+        setRecommendedAttributes(Set.of(AttributeType.MAX_HEALTH, AttributeType.ENERGY_RECHARGE, AttributeType.AETHER_DAMAGE_BONUS));
     }
     
     @Override

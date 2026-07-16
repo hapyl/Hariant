@@ -15,14 +15,14 @@ import java.util.Set;
 
 public class DamageSourceImpl implements DamageSource {
     
-    @Nullable private final HariantEntity source;
+    private final @Nullable HariantEntity source;
     
-    @NotNull private final DamageSourceIdentity identity;
-    @NotNull private final ElementType elementType;
-    @NotNull private final DamageType damageType;
+    private final @NotNull DamageSourceIdentity identity;
+    private final @NotNull ElementType elementType;
+    private final @NotNull DamageType damageType;
     
-    @NotNull @Unmodifiable private final List<? extends DamageComponent> damageComponents;
-    @NotNull @Unmodifiable private final Set<? extends DamageFlag> damageFlags;
+    private final @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents;
+    private final @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags;
     
     private final double damage;
     private final double elementUnits;

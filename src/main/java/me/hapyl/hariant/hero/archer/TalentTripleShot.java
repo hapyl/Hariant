@@ -5,6 +5,8 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -32,6 +34,11 @@ public final class TalentTripleShot extends Talent {
     @DisplayField private final Decimal additionalArrowDamageMultiplier = Decimal.ofPercentage(50);
     @DisplayField private final Decimal additionalArrowSpread = Decimal.ofValue(5, v -> Component.text(v).append(Component.text("°")).color(TextColor.color(0xFFF854)));
     @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 100);
+    
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.create("{player} was triple shot [by {killer}]")
+    );
     
     public TalentTripleShot(@NotNull Key key) {
         super(key, Component.text("Triple Shot"), Icon.ofMaterial(Material.ARROW));
@@ -82,7 +89,7 @@ public final class TalentTripleShot extends Talent {
     private Arrow createArrow(@NotNull HariantPlayer player, double damage, @Nullable Vector velocity) {
         return player.launchProjectile(
                 Arrow.class,
-                new DamageSourceArcherTalent(this, player, damage, elementalApplication.doubleValue()),
+                new DamageSourceArcherTalent(damageSourceIdentity, player, damage, elementalApplication.doubleValue()),
                 self -> {
                     self.setColor(arrowColor);
                     self.setCritical(false);

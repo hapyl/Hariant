@@ -21,7 +21,7 @@ public interface BooleanExplained {
     }
     
     class BooleanExplainedImpl implements BooleanExplained {
-        private static final BooleanExplainedImpl TRUE = new BooleanExplainedImpl(true, Component.empty());
+        private static final BooleanExplainedImpl TRUE = new BooleanExplainedImpl(true, Component.text(true));
         
         private final boolean value;
         private final Component explain;

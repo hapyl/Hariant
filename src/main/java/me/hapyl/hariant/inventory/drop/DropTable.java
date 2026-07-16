@@ -86,6 +86,10 @@ public class DropTable implements LootGenerator {
         return dropSummary;
     }
     
+    public void generateLootShowSummary(@NotNull PlayerProfile profile) {
+        this.generateLoot(profile).showSummary(profile);
+    }
+    
     @NotNull
     private DropTable.Content randomEntry() {
         final Random random = Hariant.getRandom();

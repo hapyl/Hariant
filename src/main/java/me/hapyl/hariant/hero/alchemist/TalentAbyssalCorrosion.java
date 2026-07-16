@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentAbyssalCorrosion extends TalentPassive {
     
-    public final @DisplayField Decimal instabilityDecrement = Decimal.ofPercentage(5);
-    public final @DisplayField Decimal instabilityDecrementThreshold = Decimal.ofValue(10);
+    public final @DisplayField Decimal abyssalCurseInstabilityDecrementThreshold = Decimal.ofValue(10);
+    public final @DisplayField Decimal abyssalCurseInstabilityDecrement = Decimal.ofPercentage(5);
     
     public final @DisplayField Decimal corrosionDecrementPerSecond = Decimal.ofValue(0.75);
     public final @DisplayField Decimal maximumCorrosion = Decimal.ofValue(100);
@@ -44,4 +44,5 @@ public final class TalentAbyssalCorrosion extends TalentPassive {
                          .append(Component.text("."))
         );
     }
+    
 }

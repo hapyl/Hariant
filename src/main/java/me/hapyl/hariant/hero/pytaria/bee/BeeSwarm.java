@@ -172,7 +172,7 @@ public class BeeSwarm extends HariantTickingTask {
     
     class BeeSwarmDamageSource extends DamageSourceImpl {
         BeeSwarmDamageSource(@Nullable HariantEntity source, double damage) {
-            super(talent, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponent.common(), Set.of(), damage, talent.elementalApplication.doubleValue());
+            super(talent.damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponent.ofCommon(), Set.of(), damage, talent.elementalApplication.doubleValue());
         }
     }
     

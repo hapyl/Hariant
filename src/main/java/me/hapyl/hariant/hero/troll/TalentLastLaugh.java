@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.troll;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
@@ -65,6 +66,9 @@ public final class TalentLastLaugh extends TalentPassive implements Listener {
         final HariantEntity entity = ev.getEntity();
         
         entity.die(DamageSource.death(DamageSourceIdentity.create(this, deathMessage)).source(player).build());
+        
+        // Progress achievement
+        AchievementRegistry.TROLL_LAUGHING_OUT_LOUD.progress(player.getProfile());
         
         // Fx
         player.playWorldSound(Sound.ENTITY_EVOKER_PREPARE_WOLOLO, 2.0f);

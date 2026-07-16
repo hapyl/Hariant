@@ -18,6 +18,8 @@ import me.hapyl.hariant.util.Hoverable;
 import me.hapyl.hariant.util.Timestamp;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,25 +27,35 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverable, ItemCreator, ArtifactHolder {
+public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverable, ItemCreator, ArtifactHolder, Holder {
+    
+    private static final Style HOLDER_STYLE = Style.style(Colors.GRAY, TextDecoration.UNDERLINED);
     
     private final PlayerDatabase playerDatabase;
     private final Hero hero;
     private final ArtifactMap artifactMap;
+    private final ArtifactFilter artifactFilter;
+    private final ArtifactLoadouts artifactLoadouts;
+    private final Component holderName;
     
     private @NotNull Timestamp timestamp;
-    private @NotNull ArtifactFilter artifactFilter;
     
     public HeroInstance(@NotNull PlayerDatabase playerDatabase, @NotNull Hero hero) {
         this.playerDatabase = playerDatabase;
         this.hero = hero;
         this.artifactMap = new ArtifactMap(this);
-        this.timestamp = Timestamp.ofNow();
         this.artifactFilter = new ArtifactFilter();
+        this.artifactLoadouts = new ArtifactLoadouts();
+        this.timestamp = Timestamp.ofNow();
+        this.holderName = Component.empty()
+                                   .append(Component.text("Equipped by ", HOLDER_STYLE))
+                                   .append(hero.asHeadComponent().style(HOLDER_STYLE))
+                                   .append(Component.text(" ", HOLDER_STYLE))
+                                   .append(hero.getName().style(HOLDER_STYLE));
     }
     
-    public @NotNull ArtifactMap getArtifactMap() {
-        return artifactMap;
+    public @NotNull ArtifactLoadouts getArtifactLoadouts() {
+        return artifactLoadouts;
     }
     
     @NotNull
@@ -74,9 +86,9 @@ public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverabl
         // Write artifacts
         document.put("artifacts", artifactMap.writeToNewDocument(playerDatabase, problemReporter));
         
-        // Write artifact filter
-        if (!artifactFilter.isEmpty()) {
-            document.put("artifact_filter", artifactFilter.writeToNewDocument(playerDatabase, problemReporter));
+        // Write artifact loadouts
+        if (!artifactLoadouts.isEmpty()) {
+            document.put("artifact_loadouts", artifactLoadouts.writeToNewDocument(playerDatabase, problemReporter));
         }
     }
     
@@ -88,8 +100,8 @@ public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverabl
         // Read artifacts
         artifactMap.read(playerDatabase, document.get("artifacts", new Document()), problemReporter);
         
-        // Read artifact filter
-        artifactFilter.read(playerDatabase, document.get("artifact_filter", new Document()), problemReporter);
+        // Read loadouts
+        artifactLoadouts.read(playerDatabase, document.get("artifact_loadouts", new Document()), problemReporter);
     }
     
     @Override
@@ -108,12 +120,12 @@ public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverabl
     @NotNull
     @Override
     public ItemBuilder createBuilder() {
-        final ItemBuilder builder = hero.createBuilder();
-        
-        // Append stats
-        // FIXME (xanyjl @ Tuesday, June 23) -> ?
-        
-        return builder;
+        return hero.createBuilder();
+    }
+    
+    @Override
+    public @NotNull Component getHolderName() {
+        return holderName;
     }
     
     @Override
@@ -137,13 +149,23 @@ public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverabl
     }
     
     @Override
-    public boolean isArtifactSetPieceBonusActive(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount) {
-        return artifactMap.isArtifactSetPieceBonusActive(artifactSet, pieceCount);
+    public @NotNull Stream<ItemArtifactInstance> streamArtifacts() {
+        return artifactMap.streamArtifacts();
+    }
+    
+    public @NotNull ArtifactFilter getArtifactFilter() {
+        // FIXME (xanyjl @ Saturday, July 4) -> Remove this from impl just keep it here and call hero#getArtifactFilter()
+        return artifactFilter;
     }
     
     @Override
     public @NotNull PieceCount countArtifactSetPieces(@NotNull ArtifactSet artifactSet) {
         return artifactMap.countArtifactSetPieces(artifactSet);
+    }
+    
+    @Override
+    public boolean isArtifactSetPieceBonusActive(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount) {
+        return artifactMap.isArtifactSetPieceBonusActive(artifactSet, pieceCount);
     }
     
     @Override
@@ -154,19 +176,6 @@ public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverabl
     @Override
     public @NotNull Map<? extends @NotNull AttributeType, ? extends @NotNull Double> sumArtifactAffixes() {
         return artifactMap.sumArtifactAffixes();
-    }
-    
-    @Override
-    public @NotNull Stream<ItemArtifactInstance> streamArtifacts() {
-        return artifactMap.streamArtifacts();
-    }
-    
-    public @NotNull ArtifactFilter getArtifactFilter() {
-        if (this.artifactFilter == null) {
-            this.artifactFilter = new ArtifactFilter();
-        }
-        
-        return this.artifactFilter;
     }
     
 }

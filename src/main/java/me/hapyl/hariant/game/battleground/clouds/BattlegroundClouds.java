@@ -2,6 +2,7 @@ package me.hapyl.hariant.game.battleground.clouds;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
@@ -58,7 +59,7 @@ public final class BattlegroundClouds extends BattlegroundImpl {
             if (!player.isDead() && player.y() < deathZoneY) {
                 player.die(damageSource);
                 
-                // TODO (xanyjl @ Saturday, May 30) -> Add achievement
+                AchievementRegistry.BEYOND_CLOUDS.progress(player.getProfile());
             }
         });
     }

@@ -7,7 +7,6 @@ import me.hapyl.eterna.module.inventory.menu.pattern.SlotPatternApplier;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
-import me.hapyl.hariant.lobby.MenuGameManagement;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +44,7 @@ public class MenuBattlegroundSelection extends Menu {
                     // Broadcast battleground change
                     HariantLogger.PREFIX_INFO.broadcastMessage(
                             Component.empty()
-                                     .append(playerProfile.getNameFormatted())
+                                     .append(profile.getNameFormatted())
                                      .append(Component.text(" selected "))
                                      .append(battleground.getName().color(Colors.GOLD))
                                      .append(Component.text("!"))

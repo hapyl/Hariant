@@ -31,7 +31,10 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
     
     private final double burnDamage = 20;
     
-    private final DeathMessage deathMessage = DeathMessage.createWithDefaultKiller("{player} burnt to death");
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.createWithDefaultKiller("{player} burnt to death")
+    );
     
     ElementalAnomalyBurn() {
         super(Key.ofString("burn"), Component.text("Burn"), ElementType.FIRE);
@@ -54,6 +57,11 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
         final double damage = this.calculateBurnDamage(source);
         
         entity.getAttributes().addModifier(new ElementalAnomalyBurnAttributeModifier(source != null ? source : entity, duration, damage));
+    }
+    
+    @Override
+    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
+        return entity.getAttributes().hasModifier(modifierKey);
     }
     
     public int calculateBurnDuration(@Nullable HariantEntity source) {
@@ -110,7 +118,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
     public class ElementalAnomalyBurnDamageSource extends DamageSourceImpl {
         ElementalAnomalyBurnDamageSource(@Nullable HariantEntity source, double damage) {
             super(
-                    DamageSourceIdentity.create(ElementalAnomalyBurn.this, deathMessage),
+                    damageSourceIdentity,
                     source,
                     DamageType.ANOMALY,
                     ElementType.FIRE,

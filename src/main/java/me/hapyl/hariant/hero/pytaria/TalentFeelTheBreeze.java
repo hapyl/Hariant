@@ -5,6 +5,8 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.hero.pytaria.bee.BeeSwarm;
@@ -35,6 +37,11 @@ public final class TalentFeelTheBreeze extends TalentUltimate {
     public final @DisplayField AttributeScaling beeDamageIvy = AttributeScaling.create(AttributeType.ATTACK, 204);
     
     public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 100);
+    
+    public final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.create("{player} felt [{killer}'s] breeze")
+    );
     
     public TalentFeelTheBreeze(@NotNull Key key) {
         super(key, Component.text("Feel the Breeze"), Icon.ofTexture("d4579f1ea3864269c2148d827c0887b0c5ed43a975b102a01afb644efb85ccfd"), UltimateResourceType.ENERGY, 60);

@@ -7,10 +7,12 @@ import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.eterna.module.util.Compute;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.hero.ArtifactLoadouts;
 import me.hapyl.hariant.hero.HeroInstance;
-import me.hapyl.hariant.inventory.item.artifact.set.ArtifactSet;
 import me.hapyl.hariant.inventory.item.artifact.ArtifactSlot;
 import me.hapyl.hariant.inventory.item.artifact.ItemArtifactInstance;
+import me.hapyl.hariant.inventory.item.artifact.set.ArtifactSet;
+import me.hapyl.hariant.menu.artifact.MenuArtifactLoadouts;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -23,7 +25,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 
-public class MenuHeroArtifactEquip extends MenuHeroAbstract {
+public class MenuHeroArtifactEquip extends AbstractMenuHero {
     
     private static final Map<ElementType, ItemStack> ELEMENTAL_BAR_ICONS = Map.of(
             ElementType.PHYSICAL, Icon.createIcon(Material.WHITE_STAINED_GLASS_PANE),
@@ -44,12 +46,9 @@ public class MenuHeroArtifactEquip extends MenuHeroAbstract {
             ArtifactSlot.SLOT_4, new int[] { 16, 34, 43 }
     );
     
-    private final HeroInstance heroInstance;
-    
     public MenuHeroArtifactEquip(@NotNull Player player, @NotNull HeroInstance heroInstance) {
         super(player, heroInstance, Category.ARTIFACTS);
         
-        this.heroInstance = heroInstance;
         this.openMenu();
     }
     
@@ -78,7 +77,7 @@ public class MenuHeroArtifactEquip extends MenuHeroAbstract {
                                 .addLore(ButtonComponents.left("select artifact"))
                                 .asIcon(),
                         PlayerMenuAction.builder()
-                                        .left(player -> new MenuHeroArtifactSelect(player, heroInstance, artifactSlot, null))
+                                        .left(player -> new MenuHeroArtifactSelection(player, heroInstance, artifactSlot, null))
                                         .build()
                 );
             }
@@ -91,7 +90,7 @@ public class MenuHeroArtifactEquip extends MenuHeroAbstract {
                                 .addLore(ButtonComponents.right("unequip"))
                                 .asIcon(),
                         PlayerMenuAction.builder()
-                                        .left(player -> new MenuHeroArtifactSelect(player, heroInstance, artifactSlot, artifact))
+                                        .left(player -> new MenuHeroArtifactSelection(player, heroInstance, artifactSlot, artifact))
                                         .right(player -> {
                                             heroInstance.unsetArtifact(artifact);
                                             this.openMenu();
@@ -131,24 +130,70 @@ public class MenuHeroArtifactEquip extends MenuHeroAbstract {
         });
         
         // Unselect all
-        if (!seenArtifactSetsOnSlots.isEmpty()) {
-            setFooter(
-                    6,
-                    new ItemBuilder(Material.GOLDEN_HORSE_ARMOR)
-                            .setName(Component.text("Unselect All", Colors.RED))
-                            .addLore()
-                            .addWrappedLore(Component.text("Unselects all artifacts currently equipped by this hero."))
-                            .addLore()
-                            .addLore(ButtonComponents.left("unselect"))
-                            .asIcon(),
-                    PlayerMenuAction.of(player -> {
-                        heroInstance.unsetArtifacts();
-                        this.openMenu();
-                        
-                        player.playSound(player, Sound.ITEM_ARMOR_EQUIP_CHAIN, 3, 0.0f);
-                    })
-            );
+        final boolean empty = seenArtifactSetsOnSlots.isEmpty();
+        
+        setFooter(
+                2,
+                new ItemBuilder(empty ? Material.BUCKET : Material.LAVA_BUCKET)
+                        .setName(Component.text("Unselect All", Colors.RED))
+                        .addLore()
+                        .addWrappedLore(Component.text("Unselects all artifacts currently equipped by this hero."))
+                        .addLore()
+                        .addLore(empty ? Component.text("No artifacts equipped!", Colors.RED) : ButtonComponents.left("unselect"))
+                        .asIcon(),
+                PlayerMenuAction.of(player -> {
+                    if (empty) {
+                        return;
+                    }
+                    
+                    this.heroInstance.unsetArtifacts();
+                    this.openMenu();
+                    
+                    player.playSound(player, Sound.ITEM_ARMOR_EQUIP_CHAIN, 3, 0.0f);
+                })
+        );
+        
+        // Artifact loadouts
+        setFooter(
+                6,
+                new ItemBuilder(Material.ARMOR_STAND)
+                        .setName(Component.text("Artifact Loadouts"))
+                        .addLore()
+                        .addWrappedLore(Component.text("Quickly equip artifacts from previously defined sets."))
+                        .addLore()
+                        .addLore(ButtonComponents.left("open loadouts"))
+                        .asIcon(),
+                PlayerMenuAction.of(player -> new MenuArtifactLoadouts(player, heroInstance, MenuArtifactLoadouts.ButtonHandler.equip()))
+        );
+        
+        // Save loadout button
+        final long numberOfArtifactEquipped = seenArtifactSetsOnSlots.values().stream().mapToLong(Set::size).sum();
+        
+        // If artifacts are equipped on each slot, add a "Save Loadout" button
+        if (numberOfArtifactEquipped == ArtifactSlot.LENGTH) {
+            // Make sure there isn't identical loadout
+            final ArtifactLoadouts artifactLoadouts = heroInstance.getArtifactLoadouts();
+            final @NotNull ItemArtifactInstance[] artifacts = heroInstance.artifactsAsArray();
+            
+            if (!artifactLoadouts.doesIdenticalExist(artifacts)) {
+                setFooter(
+                        7,
+                        new ItemBuilder(Material.HONEYCOMB)
+                                .setName(Component.text("Save to Loadout"))
+                                .addLore()
+                                .addWrappedLore(Component.text("Saves this artifact configuration to a loadout that can be equipped anytime with a click of a button."))
+                                .addLore()
+                                .addLore(ButtonComponents.left("save"))
+                                .glow()
+                                .asIcon(),
+                        PlayerMenuAction.of(player -> {
+                            new MenuArtifactLoadouts(player, heroInstance, MenuArtifactLoadouts.ButtonHandler.save(artifacts));
+                        })
+                );
+            }
+            
         }
+      
     }
     
 }

@@ -1,34 +1,34 @@
 package me.hapyl.hariant.npc;
 
-import me.hapyl.eterna.module.component.ButtonComponents;
-import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
-import me.hapyl.eterna.module.inventory.menu.ChestSize;
-import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
-import me.hapyl.eterna.module.inventory.menu.pattern.SlotPattern;
-import me.hapyl.eterna.module.inventory.menu.pattern.SlotPatternApplier;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.npc.ClickType;
 import me.hapyl.eterna.module.npc.NpcProperties;
 import me.hapyl.eterna.module.npc.appearance.AppearanceBuilder;
 import me.hapyl.eterna.module.player.dialog.entry.DialogEntry;
+import me.hapyl.eterna.module.player.dialog.entry.DialogEntryOptions;
+import me.hapyl.eterna.module.player.dialog.entry.OptionIndex;
 import me.hapyl.eterna.module.reflect.Skin;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.dialog.HariantDialog;
-import me.hapyl.hariant.inventory.item.ItemRegistry;
-import me.hapyl.hariant.inventory.item.artifact.ItemArtifact;
-import me.hapyl.hariant.menu.Menu;
+import me.hapyl.hariant.inventory.drop.Amount;
+import me.hapyl.hariant.inventory.drop.DropTable;
+import me.hapyl.hariant.inventory.drop.Droppable;
+import me.hapyl.hariant.inventory.item.ResourceRegistry;
+import me.hapyl.hariant.menu.artifact.MenuArtifactCreation;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class HariantNpcMrNerd extends HariantNpc {
     
+    private final DropTable dropTable;
     private final HariantDialog dialogFirstMeeting;
-    private final HariantDialog dialogCreating;
+    
     
     public HariantNpcMrNerd(@NotNull Key key) {
         super(
@@ -47,8 +47,11 @@ public class HariantNpcMrNerd extends HariantNpc {
         
         properties.setLookAtClosePlayerDistance(8);
         
+        dropTable = DropTable.create(
+                List.of(Droppable.ofResource(ResourceRegistry.ARTIFACT_ARTIFICER, 1, Amount.fixed(50))),
+                Amount.fixed(1)
+        );
         dialogFirstMeeting = new DialogFirstMeeting();
-        dialogCreating = new DialogArtifactCreation();
     }
     
     @Override
@@ -57,13 +60,21 @@ public class HariantNpcMrNerd extends HariantNpc {
             dialogFirstMeeting.start(player);
         }
         else {
-            new ArtifactCreatingMenu(player);
+            new MenuArtifactCreation(player);
         }
     }
     
+    @Override
+    public void sendMessage(@NotNull Player player, @NotNull Component message) {
+        super.sendMessage(player, message);
+        
+        player.playSound(player, Sound.ENTITY_VILLAGER_TRADE, 3, 1.25f);
+    }
+    
     private class DialogFirstMeeting extends HariantDialog {
+        
         DialogFirstMeeting() {
-            super(Key.ofString("mr_nerd_first_meeting"), Component.text("Mr. Nerd's Dialog"), false);
+            super(Key.ofString("mr_nerd_first_meeting_new"), Component.text("Mr. Nerd's Dialog"), false);
             
             addEntry(
                     DialogEntry.ofNpc(
@@ -72,79 +83,52 @@ public class HariantNpcMrNerd extends HariantNpc {
                             Component.text("I'm the temporary overseer of this place, {npc_name}!"),
                             Component.text("I posses the best kind of power - knowledge!"),
                             Component.empty()
-                                     .append(Component.text("I can use the power of knowledge to create "))
+                                     .append(Component.text("I can use the power of knowledge to artifice "))
                                      .append(Component.text("Artifacts", Colors.GOLD))
                                      .append(Component.text("!")),
-                            Component.text("And since I'm so smart, so handsome, and so successful, I will do that for free!"),
-                            Component.text("Talk to me again to open the Artifact Creating Menu!")
+                            Component.empty()
+                                     .append(Component.text("Artificing is a complicated process that requires a rare material - "))
+                                     .append(ResourceRegistry.ARTIFACT_ARTIFICER.getName())
+                                     .append(Component.text("!"))
                     )
             );
-        }
-    }
-    
-    // TODO (xanyjl @ Friday, June 26) -> This needs to be a Page menu later
-    private class ArtifactCreatingMenu extends Menu {
-        public ArtifactCreatingMenu(@NotNull Player player) {
-            super(player, () -> Component.text("Artifact Creating Menu"), ChestSize.SIZE_6);
             
-            this.openMenu();
-        }
-        
-        @Override
-        public void updateMenu() {
-            final SlotPatternApplier applier = newSlotPatternApplier(SlotPattern.INNER_LEFT_TO_RIGHT, ChestSize.SIZE_2);
-            
-            ItemRegistry.getRegistry().values()
-                        .stream()
-                        .filter(ItemArtifact.class::isInstance)
-                        .map(ItemArtifact.class::cast)
-                        .forEach(item -> {
-                            final ItemBuilder builder = item.createBuilder();
-                            
-                            builder.addLore();
-                            builder.addLore(Component.text("                                            ", Colors.DARK_GRAY, TextDecoration.STRIKETHROUGH));
-                            builder.addLore();
-                            builder.addLore(ButtonComponents.left("create one artifact"));
-                            builder.addLore(ButtonComponents.right("create ten artifacts"));
-                            builder.addLore(ButtonComponents.middle("create twenty artifacts"));
-                            
-                            applier.add(
-                                    builder.asIcon(),
-                                    PlayerMenuAction.builder()
-                                                    .left(player -> createArtifacts(item, 1))
-                                                    .right(player -> createArtifacts(item, 10))
-                                                    .middle(player -> createArtifacts(item, 20))
-                                                    .build()
-                            );
-                        });
-            
-            applier.apply();
-        }
-        
-        private void createArtifacts(@NotNull ItemArtifact artifact, int amount) {
-            final PlayerDatabase database = Hariant.getPlayerDatabase(player);
-            
-            for (int i = 0; i < amount; i++) {
-                database.inventory.createItem(artifact);
-            }
-            
-            dialogCreating.startForcefully(player);
-            closeMenu();
-        }
-    }
-    
-    private class DialogArtifactCreation extends HariantDialog {
-        DialogArtifactCreation() {
-            super(Key.ofString("mr_nerd_artifact_creation"), Component.text("Artifact Creation"), true);
+            addEntry(
+                    DialogEntry.ofSelectableOptions(DialogEntry.ofNpc(HariantNpcMrNerd.this, Component.text("As long as you got the materials, I can always artifice artifacts for you!")))
+                               .setOption(
+                                       OptionIndex.OPTION_1,
+                                       DialogEntryOptions.builder(Component.text("I don't have any."))
+                                                         .append(DialogEntry.ofNpc(HariantNpcMrNerd.this, Component.text("That's a shame...")))
+                                                         .advanceDialog(true)
+                               )
+                               .setOption(
+                                       OptionIndex.OPTION_2,
+                                       DialogEntryOptions.builder(Component.text("Aren't you so smart, so handsome and so successful? Can't you do that for free?"))
+                                                         .append(DialogEntry.ofNpc(
+                                                                 HariantNpcMrNerd.this,
+                                                                 Component.text("I am indeed so smart, so handsome and so successful!"),
+                                                                 Component.text("But even a person as me cannot do the impossible...")
+                                                         ))
+                                                         .advanceDialog(true)
+                               )
+            );
             
             addEntry(
                     DialogEntry.ofNpc(
                             HariantNpcMrNerd.this,
-                            Component.text("ᔑリ↸ ℸ ̣ ⍑⚍ᓭ ╎ ⚍ᓭᒷ ℸ ̣ ⍑ᒷ !¡\uD835\uDE79∴ᒷ∷ \uD835\uDE79⎓ ꖌリ\uD835\uDE79∴ꖎᒷ↸⊣ᒷ", Colors.LIGHT_PURPLE),
-                            Component.text("ℸ ̣ \uD835\uDE79 ᓵ∷ᒷᔑℸ ̣ ᒷ ∴⍑ᔑℸ ̣  ||\uD835\uDE79⚍ ↸ᒷᓭ╎∷ᒷ!", Colors.LIGHT_PURPLE),
-                            Component.text("Done, enjoy!")
+                            Component.text("Anyways, today is your lucky day!"),
+                            Component.text("Because I have some spare for you, make sure to use the wisely!"),
+                            Component.text("Talk to me again to open the Artifact Artificing Menu!")
                     )
             );
         }
+        
+        @Override
+        public void complete(@NotNull Player player) {
+            super.complete(player);
+            
+            dropTable.generateLootShowSummary(Hariant.getPlayerProfile(player));
+        }
     }
+    
 }

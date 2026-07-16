@@ -10,7 +10,9 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageSource;
+import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageType;
+import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -52,6 +54,11 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
     
     private final ParticleBuilder particleFx = ParticleBuilder.dustColorTransition(Color.fromRGB(247, 181, 47), Color.fromRGB(250, 224, 170), 1);
     private final ProgressBar progressBar = new ProgressBar("⚡", 20, Style.style(Colors.ELEMENT_ELECTRIC));
+    
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.create("{player} was electrified [by {killer}]")
+    );
     
     public TalentElectrify(@NotNull Key key) {
         super(key, Component.text("Electrify"), Icon.ofMaterial(Material.BLAZE_POWDER), UltimateResourceType.ENERGY, 100);
@@ -201,14 +208,14 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
         
         ElectrifyArrowDamageSource(@NotNull HariantEntity attacker) {
             // The one defines the arrow damage, which shouldn't actually deal damage
-            super(TalentElectrify.this, attacker, 1, 0);
+            super(damageSourceIdentity, attacker, 1, 0);
             
-            this.damageSource = DamageSource.builder(TalentElectrify.this, explosionDamage.getScaledValue(attacker))
+            this.damageSource = DamageSource.builder(damageSourceIdentity, explosionDamage.getScaledValue(attacker))
                                             .source(attacker)
                                             .elementType(ElementType.ELECTRIC)
                                             .units(elementalApplication.doubleValue())
                                             .damageType(DamageType.ULTIMATE)
-                                            .components(DamageComponent.common())
+                                            .components(DamageComponent.ofCommon())
                                             .build();
         }
         

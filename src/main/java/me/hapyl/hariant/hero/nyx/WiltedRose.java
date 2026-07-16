@@ -112,7 +112,7 @@ public final class WiltedRose extends HariantTickingTask {
     
     public static class WilterRoseDamageSource extends DamageSourceImpl {
         WilterRoseDamageSource(@Nullable HariantEntity source, double damage, double elementalApplication) {
-            super(DAMAGE_SOURCE_IDENTITY, source, DamageType.TALENT, ElementType.AETHER, DamageComponent.common(), Set.of(), damage, elementalApplication);
+            super(DAMAGE_SOURCE_IDENTITY, source, DamageType.TALENT, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damage, elementalApplication);
         }
     }
     

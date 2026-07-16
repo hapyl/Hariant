@@ -1,4 +1,4 @@
-package me.hapyl.hariant.profile.menu;
+package me.hapyl.hariant.menu;
 
 import me.hapyl.eterna.module.component.ButtonComponents;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
@@ -6,11 +6,13 @@ import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantLogger;
+import me.hapyl.hariant.achievement.AchievementCategory;
 import me.hapyl.hariant.inventory.item.resource.ResourceRuby;
-import me.hapyl.hariant.menu.Menu;
+import me.hapyl.hariant.menu.achievement.MenuAchievement;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class MenuPlayerProfile extends Menu {
@@ -31,7 +33,7 @@ public class MenuPlayerProfile extends Menu {
                 new ItemBuilder(Material.CHEST)
                         .setName(Component.text("Inventory"))
                         .addLore()
-                        .addWrappedLore(Component.text("Browse your items."))
+                        .addWrappedLore(Component.text("Browse and manage your items and resources."))
                         .addLore()
                         .addLore(COMING_SOON)
                         .asIcon(),
@@ -57,17 +59,8 @@ public class MenuPlayerProfile extends Menu {
         
         setItem(
                 24,
-                new ItemBuilder(Material.DIAMOND)
-                        .setName(Component.text("Achievements"))
-                        .addLore()
-                        .addWrappedLore(
-                                Component.empty()
-                                         .append(Component.text("Complete unique achievements to earn "))
-                                         .append(ResourceRuby.PREFIX)
-                                         .append(Component.text(" ruby ", Colors.RESOURCE_RUBY))
-                                         .append(Component.text(" rewards!"))
-                        )
-                        .asIcon()
+                createAchievementItem(),
+                PlayerMenuAction.of(player -> new MenuAchievement(player, AchievementCategory.GAMEPLAY))
         );
         
         setFooter(
@@ -81,6 +74,33 @@ public class MenuPlayerProfile extends Menu {
                         .asIcon(),
                 PlayerMenuAction.of(MenuSettings::new)
         );
+    }
+    
+    private @NotNull ItemStack createAchievementItem() {
+        final ItemBuilder builder = new ItemBuilder(Material.DIAMOND)
+                .setName(Component.text("Achievements"))
+                .addLore()
+                .addWrappedLore(
+                        Component.empty()
+                                 .append(Component.text("Complete achievements to earn "))
+                                 .appendNewline()
+                                 .append(ResourceRuby.PREFIX)
+                                 .appendSpace()
+                                 .append(Component.text("rubies", Colors.RESOURCE_RUBY))
+                                 .append(Component.text("!"))
+                );
+        
+        final int unclaimedRewards = profile.getDatabase().achievements.countUnclaimedRewards();
+        
+        if (unclaimedRewards > 0) {
+            builder.addLore();
+            builder.addLore(Component.text("You have %s unclaimed rewards!".formatted(unclaimedRewards), Colors.GREEN));
+        }
+        
+        builder.addLore();
+        builder.addLore(ButtonComponents.left("open achievements menu"));
+        
+        return builder.asIcon();
     }
     
 }

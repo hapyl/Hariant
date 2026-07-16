@@ -1,4 +1,4 @@
-package me.hapyl.hariant.profile.menu;
+package me.hapyl.hariant.menu;
 
 import me.hapyl.eterna.module.component.ButtonComponents;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
@@ -7,8 +7,6 @@ import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
-import me.hapyl.hariant.menu.Menu;
-import me.hapyl.hariant.menu.MenuReturn;
 import me.hapyl.hariant.profile.setting.Setting;
 import me.hapyl.hariant.profile.setting.SettingCategory;
 import me.hapyl.hariant.profile.setting.SettingEntry;

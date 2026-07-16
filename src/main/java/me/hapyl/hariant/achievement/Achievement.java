@@ -3,18 +3,17 @@ package me.hapyl.hariant.achievement;
 import me.hapyl.eterna.module.annotate.EventLike;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
+import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
-import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.database.PlayerDatabase;
+import me.hapyl.hariant.inventory.item.ItemCreator;
+import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.registry.Registrable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public interface Achievement extends Keyed, Named, Described, Registrable {
-    
-    @NotNull Component HIDDEN_ACHIEVEMENT_NAME = Component.text("???", Colors.ERROR);
+public interface Achievement extends Keyed, Named, Described, Registrable, ItemCreator {
     
     @Override
     @NotNull Key getKey();
@@ -24,6 +23,9 @@ public interface Achievement extends Keyed, Named, Described, Registrable {
     
     @Override
     @NotNull Component getDescription();
+    
+    @Override
+    @NotNull ItemBuilder createBuilder();
     
     double getGoal();
     
@@ -41,12 +43,6 @@ public interface Achievement extends Keyed, Named, Described, Registrable {
     
     boolean isProgressCapped();
     
-    default @NotNull Component getNameOrQuestionMarks(@NotNull PlayerDatabase playerDatabase) {
-        return this.isHidden() && !playerDatabase.achievements.hasCompleted(this)
-               ? HIDDEN_ACHIEVEMENT_NAME
-               : this.getName();
-    }
-    
     @EventLike
     void onProgress(@NotNull Player player, @NotNull AchievementProgress achievementProgress, double progressBefore, double progress);
     
@@ -55,4 +51,13 @@ public interface Achievement extends Keyed, Named, Described, Registrable {
     
     @EventLike
     void onRewardsClaimed(@NotNull Player player, @NotNull AchievementProgress achievementProgress);
+    
+    default void progress(@NotNull PlayerProfile profile, double progress) {
+        profile.getDatabase().achievements.progress(this, progress);
+    }
+    
+    default void progress(@NotNull PlayerProfile profile) {
+        this.progress(profile, 1);
+    }
+    
 }

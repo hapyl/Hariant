@@ -23,7 +23,7 @@ public class GameInstanceImpl implements GameInstance {
     private final EnumBattleground battleground;
     private final TeamDataMap teamDataMap;
     
-    private GameInstanceState state;
+    private @NotNull GameInstanceState state;
     private int timeLeft;
     
     public GameInstanceImpl(@NotNull GameType gameType, @NotNull EnumBattleground battleground) {

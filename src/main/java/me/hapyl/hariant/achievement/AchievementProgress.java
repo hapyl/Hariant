@@ -112,6 +112,10 @@ public final class AchievementProgress implements MongoSerializable {
         this.rewardsClaimedAt = MongoCodecs.ofTimestamp().read(document, "rewards_claimed_at").orElse(null);
     }
     
+    public boolean hasCompletedButNotClaimedRewards() {
+        return completedAt != null && rewardsClaimedAt == null;
+    }
+    
     static @NotNull AchievementProgress fromDocument(@NotNull Achievement achievement, @NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
         final AchievementProgress data = new AchievementProgress(achievement, database);
         data.read(database, document, problemReporter);

@@ -45,6 +45,12 @@ public final class TalentQuantumWard extends Talent implements Listener {
     
     private final @DisplayField AttributeScaling wardStrength = AttributeScaling.create(AttributeType.DEFENSE, 180);
     
+    private final @DisplayField Decimal splitDamageReductionDefenseMinimum = Decimal.ofValue(300);
+    private final @DisplayField Decimal splitDamageReductionPerDefense = Decimal.ofValue(50);
+    
+    private final @DisplayField Decimal splitDamageReductionPercentage = Decimal.ofPercentage(10);
+    private final @DisplayField Decimal splitDamageReductionPercentageLimit = Decimal.ofPercentage(50);
+    
     public TalentQuantumWard(@NotNull Key key) {
         super(key, Component.text("Quantum Ward"), Icon.ofMaterial(Material.POPPED_CHORUS_FRUIT));
         
@@ -70,6 +76,19 @@ public final class TalentQuantumWard extends Talent implements Listener {
                          .append(Definition.QUANTUM_ENERGY)
                          .append(Component.text(" once every "))
                          .append(quantumEnergyGenerationCooldown)
+                         .append(Component.text("."))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("For every "))
+                         .append(splitDamageReductionPerDefense)
+                         .appendSpace()
+                         .append(AttributeType.DEFENSE)
+                         .append(Component.text(" above "))
+                         .append(splitDamageReductionDefenseMinimum)
+                         .append(Component.text(", the split damage is reduced by "))
+                         .append(splitDamageReductionPercentage)
+                         .append(Component.text(", up to "))
+                         .append(splitDamageReductionPercentageLimit)
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
@@ -129,7 +148,8 @@ public final class TalentQuantumWard extends Talent implements Listener {
         
         // Calculate the damage and split it
         final double damage = ev.getDamage();
-        final double damageToDealToBlastKnight = Math.max(0, damage * damageSplit.doubleValue());
+        final double damageReductionMultiplier = calculateDamageReductionMultiplier(player);
+        final double damageToDealToBlastKnight = Math.max(0, damage * damageSplit.doubleValue() * damageReductionMultiplier);
         
         final double wardStrengthAfterTakingDamage = stoneCastle.damage(damageToDealToBlastKnight);
         final double damageReduction = damage - (damage * (1 - damageSplit.doubleValue()) + Math.max(0, -wardStrengthAfterTakingDamage));
@@ -150,6 +170,16 @@ public final class TalentQuantumWard extends Talent implements Listener {
             heroData.removeStoneCastle();
             player.setCooldown(this);
         }
+    }
+    
+    public double calculateDamageReductionMultiplier(@NotNull HariantPlayer player) {
+        final double defense = player.getAttributes().get(AttributeType.DEFENSE);
+        
+        return Math.min(
+                (int) (Math.max(0, defense - splitDamageReductionDefenseMinimum.intValue()) / splitDamageReductionPerDefense.intValue()) * splitDamageReductionPercentage.doubleValue(),
+                splitDamageReductionPercentageLimit.doubleValue()
+        );
+        
     }
     
     public static class DamageSourceStoneCastle extends DamageSourceImpl {
