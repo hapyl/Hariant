@@ -1,6 +1,6 @@
 package me.hapyl.hariant.element;
 
-import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.HariantEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +11,6 @@ public interface ElementHandler {
     
     double getElementalUnit(@NotNull ElementType elementType);
     
-    void triggerAnomaly(@NotNull ElementalAnomaly elementalAnomaly, @Nullable HariantEntity source);
+    void triggerAnomaly(@NotNull ElementalAnomalyType elementalAnomaly, @Nullable HariantEntity source);
     
 }

@@ -10,6 +10,8 @@ import me.hapyl.hariant.database.problem.Problem;
 import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializableConstructor;
 import me.hapyl.hariant.database.serialize.codec.MongoCodecs;
+import me.hapyl.hariant.inventory.adder.Adder;
+import me.hapyl.hariant.inventory.adder.AdderError;
 import me.hapyl.hariant.inventory.item.*;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +32,98 @@ public class HariantInventory extends PlayerDatabaseEntry {
         
         this.items = Maps.newHashMap();
         this.materials = Maps.newHashMap();
+    }
+    
+    // *-* Resources *-* //
+    
+    public boolean hasResource(@NotNull Resource resource, int amount) {
+        return materials.getOrDefault(resource, 0) >= amount;
+    }
+    
+    public int getResource(@NotNull Resource resource) {
+        return materials.getOrDefault(resource, 0);
+    }
+    
+    public boolean hasEnoughInventorySpace(@NotNull Resource resource) {
+        return this.getResource(resource) < resource.maxStackSize();
+    }
+    
+    public boolean canAddResource(@NotNull Resource resource, int amount) {
+        return getResource(resource) + amount < resource.maxStackSize();
+    }
+    
+    public void addResource(@NotNull Resource resource, int amount) {
+        materials.compute(resource, (_resource, _amount) -> {
+            // Increment the value and clamp between `0` - `maxStackSize()`
+            return Math.clamp((_amount != null ? _amount : 0) + amount, 0, resource.maxStackSize());
+        });
+    }
+    
+    public void removeResource(@NotNull Resource resource, int amount) {
+        this.addResource(resource, -amount);
+    }
+    
+    // *-* Items *-* //
+    
+    public @NotNull ItemInstance createItem(@NotNull Item item) {
+        final ItemInstance itemInstance = item.newInstance(database, UUID.randomUUID());
+        itemInstance.onInstanceCreated();
+        
+        items.put(itemInstance.getUuid(), itemInstance);
+        
+        return itemInstance;
+    }
+    
+    public boolean destroyItem(@NotNull UUID uuid) {
+        final ItemInstance destroyedItem = items.remove(uuid);
+        
+        if (destroyedItem != null) {
+            destroyedItem.onInstanceDestroyed();
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public @NotNull <I extends Resource> Adder<I, I> adderOfResource(@NotNull I resource, int amount) {
+        final int totalAmount = materials.getOrDefault(resource, 0);
+        
+        if ((materials.size() + (totalAmount == 0 ? 1 : 0)) > resource.getCategory().getCapacity() || totalAmount + amount > resource.maxStackSize()) {
+            return Adder.ofError(AdderError.INVENTORY_FULL);
+        }
+        
+        this.addResource(resource, amount);
+        
+        return Adder.ofResult(resource);
+    }
+    
+    public @NotNull <I extends Item> Adder<I, ItemInstance> adderOfItem(@NotNull I item) {
+        final long totalItems = numberOfItems(item);
+        
+        if (totalItems + 1 > item.getCategory().getCapacity()) {
+            return Adder.ofError(AdderError.INVENTORY_FULL);
+        }
+        
+        return Adder.ofResult(this.createItem(item));
+    }
+    
+    @NotNull
+    public <I extends ItemInstance> Optional<I> getItemByUuid(@NotNull UUID uuid, @NotNull Class<I> instanceClass) {
+        final ItemInstance item = items.get(uuid);
+        
+        return instanceClass.isInstance(item) ? Optional.of(instanceClass.cast(item)) : Optional.empty();
+    }
+    
+    public @NotNull Stream<? extends ItemInstance> streamItems() {
+        return items.values().stream();
+    }
+    
+    public <I extends ItemInstance> @NotNull Stream<I> streamItemsOfType(@NotNull Class<I> instanceClass) {
+        return this.streamItems().filter(instanceClass::isInstance).map(instanceClass::cast);
+    }
+    
+    public long numberOfItems(@NotNull Item item) {
+        return this.streamItems().filter(i -> i.getOrigin().equals(item)).count();
     }
     
     @Override
@@ -106,69 +200,6 @@ public class HariantInventory extends PlayerDatabaseEntry {
             
             materials.put(resource, amount);
         });
-    }
-    
-    // *-* Resources *-* //
-    
-    public boolean hasResource(@NotNull Resource resource, int amount) {
-        return materials.getOrDefault(resource, 0) >= amount;
-    }
-    
-    public int getResource(@NotNull Resource resource) {
-        return materials.getOrDefault(resource, 0);
-    }
-    
-    public boolean canAddResource(@NotNull Resource resource, int amount) {
-        return getResource(resource) + amount < resource.maxStackSize();
-    }
-    
-    public void addResource(@NotNull Resource resource, int amount) {
-        materials.compute(resource, (_resource, _amount) -> {
-            // Increment the value and clamp between `0` - `maxStackSize()`
-            return Math.clamp((_amount != null ? _amount : 0) + amount, 0, resource.maxStackSize());
-        });
-    }
-    
-    public void removeResource(@NotNull Resource resource, int amount) {
-        this.addResource(resource, -amount);
-    }
-    
-    // *-* Items *-* //
-    
-    public @NotNull ItemInstance createItem(@NotNull Item item) {
-        // TODO (xanyjl @ Tuesday, June 23) -> Add a check whether the item can be added
-        
-        final ItemInstance itemInstance = item.newInstance(database, UUID.randomUUID());
-        itemInstance.onInstanceCreated();
-        
-        items.put(itemInstance.getUuid(), itemInstance);
-        
-        return itemInstance;
-    }
-    
-    public boolean destroyItem(@NotNull UUID uuid) {
-        final ItemInstance destroyedItem = items.remove(uuid);
-        
-        if (destroyedItem != null) {
-            destroyedItem.onInstanceDestroyed();
-            return true;
-        }
-        
-        return false;
-    }
-    
-    @NotNull
-    public <I extends ItemInstance> Optional<I> getItemByUuid(@NotNull UUID uuid, @NotNull Class<I> instanceClass) {
-        final ItemInstance item = items.get(uuid);
-        
-        return instanceClass.isInstance(item) ? Optional.of(instanceClass.cast(item)) : Optional.empty();
-    }
-    
-    @NotNull
-    public <I extends ItemInstance> Stream<I> getItemsByClass(@NotNull Class<I> instanceClass) {
-        return items.values().stream()
-                    .filter(instanceClass::isInstance)
-                    .map(instanceClass::cast);
     }
     
 }

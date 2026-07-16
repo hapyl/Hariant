@@ -89,7 +89,7 @@ public class BattlegroundImpl implements Battleground {
             
             features.forEach(feature -> {
                 builder.addLore(Component.space().append(feature.getName().color(Colors.SUCCESS)));
-                builder.addWrappedLore(feature.getDescription(), HariantConstants.COMPONENT_STYLER_DESCRIPTION);
+                builder.addWrappedLore(feature.getDescription(), HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_2);
                 builder.addLore();
             });
         }
@@ -115,7 +115,7 @@ public class BattlegroundImpl implements Battleground {
                                  .append(Component.text("  ● ", Colors.DARK_GRAY))
                                  .append(content.getName())
                                  .appendSpace()
-                                 .append(amount.amount() == 1 ? Component.empty() : amount.asComponent().color(Colors.GRAY))
+                                 .append(amount.asComponent().color(Colors.GRAY))
                 );
             });
             
@@ -127,7 +127,7 @@ public class BattlegroundImpl implements Battleground {
                 Component.empty()
                          .append(Component.text("At least ", Colors.DARK_GRAY))
                          .append(dropTable.getRolls().asComponent().color(Colors.DARK_GRAY))
-                         .append(Component.text(" non-guaranteed items is guaranteed to drop!", Colors.DARK_GRAY))
+                         .append(Component.text(" non-guaranteed items are guaranteed to drop!", Colors.DARK_GRAY))
         );
         
         return builder;

@@ -8,28 +8,22 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DamageSourceIdentity extends Keyed, Named {
     
-    @NotNull
-    DamageSourceIdentity COMMAND = create(Key.ofString("command"), Component.text("Command"), DeathMessage.create("{player} was killed [by {killer}]"));
+    @NotNull DamageSourceIdentity COMMAND = create(Key.ofString("command"), Component.text("Command"), DeathMessage.create("{player} was killed [by {killer}]"));
     
     @Override
-    @NotNull
-    Key getKey();
+    @NotNull Key getKey();
     
     @Override
-    @NotNull
-    Component getName();
+    @NotNull Component getName();
     
-    @NotNull
-    DeathMessage getDeathMessage();
+    @NotNull DeathMessage getDeathMessage();
     
-    @NotNull
-    static DamageSourceIdentity create(@NotNull Key key, @NotNull Component name, @NotNull DeathMessage deathMessage) {
+    static @NotNull DamageSourceIdentity create(@NotNull Key key, @NotNull Component name, @NotNull DeathMessage deathMessage) {
         return new DamageSourceIdentityImpl(key, name, deathMessage);
     }
     
-    @NotNull
-    static <K extends Keyed & Named> DamageSourceIdentity create(@NotNull K source, @NotNull DeathMessage deathMessage) {
-        return create(source.getKey(), source.getName(), deathMessage);
+    static <K extends Keyed & Named> @NotNull DamageSourceIdentity create(@NotNull K keyedNamed, @NotNull DeathMessage deathMessage) {
+        return new DamageSourceIdentityImpl(keyedNamed.getKey(), keyedNamed.getName(), deathMessage);
     }
     
 }

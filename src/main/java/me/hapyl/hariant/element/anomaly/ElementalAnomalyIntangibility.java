@@ -21,8 +21,8 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
     
     private final Key attributeKey = Key.ofString("anomaly_intangibility");
     
-    private final Decimal damagePercentOfMaxHealth = Decimal.ofPercentage(10);
-    private final double damageAdditional = 44;
+    private final Decimal damagePercentOfMaxHealth = Decimal.ofPercentage(5);
+    private final double damageAdditional = 35;
     
     @DisplayField private final ComponentFormatter damage = () -> Component.text("%s Max HP + %s".formatted(damagePercentOfMaxHealth.format(), damageAdditional));
     
@@ -78,6 +78,11 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
         }
         
         entity.getAttributes().addModifier(new ElementalAnomalyIntangibilityModifier(source != null ? source : entity));
+    }
+    
+    @Override
+    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
+        return entity.getAttributes().hasModifier(attributeKey);
     }
     
     class ElementalAnomalyIntangibilityModifier extends AttributeModifier {

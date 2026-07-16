@@ -1,6 +1,6 @@
 package me.hapyl.hariant.attribute.modifier;
 
-import me.hapyl.hariant.util.decimal.DecimalFormat;
+import me.hapyl.hariant.attribute.AttributeType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * value = (base + flat) * (1 + Σadditive) * (1 + Σmultiplicative)
  * }</pre>
  */
-public enum AttributeModifierType implements DecimalFormat {
+public enum AttributeModifierType {
     
     /**
      * Defines the {@code flat} modifier, where each value is summed together and added to the {@code base}.
@@ -20,13 +20,7 @@ public enum AttributeModifierType implements DecimalFormat {
      * value = value + (n + n + n)
      * }</pre>
      */
-    FLAT {
-        @Override
-        @NotNull
-        public Component format(double value) {
-            return Component.text("%,.0f".formatted(value));
-        }
-    },
+    FLAT,
     
     /**
      * Defines the {@code additive} modifier, where each value is summed together plus {@code 1}.
@@ -36,10 +30,11 @@ public enum AttributeModifierType implements DecimalFormat {
      * }</pre>
      */
     ADDITIVE {
-        @NotNull
         @Override
-        public Component format(double value) {
-            return Component.text("%.2f%%".formatted(value * 100));
+        public @NotNull Component format(@NotNull AttributeType attributeType, double value) {
+            // Since values for ADDITIVE and MULTIPLICATIVE are stored as decimals (0.2 -> 20%), we always
+            // multiply them by 100 and format as a percentage
+            return Component.text("%.0f%%".formatted(value * 100));
         }
     },
     
@@ -51,11 +46,14 @@ public enum AttributeModifierType implements DecimalFormat {
      * }</pre>
      */
     MULTIPLICATIVE {
-        @NotNull
         @Override
-        public Component format(double value) {
-            return ADDITIVE.format(value);
+        public @NotNull Component format(@NotNull AttributeType attributeType, double value) {
+            return ADDITIVE.format(attributeType, value);
         }
+    };
+    
+    public @NotNull Component format(@NotNull AttributeType attributeType, double value) {
+        return attributeType.format(value);
     }
     
 }

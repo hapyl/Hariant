@@ -88,9 +88,7 @@ public final class SoulStorm implements Ticking, Disposable {
                 
                 // Fx
                 if (tick % 5 == 0) {
-                    LocationHelper.offset(location, 0, 1, 0, () -> {
-                        player.spawnWorldParticle(location, Particle.SOUL_FIRE_FLAME, 1, 0);
-                    });
+                    LocationHelper.offset(location, 0, 1, 0, () -> player.spawnWorldParticle(location, Particle.SOUL_FIRE_FLAME, 1, 0));
                 }
             });
         }

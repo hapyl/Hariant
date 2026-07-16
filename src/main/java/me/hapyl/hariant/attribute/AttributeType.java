@@ -13,8 +13,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public enum AttributeType implements Attribute {
     
@@ -132,7 +130,7 @@ public enum AttributeType implements Attribute {
             ) {
                 @Override
                 public double defaultValue() {
-                    return 5;
+                    return 20;
                 }
                 
                 @Override
@@ -163,7 +161,12 @@ public enum AttributeType implements Attribute {
             ) {
                 @Override
                 public double defaultValue() {
-                    return 50;
+                    return 60;
+                }
+                
+                @Override
+                public double maxValue() {
+                    return 300;
                 }
                 
                 @NotNull
@@ -203,7 +206,7 @@ public enum AttributeType implements Attribute {
                 @Override
                 public void update(@NotNull HariantEntity entity, double newValue) {
                     // Apply modifier
-                    final double modifierValue = (newValue - 100) / 100;
+                    final double modifierValue = (newValue - defaultValue()) / 100;
                     
                     entity.addVanillaAttributeModifier(VanillaAttributeModifier.create(
                             MODIFIER_KEY,
@@ -249,7 +252,12 @@ public enum AttributeType implements Attribute {
                     Colors.ATTRIBUTE_EFFECT_RESISTANCE,
                     DecimalFormat.PERCENTAGE
             )
-    ),
+    ) {
+        @Override
+        public double maxValue() {
+            return 90;
+        }
+    },
     
     ELEMENTAL_MASTERY(
             new AttributeImpl(
@@ -326,12 +334,7 @@ public enum AttributeType implements Attribute {
                     Component.text("Increases the base chances probabilities."),
                     Colors.ATTRIBUTE_LUCK,
                     DecimalFormat.FLAT
-            ) {
-                @Override
-                public double maxValue() {
-                    return 1000;
-                }
-            }
+            )
     ),
     
     COOLDOWN_REDUCTION(
@@ -374,8 +377,6 @@ public enum AttributeType implements Attribute {
     private static final List<? extends AttributeType> ELEMENTAL_DAMAGE_BONUSES;
     private static final List<? extends AttributeType> ELEMENTAL_RESISTANCE;
     
-    private static final Map<ElementType, AttributeType[]> ELEMENTAL_ATTRIBUTES;
-    
     static {
         BASE_ATTRIBUTES = Arrays.stream(AttributeType.values()).filter(AttributeType::isBase).toList();
         ADVANCED_ATTRIBUTES = Arrays.stream(AttributeType.values())
@@ -384,16 +385,6 @@ public enum AttributeType implements Attribute {
         
         ELEMENTAL_DAMAGE_BONUSES = List.of(PHYSICAL_DAMAGE_BONUS, FIRE_DAMAGE_BONUS, WATER_DAMAGE_BONUS, ICE_DAMAGE_BONUS, TOXIC_DAMAGE_BONUS, ELECTRIC_DAMAGE_BONUS, AETHER_DAMAGE_BONUS);
         ELEMENTAL_RESISTANCE = List.of(PHYSICAL_RESISTANCE, FIRE_RESISTANCE, WATER_RESISTANCE, ICE_RESISTANCE, TOXIC_RESISTANCE, ELECTRIC_RESISTANCE, AETHER_RESISTANCE);
-        
-        ELEMENTAL_ATTRIBUTES = Map.of(
-                ElementType.PHYSICAL, new AttributeType[] { AttributeType.PHYSICAL_DAMAGE_BONUS, AttributeType.PHYSICAL_RESISTANCE },
-                ElementType.FIRE, new AttributeType[] { AttributeType.FIRE_DAMAGE_BONUS, AttributeType.FIRE_RESISTANCE },
-                ElementType.WATER, new AttributeType[] { AttributeType.WATER_DAMAGE_BONUS, AttributeType.WATER_RESISTANCE },
-                ElementType.ICE, new AttributeType[] { AttributeType.ICE_DAMAGE_BONUS, AttributeType.ICE_RESISTANCE },
-                ElementType.TOXIC, new AttributeType[] { AttributeType.TOXIC_DAMAGE_BONUS, AttributeType.TOXIC_RESISTANCE },
-                ElementType.ELECTRIC, new AttributeType[] { AttributeType.ELECTRIC_DAMAGE_BONUS, AttributeType.ELECTRIC_RESISTANCE },
-                ElementType.AETHER, new AttributeType[] { AttributeType.AETHER_DAMAGE_BONUS, AttributeType.AETHER_RESISTANCE }
-        );
     }
     
     private final Attribute attribute;
@@ -464,16 +455,6 @@ public enum AttributeType implements Attribute {
     }
     
     @NotNull
-    public static AttributeType getElementalDamageBonusAttribute(@NotNull ElementType elementType) {
-        return getElementalAttribute(elementType, true);
-    }
-    
-    @NotNull
-    public static AttributeType getElementalResistanceAttribute(@NotNull ElementType elementType) {
-        return getElementalAttribute(elementType, false);
-    }
-    
-    @NotNull
     public static List<? extends AttributeType> getBaseAttributes() {
         return BASE_ATTRIBUTES;
     }
@@ -493,8 +474,4 @@ public enum AttributeType implements Attribute {
         return ELEMENTAL_RESISTANCE;
     }
     
-    @NotNull
-    private static AttributeType getElementalAttribute(@NotNull ElementType elementType, boolean damageBonus) {
-        return Objects.requireNonNull(ELEMENTAL_ATTRIBUTES.get(elementType), "Illegal element: %s".formatted(elementType))[damageBonus ? 0 : 1];
-    }
 }

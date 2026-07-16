@@ -3,7 +3,7 @@ package me.hapyl.hariant.entity;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.Singleton;
-import me.hapyl.hariant.attribute.AttributeScaling;
+import me.hapyl.hariant.attribute.AttributeScalingSingle;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.damage.*;
@@ -12,7 +12,7 @@ import me.hapyl.hariant.weapon.NormalAttackRanged;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public class NormalAttack extends AttributeScaling implements DamageSourceCreator {
+public class NormalAttack extends AttributeScalingSingle implements DamageSourceCreator {
     
     private static final DamageSourceIdentity DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(Key.ofString("normal_attack"), Component.text("Normal Attack"), DeathMessage.DEFAULT);
     
@@ -42,7 +42,7 @@ public class NormalAttack extends AttributeScaling implements DamageSourceCreato
         return DamageSource.builder(DAMAGE_SOURCE_IDENTITY, getScaledValue(attacker))
                            .elementType(elementType)
                            .source(attacker)
-                           .components(DamageComponent.common());
+                           .components(DamageComponent.ofCommon());
     }
     
     @NotNull

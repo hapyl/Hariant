@@ -7,10 +7,7 @@ import me.hapyl.eterna.module.player.PlayerLib;
 import me.hapyl.hariant.annotate.Singleton;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseView;
-import me.hapyl.hariant.entity.EntitySpawner;
-import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.Lifecycle;
-import me.hapyl.hariant.entity.StreamRules;
+import me.hapyl.hariant.entity.*;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.*;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
@@ -55,7 +52,7 @@ import java.util.stream.Stream;
 public final class Hariant implements Runnable, Lifecycle {
     
     public static final Component GAME_NAME = Component.text("ʜᴀʀɪᴀɴᴛ", Colors.BRAND_COLOR, TextDecoration.BOLD);
-    public static final Component UPDATE_TOPIC = Component.text("Nothing much!", Colors.SUCCESS);
+    public static final Component UPDATE_TOPIC = Component.text("🦈 Sharking Time!", Colors.SHARK);
     
     @Singleton static HariantPlugin PLUGIN;
     @Singleton static Hariant HANDLER;
@@ -211,19 +208,22 @@ public final class Hariant implements Runnable, Lifecycle {
             
             @Override
             public void run() {
+                // Actually end the game
                 if (tick++ > HariantConstants.GAME_END_DELAY) {
+                    // Mark the game as finished
                     HANDLER.currentGameInstance.setState(GameInstanceState.FINISHED);
                     
-                    // Destroy players AFTER setting the state
-                    getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(HANDLER.currentGameInstance));
-                    
-                    // Cleanup tasks
+                    // Cleanup all tasks
                     HariantTask.cancelAllTasks();
+                    
+                    // Destroy players via their profiles
+                    getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(HANDLER.currentGameInstance));
                     
                     // Destroy non-players entities
                     clearEntities();
                     
-                    HANDLER.currentGameInstance = null; // Nullate instance at the very end
+                    // Nullate instance at the very end
+                    HANDLER.currentGameInstance = null;
                     this.cancel();
                     return;
                 }
@@ -679,8 +679,7 @@ public final class Hariant implements Runnable, Lifecycle {
         return HANDLER.countdown != null;
     }
     
-    @NotNull
-    public static String getVersion() {
+    public static @NotNull String getVersion() {
         return PLUGIN.getPluginMeta().getVersion().replace("-SNAPSHOT", "");
     }
     
@@ -690,7 +689,8 @@ public final class Hariant implements Runnable, Lifecycle {
                 return false;
             }
             
-            entity.remove();
+            // Remove the entity forcefully
+            entity.removeForcefully();
             return true;
         });
     }

@@ -3,13 +3,11 @@ package me.hapyl.hariant.menu.hero;
 import me.hapyl.eterna.module.component.ButtonComponents;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroDirectory;
 import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.menu.MenuPage;
-import me.hapyl.hariant.profile.PlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -17,13 +15,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class MenuHeroSelection extends MenuPage<Hero> {
     
-    private final PlayerProfile profile;
     private final HeroDirectory heroDirectory;
     
     public MenuHeroSelection(@NotNull Player player) {
         super(player, () -> Component.text("Select Hero"));
         
-        this.profile = Hariant.getPlayerProfile(player);
         this.heroDirectory = profile.getDatabase().heroDirectory;
         
         this.setContents(HeroRegistry.getRegistry().values());

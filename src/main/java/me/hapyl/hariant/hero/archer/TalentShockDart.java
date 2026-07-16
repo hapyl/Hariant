@@ -11,10 +11,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
-import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.DamageSourceImpl;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileHitEvent;
@@ -54,7 +51,10 @@ public final class TalentShockDart extends Talent implements Listener {
     private final ParticleBuilder particleWindup = ParticleBuilder.dustColorTransition(Color.fromRGB(235, 224, 169), Color.fromRGB(224, 211, 141), 1);
     private final ParticleBuilder particleExplosion = ParticleBuilder.dustColorTransition(Color.fromRGB(242, 204, 97), Color.fromRGB(252, 186, 3), 1);
     
-    private final DeathMessage deathMessage = DeathMessage.create("{player} was shocked to death [by {killer}]");
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.create("{player} was shocked to death [by {killer}]")
+    );
     
     public TalentShockDart(@NotNull Key key) {
         super(key, Component.text("Shock Dart"), Icon.ofMaterial(Material.SPECTRAL_ARROW));
@@ -74,12 +74,6 @@ public final class TalentShockDart extends Talent implements Listener {
                          .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text("."))
         );
-    }
-    
-    @NotNull
-    @Override
-    public DeathMessage getDeathMessage() {
-        return deathMessage;
     }
     
     @EventHandler
@@ -183,7 +177,7 @@ public final class TalentShockDart extends Talent implements Listener {
         private final double explosionMaxDamage;
         
         ShockDartArrowDamageSource(@NotNull HariantEntity attacker, double damage, double explosionMaxDamage) {
-            super(TalentShockDart.this, attacker, damage, 0);
+            super(damageSourceIdentity, attacker, damage, 0);
             
             this.explosionMaxDamage = explosionMaxDamage;
         }
@@ -191,7 +185,7 @@ public final class TalentShockDart extends Talent implements Listener {
     
     public class ShockDartExplosionDamageSource extends DamageSourceImpl {
         ShockDartExplosionDamageSource(@NotNull HariantPlayer attacker, double damage) {
-            super(TalentShockDart.this, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponent.common(), Set.of(), damage, elementApplication.doubleValue());
+            super(damageSourceIdentity, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponent.ofCommon(), Set.of(), damage, elementApplication.doubleValue());
         }
     }
     

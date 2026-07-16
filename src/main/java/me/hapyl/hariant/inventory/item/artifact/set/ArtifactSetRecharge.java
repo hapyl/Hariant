@@ -5,11 +5,12 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantTalentUltimateEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -19,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ArtifactSetRecharge extends ArtifactSet implements Listener {
     
-    private final Decimal energyRechargeIncrease = Decimal.ofAttribute(AttributeType.ENERGY_RECHARGE, 25);
+    private final ArtifactSetModifier energyRechargeIncrease = CommonArtifactSetModifiers.ENERGY_RECHARGE;
     private final Decimal energyRefund = Decimal.ofPercentage(20);
     
     ArtifactSetRecharge(@NotNull Key key) {
@@ -27,15 +28,7 @@ public final class ArtifactSetRecharge extends ArtifactSet implements Listener {
         
         setArtifactTags(AttributeType.ENERGY_RECHARGE);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(AttributeType.ENERGY_RECHARGE)
-                         .append(Component.text(" by "))
-                         .append(energyRechargeIncrease)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, energyRechargeIncrease);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -80,9 +73,7 @@ public final class ArtifactSetRecharge extends ArtifactSet implements Listener {
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetRecharge.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.ENERGY_RECHARGE, AttributeModifierType.FLAT, energyRechargeIncrease.doubleValue());
+            super(ArtifactSetRecharge.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, energyRechargeIncrease);
         }
         
     }

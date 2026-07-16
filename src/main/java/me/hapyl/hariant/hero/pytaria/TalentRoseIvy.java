@@ -15,8 +15,10 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
+import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
+import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -51,13 +53,13 @@ import java.util.Set;
 
 public final class TalentRoseIvy extends Talent implements Listener {
     
-    @DisplayField public final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 54);
-    @DisplayField public final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 50);
+    public final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 54);
+    public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 50);
     
-    @DisplayField private final Decimal radius = Decimal.ofValue(3);
-    @DisplayField private final Decimal affectPeriod = Decimal.ofSeconds(0.5f);
-    @DisplayField private final Decimal effectDuration = Decimal.ofSeconds(0.5f);
-    @DisplayField private final Decimal speedDecrease = Decimal.ofPercentage(25);
+    private final @DisplayField Decimal radius = Decimal.ofValue(3);
+    private final @DisplayField Decimal affectPeriod = Decimal.ofSeconds(0.5f);
+    private final @DisplayField Decimal effectDuration = Decimal.ofSeconds(0.5f);
+    private final @DisplayField Decimal speedDecrease = Decimal.ofPercentage(50);
     
     private final Key modifierKey = Key.ofString("rose_ivy");
     
@@ -66,6 +68,11 @@ public final class TalentRoseIvy extends Talent implements Listener {
     );
     
     private final int modelParts = 7;
+    
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.create("{player} was spikes to death [by {killer}]")
+    );
     
     public TalentRoseIvy(@NotNull Key key) {
         super(key, Component.text("Rose Ivy"), Icon.ofTexture("41cceb6ee1210e1725ce30a7da3d8e68fc38a7d8b6d30abc030a2601df951d2d"));
@@ -145,7 +152,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
     
     private class RoseIvyProjectileDamageSource extends DamageSourceImpl {
         RoseIvyProjectileDamageSource(@Nullable HariantEntity attacker) {
-            super(TalentRoseIvy.this, attacker, DamageType.TALENT, ElementType.PHYSICAL, List.of(), Set.of(), 1, 1);
+            super(damageSourceIdentity, attacker, DamageType.TALENT, ElementType.PHYSICAL, List.of(), Set.of(), 1, 1);
         }
     }
     
@@ -194,15 +201,15 @@ public final class TalentRoseIvy extends Talent implements Listener {
             // If fully drawn, apply IVY effect
             if (modulo(affectPeriod)) {
                 collectNearbyEntities(origin, radius, 1, radius)
-                      .filter(player::canAffect)
-                      .forEach(entity -> {
-                          entity.addEffect(EnumStatusEffect.ROSE_IVY, effectDuration, player);
-                          entity.getAttributes().addModifier(new RoseIvyModifier(player));
-                          
-                          // Fx
-                          entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.BLOCK, 3, 0.25, 0.25, 0.25, 0.1f, PARTICLE_DATA);
-                          entity.showWarning(WarningType.WARNING, affectPeriod.intValue() + 1);
-                      });
+                        .filter(player::canAffect)
+                        .forEach(entity -> {
+                            entity.addEffect(EnumStatusEffect.ROSE_IVY, effectDuration, player);
+                            entity.getAttributes().addModifier(new RoseIvyModifier(player));
+                            
+                            // Fx
+                            entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.BLOCK, 3, 0.25, 0.25, 0.25, 0.1f, PARTICLE_DATA);
+                            entity.showWarning(WarningType.WARNING, affectPeriod.intValue() + 1);
+                        });
             }
         }
         

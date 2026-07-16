@@ -52,7 +52,7 @@ public abstract class ElementalAnomalyImpl implements ElementalAnomaly {
     @NotNull
     @Override
     public Component getPrefixStyled() {
-        return prefix.style(getStyle());
+        return prefix.style(style);
     }
     
     @NotNull
@@ -81,6 +81,10 @@ public abstract class ElementalAnomalyImpl implements ElementalAnomaly {
     @Override
     public void setDescription(@NotNull Component description) {
         this.description = description;
+    }
+    
+    public @NotNull Component getNameStyled() {
+        return name.style(style);
     }
     
     @Override

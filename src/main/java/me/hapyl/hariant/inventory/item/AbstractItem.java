@@ -22,9 +22,10 @@ public abstract class AbstractItem implements Keyed, Named, Described, FlavorTex
     protected final Component name;
     protected final Icon icon;
     
-    @NotNull protected Component description;
-    @NotNull protected Component flavorText;
-    @NotNull protected Rarity rarity;
+    protected @NotNull Component description;
+    protected @NotNull Component flavorText;
+    protected @NotNull Rarity rarity;
+    protected @NotNull ItemCategory category;
     
     public AbstractItem(@NotNull Key key, @NotNull Component name, @NotNull Icon icon) {
         this.key = key;
@@ -33,6 +34,7 @@ public abstract class AbstractItem implements Keyed, Named, Described, FlavorTex
         this.description = Described.defaultValue();
         this.flavorText = Component.empty();
         this.rarity = Rarity.ONE_STAR;
+        this.category = ItemCategory.ACCOUNT_RESOURCE;
     }
     
     public @NotNull Rarity getRarity() {
@@ -43,7 +45,13 @@ public abstract class AbstractItem implements Keyed, Named, Described, FlavorTex
         this.rarity = rarity;
     }
     
-    public abstract int maxStackSize();
+    public @NotNull ItemCategory getCategory() {
+        return category;
+    }
+    
+    public void setCategory(@NotNull ItemCategory category) {
+        this.category = category;
+    }
     
     @NotNull
     @Override

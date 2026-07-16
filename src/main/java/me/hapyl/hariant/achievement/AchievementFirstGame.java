@@ -2,6 +2,7 @@ package me.hapyl.hariant.achievement;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantGameInstanceStateEvent;
 import me.hapyl.hariant.game.GameInstanceState;
 import net.kyori.adventure.text.Component;
@@ -14,8 +15,8 @@ public final class AchievementFirstGame extends AchievementImpl implements Liste
     public AchievementFirstGame(@NotNull Key key) {
         super(key, 1);
         
-        this.setName(Component.text("First Game"));
-        this.setDescription(Component.text("Play your very first game."));
+        setName(Component.text("First Game"));
+        setDescription(Component.text("Play your very first game."));
     }
     
     @EventHandler
@@ -24,7 +25,7 @@ public final class AchievementFirstGame extends AchievementImpl implements Liste
             return;
         }
         
-        Hariant.getPlayers().forEach(player -> player.getProfile().getDatabase().achievements.progress(this, 1));
+        Hariant.getPlayers().map(HariantPlayer::getProfile).forEach(this::progress);
     }
     
 }

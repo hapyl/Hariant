@@ -26,14 +26,14 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentExcellency extends TalentPassive implements Listener {
     
-    @DisplayField private final Decimal attackIncreaseThreshold = Decimal.ofPercentage(75);
-    @DisplayField private final Decimal attackIncrease = Decimal.ofPercentage(25);
+    private final @DisplayField Decimal attackIncreaseThreshold = Decimal.ofPercentage(75);
+    private final @DisplayField Decimal attackIncrease = Decimal.ofPercentage(30);
     
-    @DisplayField private final Decimal allTypeResistanceThreshold = Decimal.ofPercentage(50);
-    @DisplayField private final Decimal allTypeResistanceIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 10);
+    private final @DisplayField Decimal allTypeDamageThreshold = Decimal.ofPercentage(50);
+    private final @DisplayField Decimal allTypeDamageIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_DAMAGE_BONUS, 20);
     
-    @DisplayField private final Decimal allTypeDamageThreshold = Decimal.ofPercentage(25);
-    @DisplayField private final Decimal allTypeDamageIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 20);
+    private final @DisplayField Decimal allTypeResistanceThreshold = Decimal.ofPercentage(25);
+    private final @DisplayField Decimal allTypeResistanceIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 40);
     
     private final Key modifierKey = Key.ofString("excellency");
     
@@ -52,14 +52,14 @@ public final class TalentExcellency extends TalentPassive implements Listener {
                          .append(Component.text("  Increases ").append(AttributeType.ATTACK).append(Component.text(" by ")).append(attackIncrease).append(Component.text(".")))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("%.0f%% of less:".formatted(allTypeResistanceThreshold.value()), Colors.GOLD))
-                         .appendNewline()
-                         .append(Component.text("  Increases ").append(EnumTerminology.ALL_TYPE_RESISTANCE).append(Component.text(" by ")).append(allTypeResistanceIncrease).append(Component.text(".")))
-                         .appendNewline()
-                         .appendNewline()
                          .append(Component.text("%.0f%% of less:".formatted(allTypeDamageThreshold.value()), Colors.RED))
                          .appendNewline()
                          .append(Component.text("  Increases ").append(EnumTerminology.ALL_TYPE_DAMAGE).append(Component.text(" by ")).append(allTypeDamageIncrease).append(Component.text(".")))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("%.0f%% of less:".formatted(allTypeResistanceThreshold.value()), Colors.GOLD))
+                         .appendNewline()
+                         .append(Component.text("  Increases ").append(EnumTerminology.ALL_TYPE_RESISTANCE).append(Component.text(" by ")).append(allTypeResistanceIncrease).append(Component.text(".")))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Each buff lasts as long as your health is at or below its threshold.", Colors.DARK_GRAY))
@@ -94,13 +94,13 @@ public final class TalentExcellency extends TalentPassive implements Listener {
             
             modifier.of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue());
             
-            if (threshold < allTypeResistanceThreshold.doubleValue()) {
-                modifier.ofElementalResistance(AttributeModifierType.FLAT, allTypeResistanceIncrease.doubleValue());
+            if (threshold < allTypeDamageThreshold.doubleValue()) {
+                modifier.ofElementalDamageBonus(AttributeModifierType.FLAT, allTypeDamageIncrease.doubleValue());
                 excellency++;
             }
             
-            if (threshold < allTypeDamageThreshold.doubleValue()) {
-                modifier.ofElementalDamageBonus(AttributeModifierType.FLAT, allTypeDamageIncrease.doubleValue());
+            if (threshold < allTypeResistanceThreshold.doubleValue()) {
+                modifier.ofElementalResistance(AttributeModifierType.FLAT, allTypeResistanceIncrease.doubleValue());
                 excellency++;
             }
             

@@ -1,11 +1,13 @@
 package me.hapyl.hariant.element;
 
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
+import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.HariantEntity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public enum ElementType implements Element {
     
@@ -53,10 +55,19 @@ public enum ElementType implements Element {
         return element.format(value);
     }
     
-    @NotNull
     @Override
-    public ElementalAnomaly getElementalAnomaly() {
+    public @NotNull ElementalAnomalyType getElementalAnomaly() {
         return element.getElementalAnomaly();
+    }
+    
+    @Override
+    public @Nullable AttributeType getOffensiveAttribute() {
+        return element.getOffensiveAttribute();
+    }
+    
+    @Override
+    public @Nullable AttributeType getDefensiveAttribute() {
+        return element.getDefensiveAttribute();
     }
     
     @Override

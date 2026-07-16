@@ -18,11 +18,12 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 
-public class HeroPytaria extends Hero {
+public final class HeroPytaria extends Hero {
     
     public HeroPytaria(@NotNull Key key) {
-        super(key, Component.text("Pytaria"), Attributes.base(1200, 80, 20), new WeaponAnnihilallium());
+        super(key, Component.text("Pytaria"), Attributes.base(1200, 80, 50), new WeaponAnnihilallium());
         
         final HeroProfile profile = getProfile();
         profile.setArchetype(Archetype.DAMAGE);
@@ -42,6 +43,8 @@ public class HeroPytaria extends Hero {
                          .appendNewline()
                          .append(Component.text("She suffered all her youth, which, in the end, only made her stronger."))
         );
+        
+        setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.CRIT_DAMAGE, AttributeType.ENERGY_RECHARGE, AttributeType.PHYSICAL_DAMAGE_BONUS));
     }
     
     @NotNull
@@ -85,7 +88,7 @@ public class HeroPytaria extends Hero {
             super(
                     Key.ofString("annihilallium"),
                     Icon.ofMaterial(Material.ALLIUM),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 65, 10)
+                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 71.5, 10)
             );
             
             setName(Component.text("Annihilallium"));

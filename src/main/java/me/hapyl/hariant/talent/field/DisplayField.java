@@ -19,7 +19,7 @@ import java.lang.reflect.Field;
  * </p>
  *
  * <p>
- * Fields annotated by {@link DisplayField} always assumed to be @{@link NotNull}.
+ * Fields annotated by {@link DisplayField} always assumed to be {@link NotNull}.
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)

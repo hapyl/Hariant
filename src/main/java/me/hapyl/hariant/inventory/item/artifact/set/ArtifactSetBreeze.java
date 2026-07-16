@@ -1,6 +1,7 @@
 package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
@@ -11,6 +12,8 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantHealthChangeEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
@@ -19,48 +22,40 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ArtifactSetBreeze extends ArtifactSet implements Listener {
     
-    private final Decimal critChanceIncrease = Decimal.ofAttribute(AttributeType.CRIT_CHANCE, 20);
+    private final ArtifactSetModifier critChanceIncrease = CommonArtifactSetModifiers.CRIT_CHANCE;
     
-    private final Decimal critDamageIncreasePerHealthDecreased = Decimal.ofAttribute(AttributeType.CRIT_DAMAGE, 20);
-    private final Decimal critDamageIncreasePerHealthMaximum = Decimal.ofValue(40);
-    private final Decimal critDamageIncreaseDuration = Decimal.ofSeconds(6f);
+    private final Decimal healthLostPercentage = Decimal.ofPercentage(5);
+    private final Decimal healthLostLimit = Decimal.ofPercentage(20);
     
-    private final Decimal healthLost = Decimal.ofValue(50);
+    private final Decimal fourPieceCritDamageIncrease = Decimal.ofAttribute(AttributeType.CRIT_DAMAGE, 10);
+    private final Decimal fourPieceCritDamageIncreaseDuration = Decimal.ofSeconds(6f);
     
     ArtifactSetBreeze(@NotNull Key key) {
         super(key, Component.text("Breeze"));
         
         setArtifactTags(AttributeType.CRIT_CHANCE, AttributeType.CRIT_DAMAGE);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(AttributeType.CRIT_CHANCE)
-                         .append(Component.text(" increased by "))
-                         .append(critChanceIncrease)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, critChanceIncrease);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
                 Component.empty()
-                         .append(Component.text("Whenever your health decreases, for each "))
-                         .append(healthLost)
-                         .append(Component.text(" health lost, increases your "))
-                         .appendNewline() // Manual newline because it cuts the CD char
+                         .append(Component.text("Whenever your health decreases, for every "))
+                         .append(healthLostPercentage)
+                         .append(Component.text(" of "))
+                         .append(AttributeType.MAX_HEALTH)
+                         .append(Component.text(" lost, increases your "))
                          .append(AttributeType.CRIT_DAMAGE)
                          .append(Component.text(" by "))
-                         .append(critDamageIncreasePerHealthDecreased)
+                         .append(fourPieceCritDamageIncrease)
                          .append(Component.text(" for "))
-                         .append(critDamageIncreaseDuration)
+                         .append(fourPieceCritDamageIncreaseDuration)
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("A maximum of "))
-                         .append(critDamageIncreasePerHealthMaximum)
-                         .appendSpace()
-                         .append(AttributeType.CRIT_DAMAGE)
-                         .append(Component.text(" can be gained this way."))
+                         .append(Component.text("A maximum of %.0f ".formatted(healthLostLimit.divide(healthLostPercentage) * fourPieceCritDamageIncrease.doubleValue()), Colors.DARK_GRAY))
+                         .append(AttributeType.CRIT_DAMAGE.asComponent().color(Colors.DARK_GRAY))
+                         .append(Component.text(" can be gained this way.", Colors.DARK_GRAY))
         );
     }
     
@@ -88,13 +83,16 @@ public final class ArtifactSetBreeze extends ArtifactSet implements Listener {
             return;
         }
         
-        final double healthDifference = ev.getHealthDifference();
-        final int critDamageIncrease = calculateCritDamageIncrease(healthDifference);
+        // Calculate the health difference of max health
+        final double healthLostOfMaxHealth = Math.min(-ev.getHealthDifference() / player.getMaxHealth(), healthLostLimit.doubleValue());
         
         // Don't trigger for 0 health difference, which occurs when using Flower Breeze at minimum health threshold
-        if (healthDifference == 0 || critDamageIncrease <= 0) {
+        if (healthLostOfMaxHealth <= 0) {
             return;
         }
+        
+        final double critDamageIncreaseStacks = (int) (healthLostOfMaxHealth / healthLostPercentage.doubleValue());
+        final double critDamageIncrease = fourPieceCritDamageIncrease.doubleValue() * critDamageIncreaseStacks;
         
         final AttributesInstance attributes = player.getAttributes();
         final ModifierFourPiece previousModifier = attributes.getModifier(ModifierFourPiece.class).orElse(null);
@@ -108,30 +106,19 @@ public final class ArtifactSetBreeze extends ArtifactSet implements Listener {
         attributes.addModifier(new ModifierFourPiece(player, critDamageIncrease));
     }
     
-    public int calculateCritDamageIncrease(final double healthDifference) {
-        final int lostHealthIncrease = (int) (healthDifference / healthLost.doubleValue());
-        final int critDamageBonus = lostHealthIncrease * critDamageIncreasePerHealthDecreased.intValue();
-        
-        return Math.min(critDamageIncreasePerHealthMaximum.intValue(), critDamageBonus);
-    }
-    
     private class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetBreeze.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            entries.add(entry(AttributeType.CRIT_CHANCE, AttributeModifierType.FLAT, critChanceIncrease.doubleValue()));
+            super(ArtifactSetBreeze.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, critChanceIncrease);
         }
     }
     
     private class ModifierFourPiece extends AttributeModifierArtifactSet {
-        private final int critDamageIncrease;
+        private final double critDamageIncrease;
         
-        ModifierFourPiece(@NotNull HariantEntity applier, int critDamageIncrease) {
-            super(ArtifactSetBreeze.this, PieceCount.FOUR_PIECE, applier, critDamageIncreaseDuration.intValue());
+        ModifierFourPiece(@NotNull HariantEntity applier, double critDamageIncrease) {
+            super(ArtifactSetBreeze.this, PieceCount.FOUR_PIECE, applier, fourPieceCritDamageIncreaseDuration.intValue());
             
-            entries.add(entry(AttributeType.CRIT_DAMAGE, AttributeModifierType.FLAT, critDamageIncrease));
-            
-            this.critDamageIncrease = critDamageIncrease;
+            of(AttributeType.CRIT_DAMAGE, AttributeModifierType.FLAT, this.critDamageIncrease = critDamageIncrease);
         }
     }
     

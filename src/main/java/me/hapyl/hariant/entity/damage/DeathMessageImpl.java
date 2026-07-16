@@ -34,6 +34,8 @@ public class DeathMessageImpl implements DeathMessage {
             throw new IllegalArgumentException("Template must contain optional part!");
         }
         
+        // FIXME (xanyjl @ Thursday, July 16) -> This forces killer part to be at the end ???
+        
         final String baseString = (template.substring(0, optionalStart) + template.substring(optionalEnd + 1)).trim();
         final String optionalString = template.substring(optionalStart + 1, optionalEnd).trim();
         

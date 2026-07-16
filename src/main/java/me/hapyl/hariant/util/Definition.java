@@ -47,6 +47,12 @@ public enum Definition implements Prefixed, Named, Styled, ComponentLike {
             Style.style(TextColor.color(0x7B2FFF))
     ),
     
+    PREY(
+            Component.text("\uD83C\uDFAF"),
+            Component.text("Prey"),
+            Style.style(TextColor.color(0x4A91FF))
+    ),
+    
     ;
     
     private final Component prefix;

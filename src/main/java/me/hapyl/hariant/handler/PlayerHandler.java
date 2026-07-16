@@ -12,7 +12,6 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.SitHandler;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.frozen.FrozenHandler;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantHealEvent;
@@ -258,25 +257,6 @@ public final class PlayerHandler implements Listener {
     }
     
     @EventHandler
-    public void handlePlayerInputEvent(PlayerInputEvent ev) {
-        final Player player = ev.getPlayer();
-        final Input input = ev.getInput();
-        
-        // If input isn't directional, ignore it
-        if (!isInputDirectional(input)) {
-            return;
-        }
-        
-        Hariant.getPlayer(player).ifPresent(harp -> {
-            final FrozenHandler frozenHandler = harp.getFrozenHandler();
-            
-            if (frozenHandler != null) {
-                frozenHandler.input(input);
-            }
-        });
-    }
-    
-    @EventHandler
     public void handleEntityDismountEvent(EntityDismountEvent ev) {
         if (!(ev.getEntity() instanceof Player player)) {
             return;
@@ -406,10 +386,6 @@ public final class PlayerHandler implements Listener {
                         .append(Component.text("[", Colors.DARK_GRAY))
                         .append(component)
                         .append(Component.text("]", Colors.DARK_GRAY));
-    }
-    
-    private static boolean isInputDirectional(@NotNull Input input) {
-        return input.isForward() || input.isBackward() || input.isLeft() || input.isRight();
     }
     
     private static class FeedbackBuilder implements ComponentLike {

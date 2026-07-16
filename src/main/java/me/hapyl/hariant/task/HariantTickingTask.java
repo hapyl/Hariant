@@ -1,6 +1,5 @@
 package me.hapyl.hariant.task;
 
-import me.hapyl.eterna.module.annotate.EventLike;
 import me.hapyl.hariant.util.decimal.Decimal;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,23 +7,15 @@ public abstract class HariantTickingTask extends HariantTask {
     
     private int tick;
     
-    public HariantTickingTask(@NotNull Scheduler builder) {
-        super(builder);
+    public HariantTickingTask(@NotNull Scheduler scheduler) {
+        super(scheduler);
     }
     
     public abstract void run(final int tick);
     
     @Override
     public final void run() {
-        if (this.tick == 0) {
-            this.onFirstTick();
-        }
-        
         this.run(this.tick++);
-    }
-    
-    @EventLike
-    public void onFirstTick() {
     }
     
     public int currentTick() {

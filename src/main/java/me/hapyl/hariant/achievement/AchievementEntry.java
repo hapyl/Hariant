@@ -81,4 +81,16 @@ public final class AchievementEntry extends PlayerDatabaseEntry {
     public boolean resetProgress(@NotNull Achievement achievement) {
         return achievementProgressMap.remove(achievement.getKey()) != null;
     }
+    
+    public boolean hasProgress(@NotNull Achievement achievement) {
+        return achievementProgressMap.containsKey(achievement.getKey());
+    }
+    
+    public int countUnclaimedRewards() {
+        return (int) achievementProgressMap.values()
+                                           .stream()
+                                           .filter(AchievementProgress::hasCompletedButNotClaimedRewards)
+                                           .count();
+    }
+    
 }

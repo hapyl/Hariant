@@ -73,13 +73,13 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     public boolean removeModifier(@NotNull Key key) {
         final AttributeModifier modifier = this.modifiers.remove(key);
         
-        if (modifier != null) {
-            modifier.onRemove0(entity);
-            this.triggerAttributeUpdate(modifier);
-            return true;
+        if (modifier == null) {
+            return false;
         }
         
-        return false;
+        modifier.onRemove0(entity);
+        this.triggerAttributeUpdate(modifier);
+        return true;
     }
     
     @Override
@@ -128,6 +128,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     
     @Override
     public void tick() {
+        // Tick modifiers
         final Iterator<AttributeModifier> iterator = modifiers.values().iterator();
         
         while (iterator.hasNext()) {

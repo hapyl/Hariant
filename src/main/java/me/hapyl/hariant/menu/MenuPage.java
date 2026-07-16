@@ -47,12 +47,13 @@ public abstract class MenuPage<T> extends Menu {
     
     @Override
     public final void openMenu() {
-        super.openMenu();
+        // Default to open the current page of the menu
+        this.openMenu(this.currentPage);
     }
     
     public void openMenu(@Range(from = 1, to = Integer.MAX_VALUE) int page) {
         this.currentPage = page;
-        this.openMenu();
+        super.openMenu();
     }
     
     public @NotNull ItemStack getItemNoContents() {

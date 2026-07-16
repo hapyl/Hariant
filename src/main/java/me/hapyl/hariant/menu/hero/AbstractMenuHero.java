@@ -16,22 +16,16 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
-public class MenuHeroAbstract extends Menu {
+public class AbstractMenuHero extends Menu {
     
     protected final HeroInstance heroInstance;
     protected final Category category;
     
-    public MenuHeroAbstract(@NotNull Player player, @NotNull HeroInstance heroInstance, @NotNull Category category) {
+    public AbstractMenuHero(@NotNull Player player, @NotNull HeroInstance heroInstance, @NotNull Category category) {
         super(player, PlayerMenuTitle.create(heroInstance.getOrigin().getName(), category.getName()), ChestSize.SIZE_6);
         
         this.heroInstance = heroInstance;
         this.category = category;
-    }
-    
-    @Nullable
-    @Override
-    public MenuReturn menuReturn() {
-        return MenuReturn.create(Component.text("Hero Selection"), () -> new MenuHeroSelection(player));
     }
     
     @Override
@@ -55,6 +49,12 @@ public class MenuHeroAbstract extends Menu {
             
             this.setItem(slot, builder.build());
         }
+    }
+    
+    @Nullable
+    @Override
+    public MenuReturn menuReturn() {
+        return MenuReturn.create(Component.text("Hero Selection"), () -> new MenuHeroSelection(player));
     }
     
 }

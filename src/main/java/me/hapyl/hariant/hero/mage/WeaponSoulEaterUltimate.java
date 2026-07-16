@@ -26,11 +26,11 @@ public final class WeaponSoulEaterUltimate extends WeaponRangeProjectile {
                 Key.ofString("soul_eater_2"),
                 Icon.ofMaterial(Material.NETHERITE_HOE),
                 NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 1, 10),
-                NormalAttack.ranged(ElementType.AETHER, AttributeType.ATTACK, 240, 30),
+                NormalAttack.ranged(ElementType.AETHER, AttributeType.ATTACK, 144, 20),
                 new WeaponRangeProjectileTypeRestlessSoul()
         );
         
-        setName(Component.text("Soul Eather"));
+        setName(Component.text("Soul Eater"));
         setDescription(Component.text("A scythe infused with stabilized Restless Souls."));
     }
     

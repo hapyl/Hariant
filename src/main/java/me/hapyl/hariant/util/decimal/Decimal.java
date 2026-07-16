@@ -131,8 +131,7 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
      * @param format - The formatter to use.
      * @return a new decimal instance.
      */
-    @NotNull
-    public static Decimal ofValue(final double value, @NotNull DecimalFormat format) {
+    public static @NotNull Decimal ofValue(final double value, @NotNull DecimalFormat format) {
         return new DecimalImpl(value, format);
     }
     
@@ -142,8 +141,7 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
      * @param value - The value.
      * @return a new decimal instance.
      */
-    @NotNull
-    public static Decimal ofValue(final double value) {
+    public static @NotNull Decimal ofValue(final double value) {
         return ofValue(value, DecimalFormat.DECIMAL);
     }
     
@@ -158,8 +156,7 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
      * @param percentage - The percentage value.
      * @return a new decimal instance.
      */
-    @NotNull
-    public static Decimal ofPercentage(@Percentage(Percentage.Type.WHOLE_NUMBER) final double percentage) {
+    public static @NotNull Decimal ofPercentage(@Percentage(Percentage.Type.WHOLE_NUMBER) final double percentage) {
         return new DecimalPercentageImpl(percentage);
     }
     
@@ -170,8 +167,7 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
      * @param value         - The value.
      * @return a new decimal instance.
      */
-    @NotNull
-    public static Decimal ofAttribute(@NotNull AttributeType attributeType, @Range(from = 1, to = Integer.MAX_VALUE) final double value) {
+    public static @NotNull Decimal ofAttribute(@NotNull AttributeType attributeType, @Range(from = 1, to = Integer.MAX_VALUE) final double value) {
         return new DecimalAttributeImpl(attributeType, value);
     }
     
@@ -186,8 +182,7 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
      * @param seconds - The time unit in seconds.
      * @return a new decimal instance.
      */
-    @NotNull
-    public static Decimal ofSeconds(@Range(from = 0, to = Integer.MAX_VALUE) final float seconds) {
+    public static @NotNull Decimal ofSeconds(@Range(from = 0, to = Integer.MAX_VALUE) final float seconds) {
         return new DecimalSecondsImpl(seconds);
     }
     
@@ -199,9 +194,19 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
      * @param units       - The elemental units.
      * @return a new decimal.
      */
-    @NotNull
-    public static Decimal ofElementalApplication(@NotNull ElementType elementType, final double units) {
+    public static @NotNull Decimal ofElementalApplication(@NotNull ElementType elementType, final double units) {
         return new DecimalElementalApplicationImpl(elementType, units);
+    }
+    
+    /**
+     * A static factory method for creating a {@link Decimal} that holds a scaled value for entity velocity, which upon applying it, the entity will travel
+     * the designed blocks per second.
+     *
+     * @param blocksPerSecond - The number of blocks per second to travel.
+     * @return a new decimal.
+     */
+    public static @NotNull Decimal ofBlocksPerSecond(int blocksPerSecond) {
+        return new DecimalBlocksPerSecondImpl(blocksPerSecond);
     }
     
 }

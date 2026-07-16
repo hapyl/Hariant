@@ -172,7 +172,9 @@ public final class HariantLogger {
             return Component.empty()
                             .append(prefix)
                             .append(separator)
-                            .append(message.style(messageStyle));
+                            .append(message.style(messageStyle))
+                            .hoverEvent(message.hoverEvent())
+                            .clickEvent(message.clickEvent());
         }
         
     }

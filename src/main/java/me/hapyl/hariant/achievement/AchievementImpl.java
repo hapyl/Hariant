@@ -1,32 +1,26 @@
 package me.hapyl.hariant.achievement;
 
-import me.hapyl.eterna.module.component.Components;
-import me.hapyl.eterna.module.component.Interpolator;
+import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
+import me.hapyl.hariant.util.ComponentShine;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.title.Title;
-import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @AutoRegisteredListener
 public class AchievementImpl implements Achievement {
     
-    private static final Component ACHIEVEMENT_MADE = Components.gradient(
-            "ᴀᴄʜɪᴇᴠᴇᴍᴇɴᴛ ᴍᴀᴅᴇ",
-            TextColor.color(0xFFB90E),
-            TextColor.color(0xFF8222),
-            Interpolator.LINEAR,
-            Style.style(TextDecoration.BOLD)
-    );
+    private static final ComponentShine ACHIEVEMENT_MADE = ComponentShine.builder("ᴀᴄʜɪᴇᴠᴇᴍᴇɴᴛ ᴍᴀᴅᴇ")
+                                                                         .style(Style.style(TextColor.color(0xFF8222), TextDecoration.BOLD))
+                                                                         .styleShine(Style.style(TextColor.color(0xFFB90E), TextDecoration.BOLD))
+                                                                         .styleFade(Style.style(TextColor.color(0xFFE418), TextDecoration.BOLD))
+                                                                         .build();
     
     private final Key key;
     private final double goal;
@@ -69,6 +63,18 @@ public class AchievementImpl implements Achievement {
     @Override
     public @NotNull Component getDescription() {
         return description;
+    }
+    
+    @Override
+    public @NotNull ItemBuilder createBuilder() {
+        final ItemBuilder builder = tier.createBuilder();
+        builder.setName(name);
+        builder.setAmount(tier.getRubyReward());
+        
+        builder.addLore();
+        builder.addWrappedLore(description);
+        
+        return builder;
     }
     
     @Override
@@ -127,7 +133,8 @@ public class AchievementImpl implements Achievement {
     
     @Override
     public void onComplete(@NotNull Player player, @NotNull AchievementProgress achievementProgress) {
-        player.showTitle(Title.title(ACHIEVEMENT_MADE, achievementProgress.getAchievement().getName().color(Colors.WHITE), 5, 40, 10));
+        ACHIEVEMENT_MADE.display(player, this.getName().color(Colors.ORANGE));
+        
         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 3, 1.0f);
     }
     

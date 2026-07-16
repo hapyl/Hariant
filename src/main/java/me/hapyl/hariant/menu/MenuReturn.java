@@ -9,23 +9,23 @@ import java.util.function.Supplier;
 public interface MenuReturn {
     
     @NotNull
-    Component menuName();
+    Component returnMenuName();
     
     @NotNull
-    Menu menu(@NotNull Player player);
+    Menu returnMenu(@NotNull Player player);
     
     @NotNull
     static MenuReturn create(@NotNull Component name, @NotNull Supplier<Menu> supplier) {
         return new MenuReturn() {
             @NotNull
             @Override
-            public Component menuName() {
+            public Component returnMenuName() {
                 return name;
             }
             
             @NotNull
             @Override
-            public Menu menu(@NotNull Player player) {
+            public Menu returnMenu(@NotNull Player player) {
                 return supplier.get();
             }
         };

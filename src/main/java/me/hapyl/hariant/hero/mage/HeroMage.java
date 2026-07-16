@@ -1,13 +1,13 @@
 package me.hapyl.hariant.hero.mage;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.*;
 import me.hapyl.hariant.talent.TalentRegistry;
 import me.hapyl.hariant.weapon.Weapon;
-import me.hapyl.hariant.weapon.projectile.WeaponRangeProjectile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -15,10 +15,11 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 
 public class HeroMage extends Hero {
     
-    private final @NotNull WeaponRangeProjectile weaponSoulEaterUltimate = new WeaponSoulEaterUltimate();
+    private final @NotNull WeaponSoulEaterUltimate weaponSoulEaterUltimate = new WeaponSoulEaterUltimate();
     
     public HeroMage(@NotNull Key key) {
         super(key, Component.text("Mage"), Attributes.base(1000, 100, 100), new WeaponSoulEater());
@@ -35,6 +36,8 @@ public class HeroMage extends Hero {
         equipment.setBoots(Material.NETHERITE_BOOTS, TrimPattern.TIDE, TrimMaterial.AMETHYST);
         
         setDescription(Component.text("An amateur mage who was deceived and contaminated by the Abyss."));
+        
+        setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.ENERGY_RECHARGE, AttributeType.ELEMENTAL_MASTERY, AttributeType.AETHER_DAMAGE_BONUS));
     }
     
     @NotNull

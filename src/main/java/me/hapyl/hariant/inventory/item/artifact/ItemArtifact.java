@@ -6,6 +6,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.inventory.item.Item;
+import me.hapyl.hariant.inventory.item.ItemCategory;
 import me.hapyl.hariant.inventory.item.Rarity;
 import me.hapyl.hariant.inventory.item.artifact.set.ArtifactSet;
 import me.hapyl.hariant.util.Icon;
@@ -24,8 +25,8 @@ public class ItemArtifact extends Item {
         this.description = description;
         this.artifactSet = artifactSet;
         
-        // Default to FIVE_STAR
         this.rarity = Rarity.FIVE_STAR;
+        this.category = ItemCategory.ARTIFACT;
     }
     
     public @NotNull ArtifactSet getArtifactSet() {
@@ -51,14 +52,14 @@ public class ItemArtifact extends Item {
         
         if (Component.IS_NOT_EMPTY.test(affix)) {
             builder.addLore();
-            builder.addLore(Component.text("Affixes", Colors.GREEN));
+            builder.addLore(Component.text("Attribute", Colors.GREEN));
             builder.addLore(Component.space().append(affix));
         }
         
         builder.addLore();
         
         // Append artifact set description
-        artifactSet.appendDescription(builder, description);
+        artifactSet.supplyLore(builder, description);
         
         // Append flavor text
         if (Component.IS_NOT_EMPTY.test(flavorText)) {

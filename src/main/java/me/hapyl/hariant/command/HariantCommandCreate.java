@@ -10,7 +10,7 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.rank.PlayerRank;
-import me.hapyl.hariant.element.anomaly.EnumAnomaly;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.WinResult;
 import me.hapyl.hariant.game.WinType;
@@ -198,7 +198,7 @@ public final class HariantCommandCreate extends HariantPlayerCommand {
                     @NotNull
                     @Override
                     public Optional<ItemCreator> get(@NotNull PlayerDatabase database, @NotNull Key key) {
-                        final EnumAnomaly elementalAnomaly = Enums.byName(EnumAnomaly.class, key.toString());
+                        final ElementalAnomalyType elementalAnomaly = Enums.byName(ElementalAnomalyType.class, key.toString());
                         
                         if (elementalAnomaly == null) {
                             return Optional.empty();
@@ -214,7 +214,7 @@ public final class HariantCommandCreate extends HariantPlayerCommand {
                     @NotNull
                     @Override
                     public List<String> listNames() {
-                        return StringList.ofEnumConstantLowercaseNames(EnumAnomaly.class);
+                        return StringList.ofEnumConstantLowercaseNames(ElementalAnomalyType.class);
                     }
                 },
                 

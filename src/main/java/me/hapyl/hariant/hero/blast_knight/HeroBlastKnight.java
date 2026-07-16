@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 
 public final class HeroBlastKnight extends Hero {
     
@@ -44,6 +45,18 @@ public final class HeroBlastKnight extends Hero {
         equipment.setBoots(20, 8, 26, TrimPattern.TIDE, TrimMaterial.NETHERITE);
         
         setDescription(Component.text("A royal knight with high-end technology gadgets."));
+        
+        setRecommendedAttributes(Set.of(
+                AttributeType.DEFENSE,
+                AttributeType.ENERGY_RECHARGE,
+                AttributeType.PHYSICAL_RESISTANCE,
+                AttributeType.FIRE_RESISTANCE,
+                AttributeType.WATER_RESISTANCE,
+                AttributeType.ICE_RESISTANCE,
+                AttributeType.TOXIC_RESISTANCE,
+                AttributeType.ELECTRIC_RESISTANCE,
+                AttributeType.AETHER_RESISTANCE
+        ));
     }
     
     @Override

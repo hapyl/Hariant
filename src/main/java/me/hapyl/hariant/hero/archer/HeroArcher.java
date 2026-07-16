@@ -11,6 +11,8 @@ import me.hapyl.hariant.weapon.WeaponBow;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Set;
+
 public class HeroArcher extends Hero {
     
     public HeroArcher(@NotNull Key key) {
@@ -41,6 +43,8 @@ public class HeroArcher extends Hero {
                          .appendNewline()
                          .append(Component.text("Legends say he never missed a shot."))
         );
+        
+        setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.ENERGY_RECHARGE, AttributeType.ELECTRIC_DAMAGE_BONUS));
     }
     
     @NotNull

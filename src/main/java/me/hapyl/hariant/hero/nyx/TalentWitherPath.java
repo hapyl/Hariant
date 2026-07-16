@@ -221,7 +221,7 @@ public final class TalentWitherPath extends Talent {
             displaySpike.remove();
             
             // Fx
-            player.spawnWorldParticle(location, Particle.BLOCK, 50, 0.5, 2, 0.5, 0.075f, SPIKE_BLOCK_DATA);
+            player.spawnWorldParticle(location, Particle.BLOCK, 10, 0.5, 1, 0.5, 0.075f, SPIKE_BLOCK_DATA);
             player.playWorldSound(location, Sound.BLOCK_STONE_BREAK, 0.75f);
         }
         
@@ -254,7 +254,7 @@ public final class TalentWitherPath extends Talent {
     
     private class DamageSourceWitherPath extends DamageSourceImpl {
         DamageSourceWitherPath(@NotNull HariantPlayer player, double damage) {
-            super(damageSourceIdentity, player, DamageType.TALENT, ElementType.AETHER, DamageComponent.common(), Set.of(), damage, spikeElementalApplication.doubleValue(), damageCooldown);
+            super(damageSourceIdentity, player, DamageType.TALENT, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damage, spikeElementalApplication.doubleValue(), damageCooldown);
         }
     }
     

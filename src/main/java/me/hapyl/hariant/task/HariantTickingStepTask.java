@@ -7,8 +7,8 @@ public abstract class HariantTickingStepTask extends HariantTickingTask {
     
     private final int steps;
     
-    public HariantTickingStepTask(@NotNull Scheduler builder, @Range(from = 0, to = Integer.MAX_VALUE) int steps) {
-        super(builder);
+    public HariantTickingStepTask(@NotNull Scheduler scheduler, @Range(from = 0, to = Integer.MAX_VALUE) int steps) {
+        super(scheduler);
         
         this.steps = steps;
     }

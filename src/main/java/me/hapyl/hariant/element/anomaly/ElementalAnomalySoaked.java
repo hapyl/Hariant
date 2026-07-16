@@ -10,7 +10,6 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +25,7 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
     private final int soakedDuration = Tick.fromSeconds(8);
     
     ElementalAnomalySoaked() {
-        super(Key.ofString("soaked"), Component.text("Soaked"), ElementType.WATER);
+        super(Key.ofString("soaked"), Component.text("Drown"), ElementType.WATER);
         
         this.setDescription(
                 Component.empty()
@@ -49,6 +48,11 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
         entity.getAttributes().addModifier(new ElementalAnomalySoakedAttributeModifier(source != null ? source : entity, duration));
     }
     
+    @Override
+    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
+        return entity.getAttributes().hasModifier(modifierKey);
+    }
+    
     public int calculateSoakedDuration(@Nullable HariantEntity source) {
         if (source == null) {
             return soakedDuration;
@@ -60,11 +64,6 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
         final double elementalMastery = attributes.get(AttributeType.ELEMENTAL_MASTERY);
         
         return (int) (soakedDuration * (1 + (maxHealth / (maxHealth + 5000) + elementalMastery / 1000)));
-    }
-    
-    @Override
-    public @NotNull Style getStyle() {
-        return ElementType.WATER.getStyle();
     }
     
     public class ElementalAnomalySoakedAttributeModifier extends AttributeModifier {

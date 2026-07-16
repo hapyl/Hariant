@@ -12,7 +12,6 @@ import me.hapyl.eterna.module.reflect.glowing.Glowing;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Handle;
-import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
@@ -21,7 +20,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.element.*;
-import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
@@ -36,13 +35,15 @@ import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.effect.status.StatusEffectHandler;
 import me.hapyl.hariant.entity.effect.status.StatusEffectInstance;
 import me.hapyl.hariant.entity.effect.status.StatusEffectMap;
-import me.hapyl.hariant.entity.frozen.FrozenHandler;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.mutator.HealthMutator;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.shield.Shield;
 import me.hapyl.hariant.entity.shield.ShieldResult;
 import me.hapyl.hariant.entity.ticker.EntityTicker;
+import me.hapyl.hariant.entity.trap.Trap;
+import me.hapyl.hariant.entity.trap.TrapEscape;
+import me.hapyl.hariant.entity.trap.Trappable;
 import me.hapyl.hariant.event.*;
 import me.hapyl.hariant.handler.ProjectileHandler;
 import me.hapyl.hariant.team.EnumTeam;
@@ -90,12 +91,12 @@ import java.util.stream.Stream;
 
 public class HariantEntity
         implements
-        Handle<LivingEntity>, Ticking, Attributable, Located,
-        ForwardingAudience.Single, UniquelyIdentified, Lifecycle,
-        Coordinates, SoundPlayer, ParticleSpawner, EntityCollector,
-        Distanced, Attacker, TeamEntryProvider, StatusEffectHandler,
-        HeadComponent, DeathComponent, CooldownHandler, Elemental,
-        ElementHandler, HariantLogger.Sender, EffectHandler, TickSupplier {
+        Handle<LivingEntity>, Attributable, Located, ForwardingAudience.Single,
+        UniquelyIdentified, Lifecycle, Coordinates, SoundPlayer,
+        ParticleSpawner, EntityCollector, Distanced, Attacker,
+        TeamEntryProvider, StatusEffectHandler, HeadComponent, DeathComponent,
+        CooldownHandler, Elemental, ElementHandler, HariantLogger.Sender,
+        EffectHandler, TickSupplier, Trappable {
     
     private static final ComponentDisplay EFFECT_RESISTANCE_DISPLAY = new ComponentDisplay(
             Component.text("ᴇꜰꜰᴇᴄᴛ ʀᴇꜱ", AttributeType.EFFECT_RESISTANCE.getStyle()),
@@ -135,12 +136,10 @@ public class HariantEntity
     
     protected double health;
     
-    private @Nullable FrozenHandler frozenHandler;
+    private @Nullable Trap trap;
     private @Nullable Shield shield;
     private @Nullable SitHandler sitHandler;
-    
     private @Nullable RemovalReason removalReason;
-    
     private @Nullable SoundFx soundHurt;
     private @Nullable SoundFx soundDeath;
     
@@ -166,13 +165,17 @@ public class HariantEntity
         return sitHandler;
     }
     
-    public @NotNull SitHandler setSitting(@NotNull Location location, boolean allowDismount) {
+    public @NotNull SitHandler setSitting(@NotNull SitHandler sitHandler) {
         this.unsetSitting();
         
-        this.sitHandler = new SitHandlerImpl(this, location, allowDismount);
+        this.sitHandler = sitHandler;
         this.sitHandler.onMount();
         
         return sitHandler;
+    }
+    
+    public @NotNull SitHandler setSitting(@NotNull Location location, boolean allowDismount) {
+        return this.setSitting(new SitHandlerImpl(this, location, allowDismount));
     }
     
     public void unsetSitting() {
@@ -286,8 +289,11 @@ public class HariantEntity
         final double previousHealth = health;
         final double newHealth = Math.clamp(health - amount, 0.0, this.getMaxHealth());
         
-        this.health = newHealth;
-        this.onHealthChange(previousHealth, newHealth);
+        // Call event
+        final HariantHealthChangeEvent event = new HariantHealthChangeEvent(this, previousHealth, newHealth);
+        event.callEvent();
+        
+        this.setHealth(event.getNewHealth());
     }
     
     @NotNull
@@ -413,13 +419,6 @@ public class HariantEntity
         return DamageResult.OK;
     }
     
-    private void incrementTrackerDamage(@Nullable HariantEntity attacker, @NotNull DamageSource source, double damage, boolean isLethal) {
-        final @NotNull HariantEntity that = attacker != null ? attacker : this;
-        
-        this.combatTracker.incrementDamage(CombatData.Type.INCOMING, that, source.getIdentity(), damage, isLethal);
-        that.combatTracker.incrementDamage(CombatData.Type.OUTGOING, this, source.getIdentity(), damage, isLethal);
-    }
-    
     @NotNull
     public Set<? extends Entity> listGarbage() {
         return Set.of(entity);
@@ -517,23 +516,22 @@ public class HariantEntity
         final double healthAfterHealing = Math.min(maxHealth, health + healingAmount);
         
         final double actualHealing = healthAfterHealing - healthBeforeHealing;
-        final double excessHealing = Math.max(0, healthAfterHealing - maxHealth);
         
-        // Call healing event
-        if (new HariantHealEvent(this, healingSource, healthBeforeHealing, healthAfterHealing, actualHealing, excessHealing).callEvent()) {
+        // Call event
+        final HariantHealEvent event = new HariantHealEvent(this, healingSource, healthBeforeHealing, healthAfterHealing, actualHealing);
+        
+        if (event.callEvent()) {
             return false;
         }
         
-        this.health = healthAfterHealing;
-        
-        this.onHeal(healthBeforeHealing, healthAfterHealing, actualHealing, excessHealing);
-        this.onHealthChange(healthBeforeHealing, healthAfterHealing);
+        this.setHealth(event.getNewHealth());
+        this.onHeal(healthBeforeHealing, healthAfterHealing, actualHealing);
         
         return true;
     }
     
     @EventLike
-    public void onHeal(double healthBeforeHealing, double healthAfterHealing, double actualHealing, double excessHealing) {
+    public void onHeal(double healthBeforeHealing, double healthAfterHealing, double actualHealing) {
         // Show healing display
         if (actualHealing > 1) {
             ComponentDisplay.ofAscend(Component.text("+" + MathFont.format((int) actualHealing), Colors.GREEN), this.getMidpointLocation(), 20, 1.75f);
@@ -561,7 +559,6 @@ public class HariantEntity
     
     @EventLike
     public void onHealthChange(double previousHealth, double newHealth) {
-        new HariantHealthChangeEvent(this, previousHealth, newHealth).callEvent();
     }
     
     @EventLike
@@ -684,8 +681,8 @@ public class HariantEntity
     }
     
     public void knockback(@NotNull KnockbackSource cause) {
-        // If the entity is frozen, skip the calculations
-        if (this.isFrozen()) {
+        // If the entity is trapped, skip the calculations
+        if (this.isTrapped()) {
             return;
         }
         
@@ -729,6 +726,14 @@ public class HariantEntity
         return health;
     }
     
+    public void setHealth(double health) {
+        final double previousHealth = this.health;
+        final double newHealth = Math.clamp(health, this.getMinHealth(), this.getMaxHealth());
+        
+        this.health = newHealth;
+        this.onHealthChange(previousHealth, newHealth);
+    }
+    
     public double getFinalHealth() {
         double health = this.health;
         
@@ -738,6 +743,10 @@ public class HariantEntity
         }
         
         return health;
+    }
+    
+    public double getMinHealth() {
+        return AttributeType.MAX_HEALTH.minValue();
     }
     
     public double getMaxHealth() {
@@ -750,41 +759,21 @@ public class HariantEntity
         return entity;
     }
     
-    @Override
-    public void tick() {
+    public boolean tick() {
         if (!shouldTick()) {
-            return;
+            return false;
         }
         
-        // Always tick the ticker
-        ticker.tick();
+        this.ticker.tick();
+        this.attributes.tick();
+        this.effectMap.tick();
+        this.elementData.tick();
         
-        // Tick frozen
-        if (frozenHandler != null) {
-            frozenHandler.tick();
-            
-            if (frozenHandler.isOver()) {
-                this.unfreeze();
-            }
-        }
+        this.tickHealthMutators();
+        this.tickShield();
+        this.tickTrap();
         
-        // Only tick if not frozen
-        if (!isFrozen()) {
-            // Tick attributes
-            this.attributes.tick();
-            
-            // Tick effects
-            this.effectMap.tick();
-            
-            // Tick element data
-            this.elementData.tick();
-            
-            // Tick health mutators
-            this.tickHealthMutators();
-            
-            // Tick shield
-            this.tickShield();
-        }
+        return true;
     }
     
     public final boolean compareEntity(@NotNull Entity entity) {
@@ -803,21 +792,6 @@ public class HariantEntity
         return health >= getMaxHealth();
     }
     
-    @EventLike
-    public void onFrozenTick(@NotNull FrozenHandler frozenHandler) {
-        entity.setFreezeTicks(100);
-    }
-    
-    @EventLike
-    public void onFreeze(@NotNull FrozenHandler frozenHandler) {
-        playWorldSound(Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 2.0f);
-    }
-    
-    @EventLike
-    public void onUnfreeze(@NotNull FrozenHandler frozenHandler) {
-        entity.setFreezeTicks(0);
-    }
-    
     @ApiStatus.Internal
     public final void tick0() {
         // Handle removal
@@ -833,38 +807,50 @@ public class HariantEntity
         this.tick();
     }
     
-    public final boolean shouldActuallyTick() {
-        return shouldTick() && !isFrozen();
-    }
-    
     public boolean shouldTick() {
         return !entity.isDead();
     }
     
-    public boolean isFrozen() {
-        return frozenHandler != null;
-    }
-    
-    @Nullable
-    public FrozenHandler getFrozenHandler() {
-        return frozenHandler;
-    }
-    
-    public void freeze(@NotNull FrozenHandler frozenHandler) {
-        // If already frozen, unfreeze
-        if (this.frozenHandler != null) {
-            this.frozenHandler.unfreeze();
+    @Override
+    public boolean trap(@NotNull Trap trap) {
+        // If already trapped, make sure the trap can be replaced
+        if (this.trap != null && !this.trap.isReplaceable()) {
+            return false;
         }
         
-        this.frozenHandler = frozenHandler;
-        this.frozenHandler.freeze();
+        // Traps are affected by EFFECT RES, so check for it
+        if (this.hasEffectResistance(trap)) {
+            return false;
+        }
+        
+        // Always remove previous trap
+        this.untrap(TrapEscape.REPLACED);
+        
+        this.trap = trap;
+        this.trap.onTrap0();
+        
+        return true;
     }
     
-    public void unfreeze() {
-        if (this.frozenHandler != null) {
-            this.frozenHandler.unfreeze();
-            this.frozenHandler = null;
+    @Override
+    public boolean untrap(@NotNull TrapEscape trapEscape) {
+        if (this.trap == null) {
+            return false;
         }
+        
+        this.trap.onEscape0(trapEscape);
+        this.trap = null;
+        return true;
+    }
+    
+    @Override
+    public @Nullable Trap getTrap() {
+        return trap;
+    }
+    
+    @Override
+    public boolean isTrapped() {
+        return trap != null;
     }
     
     @Override
@@ -946,6 +932,13 @@ public class HariantEntity
     }
     
     /**
+     * Removes this entity forcefully without scheduling the removal.
+     */
+    public final void removeForcefully() {
+        this.onRemove(RemovalReason.REMOVAL);
+    }
+    
+    /**
      * Gets whether this entity should be destroyed.
      */
     public boolean shouldRemove() {
@@ -964,8 +957,6 @@ public class HariantEntity
         lastAttacker = null;
         health = 0;
         
-        // FIXME (xanyjl @ Monday, June 29) -> This shit is being called twice, move reset to death maybe, wtf?
-        
         ticker.reset();
         attributes.reset();
         combatTracker.reset();
@@ -974,9 +965,9 @@ public class HariantEntity
         elementData.reset();
         healthMutators.clear();
         
-        if (frozenHandler != null) {
-            frozenHandler.unfreeze();
-            frozenHandler = null;
+        if (trap != null) {
+            trap.onEscape0(TrapEscape.DIED);
+            trap = null;
         }
         
         if (shield != null) {
@@ -1052,11 +1043,6 @@ public class HariantEntity
     
     @Override
     public <T> void spawnWorldParticle(@NotNull Location location, @NotNull Particle particle, int amount, double x, double y, double z, float speed, @Nullable T data) {
-        // Don't spawn world particle if the entity is invisible
-        if (this.isInvisible()) {
-            return;
-        }
-        
         getWorld().spawnParticle(particle, location, amount, x, y, z, speed, data);
     }
     
@@ -1135,7 +1121,6 @@ public class HariantEntity
      * @param assistSource - The assist source.
      * @return {@code true} if the entity has effect resistance; {@code false} otherwise.
      */
-    @ApiStatus.Internal
     public boolean hasEffectResistance(@NotNull AssistSource assistSource) {
         final HariantEntity source = assistSource.source();
         
@@ -1349,7 +1334,7 @@ public class HariantEntity
     }
     
     @Override
-    public void triggerAnomaly(@NotNull ElementalAnomaly elementalAnomaly, @Nullable HariantEntity source) {
+    public void triggerAnomaly(@NotNull ElementalAnomalyType elementalAnomaly, @Nullable HariantEntity source) {
         elementData.triggerAnomaly(elementalAnomaly, source);
     }
     
@@ -1498,6 +1483,14 @@ public class HariantEntity
         return NoInput.INSTANCE;
     }
     
+    public @NotNull org.bukkit.attribute.AttributeInstance getVanillaAttribute(@NotNull Attribute attribute) {
+        return Objects.requireNonNull(entity.getAttribute(attribute), "Unsupported attribute: %s".formatted(attribute.getKey().getKey()));
+    }
+    
+    public boolean isSneaking() {
+        return entity.isSneaking();
+    }
+    
     protected void playDamageFx(@NotNull Supplier<@Nullable SoundFx> supplier) {
         entity.playHurtAnimation(0);
         
@@ -1508,8 +1501,21 @@ public class HariantEntity
         }
     }
     
-    public @NotNull org.bukkit.attribute.AttributeInstance getVanillaAttribute(@NotNull Attribute attribute) {
-        return Objects.requireNonNull(entity.getAttribute(attribute), "Unsupported attribute: %s".formatted(attribute.getKey().getKey()));
+    private void tickTrap() {
+        if (trap != null) {
+            trap.tick();
+            
+            if (trap.isOver()) {
+                this.untrap(TrapEscape.TIME_LIMIT);
+            }
+        }
+    }
+    
+    private void incrementTrackerDamage(@Nullable HariantEntity attacker, @NotNull DamageSource source, double damage, boolean isLethal) {
+        final @NotNull HariantEntity that = attacker != null ? attacker : this;
+        
+        this.combatTracker.incrementDamage(CombatData.Type.INCOMING, that, source.getIdentity(), damage, isLethal);
+        that.combatTracker.incrementDamage(CombatData.Type.OUTGOING, this, source.getIdentity(), damage, isLethal);
     }
     
     private void playWorldSound0(@NotNull Location location, @NotNull Sound sound, float volume, @Range(from = 0, to = 2) float pitch) {
@@ -1558,9 +1564,9 @@ public class HariantEntity
     @NotNull
     private Location getLocationInFront0(double distance, boolean fromEyes) {
         final Location location = fromEyes ? this.getEyeLocation() : this.getLocation();
-        final Vector vector = location.getDirection().normalize().multiply(distance).setY(0);
+        final Vector vector = location.getDirection().setY(0);
         
-        return location.add(vector);
+        return vector.lengthSquared() > 0 ? location.add(vector.normalize().multiply(distance)) : location;
     }
     
     private void sendTitle0(@Nullable Component title, @Nullable Component subtitle, int fadeIn, int stay, int fadeOut) {
@@ -1575,12 +1581,12 @@ public class HariantEntity
         }
     }
     
-    private static <T> void resetNullableField(@Nullable T field, @NotNull Consumer<T> reset) {
-        if (field == null) {
-            return;
-        }
-        
-        reset.accept(field);
+    public static @NotNull Component createHeadComponent(@NotNull String texture) {
+        return Component.object(
+                ObjectContents.playerHead()
+                              .profileProperty(PlayerHeadObjectContents.property("textures", Base64.getEncoder().encodeToString(HEAD_TEXTURE_URL.formatted(texture).getBytes())))
+                              .build()
+        ).color(Colors.WHITE);
     }
     
     public static class NoInput implements Input {
@@ -1624,14 +1630,6 @@ public class HariantEntity
         public boolean isSprint() {
             return false;
         }
-    }
-    
-    public static @NotNull Component createHeadComponent(@NotNull String texture) {
-        return Component.object(
-                ObjectContents.playerHead()
-                              .profileProperty(PlayerHeadObjectContents.property("textures", Base64.getEncoder().encodeToString(HEAD_TEXTURE_URL.formatted(texture).getBytes())))
-                              .build()
-        ).color(Colors.WHITE);
     }
     
 }

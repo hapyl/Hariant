@@ -15,9 +15,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Menu extends PlayerMenu {
+public abstract class Menu extends PlayerMenu implements MenuReturn {
     
-    public final PlayerProfile playerProfile;
+    public final PlayerProfile profile;
     
     public Menu(@NotNull Player player, @NotNull PlayerMenuTitle title, @NotNull ChestSize chestSize) {
         if (chestSize == ChestSize.SIZE_1 || chestSize == ChestSize.SIZE_2) {
@@ -25,10 +25,20 @@ public abstract class Menu extends PlayerMenu {
         }
         
         super(player, title, PlayerMenuType.chest(chestSize));
-        this.playerProfile = Hariant.getPlayerProfile(player);
+        this.profile = Hariant.getPlayerProfile(player);
     }
     
     public abstract void updateMenu();
+    
+    @Override
+    public @NotNull Component returnMenuName() {
+        return this.getTitle().asComponent();
+    }
+    
+    @Override
+    public @NotNull Menu returnMenu(@NotNull Player player) {
+        return this;
+    }
     
     @Nullable
     public MenuReturn menuReturn() {
@@ -51,6 +61,10 @@ public abstract class Menu extends PlayerMenu {
         this.setFooter(slot, itemStack, null);
     }
     
+    public void setButton(int slot, @NotNull Button button) {
+        this.setItem(slot, button.createBuilder().asIcon(), button.createMenuAction());
+    }
+    
     @Override
     public int getReturnButtonSlot() {
         return getMenuSize() - 8;
@@ -64,7 +78,7 @@ public abstract class Menu extends PlayerMenu {
         final MenuReturn menuReturn = this.menuReturn();
         
         if (menuReturn != null) {
-            this.setReturnButton(menuReturn.menuName(), menuReturn::menu);
+            this.setReturnButton(menuReturn.returnMenuName(), menuReturn::returnMenu);
         }
         
         this.setCloseButton();

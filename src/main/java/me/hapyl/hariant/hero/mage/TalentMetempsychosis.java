@@ -32,8 +32,8 @@ public final class TalentMetempsychosis extends Talent {
     public TalentMetempsychosis(@NotNull Key key) {
         super(key, Component.text("Metempsychosis"), Icon.ofMaterial(Material.ECHO_SHARD));
         
-        setDurationSeconds(1.25f);
-        setCooldownSeconds(16);
+        setDurationSeconds(1f);
+        setCooldownSeconds(12);
         
         setTalentType(TalentType.MOVEMENT);
         

@@ -17,7 +17,6 @@ import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.VanillaTeamManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -139,7 +138,7 @@ public final class PlayerUI implements Ticking {
                                      .append(attributeType)
                                      .appendSpace()
                                      .append(isBuff ? Component.text("+", valueColor) : Component.text("-", valueColor))
-                                     .append(modifierType.format(Math.abs(value)).color(valueColor))
+                                     .append(modifierType.format(attributeType, Math.abs(value)).color(valueColor))
                                      .appendSpace()
                                      .append(Component.text("(%s)".formatted(modifierType), Colors.DARK_GRAY))
                     );

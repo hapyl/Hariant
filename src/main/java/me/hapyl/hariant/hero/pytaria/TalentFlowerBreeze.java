@@ -31,9 +31,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentFlowerBreeze extends Talent {
     
-    @DisplayField private final Decimal healthSacrifice = Decimal.ofPercentage(20);
-    @DisplayField private final Decimal attackIncrease = Decimal.ofPercentage(50);
-    @DisplayField private final Decimal defenseIncrease = Decimal.ofValue(400);
+    private final @DisplayField Decimal healthSacrifice = Decimal.ofPercentage(20);
+    private final @DisplayField Decimal attackIncrease = Decimal.ofPercentage(50);
+    private final @DisplayField Decimal defenseIncrease = Decimal.ofPercentage(1000);
     
     private final ItemStack angryPytariaHead = ItemBuilder.playerHead("cb3a2c6fa906d782e9bf33cc79ebd043feae0e1284c7e6e43e31e24a59a5d6b1").asIcon();
     
@@ -58,7 +58,7 @@ public final class TalentFlowerBreeze extends Talent {
         super(key, Component.text("Flower Breeze"), Icon.ofMaterial(Material.RED_DYE));
         
         this.setCooldownSeconds(16);
-        this.setDurationSeconds(4);
+        this.setDurationSeconds(5);
         
         this.setTalentType(TalentType.ENHANCE);
         
@@ -135,13 +135,24 @@ public final class TalentFlowerBreeze extends Talent {
         return Response.ok();
     }
     
+    public @NotNull Component createComponent(@NotNull HariantPlayer player) {
+        final AttributeModifier attributeModifier = player.getAttributes().getModifier(this.getKey()).orElse(null);
+        
+        return attributeModifier != null
+               ? Component.empty()
+                          .append(Component.text("\uD83D\uDCA2", Colors.ERROR))
+                          .appendSpace()
+                          .append(attributeModifier.currentTickFormatted())
+               : Component.empty();
+    }
+    
     private class ModifierFlowerBreeze extends AttributeModifier {
         
         ModifierFlowerBreeze(@NotNull HariantEntity applier) {
             super(TalentFlowerBreeze.this, applier, TalentFlowerBreeze.this.getDuration());
             
             of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue());
-            of(AttributeType.DEFENSE, AttributeModifierType.FLAT, defenseIncrease.doubleValue());
+            of(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, defenseIncrease.doubleValue());
         }
         
         @Override

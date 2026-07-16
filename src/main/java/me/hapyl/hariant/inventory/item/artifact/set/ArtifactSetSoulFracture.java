@@ -13,34 +13,26 @@ import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageCalculationsEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.term.Terminology;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class ArtifactSetSoulFracture extends ArtifactSet implements Listener {
     
-    private final Decimal elementalMasteryIncrease = Decimal.ofAttribute(AttributeType.ELEMENTAL_MASTERY, 120);
-    private final Decimal aetherDamageBonus = Decimal.ofAttribute(AttributeType.AETHER_DAMAGE_BONUS, 40);
+    private final ArtifactSetModifier elementalMasteryIncrease = CommonArtifactSetModifiers.ELEMENTAL_MASTERY;
+    private final Decimal aetherDamageBonus = Decimal.ofAttribute(AttributeType.AETHER_DAMAGE_BONUS, 20);
     
     public ArtifactSetSoulFracture(@NotNull Key key) {
         super(key, Component.text("Soul Fracture"));
         
         setArtifactTags(AttributeType.ELEMENTAL_MASTERY, AttributeType.AETHER_DAMAGE_BONUS);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(AttributeType.ELEMENTAL_MASTERY)
-                         .append(Component.text(" by "))
-                         .append(elementalMasteryIncrease)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, elementalMasteryIncrease);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -55,9 +47,8 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
         );
     }
     
-    @Nullable
     @Override
-    public ElementType getEffectiveElementType() {
+    public @NotNull ElementType getEffectiveElementType() {
         return ElementType.AETHER;
     }
     
@@ -94,9 +85,7 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
     
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetSoulFracture.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.FLAT, elementalMasteryIncrease.doubleValue());
+            super(ArtifactSetSoulFracture.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, elementalMasteryIncrease);
         }
     }
     

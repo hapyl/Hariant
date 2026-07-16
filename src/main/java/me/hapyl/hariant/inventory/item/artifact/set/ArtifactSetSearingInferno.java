@@ -6,26 +6,25 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyBurn;
-import me.hapyl.hariant.element.anomaly.EnumAnomaly;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class ArtifactSetSearingInferno extends ArtifactSet implements Listener {
     
-    private final Decimal elementalMasteryIncrease = Decimal.ofAttribute(AttributeType.ELEMENTAL_MASTERY, 120);
+    private final ArtifactSetModifier elementalMasteryIncrease = CommonArtifactSetModifiers.ELEMENTAL_MASTERY;
     private final Decimal burningDamageIncreaseOfElementalMastery = Decimal.ofPercentage(25);
     
     ArtifactSetSearingInferno(@NotNull Key key) {
@@ -33,21 +32,13 @@ public final class ArtifactSetSearingInferno extends ArtifactSet implements List
         
         setArtifactTags(AttributeType.ELEMENTAL_MASTERY);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(AttributeType.ELEMENTAL_MASTERY)
-                         .append(Component.text(" by "))
-                         .append(elementalMasteryIncrease)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, elementalMasteryIncrease);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
                 Component.empty()
                          .append(Component.text("Increases "))
-                         .append(EnumAnomaly.BURN.asComponent())
+                         .append(ElementalAnomalyType.BURN.asComponent())
                          .append(Component.text(" anomaly "))
                          .append(Component.text("DMG", Colors.ELEMENT_FIRE))
                          .append(Component.text(" by "))
@@ -58,9 +49,8 @@ public final class ArtifactSetSearingInferno extends ArtifactSet implements List
         );
     }
     
-    @Nullable
     @Override
-    public ElementType getEffectiveElementType() {
+    public @NotNull ElementType getEffectiveElementType() {
         return ElementType.FIRE;
     }
     
@@ -101,9 +91,7 @@ public final class ArtifactSetSearingInferno extends ArtifactSet implements List
     
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantPlayer applier) {
-            super(ArtifactSetSearingInferno.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.FLAT, elementalMasteryIncrease);
+            super(ArtifactSetSearingInferno.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, elementalMasteryIncrease);
         }
     }
 }

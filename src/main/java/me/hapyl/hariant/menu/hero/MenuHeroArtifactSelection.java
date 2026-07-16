@@ -13,7 +13,6 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.hero.HeroInstance;
-import me.hapyl.hariant.inventory.item.ItemRegistry;
 import me.hapyl.hariant.inventory.item.artifact.ArtifactFilter;
 import me.hapyl.hariant.inventory.item.artifact.ArtifactSlot;
 import me.hapyl.hariant.inventory.item.artifact.ItemArtifact;
@@ -23,9 +22,12 @@ import me.hapyl.hariant.inventory.item.artifact.set.ArtifactSet;
 import me.hapyl.hariant.menu.Menu;
 import me.hapyl.hariant.menu.MenuPage;
 import me.hapyl.hariant.menu.MenuReturn;
+import me.hapyl.hariant.menu.ObjectCycle;
+import me.hapyl.hariant.menu.artifact.AbstractMenuArtifactSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -33,13 +35,14 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
+public class MenuHeroArtifactSelection extends MenuPage<ItemArtifactInstance> {
     
     private static final ItemStack ITEM_NO_ARTIFACTS
             = ItemBuilder.playerHead("7df0ee9d25b41cb645dd2fe5c7746cbb8a1d37fd3e01e25e013242f9d03a30d6")
@@ -69,10 +72,9 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
     private static final int MAX_FILTERING_SETS_TO_DISPLAY = 4;
     private static final int MAX_FILTERING_ATTRIBUTES_TO_DISPLAY = 5;
     
-    private static final Component COMPONENT_POINTER_CURRENT = Component.text(" ➥ ", Colors.GREEN);
-    private static final Component COMPONENT_POINTER = Component.text("    ");
     private static final Component COMPONENT_BULLET = Component.text(" ● ", Colors.DARK_GRAY);
     private static final Component COMPONENT_EMPTY = Component.text(" None!", Colors.DARK_GRAY);
+    private static final Component COMPONENT_RECOMMENDED_ATTRIBUTE = Component.text(" ⭐", Colors.GOLD, TextDecoration.BOLD);
     
     private final PlayerDatabase playerDatabase;
     private final HeroInstance heroInstance;
@@ -83,7 +85,7 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
     
     private final List<? extends AttributeType> possibleAttributes;
     
-    public MenuHeroArtifactSelect(@NotNull Player player, @NotNull HeroInstance heroInstance, @NotNull ArtifactSlot artifactSlot, @Nullable ItemArtifactInstance currentArtifact) {
+    public MenuHeroArtifactSelection(@NotNull Player player, @NotNull HeroInstance heroInstance, @NotNull ArtifactSlot artifactSlot, @Nullable ItemArtifactInstance currentArtifact) {
         super(player, PlayerMenuTitle.create(Component.text("Select Artifact"), artifactSlot.asComponent()));
         
         this.playerDatabase = Hariant.getPlayerDatabase(player);
@@ -91,7 +93,7 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
         this.artifactSlot = artifactSlot;
         this.currentArtifact = currentArtifact;
         this.artifactFilter = heroInstance.getArtifactFilter();
-        this.possibleAttributes = artifactSlot.getArtifactAttributeDistribution().listAffixes().stream().map(ArtifactAffix::getAttributeType).toList();
+        this.possibleAttributes = artifactSlot.getArtifactAttributeDistribution().listAttributes();
         
         this.updateContentsOpenMenu();
     }
@@ -143,7 +145,7 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
     
     @Override
     public void onClick(@NotNull ItemArtifactInstance artifactInstance, @NotNull ClickType clickType) {
-        heroInstance.setArtifact(artifactInstance);
+        this.heroInstance.setArtifact(artifactInstance);
         
         new MenuHeroArtifactEquip(player, heroInstance);
     }
@@ -179,8 +181,8 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
     
     private void updateContentsOpenMenu() {
         this.setContents(
-                playerDatabase.inventory.getItemsByClass(ItemArtifactInstance.class)
-                                        .filter(Predicate.not(ItemArtifactInstance::isOwned))
+                playerDatabase.inventory.streamItemsOfType(ItemArtifactInstance.class)
+                                        .filter(Predicate.not(ItemArtifactInstance::isHeld))
                                         .filter(artifact -> artifact.getArtifactSlot() == artifactSlot)
                                         .filter(artifact -> artifactFilter.test(artifact, possibleAttributes))
                                         .sorted(COMPARATOR)
@@ -231,18 +233,53 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
         return components;
     }
     
+    private static void playButtonSfx(@NotNull Player player, boolean value) {
+        player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 3, value ? 1.25f : 0.75f);
+    }
+    
     private static class MenuArtifactFilter extends Menu {
         
-        private final MenuHeroArtifactSelect menu;
+        private final MenuHeroArtifactSelection menu;
         private final ArtifactFilter artifactFilter;
+        private final ObjectCycle<AttributeType> attributeCycle;
         
-        private int attributePointer;
-        
-        public MenuArtifactFilter(@NotNull Player player, @NotNull MenuHeroArtifactSelect menu, @NotNull ArtifactFilter artifactFilter) {
+        public MenuArtifactFilter(@NotNull Player player, @NotNull MenuHeroArtifactSelection menu, @NotNull ArtifactFilter artifactFilter) {
             super(player, () -> Component.text("Artifact Filter"), ChestSize.SIZE_5);
             
             this.menu = menu;
             this.artifactFilter = artifactFilter;
+            this.attributeCycle = new ObjectCycle<>(menu.possibleAttributes) {
+                @Override
+                public @NotNull Component getName(@NotNull AttributeType attributeType) {
+                    return Component.empty()
+                                    .append(Component.text("[", Colors.DARK_GRAY))
+                                    .append(Components.checkmark(menu.artifactFilter.getFilteringAttributes().contains(attributeType)))
+                                    .append(Component.text("]", Colors.DARK_GRAY))
+                                    .appendSpace()
+                                    .append(attributeType.asComponent())
+                                    .append(menu.heroInstance.getOrigin().getRecommendedAttributes().contains(attributeType) ? COMPONENT_RECOMMENDED_ATTRIBUTE : Component.empty());
+                }
+                
+                @Override
+                public @NotNull ItemBuilder createBaseBuilder() {
+                    final ItemBuilder builder = super.createBaseBuilder();
+                    builder.setName(Component.text("Filter Attributes"));
+                    
+                    builder.addLore();
+                    builder.addWrappedLore(Component.text("Filter by attributes applicable to this slot."));
+                    
+                    builder.addLore();
+                    builder.addLore(Component.text("Applicable Attributes:", Colors.GOLD));
+                    
+                    return builder;
+                }
+                
+                @Override
+                public void onCycle(@NotNull AttributeType attributeType) {
+                    updateMenu();
+                }
+            };
+            
             this.openMenu();
         }
         
@@ -253,8 +290,6 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
         
         @Override
         public void updateMenu() {
-            final int possibleAttributesSize = menu.possibleAttributes.size();
-            
             setItem(
                     20,
                     createFilteringSetsBuilder()
@@ -264,7 +299,7 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
                             .asIcon(),
                     PlayerMenuAction.builder()
                                     .left(player -> {
-                                        new MenuArtifactFilterSets(player, this, artifactFilter);
+                                        new MenuFilterArtifactSet(player, this);
                                     })
                                     .right(player -> {
                                         this.artifactFilter.getFilteringSets().clear();
@@ -275,23 +310,14 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
             
             setItem(
                     24,
-                    createFilteringAttributesBuilder()
-                            .addLore()
-                            .addLore(ButtonComponents.left("cycle"))
-                            .addLore(ButtonComponents.right("cycle backwards"))
-                            .addLore(ButtonComponents.swapOffhand("toggle"))
-                            .asIcon(),
+                    attributeCycle.createBuilderDefaultCycle()
+                                  .addLore(ButtonComponents.swapOffhand("toggle"))
+                                  .asIcon(),
                     PlayerMenuAction.builder()
-                                    .left(player -> {
-                                        this.attributePointer = (this.attributePointer + 1) % possibleAttributesSize;
-                                        this.openMenu();
-                                    })
-                                    .right(player -> {
-                                        this.attributePointer = (this.attributePointer - 1 + possibleAttributesSize) % possibleAttributesSize;
-                                        this.openMenu();
-                                    })
+                                    .left(player -> attributeCycle.cycleNext())
+                                    .right(player -> attributeCycle.cyclePrevious())
                                     .swapOffhand(player -> {
-                                        final AttributeType attributeType = menu.possibleAttributes.get(attributePointer);
+                                        final AttributeType attributeType = attributeCycle.currentValue();
                                         final Set<AttributeType> filteringAttributes = menu.artifactFilter.getFilteringAttributes();
                                         
                                         if (!filteringAttributes.add(attributeType)) {
@@ -340,72 +366,30 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
             return builder;
         }
         
-        private @NotNull ItemBuilder createFilteringAttributesBuilder() {
-            final ItemBuilder builder = new ItemBuilder(Material.FILLED_MAP);
-            final Set<AttributeType> filteringAttributes = menu.artifactFilter.getFilteringAttributes();
-            
-            builder.setName(Component.text("Filter Attributes"));
-            builder.addLore();
-            
-            builder.addWrappedLore(Component.text("Filter by attributes applicable to this slot."));
-            builder.addLore();
-            
-            builder.addLore(Component.text("Applicable attributes:", Colors.GOLD));
-            
-            // Show whether attribute filtering is enabled
-            for (int i = 0; i < menu.possibleAttributes.size(); i++) {
-                final AttributeType attributeType = menu.possibleAttributes.get(i);
-                
-                final boolean currentPointer = attributePointer == i;
-                final boolean contains = filteringAttributes.contains(attributeType);
-                
-                builder.addLore(
-                        Component.empty()
-                                 .append(currentPointer ? COMPONENT_POINTER_CURRENT : COMPONENT_POINTER)
-                                 .append(Component.text("[", Colors.DARK_GRAY))
-                                 .append(Components.checkmark(contains))
-                                 .append(Component.text("]", Colors.DARK_GRAY))
-                                 .appendSpace()
-                                 .append(attributeType.asComponent())
-                );
-            }
-            
-            return builder;
-        }
-        
     }
     
-    private static class MenuArtifactFilterSets extends MenuPage<ItemArtifact> {
+    private static class MenuFilterArtifactSet extends AbstractMenuArtifactSet {
         
         private final MenuArtifactFilter menu;
-        private final ArtifactFilter artifactFilter;
         
-        public MenuArtifactFilterSets(@NotNull Player player, @NotNull MenuArtifactFilter menu, @NotNull ArtifactFilter artifactFilter) {
+        MenuFilterArtifactSet(@NotNull Player player, @NotNull MenuArtifactFilter menu) {
             super(player, PlayerMenuTitle.create(menu.getTitle().asComponent(), Component.text("Artifact Sets")));
             
             this.menu = menu;
-            this.artifactFilter = artifactFilter;
-            
-            this.setContents(ItemRegistry.streamOfType(ItemArtifact.class).toList());
             this.openMenu();
         }
         
         @Override
-        public int getReturnButtonSlot() {
+        public int getCloseButtonSlot() {
             return -1;
         }
         
         @Override
         public @NotNull ItemBuilder createBuilder(@NotNull ItemArtifact itemArtifact) {
-            final ItemBuilder builder = itemArtifact.getIcon().createBuilder();
+            final ItemBuilder builder = super.createBuilder(itemArtifact);
+            final boolean filtered = menu.artifactFilter.getFilteringSets().contains(itemArtifact.getArtifactSet());
             
-            final ArtifactSet artifactSet = itemArtifact.getArtifactSet();
-            final boolean filtered = artifactFilter.getFilteringSets().contains(artifactSet);
-            
-            builder.setName(artifactSet.getName().color(filtered ? Colors.GREEN : Colors.RED));
-            builder.addLore();
-            
-            artifactSet.appendDescription(builder, ArtifactSet.ArtifactSetDescription.EMPTY);
+            builder.setName(itemArtifact.getArtifactSet().getName().color(filtered ? Colors.GREEN : Colors.RED));
             builder.addLore();
             
             if (filtered) {
@@ -423,15 +407,14 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
         
         @Override
         public void onClick(@NotNull ItemArtifact itemArtifact, @NotNull ClickType clickType) {
-            final Set<ArtifactSet> filteringSets = artifactFilter.getFilteringSets();
+            final Set<ArtifactSet> filteringSets = menu.artifactFilter.getFilteringSets();
             final ArtifactSet artifactSet = itemArtifact.getArtifactSet();
             
-            if (filteringSets.contains(artifactSet)) {
+            if (!filteringSets.add(artifactSet)) {
                 filteringSets.remove(artifactSet);
                 playButtonSfx(player, false);
             }
             else {
-                filteringSets.add(artifactSet);
                 playButtonSfx(player, true);
             }
             
@@ -439,15 +422,12 @@ public class MenuHeroArtifactSelect extends MenuPage<ItemArtifactInstance> {
         }
         
         @Override
-        public void updateMenu() {
-            super.updateMenu();
+        public void openMenu(@Range(from = 1, to = Integer.MAX_VALUE) int page) {
+            super.openMenu(page);
             
             setItem(49, ITEM_CONFIRM, PlayerMenuAction.of(player -> menu.openMenu()));
         }
     }
     
-    private static void playButtonSfx(@NotNull Player player, boolean value) {
-        player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 3, value ? 1.25f : 0.75f);
-    }
     
 }

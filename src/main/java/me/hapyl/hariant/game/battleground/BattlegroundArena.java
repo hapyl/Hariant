@@ -37,6 +37,7 @@ public final class BattlegroundArena extends BattlegroundImpl {
                             Droppable.ofItem(ItemRegistry.ARTIFACT_UNSTABLE_LIGHTNING_GEM, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_BLOODY_ROSE, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_PHILOSOPHERS_STONE, 50),
+                            Droppable.ofArtifactArtificer(),
                             Droppable.ofHeroRecruitVoucher()
                     ),
                     Battleground.DEFAULT_DROP_TABLE_AMOUNT

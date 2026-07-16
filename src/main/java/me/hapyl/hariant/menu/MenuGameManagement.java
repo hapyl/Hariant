@@ -1,4 +1,4 @@
-package me.hapyl.hariant.lobby;
+package me.hapyl.hariant.menu;
 
 import me.hapyl.eterna.module.component.ButtonComponents;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
@@ -6,9 +6,6 @@ import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.menu.Menu;
-import me.hapyl.hariant.menu.MenuBattlegroundSelection;
-import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.MenuTeamSelection;
 import net.kyori.adventure.text.Component;
@@ -18,12 +15,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class MenuGameManagement extends Menu {
     
-    private final PlayerProfile playerProfile;
-    
     public MenuGameManagement(@NotNull Player player) {
         super(player, () -> Component.text("Lobby Management"), ChestSize.SIZE_6);
         
-        this.playerProfile = Hariant.getPlayerProfile(player);
         this.openMenu();
     }
     
@@ -58,7 +52,7 @@ public class MenuGameManagement extends Menu {
                         .asIcon()
         );
         
-        final EnumTeam playerTeam = playerProfile.getTeam();
+        final EnumTeam playerTeam = profile.getTeam();
         
         setItem(
                 24,

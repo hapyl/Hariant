@@ -26,20 +26,19 @@ import java.util.Iterator;
 
 public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
     
-    @DisplayField private final Decimal energyDrainOfMaxEnergy = Decimal.ofPercentage(30);
-    @DisplayField private final Decimal energyPlayerTransferPercentOfDrainedEnergy = Decimal.ofPercentage(50);
+    private final @DisplayField Decimal energyDrainOfMaxEnergy = Decimal.ofPercentage(30);
+    private final @DisplayField Decimal energyPlayerTransferPercentOfDrainedEnergy = Decimal.ofPercentage(50);
     
     private final double explosionRadius = 3;
     private final double baseDamage = 30;
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            Key.ofString("shocked"),
-            Component.text("Shocked"),
+            this,
             DeathMessage.createWithDefaultKiller("{player} was shocked to death")
     );
     
     ElementalAnomalyShock() {
-        super(Key.ofString("shock"), Component.text("Shock"), ElementType.ELECTRIC);
+        super(Key.ofString("shock"), Component.text("Shocked"), ElementType.ELECTRIC);
         
         setDescription(
                 Component.empty()
@@ -118,6 +117,11 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
         
         entity.spawnWorldParticle(location, Particle.WAX_ON, 50, 0, 0, 0, 100f);
         entity.playWorldSound(location, Sound.ENTITY_COPPER_GOLEM_DEATH, 1.25f);
+    }
+    
+    @Override
+    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
+        return false;
     }
     
     public double calculateDamage(@Nullable HariantEntity source) {

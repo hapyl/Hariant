@@ -4,6 +4,7 @@ plugins {
 
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
     id("xyz.jpenilla.run-paper") version "3.0.2"
+    id("xyz.jpenilla.resource-factory-bukkit-convention") version "1.3.1"
 }
 
 repositories {
@@ -21,10 +22,10 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("26.1.2.build.+")
+    paperweight.paperDevBundle("26.2.build.+")
 
     implementation("org.mongodb:mongo-java-driver:3.12.12")
-    implementation("me.hapyl:eternaapi:6.2.16-SNAPSHOT")
+    implementation("me.hapyl:eternaapi:6.3.2-SNAPSHOT")
 }
 
 group = "me.hapyl"
@@ -48,20 +49,18 @@ tasks {
         isFailOnError = false
     }
 
-    // Copy version from project to `plugin.yml`, because gradle can't do
-    // that automatically ¯\_(ツ)_/¯
-    named<ProcessResources>("processResources") {
-        filteringCharset = "UTF-8"
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-        from(sourceSets.main.get().resources.srcDirs) {
-            include("plugin.yml")
-            expand("version" to project.version)
-        }
+    // Create `plugin.yml`
+    bukkitPluginYaml {
+        main = "me.hapyl.hariant.HariantPlugin"
+        prefix = "Hariant"
+        apiVersion = "26.2"
+        authors = listOf("hapyl")
+        depend = listOf("EternaAPI")
+        libraries = listOf("org.mongodb:mongo-java-driver:3.12.12")
     }
 
     runServer {
-        minecraftVersion("26.1.2")
+        minecraftVersion("26.2")
     }
 }
 

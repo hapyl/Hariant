@@ -18,8 +18,8 @@ public final class DamageComponentDefense implements DamageComponent {
     }
     
     @Override
-    public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot snapshotEntity, @NotNull AttributesInstanceSnapshot snapshotAttacker) {
-        final double defense = snapshotEntity.get(AttributeType.DEFENSE);
+    public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot entity, @NotNull AttributesInstanceSnapshot attacker) {
+        final double defense = entity.get(AttributeType.DEFENSE);
         
         return HariantConstants.DEFENSE_DIVISOR / (defense + HariantConstants.DEFENSE_DIVISOR);
     }

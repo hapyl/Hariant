@@ -94,7 +94,7 @@ public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
     
     @NotNull
     static Builder common(@NotNull DamageSourceIdentity identity, final double damage) {
-        return new Builder(identity, damage).components(DamageComponent.common());
+        return new Builder(identity, damage).components(DamageComponent.ofCommon());
     }
     
     class Builder implements Buildable<DamageSource> {
@@ -151,7 +151,7 @@ public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
         }
         
         @SelfReturn
-        public Builder damageFlag(@NotNull DamageFlag... flags) {
+        public Builder damageFlags(@NotNull DamageFlag... flags) {
             this.damageFlags = Set.of(flags);
             return this;
         }

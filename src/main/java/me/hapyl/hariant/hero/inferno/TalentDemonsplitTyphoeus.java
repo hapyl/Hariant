@@ -151,7 +151,7 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
                                                               .source(player)
                                                               .elementType(ElementType.FIRE)
                                                               .damageType(DamageType.TALENT)
-                                                              .components(DamageComponent.trueDamage())
+                                                              .components(DamageComponent.ofTrueDamage())
                                                               .build();
                 
                 final Location location = player.getLocationInFrontFromEyes(2.5);
@@ -183,19 +183,19 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
         }
         
         @Override
-        public void tick() {
+        public boolean tick() {
             super.tick();
             
             // Hellfire aura
-            if (localTicks() % 5 != 0) {
-                return;
+            if (localTicks() % 5 == 0) {
+                collectNearbyEntities(hellfireAuraRadius)
+                        .filter(player::canAffect)
+                        .forEach(entity -> {
+                            entity.getAttributes().addModifierIfAbsent(new HellfireAuraAttributeModifier(player));
+                        });
             }
             
-            collectNearbyEntities(hellfireAuraRadius)
-                    .filter(player::canAffect)
-                    .forEach(entity -> {
-                        entity.getAttributes().addModifierIfAbsent(new HellfireAuraAttributeModifier(player));
-                    });
+            return true;
         }
     }
     

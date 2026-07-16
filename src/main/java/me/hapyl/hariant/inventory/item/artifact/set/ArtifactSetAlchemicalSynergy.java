@@ -5,7 +5,6 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
@@ -13,6 +12,8 @@ import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
@@ -21,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ArtifactSetAlchemicalSynergy extends ArtifactSet implements Listener {
     
-    private final Decimal toxicDamageBonus = Decimal.ofAttribute(AttributeType.TOXIC_DAMAGE_BONUS, 20);
+    private final ArtifactSetModifier toxicDamageBonus = CommonArtifactSetModifiers.TOXIC_DAMAGE_BONUS;
     
     private final Decimal damageBoostPerDebuff = Decimal.ofPercentage(6);
     private final Decimal maxNumbersOfDebuffs = Decimal.ofValue(3);
@@ -33,15 +34,7 @@ public final class ArtifactSetAlchemicalSynergy extends ArtifactSet implements L
         
         setArtifactTags(AttributeType.TOXIC_DAMAGE_BONUS);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(ElementType.TOXIC.asComponentDamage())
-                         .append(Component.text(" dealt by "))
-                         .append(toxicDamageBonus)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, toxicDamageBonus);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -95,9 +88,7 @@ public final class ArtifactSetAlchemicalSynergy extends ArtifactSet implements L
     
     private class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetAlchemicalSynergy.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.TOXIC_DAMAGE_BONUS, AttributeModifierType.FLAT, toxicDamageBonus.doubleValue());
+            super(ArtifactSetAlchemicalSynergy.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, toxicDamageBonus);
         }
     }
     

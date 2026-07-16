@@ -97,8 +97,10 @@ public class HariantEntityDummy extends HariantDisplayEntity {
     }
     
     @Override
-    public void tick() {
-        super.tick();
+    public boolean tick() {
+        if (!super.tick()) {
+            return false;
+        }
         
         this.hologram.setLines(player -> {
             final ComponentList components = ComponentList.empty();
@@ -139,6 +141,8 @@ public class HariantEntityDummy extends HariantDisplayEntity {
             displayEntity.teleport(location);
             hologram.teleport(location.add(0, HOLOGRAM_OFFSET, 0));
         }
+        
+        return true;
     }
     
     @Override

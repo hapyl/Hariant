@@ -10,6 +10,8 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantElementalAnomalyEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
+import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.decimal.Decimal;
@@ -20,9 +22,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class ArtifactSetTomeOfTheEnlightened extends ArtifactSet implements Listener {
     
-    private final Decimal twoPieceElementalMasteryIncrease = Decimal.ofAttribute(AttributeType.ELEMENTAL_MASTERY, 120);
+    private final ArtifactSetModifier twoPieceElementalMasteryIncrease = CommonArtifactSetModifiers.ELEMENTAL_MASTERY;
     
-    private final Decimal fourPieceElementalMasteryIncrease = Decimal.ofAttribute(AttributeType.ELEMENTAL_MASTERY, 120);
+    private final Decimal fourPieceElementalMasteryIncrease = Decimal.ofPercentage(100);
     private final Decimal fourPieceElementalMasteryIncreaseDuration = Decimal.ofSeconds(16);
     
     ArtifactSetTomeOfTheEnlightened(@NotNull Key key) {
@@ -30,15 +32,7 @@ public final class ArtifactSetTomeOfTheEnlightened extends ArtifactSet implement
         
         setArtifactTags(AttributeType.ELEMENTAL_MASTERY);
         
-        setPieceDescription(
-                PieceCount.TWO_PIECE,
-                Component.empty()
-                         .append(Component.text("Increases "))
-                         .append(AttributeType.ELEMENTAL_MASTERY)
-                         .append(Component.text(" by "))
-                         .append(twoPieceElementalMasteryIncrease)
-                         .append(Component.text("."))
-        );
+        setPieceDescription(PieceCount.TWO_PIECE, twoPieceElementalMasteryIncrease);
         
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
@@ -85,9 +79,7 @@ public final class ArtifactSetTomeOfTheEnlightened extends ArtifactSet implement
     
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.FLAT, twoPieceElementalMasteryIncrease.doubleValue());
+            super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, twoPieceElementalMasteryIncrease);
         }
     }
     
@@ -95,7 +87,7 @@ public final class ArtifactSetTomeOfTheEnlightened extends ArtifactSet implement
         ModifierFourPiece(@NotNull HariantEntity applier) {
             super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.FOUR_PIECE, applier, fourPieceElementalMasteryIncreaseDuration.intValue());
             
-            of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.FLAT, fourPieceElementalMasteryIncrease.doubleValue());
+            of(AttributeType.ELEMENTAL_MASTERY, AttributeModifierType.MULTIPLICATIVE, fourPieceElementalMasteryIncrease.doubleValue());
         }
     }
 }

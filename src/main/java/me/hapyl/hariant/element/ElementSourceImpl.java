@@ -17,9 +17,8 @@ public class ElementSourceImpl implements ElementSource {
         this.units = units;
     }
     
-    @NotNull
     @Override
-    public ElementType getElementType() {
+    public @NotNull ElementType getElementType() {
         return elementType;
     }
     

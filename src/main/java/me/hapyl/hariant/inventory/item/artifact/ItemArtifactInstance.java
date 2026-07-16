@@ -10,24 +10,17 @@ import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.inventory.item.ItemInstance;
 import me.hapyl.hariant.inventory.item.artifact.affix.ArtifactAffix;
 import me.hapyl.hariant.inventory.item.artifact.set.ArtifactSet;
-import me.hapyl.hariant.util.Owned;
+import me.hapyl.hariant.util.Holdable;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInstance> {
+public class ItemArtifactInstance extends ItemInstance implements Holdable<HeroInstance> {
     
-    private static final Style STYLE_EQUIPPED_BY = Style.style(Colors.WHITE, TextDecoration.UNDERLINED);
-    
-    /**
-     * Defines the {@link HeroInstance} this {@link ItemArtifactInstance} is currently equipped by, or {@code null} if not equipped.
-     */
-    private @Nullable HeroInstance owner;
+    private @Nullable HeroInstance holder;
     
     private @NotNull ArtifactSlot artifactSlot;
     private @NotNull ArtifactAffix artifactAffix;
@@ -48,6 +41,10 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
         this.artifactAffix = artifactSlot.getArtifactAttributeDistribution().randomAffix();
     }
     
+    public void setArtifactSlot(@NotNull ArtifactSlot artifactSlot) {
+        this.artifactSlot = artifactSlot;
+    }
+    
     public @NotNull ArtifactSlot getArtifactSlot() {
         return artifactSlot;
     }
@@ -65,15 +62,14 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
         return getOrigin().getArtifactSet();
     }
     
-    @Nullable
     @Override
-    public HeroInstance getOwner() {
-        return owner;
+    public @Nullable HeroInstance getHolder() {
+        return holder;
     }
     
     @Override
-    public void setOwner(@Nullable HeroInstance owner) {
-        this.owner = owner;
+    public void setHolder(@Nullable HeroInstance holder) {
+        this.holder = holder;
     }
     
     @NotNull
@@ -105,19 +101,20 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
     }
     
     @Override
+    public @NotNull Component getName() {
+        return origin.getName().appendSpace().append(artifactSlot);
+    }
+    
+    @Override
     @NotNull
     public ItemBuilder createBuilder() {
         final ItemBuilder builder = getOrigin().createBuilder(new ArtifactInstanceArtifactDescription());
-        builder.setName(origin.getName().appendSpace().append(artifactSlot));
+        builder.setName(this.getName());
         
         // Append owner if exists
-        if (owner != null) {
+        if (holder != null) {
             builder.addLore();
-            builder.addLore(
-                    Component.empty()
-                             .append(Component.text("Equipped by ", STYLE_EQUIPPED_BY))
-                             .append(owner.getOrigin().getName().style(STYLE_EQUIPPED_BY))
-            );
+            builder.addLore(holder.getHolderName());
         }
         
         return builder;
@@ -130,7 +127,7 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
         
         @Override
         public @NotNull Component getArtifactSetNameSuffix(@NotNull ArtifactSet artifactSet) {
-            final int artifactSetCount = owner != null ? owner.countArtifactSetPieces(artifactSet).ordinal() : 0;
+            final int artifactSetCount = holder != null ? holder.countArtifactSetPieces(artifactSet).ordinal() : 0;
             
             return artifactSetCount == 0
                    ? Component.empty()
@@ -139,11 +136,11 @@ public class ItemArtifactInstance extends ItemInstance implements Owned<HeroInst
         
         @Override
         public @NotNull Component getPieceNameSuffix(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount) {
-            if (owner == null) {
+            if (holder == null) {
                 return Component.empty();
             }
             
-            final boolean isPieceBonusActive = owner.isArtifactSetPieceBonusActive(artifactSet, pieceCount);
+            final boolean isPieceBonusActive = holder.isArtifactSetPieceBonusActive(artifactSet, pieceCount);
             
             return Components.checkmark(isPieceBonusActive)
                              .appendSpace()

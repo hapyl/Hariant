@@ -22,19 +22,19 @@ public final class DamageComponentCritical implements DamageComponent {
     }
     
     @Override
-    public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot snapshotEntity, @NotNull AttributesInstanceSnapshot snapshotAttacker) {
+    public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot entity, @NotNull AttributesInstanceSnapshot attacker) {
         if (damageInstance.isCritical()) {
             return 1.0;
         }
         
-        final double critChance = snapshotAttacker.normalized(AttributeType.CRIT_CHANCE);
+        final double critChance = attacker.normalized(AttributeType.CRIT_CHANCE);
         final boolean forceCritical = damageInstance.getSource().isFlagged(DamageFlag.FORCE_CRITICAL);
         
         final Random random = Hariant.getRandom();
         
         if (critChance >= 1.0 || forceCritical || (critChance > 0.0 && random.nextDouble() < critChance)) {
             damageInstance.markCritical();
-            return 1 + snapshotAttacker.normalized(AttributeType.CRIT_DAMAGE);
+            return 1 + attacker.normalized(AttributeType.CRIT_DAMAGE);
         }
         
         return 1.0;

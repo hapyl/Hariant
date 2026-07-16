@@ -8,13 +8,14 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.damage.KnockbackSource;
 import me.hapyl.hariant.hero.*;
-import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.TalentRegistry;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.weapon.WeaponMelee;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 public final class HeroTroll extends Hero {
     
@@ -39,6 +40,8 @@ public final class HeroTroll extends Hero {
         equipment.setBoots(255, 204, 84);
         
         setDescription(Component.text("Not a good fighter, but definitely a good troll!"));
+        
+        setRecommendedAttributes(Set.of(AttributeType.MAX_HEALTH, AttributeType.DEFENSE, AttributeType.LUCK, AttributeType.PHYSICAL_DAMAGE_BONUS));
     }
     
     @Override
@@ -57,7 +60,7 @@ public final class HeroTroll extends Hero {
     }
     
     @Override
-    public @NotNull TalentPassive getPassiveTalent() {
+    public @NotNull TalentLastLaugh getPassiveTalent() {
         return TalentRegistry.LAST_LAUGH;
     }
     

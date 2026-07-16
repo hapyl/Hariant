@@ -1,5 +1,6 @@
 package me.hapyl.hariant.inventory.item;
 
+import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.database.InstanceImpl;
@@ -25,7 +26,7 @@ public class ItemInstance
         InstanceImpl<Item>
         implements
         UniquelyIdentified, MongoSerializable, ItemCreator, Hoverable,
-        Drop {
+        Drop, Named {
     
     private final UUID uuid;
     
@@ -44,24 +45,15 @@ public class ItemInstance
         return timestamp;
     }
     
+    @Override
+    public @NotNull Component getName() {
+        return origin.getName();
+    }
+    
     @NotNull
     @Override
     public UUID getUuid() {
         return uuid;
-    }
-    
-    @Override
-    @OverridingMethodsMustInvokeSuper
-    public void write(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
-        MongoCodecs.ofKey().write(document, "key", origin.getKey());
-        MongoCodecs.ofTimestamp().write(document, "timestamp", timestamp);
-    }
-    
-    @Override
-    @OverridingMethodsMustInvokeSuper
-    public void read(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
-        // We skip `key` because it's set on init stage via `origin`
-        timestamp = MongoCodecs.ofTimestamp().read(document, "timestamp").orElseGet(Timestamp::ofNow);
     }
     
     @Override
@@ -103,6 +95,20 @@ public class ItemInstance
     @Override
     public String toString() {
         return "%s(%s, %s)".formatted(this.getClass().getSimpleName(), origin.getClass().getSimpleName(), uuid.toString());
+    }
+    
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void write(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
+        MongoCodecs.ofKey().write(document, "key", origin.getKey());
+        MongoCodecs.ofTimestamp().write(document, "timestamp", timestamp);
+    }
+    
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void read(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
+        // We skip `key` because it's set on init stage via `origin`
+        timestamp = MongoCodecs.ofTimestamp().read(document, "timestamp").orElseGet(Timestamp::ofNow);
     }
     
 }

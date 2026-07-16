@@ -5,6 +5,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
 import me.hapyl.hariant.hero.pytaria.bee.BeeSwarm;
 import me.hapyl.hariant.profile.ui.ActionbarSupplier;
+import me.hapyl.hariant.talent.TalentRegistry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Sound;
@@ -13,10 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class HeroDataPytaria extends HeroData<HeroPytaria> implements ComponentLike, ActionbarSupplier {
+public final class HeroDataPytaria extends HeroData<HeroPytaria> implements ComponentLike, ActionbarSupplier {
     
-    @Nullable
-    public BeeSwarm swarm;
+    public @Nullable BeeSwarm swarm;
     
     private int excellency;
     
@@ -54,7 +54,10 @@ public class HeroDataPytaria extends HeroData<HeroPytaria> implements ComponentL
     
     @Override
     public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
-        return List.of(this.asComponent());
+        return List.of(
+                this.asComponent(),
+                TalentRegistry.FLOWER_BREEZE.createComponent(player)
+        );
     }
     
 }

@@ -13,6 +13,7 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import me.hapyl.hariant.registry.Registrable;
+import me.hapyl.hariant.util.LoreSupplier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.ApiStatus;
@@ -25,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 @AutoRegisteredListener
-public abstract class ArtifactSet implements Keyed, Named, Registrable, ComponentLike {
+public abstract class ArtifactSet implements Keyed, Named, Registrable, ComponentLike, LoreSupplier {
     
     private final Key key;
     private final Component name;
@@ -114,7 +115,12 @@ public abstract class ArtifactSet implements Keyed, Named, Registrable, Componen
         return effectDescription.get(pieceCount);
     }
     
-    public final void appendDescription(@NotNull ItemBuilder builder, @NotNull ArtifactSet.ArtifactSetDescription description) {
+    @Override
+    public void supplyLore(@NotNull ItemBuilder builder) {
+        this.supplyLore(builder, ArtifactSetDescription.EMPTY);
+    }
+    
+    public void supplyLore(@NotNull ItemBuilder builder, @NotNull ArtifactSetDescription description) {
         // Append artifact set name
         builder.addLore(
                 Component.empty()
@@ -143,16 +149,22 @@ public abstract class ArtifactSet implements Keyed, Named, Registrable, Componen
                              .append(pieceCount.getName().color(Colors.DARK_GRAY))
                              .append(Component.text("  "))
                              .append(description.getPieceNameSuffix(this, pieceCount))
-            
             );
             
             // Append piece description
-            builder.addWrappedLore(pieceDescription, HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_2);
+            builder.addWrappedLore(
+                    pieceDescription,
+                    HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_2
+            );
         }
     }
     
     protected void setPieceDescription(@NotNull PieceCount pieceCount, @NotNull Component description) {
         this.effectDescription.put(pieceCount, description);
+    }
+    
+    protected void setPieceDescription(@NotNull PieceCount pieceCount, @NotNull ComponentLike description) {
+        this.setPieceDescription(pieceCount, description.asComponent());
     }
     
     private @NotNull Stream<Integer> streamEffectsAsOrdinals() {

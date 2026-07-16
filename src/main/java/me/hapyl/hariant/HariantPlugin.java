@@ -7,6 +7,7 @@ import me.hapyl.hariant.config.HariantConfigImpl;
 import me.hapyl.hariant.database.Database;
 import me.hapyl.hariant.database.DatabaseSyncer;
 import me.hapyl.hariant.entity.EntityGarbageCollector;
+import me.hapyl.hariant.entity.trap.TrapHandler;
 import me.hapyl.hariant.event.HariantEntityMoveEvent;
 import me.hapyl.hariant.game.booster.BoosterHandler;
 import me.hapyl.hariant.handler.*;
@@ -24,11 +25,6 @@ import java.util.logging.Logger;
 
 public final class HariantPlugin extends JavaPlugin {
     
-    /**
-     * Defines the minimum EternaAPI version plugin requires, using any versions below that will shut down the server.
-     */
-    public static final String REQUIRED_ETERNA_VERSION = "6.2.16";
-    
     private HariantConfig config;
     private Database database;
     private DatabaseSyncer databaseSyncer;
@@ -44,7 +40,7 @@ public final class HariantPlugin extends JavaPlugin {
         Hariant.PLUGIN = this;
         
         // Instantiate EternaAPI
-        EternaAPI.instantiate(this, REQUIRED_ETERNA_VERSION);
+        EternaAPI.instantiate(this);
         
         // Load config
         config = new HariantConfigImpl(this);
@@ -77,6 +73,7 @@ public final class HariantPlugin extends JavaPlugin {
         pluginManager.registerEvents(new EntityGarbageCollector(), this);
         pluginManager.registerEvents(new ServerHandler(), this);
         pluginManager.registerEvents(new BoosterHandler(), this);
+        pluginManager.registerEvents(new TrapHandler(), this);
         
         for (final World world : Bukkit.getWorlds()) {
             setDefaultGamerules(world);

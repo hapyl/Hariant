@@ -77,6 +77,7 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
                             Droppable.ofItem(ItemRegistry.ARTIFACT_MAGIC_CODEX, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_SHATTERED_SOUL, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_WHOOPEE_CUSHION, 50),
+                            Droppable.ofArtifactArtificer(),
                             Droppable.ofHeroRecruitVoucher()
                     ),
                     Battleground.DEFAULT_DROP_TABLE_AMOUNT

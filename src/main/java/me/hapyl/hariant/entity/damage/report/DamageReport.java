@@ -50,7 +50,7 @@ public class DamageReport implements Hoverable {
         
         builder.append(
                 Component.empty()
-                         .append(Component.text("ELM ", Colors.GRAY))
+                         .append(Component.text("ENT ", Colors.GRAY))
                          .append(entity.getName()).color(Colors.WHITE)
                          .appendNewline()
         );

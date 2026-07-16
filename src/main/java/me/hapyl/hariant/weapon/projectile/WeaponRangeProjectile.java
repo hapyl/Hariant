@@ -18,13 +18,7 @@ public class WeaponRangeProjectile extends WeaponRange {
     
     private final WeaponRangeProjectileType projectileType;
     
-    public WeaponRangeProjectile(
-            @NotNull Key key,
-            @NotNull Icon icon,
-            @NotNull NormalAttack normalAttackMelee,
-            @NotNull NormalAttackRanged normalAttackRanged,
-            @NotNull WeaponRangeProjectileType projectileType
-    ) {
+    public WeaponRangeProjectile(@NotNull Key key, @NotNull Icon icon, @NotNull NormalAttack normalAttackMelee, @NotNull NormalAttackRanged normalAttackRanged, @NotNull WeaponRangeProjectileType projectileType) {
         super(key, icon, normalAttackMelee, normalAttackRanged);
         
         this.projectileType = projectileType;

@@ -8,7 +8,7 @@ public class DecimalImpl extends Decimal {
     
     private final DecimalFormat format;
     
-    DecimalImpl(double value, @NotNull DecimalFormat format) {
+    public DecimalImpl(double value, @NotNull DecimalFormat format) {
         super(value);
         
         this.format = format;

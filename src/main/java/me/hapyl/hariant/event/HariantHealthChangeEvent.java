@@ -9,10 +9,11 @@ public class HariantHealthChangeEvent extends HariantEntityEvent {
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
     private final double previousHealth;
-    private final double newHealth;
+    private double newHealth;
     
     public HariantHealthChangeEvent(@NotNull HariantEntity entity, double previousHealth, double newHealth) {
         super(entity);
+        
         this.previousHealth = previousHealth;
         this.newHealth = newHealth;
     }
@@ -25,8 +26,12 @@ public class HariantHealthChangeEvent extends HariantEntityEvent {
         return newHealth;
     }
     
+    public void setNewHealth(double newHealth) {
+        this.newHealth = newHealth;
+    }
+    
     public double getHealthDifference() {
-        return Math.max(previousHealth, newHealth) - Math.min(previousHealth, newHealth);
+        return newHealth - previousHealth;
     }
     
     public boolean isHealing() {

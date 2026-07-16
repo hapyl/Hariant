@@ -9,7 +9,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
-import me.hapyl.hariant.element.anomaly.EnumAnomaly;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
@@ -54,7 +54,10 @@ public class TalentInfernalWrath extends TalentUltimate {
     @DisplayField private final Decimal radius = Decimal.ofValue(6);
     @DisplayField private final Decimal castingTime = Decimal.ofSeconds(2.5f);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(this, DeathMessage.create("{player} suffered the wrath [of {killer}]"));
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+            this,
+            DeathMessage.create("{player} suffered the wrath [of {killer}]")
+    );
     
     public TalentInfernalWrath(@NotNull Key key) {
         super(key, Component.text("Infernal Wrath"), Icon.ofMaterial(Material.MAGMA_BLOCK), UltimateResourceType.ENERGY, 60);
@@ -77,7 +80,7 @@ public class TalentInfernalWrath extends TalentUltimate {
                          .append(Component.text(" and "))
                          .append(Component.text("forcefully", Style.style(TextDecoration.UNDERLINED)))
                          .append(Component.text(" triggers one instance of "))
-                         .append(EnumAnomaly.BURN)
+                         .append(ElementalAnomalyType.BURN)
                          .append(Component.text("."))
         );
     }
@@ -109,7 +112,7 @@ public class TalentInfernalWrath extends TalentUltimate {
                                             .source(player)
                                             .damageType(DamageType.ULTIMATE)
                                             .elementType(ElementType.FIRE)
-                                            .components(DamageComponent.trueDamage())
+                                            .components(DamageComponent.ofTrueDamage())
                                             .build();
             this.armorStands = Lists.newArrayList();
             
@@ -130,7 +133,7 @@ public class TalentInfernalWrath extends TalentUltimate {
                 // Deal damage and apply burning
                 collectNearbyEntities().forEach(entity -> {
                     entity.damage(damageSource);
-                    entity.triggerAnomaly(EnumAnomaly.BURN, player);
+                    entity.triggerAnomaly(ElementalAnomalyType.BURN, player);
                 });
                 
                 // Fx
