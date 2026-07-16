@@ -9,40 +9,45 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.NormalAttack;
-import me.hapyl.hariant.entity.PlayerState;
-import me.hapyl.hariant.entity.WarningType;
+import me.hapyl.hariant.database.rank.FormatRules;
+import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.*;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
+import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.tracker.CombatData;
+import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.frozen.FrozenHandler;
 import me.hapyl.hariant.entity.heal.HealingSource;
-import me.hapyl.hariant.event.HariantPlayerRespawnEvent;
+import me.hapyl.hariant.event.HariantPlayerCreateEvent;
 import me.hapyl.hariant.game.GameInstance;
+import me.hapyl.hariant.handler.PlayerHandler;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroData;
 import me.hapyl.hariant.hero.HeroDataSupplier;
 import me.hapyl.hariant.hero.HeroInstance;
+import me.hapyl.hariant.profile.NameFormatter;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.setting.Setting;
+import me.hapyl.hariant.profile.setting.SettingRetriever;
 import me.hapyl.hariant.profile.setting.Settings;
 import me.hapyl.hariant.profile.ui.ActionbarBuilder;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentIndex;
-import me.hapyl.hariant.talent.ultimate.RegenerationRule;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
-import me.hapyl.hariant.talent.ultimate.TalentUltimateResource;
-import me.hapyl.hariant.task.Cancellable;
+import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.HariantTickingTask;
+import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
+import me.hapyl.hariant.util.Cancellable;
+import me.hapyl.hariant.util.ComponentProgress;
+import me.hapyl.hariant.weapon.NormalAttackRanged;
 import me.hapyl.hariant.weapon.Weapon;
+import me.hapyl.hariant.weapon.WeaponBow;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.title.Title;
-import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
@@ -51,6 +56,7 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -61,28 +67,41 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class HariantPlayer extends HariantEntity implements CooldownHandler, HeroDataRetriever {
+public class HariantPlayer extends HariantEntity implements CooldownHandler, HeroDataRetriever, SettingRetriever, NameFormatter, Delegatable {
     
-    public static final Map<Attribute, Double> DEFAULT_ATTRIBUTE_VALUES = Map.of(
+    /**
+     * Defines default attributes that are reset each time player is spawner or removed, used to ensure
+     * correctness, event if base values are never touched.
+     */
+    private static final Map<Attribute, Double> DEFAULT_ATTRIBUTE_VALUES = Map.of(
             Attribute.MAX_HEALTH, HariantConstants.ABSOLUTE_MAX_HEALTH,
-            Attribute.ARMOR, -100.0,       // This will remove armor bars, which are ugly and useless
-            Attribute.ATTACK_SPEED, 2.0,   // This will remove the damage indicator
-            Attribute.MOVEMENT_SPEED, 0.1, // This will ensure speed is reset properly
-            Attribute.SAFE_FALL_DISTANCE, HariantConstants.FALL_DAMAGE_SAFE_FALL_DISTANCE
+            Attribute.ARMOR, -100.0,        // This will remove armor bars, which are ugly and useless
+            Attribute.ATTACK_SPEED, 2.0,    // This will remove the damage indicator
+            Attribute.MOVEMENT_SPEED, 0.1,  // This will ensure speed is reset properly
+            Attribute.JUMP_STRENGTH, 0.42,  // This will ensure jump strength is reset properly
+            Attribute.MAX_ABSORPTION, 20.0, // This will ensure max hearts for shields being within limit
+            Attribute.SAFE_FALL_DISTANCE, HariantConstants.FALL_DAMAGE_SAFE_FALL_DISTANCE,
+            Attribute.WATER_MOVEMENT_EFFICIENCY, 0.0
     );
     
     private static final String NO_COLLISION_BUKKIT_TEAM = "no_collision";
     private static final int[] HOT_BAR_SLOTS = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
     
+    private static final @NotNull Component HEALING_SOURCE_PLAYER_ELIMINATION = Component.text("Player Elimination");
+    private static final @NotNull Component HEALING_SOURCE_PLAYER_ASSIST = Component.text("Player Assist");
+    
+    private static final @NotNull Component PREFIX_DEATH = PlayerHandler.createPrefix(Component.text("☠", Colors.DARK_RED));
+    
     private final PlayerProfile profile;
     private final HeroInstance heroInstance;
-    private final Set<Cancellable> delegatedCancellable;
+    private final Set<DelegateCancellable> delegatedCancellable;
     private final ActionbarCache actionbarCache;
     
     private final Map<Class<? extends Hero>, HeroData<? extends Hero>> heroData;
@@ -91,7 +110,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     private int usedUltimateAt;
     
     private PlayerState state;
-    private HeartStyle heartStyle;
     
     public HariantPlayer(@NotNull PlayerProfile profile, @NotNull Player player, @NotNull HeroInstance heroInstance) {
         super(player, heroInstance.getOrigin().getAttributes());
@@ -102,7 +120,43 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         this.heroData = Maps.newHashMap();
         this.state = PlayerState.ALIVE;
         this.actionbarCache = new ActionbarCache();
-        this.heartStyle = null;
+    }
+    
+    @Override
+    public final void setCollision(@NotNull HariantPlayer player, boolean collision) throws Error {
+        throw new IllegalStateException("Cannot set collision on a player");
+    }
+    
+    public void interrupt(@NotNull AssistSource source) {
+        // Interruption counts as negative effect, so check for effect resistance
+        if (this.hasEffectResistance(source)) {
+            return;
+        }
+        
+        // Cancel interruptible delegates
+        delegatedCancellable.removeIf(delegate -> {
+            if (delegate.getDelegateType() == DelegateType.INTERRUPTABLE) {
+                delegate.cancel();
+                return true;
+            }
+            
+            return false;
+        });
+        
+        // Interrupt weapon
+        final PlayerInventory inventory = getInventory();
+        
+        final int weaponSlot = heroInstance.getOrigin().getWeaponSlot(this);
+        
+        inventory.setHeldItemSlot(8);
+        InternalTasks.later(() -> inventory.setHeldItemSlot(weaponSlot), 2);
+        
+        // Add to assisters
+        combatTracker.assist(source);
+        
+        // Fx
+        playSound(Sound.ENTITY_ELDER_GUARDIAN_CURSE, 2.0f);
+        playSound(Sound.ENCHANT_THORNS_HIT, 0.0f);
     }
     
     @NotNull
@@ -112,12 +166,30 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     
     @SuppressWarnings("unchecked")
     @NotNull
+    @Override
     public <H extends Hero, D extends HeroData<H>> D getHeroData(@NotNull H hero, @NotNull HeroDataSupplier<H, D> supplier) {
         return (D) this.heroData.computeIfAbsent(hero.getClass(), heroClass -> supplier.supply(hero, this));
     }
     
+    @Override
     public <H extends Hero> boolean hasHeroData(@NotNull H hero) {
         return heroData.containsKey(hero.getClass());
+    }
+    
+    @Override
+    public <H extends Hero, D extends HeroData<H>> void touchHeroData(@NotNull H hero, @NotNull Class<D> heroDataClass, @NotNull Consumer<@NotNull D> consumer) {
+        final D data = this.touchData0(hero, heroDataClass);
+        
+        if (data != null) {
+            consumer.accept(heroDataClass.cast(data));
+        }
+    }
+    
+    @Override
+    public <H extends Hero, D extends HeroData<H>, R> @NotNull Optional<R> touchHeroData(@NotNull H hero, @NotNull Class<D> heroDataClass, @NotNull Function<@NotNull D, @Nullable R> function) {
+        final D data = this.touchData0(hero, heroDataClass);
+        
+        return data != null ? Optional.ofNullable(function.apply(data)) : Optional.empty();
     }
     
     public boolean isUsingUltimate() {
@@ -125,7 +197,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     }
     
     public void setUsingUltimate(boolean usingUltimate) {
-        this.usedUltimateAt = usingUltimate ? this.getTicksAlive() : 0;
+        this.usedUltimateAt = usingUltimate ? this.localTicks() : 0;
     }
     
     public int getUsedUltimateAt() {
@@ -135,33 +207,35 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     /**
      * Increments the ultimate resource for this player.
      *
-     * <p>
-     * Note that this method computes the absolute value and multiplies it by the {@link RegenerationRule#getEffectiveAttribute()}, if
-     * it exists.
-     * </p>
-     *
-     * <p><b>Do not use this method to decrement the resource, use {@link #decrementUltimateResource(double)} instead!</b></p>
-     *
-     * @param value - The value by which to increment.
+     * @param value                      - The value by which to increment.
+     * @param offsetByEffectiveAttribute - {@code true} to offset the value by the effective attribute.
      */
-    public void incrementUltimateResource(final double value) {
+    public void incrementUltimateResource(final double value, boolean offsetByEffectiveAttribute) {
         double absoluteValue = Math.abs(value);
         
         final Hero hero = heroInstance.getOrigin();
         final TalentUltimate ultimateTalent = hero.getUltimateTalent();
-        final TalentUltimateResource resource = ultimateTalent.getResource();
         
-        final AttributeType effectiveAttribute = resource.getEffectiveAttribute();
-        
-        if (effectiveAttribute != null) {
-            absoluteValue *= attributes.normalized(effectiveAttribute);
+        // Offset by effective attribute
+        if (offsetByEffectiveAttribute) {
+            final AttributeType effectiveAttribute = ultimateTalent.getUltimateResourceType().getEffectiveAttribute();
+            
+            if (effectiveAttribute != null) {
+                absoluteValue *= attributes.normalized(effectiveAttribute);
+            }
         }
         
         final double previousUltimateResource = ultimateResource;
+        final double newUltimateResource = Math.min(ultimateTalent.getMaximumCost(), ultimateResource + absoluteValue);
         
-        this.ultimateResource = Math.min(ultimateTalent.getResourceCost(), ultimateResource + absoluteValue);
+        this.ultimateResource = newUltimateResource;
         
-        ultimateTalent.onResourceValue(this, previousUltimateResource, ultimateResource);
+        // Call ultimate talent
+        ultimateTalent.onResourceValue(this, previousUltimateResource, newUltimateResource);
+    }
+    
+    public void incrementUltimateResource(final double value) {
+        this.incrementUltimateResource(value, true);
     }
     
     public void decrementUltimateResource(final double value) {
@@ -171,7 +245,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     }
     
     public void chargeUltimate() {
-        this.incrementUltimateResource(heroInstance.getOrigin().getUltimateTalent().getResourceCost());
+        this.incrementUltimateResource(heroInstance.getOrigin().getUltimateTalent().getMaximumCost());
     }
     
     public double getUltimateResource() {
@@ -192,9 +266,8 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         return heroInstance.getOrigin().getWeapon(this).getMeleeAttack();
     }
     
-    @Nullable
     @Override
-    public final NormalAttack getRangedAttack() {
+    public final NormalAttackRanged getRangedAttack() {
         return heroInstance.getOrigin().getWeapon(this).getRangedAttack();
     }
     
@@ -203,16 +276,16 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         return true;
     }
     
+    @NotNull
     @Override
-    public boolean heal(@NotNull HealingSource healingSource) {
-        final boolean healed = super.heal(healingSource);
-        
-        // Add regeneration effect so it's obvious that the player is healed
-        if (healed) {
-            this.addVanillaEffect(PotionEffectType.REGENERATION, 0, 25);
-        }
-        
-        return healed;
+    public final Set<? extends Entity> listGarbage() {
+        return Set.of();
+    }
+    
+    @Override
+    public void onHeal(double healthBeforeHealing, double healthAfterHealing, double actualHealing, double excessHealing) {
+        super.onHeal(healthBeforeHealing, healthAfterHealing, actualHealing, excessHealing);
+        this.addVanillaEffect(PotionEffectType.REGENERATION, 0, 25);
     }
     
     @Override
@@ -228,12 +301,10 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
             this.sendEliminationFeedback(EliminationFeedback.KILL, player);
             
             // Generate energy
-            final double energyRegenerationOnElimination = heroInstance.getOrigin().getUltimateTalent().getResource().regenerateOnElimination();
-            
-            this.incrementUltimateResource(energyRegenerationOnElimination);
+            this.incrementUltimateResource(heroInstance.getOrigin().getUltimateTalent().getUltimateResourceType().regenerateOnElimination());
             
             // Heal
-            this.heal(HealingSource.create(this.getMaxHealth() * HariantConstants.HEALING_ON_PLAYER_ELIMINATION));
+            this.heal(HealingSource.create(this.getMaxHealth() * HariantConstants.HEALING_ON_PLAYER_ELIMINATION, HEALING_SOURCE_PLAYER_ELIMINATION));
             
             // Reward for kill
             //CommonRewards.PLAYER_ELIMINATION.reward(profile);
@@ -242,10 +313,14 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     
     @Override
     public void onAssist(@NotNull HariantPlayer player) {
-        this.heal(HealingSource.create(this.getMaxHealth() * HariantConstants.HEALING_ON_PLAYER_ASSIST));
+        // Regenerate energy
+        this.incrementUltimateResource(heroInstance.getOrigin().getUltimateTalent().getUltimateResourceType().regenerateOnAssist());
+        
+        // Heal
+        this.heal(HealingSource.create(this.getMaxHealth() * HariantConstants.HEALING_ON_PLAYER_ASSIST, HEALING_SOURCE_PLAYER_ASSIST));
         
         // Notify assist
-        EliminationFeedback.ASSIST.feedback(this, player);
+        this.sendEliminationFeedback(EliminationFeedback.ASSIST, player);
     }
     
     @Override
@@ -260,7 +335,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     public void onHealthChange(double previousHealth, double newHealth) {
         super.onHealthChange(previousHealth, newHealth);
         
-        this.updateHealth0(newHealth, this.getMaxHealth(), this.getMaxHearts());
+        this.updateHealth0(newHealth, this.getMaxHealth(), this.getMaxVanillaHearts());
     }
     
     @Override
@@ -277,26 +352,63 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         this.playSound(Sound.ENTITY_BLAZE_DEATH, 1.0f);
         
         // Award eliminations & assists
-        final List<? extends CombatData> assistingPlayers
-                = this.combatTracker.assistingPlayers()
-                                    // Filter self and lastAttacker
-                                    .filter(data -> {
-                                        final HariantEntity entity = data.getEntity();
-                                        
-                                        return !entity.equals(this) && !entity.equals(lastAttacker);
-                                    })
-                                    .toList();
+        final List<? extends HariantEntity> assistingPlayers
+                = combatTracker.assistingEntities()
+                               // Filter self and lastAttacker
+                               .filter(entity -> {
+                                   // Skip self and last attacker
+                                   return !entity.equals(this) && !entity.equals(lastAttacker);
+                               })
+                               .toList();
         
         // Call onAssist() on assisting players
-        assistingPlayers.forEach(data -> data.getEntity().onAssist(this));
+        assistingPlayers.forEach(data -> data.onAssist(this));
         
         // Broadcast death message
         Bukkit.broadcast(damageSource.getIdentity().getDeathMessage().deathMessage(this, lastAttacker, assistingPlayers));
+        
+        // Show death
+        this.sendDeathDamageReport();
+    }
+    
+    private void sendDeathDamageReport() {
+        if (!getSetting(Settings.COMBAT_FEEDBACK)) {
+            return;
+        }
+        
+        sendMessage(
+                Component.empty()
+                         .append(PREFIX_DEATH)
+                         .append(Component.text(" Damage report since last death ", Colors.GRAY))
+                         .append(
+                                 Component.empty()
+                                          .append(Component.text("[Outgoing]", Colors.YELLOW, TextDecoration.UNDERLINED))
+                                          .hoverEvent(combatTracker.createHoverEvent(CombatData.Type.OUTGOING))
+                         )
+                         .append(Component.text("  "))
+                         .append(
+                                 Component.empty()
+                                          .append(Component.text("[Incoming]", Colors.YELLOW, TextDecoration.UNDERLINED))
+                                          .hoverEvent(combatTracker.createHoverEvent(CombatData.Type.INCOMING))
+                         )
+        );
     }
     
     @Override
     public void onShoot(@NotNull DamageSource damageSource) {
         this.startAttackCooldown(false);
+    }
+    
+    @Override
+    public final void onRemove(@Nullable RemovalReason removalReason) {
+        // Don't remove players, just call `onDestroy()`
+        this.onDestroy();
+    }
+    
+    @Override
+    public final boolean shouldRemove() {
+        // Players should never be removed
+        return false;
     }
     
     @Override
@@ -306,7 +418,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     }
     
     @Override
-    public boolean canSee(@NotNull HariantEntity entity) {
+    public boolean canSeeInvisible(@NotNull HariantEntity entity) {
         // If the entity is a player is NOT in SURVIVAL, we consider that we can't see them
         if (entity instanceof HariantPlayer player && player.getGameMode() != GameMode.SURVIVAL) {
             return false;
@@ -316,10 +428,28 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     }
     
     @Override
-    public boolean canAttack(@NotNull HariantEntity entity) {
-        // Check for weapon cooldown
+    public boolean isInvisible() {
+        // Consider spectators invisible
+        final Player player = getHandle();
+        
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            return true;
+        }
+        
+        return super.isInvisible();
+    }
+    
+    @Override
+    public boolean canAttack(@NotNull HariantEntity entity, @NotNull DamageType damageType) {
         final Weapon weapon = heroInstance.getOrigin().getWeapon();
         
+        // If the weapon is bow, and the damage type is RANGED, we always return true, because for ranged weapons the
+        // cooldown determines whether you can shoot the weapon, not whether the damage can be dealt
+        if (weapon instanceof WeaponBow && damageType == DamageType.RANGED) {
+            return true;
+        }
+        
+        // Otherwise, check for weapon cooldown
         if (weapon.hasCooldown(this)) {
             if (getSetting(Settings.ATTACK_COOLDOWN_FEEDBACK)) {
                 playSound(Sound.BLOCK_LAVA_POP, 2.0f);
@@ -341,16 +471,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     public void tick() {
         super.tick();
         
-        // Always tick heart style
-        if (heartStyle != null) {
-            heartStyle.tick();
-            heartStyle.apply(this);
-            
-            if (heartStyle.isOver()) {
-                heartStyle = null;
-            }
-        }
-        
         if (!this.shouldActuallyTick()) {
             return;
         }
@@ -360,15 +480,27 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         
         // Generate energy unless using ultimate
         final TalentUltimate ultimateTalent = heroInstance.getOrigin().getUltimateTalent();
-        final TalentUltimateResource resource = ultimateTalent.getResource();
+        final UltimateResourceType resource = ultimateTalent.getUltimateResourceType();
         
-        if (!this.isUsingUltimate() && ultimateResource < ultimateTalent.getResourceCost()) {
+        if (!this.isUsingUltimate() && ultimateResource < ultimateTalent.getMaximumCost()) {
             final double passiveRegeneration = resource.regeneratePassively();
             
             if (passiveRegeneration > 0.0) {
                 incrementUltimateResource(passiveRegeneration);
             }
         }
+    }
+    
+    @Override
+    public void onFrozenTick(@NotNull FrozenHandler frozenHandler) {
+        super.onFrozenTick(frozenHandler);
+        
+        // Build frozen title
+        this.sendTitleSubtitle(
+                ComponentProgress.create("ꜰʀᴏᴢᴇɴ", ElementType.ICE.getStyle(), (double) frozenHandler.currentTick() / frozenHandler.duration()),
+                frozenHandler.asComponent(),
+                0, 5, 0
+        );
     }
     
     @Override
@@ -399,23 +531,29 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     public void onCreate() {
         this.state = PlayerState.ALIVE;
         
-        this.resetPlayer();
-        this.updateAttributes();
         this.resetArtifactModifiers();
+        this.updateAttributes();
+        
+        // Update health after artifacts and modifiers
+        this.health = this.getMaxHealth();
+        
+        this.resetPlayer();
         this.resetInventory();
         this.resetHotBar();
         this.setGameMode(GameMode.SURVIVAL);
         
         // Call PlayerLifecycle
         heroInstance.getOrigin().getWeapon().onCreate(this);
+        
+        // Call event
+        new HariantPlayerCreateEvent(this).callEvent();
     }
     
     @Override
     public void onDestroy() {
-        // Reset `lastAttacker` because players can't die
-        this.lastAttacker = null;
+        super.onDestroy();
         
-        // Cancel delegated tasks
+        // Cancel all delegated tasks
         this.delegatedCancellable.forEach(Cancellable::cancel);
         this.delegatedCancellable.clear();
         
@@ -426,17 +564,8 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         this.resetPlayer();
         this.resetUltimate();
         
-        // Reset health
-        this.health = this.getMaxHealth();
-        
         // Call weapon PlayerLifecycle
         this.heroInstance.getOrigin().getWeapon().onDestroy(this);
-        
-        this.ticker.reset();
-        this.attributes.reset();
-        this.combatTracker.reset();
-        this.effectMap.resetEffects();
-        this.cooldownHandler.resetCooldowns();
     }
     
     @Override
@@ -472,22 +601,27 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         super.updateHealth(maxHealth);
         
         // Scale player's max hearts
-        final double maxHearts = this.getMaxHearts();
+        final double maxHearts = this.getMaxVanillaHearts();
         
         this.getVanillaAttribute(Attribute.MAX_HEALTH).setBaseValue(maxHearts);
         
         // Scale player's hearts
-        this.updateHealth0(health, maxHealth, maxHearts);
+        this.updateHealth0(getFinalHealth(), maxHealth, maxHearts);
     }
     
-    public double getMaxHearts() {
+    public @NotNull String getEntityName() {
+        return entity.getName();
+    }
+    
+    public double getMaxVanillaHearts() {
         // Calculate max hearts over base max health
-        final double absoluteMaxHealth = attributes.get(AttributeType.MAX_HEALTH);
-        final double baseMaxHealth = attributes.base(AttributeType.MAX_HEALTH);
+        final double maxHealth = Math.clamp(
+                attributes.get(AttributeType.MAX_HEALTH) / attributes.base(AttributeType.MAX_HEALTH),
+                0,
+                1
+        );
         
-        final double maxHealth = Math.clamp(absoluteMaxHealth / baseMaxHealth, 0, 1);
-        
-        return Math.max(maxHealth * HariantConstants.ABSOLUTE_MAX_HEALTH, 0.5);
+        return Math.max(maxHealth * HariantConstants.ABSOLUTE_MAX_HEALTH, HariantConstants.ABSOLUTE_MIN_HEALTH);
     }
     
     @NotNull
@@ -502,16 +636,19 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         for (Attribute attribute : Registry.ATTRIBUTE) {
             final AttributeInstance attributeInstance = player.getAttribute(attribute);
             
+            // Remove all modifiers
             if (attributeInstance != null) {
+                final Double defaultAttributeValue = DEFAULT_ATTRIBUTE_VALUES.get(attribute);
+                
+                // Set default attribute value
+                if (defaultAttributeValue != null) {
+                    attributeInstance.setBaseValue(defaultAttributeValue);
+                }
+                
                 // Remove all modifiers
                 attributeInstance.getModifiers().stream().map(AttributeModifier::getKey).forEach(attributeInstance::removeModifier);
             }
         }
-        
-        // Reset default vanilla attributes
-        DEFAULT_ATTRIBUTE_VALUES.forEach((attribute, value) -> {
-            this.getVanillaAttribute(attribute).setBaseValue(value);
-        });
         
         player.setHealth(HariantConstants.ABSOLUTE_MAX_HEALTH);
         player.setAbsorptionAmount(0.0);
@@ -522,6 +659,10 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         player.setInvulnerable(false);
         player.setArrowsInBody(0, false);
         player.setGlowing(false);
+        player.closeInventory();
+        
+        // Show the player
+        this.show(StreamRules.ALL);
     }
     
     public void sendEliminationFeedback(@NotNull EliminationFeedback feedback, @NotNull HariantPlayer player) {
@@ -567,6 +708,13 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     }
     
     public final void resetArtifactModifiers() {
+        // Add affix modifier
+        final Map<? extends @NotNull AttributeType, ? extends @NotNull Double> summedArtifactAffixes = heroInstance.sumArtifactAffixes();
+        
+        if (!summedArtifactAffixes.isEmpty()) {
+            attributes.addModifier(new ArtifactAffixAttributeModifier(this, summedArtifactAffixes));
+        }
+        
         // Realistically we don't need to manually remove the attribute modifiers, since this is only called on `onCreate`, which is
         // either called whenever the game is started, or whenever the player respawns, which removes any modifiers, so we're good
         this.heroInstance.countArtifactSetPieces().forEach(((artifactSet, pieceCount) -> artifactSet.applyEffect(this, pieceCount)));
@@ -590,8 +738,9 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         return heroInstance.getOrigin().equals(hero);
     }
     
-    public void delegate(@NotNull Cancellable cancellable) {
-        this.delegatedCancellable.add(cancellable);
+    @Override
+    public void delegate(@NotNull Cancellable cancellable, @NotNull DelegateType delegateType) {
+        this.delegatedCancellable.add(new DelegateCancellable(cancellable, delegateType));
     }
     
     @NotNull
@@ -599,26 +748,14 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         return getHandle().getInventory();
     }
     
-    public void sendTitleSubtitle(@NotNull Component title, @NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(title, subtitle, fadeIn, stay, fadeOut);
+    @Override
+    public @NotNull <I> I getSetting(@NotNull Setting<I> setting) {
+        return profile.getSetting(setting);
     }
     
-    public void sendTitle(@NotNull Component title, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(title, null, fadeIn, stay, fadeOut);
-    }
-    
-    public void sendSubtitle(@NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        // Subtitle cannot be displayed without a title, so we send an empty title, which will override the main title, if any showing
-        this.sendTitle0(Component.empty(), subtitle, fadeIn, stay, fadeOut);
-    }
-    
-    public void sendSubtitleKeepTitle(@NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(null, subtitle, fadeIn, stay, fadeOut);
-    }
-    
-    @NotNull
-    public <I> I getSetting(@NotNull Setting<I> setting) {
-        return profile.getDatabase().settings.getValue(setting);
+    @Override
+    public <I> void setSetting(@NotNull Setting<I> setting, @NotNull I value) {
+        profile.setSetting(setting, value);
     }
     
     public void respawn(int respawnIn) {
@@ -642,8 +779,8 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
                 
                 // Fx
                 sendTitleSubtitle(
-                        Component.text("ʀᴇsᴘᴀᴡɴɪɴɢ", NamedTextColor.YELLOW, TextDecoration.BOLD),
-                        Component.text(Tick.format(respawnIn - tick), Colors.FORMAT_TICK),
+                        Component.text("ʀᴇsᴘᴀᴡɴɪɴɢ", Colors.YELLOW, TextDecoration.BOLD),
+                        Component.text(Tick.format(respawnIn - tick), Colors.TICK),
                         0, 25, 0
                 );
                 
@@ -655,28 +792,27 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     }
     
     public void respawn() {
-        this.onCreate();
-        
         // Teleport to a random location
         Hariant.getCurrentGameInstance().ifPresent(gameInstance -> teleport(gameInstance.getBattleground().getRandomSpawnLocation()));
         
-        // TODO @Feb 24, 2026 (xanyjl) -> Add respawn resistance effect
+        // Call onCreate after teleport
+        this.onCreate();
+        
+        // Add respawn resistance
+        addEffect(EnumStatusEffect.RESPAWN_RESISTANCE, 40, this);
         
         // Fx
-        this.addVanillaEffect(PotionEffectType.BLINDNESS, 1, 20);
-        this.sendTitleSubtitle(Component.text("ʀᴇsᴘᴀᴡɴᴇᴅ", Colors.SUCCESS, TextDecoration.BOLD), Component.empty(), 0, 20, 5);
-        
-        // Call respawn event
-        new HariantPlayerRespawnEvent(this).callEvent();
+        addVanillaEffect(PotionEffectType.BLINDNESS, 1, 20);
+        sendTitleSubtitle(Component.text("ʀᴇsᴘᴀᴡɴᴇᴅ", Colors.SUCCESS, TextDecoration.BOLD), Component.empty(), 0, 20, 5);
     }
     
     @NotNull
     public Component createSuffix() {
         return Component.empty()
-                        .append(Component.text(" | ", NamedTextColor.DARK_GRAY))
+                        .append(Component.text(" | ", Colors.DARK_GRAY))
                         .append(
                                 Component.empty()
-                                         .append(Component.text("%,.0f".formatted(health), AttributeType.MAX_HEALTH.getStyle()))
+                                         .append(Component.text("%,.0f".formatted(getFinalHealth()), AttributeType.MAX_HEALTH.getStyle()))
                                          .appendSpace()
                                          .append(AttributeType.MAX_HEALTH.getPrefix().style(AttributeType.MAX_HEALTH.getStyle()))
                         )
@@ -753,39 +889,40 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         this.snapTo(heroInstance.getOrigin().getWeaponSlot(this));
     }
     
-    @NotNull
-    public Input getInput() {
+    @Override
+    public @NotNull Input getCurrentInput() {
         return this.getHandle().getCurrentInput();
     }
     
-    @Nullable
-    public HeartStyle getHeartStyle() {
-        return heartStyle;
+    @Override
+    public @NotNull Component getNameFormatted(@NotNull FormatRules formatRules) {
+        return profile.getNameFormatted(formatRules);
     }
     
-    public void setHeartStyle(@Nullable HeartStyle heartStyle) {
-        this.heartStyle = heartStyle;
+    @Override
+    public @NotNull Component getNameFormatted() {
+        return profile.getNameFormatted();
+    }
+    
+    @Override
+    public @NotNull Component getNameFormattedSocial() {
+        return profile.getNameFormatted();
+    }
+    
+    private <H extends Hero, D extends HeroData<H>> @Nullable D touchData0(@NotNull H hero, @NotNull Class<D> heroDataClass) {
+        final HeroData<? extends Hero> data = this.heroData.get(hero.getClass());
+        
+        return heroDataClass.isInstance(data) ? heroDataClass.cast(data) : null;
     }
     
     private void updateHealth0(double health, double maxHealth, double maxHearts) {
-        // Player health is always scaled of `maxHearts`
-        this.entity.setHealth(Math.max(health / maxHealth * maxHearts, HariantConstants.ABSOLUTE_MIN_HEALTH));
+        final double radio = Math.clamp(health / maxHealth, 0, 1);
+        
+        this.entity.setHealth(Math.max(radio * maxHearts, HariantConstants.ABSOLUTE_MIN_HEALTH));
     }
     
     private void fetchGameInstance(@NotNull Consumer<GameInstance> consumer) {
         Hariant.getCurrentGameInstance().ifPresent(consumer);
-    }
-    
-    private void sendTitle0(@Nullable Component title, @Nullable Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.ofMillis(fadeIn * 50L), Duration.ofMillis(stay * 50L), Duration.ofMillis(fadeOut * 50L)));
-        
-        if (title != null) {
-            this.sendTitlePart(TitlePart.TITLE, title);
-        }
-        
-        if (subtitle != null) {
-            this.sendTitlePart(TitlePart.SUBTITLE, subtitle);
-        }
     }
     
     private void startAttackCooldown(boolean isMeleeAttack) {
@@ -802,5 +939,4 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
             }
         }
     }
-    
 }

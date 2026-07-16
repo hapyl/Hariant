@@ -62,4 +62,5 @@ public interface GameInstance extends Lifecycle, Ticking, PlayerUIFormatter, Pla
     default boolean endIfWinConditionMet() {
         return Hariant.endCurrentGameInstanceIfWinConditionMet();
     }
+    
 }

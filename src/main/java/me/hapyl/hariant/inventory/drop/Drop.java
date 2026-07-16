@@ -1,41 +1,20 @@
 package me.hapyl.hariant.inventory.drop;
 
-import me.hapyl.eterna.module.component.Named;
+import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.registry.Keyed;
+import me.hapyl.hariant.util.Hoverable;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 
-public final class Drop implements Named, ComponentLike {
+public interface Drop extends Keyed, Hoverable {
     
-    private final Component name;
-    private final int amount;
-    
-    private final Component component;
-    
-    Drop(@NotNull Droppable droppable, int amount) {
-        this.name = droppable.getName();
-        this.amount = amount;
-        this.component = Component.empty()
-                                  .append(Component.text("%d".formatted(amount), NamedTextColor.GOLD))
-                                  .append(Component.text(" x ", NamedTextColor.DARK_GRAY))
-                                  .append(name);
-    }
-    
-    @NotNull
     @Override
-    public Component getName() {
-        return name;
-    }
+    @NotNull Key getKey();
     
-    public int getAmount() {
-        return amount;
-    }
+    @NotNull Component getNameStyled();
     
-    @NotNull
     @Override
-    public Component asComponent() {
-        return component;
-    }
+    @NotNull HoverEvent<?> createHoverEvent();
     
 }

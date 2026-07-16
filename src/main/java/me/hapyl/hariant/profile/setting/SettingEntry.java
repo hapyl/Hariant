@@ -14,12 +14,13 @@ public class SettingEntry extends PlayerDatabaseEntry {
         super(database, document, parent);
     }
     
+    @NotNull
     public <I> I getValue(@NotNull Setting<I> setting) {
-        return document.get(setting.getKeyAsString(), setting.defaultValue());
+        return setting.getValue(document);
     }
     
     public <I> void setValue(@NotNull Setting<I> setting, @NotNull I value) {
-        document.put(setting.getKeyAsString(), value);
+        setting.setValue(document, value);
     }
     
     @Override

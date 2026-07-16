@@ -8,13 +8,10 @@ import com.mongodb.client.MongoDatabase;
 import me.hapyl.hariant.HariantPlugin;
 import me.hapyl.hariant.config.HariantConfig;
 import org.bson.Document;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 public final class Database implements Closeable {
     

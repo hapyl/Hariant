@@ -2,6 +2,9 @@ package me.hapyl.hariant.game.battleground;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.game.battleground.clouds.BattlegroundClouds;
+import me.hapyl.hariant.game.battleground.feature.BattlegroundFeature;
+import me.hapyl.hariant.game.battleground.japan.BattlegroundJapan;
 import me.hapyl.hariant.inventory.drop.DropTable;
 import me.hapyl.hariant.util.ImmutableLocation;
 import me.hapyl.hariant.util.Selectable;
@@ -23,6 +26,7 @@ public enum EnumBattleground implements Battleground, Selectable {
     JAPAN(new BattlegroundJapan()),
     RAILWAY(new BattlegroundRailway()),
     WINERY(new BattlegroundWinery()),
+    CLOUDS(new BattlegroundClouds()),
     
     ;
     
@@ -47,8 +51,13 @@ public enum EnumBattleground implements Battleground, Selectable {
     
     @NotNull
     @Override
-    public List<ImmutableLocation> getSpawnLocations() {
+    public List<? extends ImmutableLocation> getSpawnLocations() {
         return battleground.getSpawnLocations();
+    }
+    
+    @Override
+    public @NotNull List<? extends BattlegroundFeature> getFeatures() {
+        return battleground.getFeatures();
     }
     
     @NotNull
@@ -69,6 +78,11 @@ public enum EnumBattleground implements Battleground, Selectable {
     }
     
     @Override
+    public void tick() {
+        battleground.tick();
+    }
+    
+    @Override
     public void select() {
         Hariant.setSelectedBattleground(this);
     }
@@ -77,6 +91,5 @@ public enum EnumBattleground implements Battleground, Selectable {
     public boolean isSelected() {
         return Hariant.getSelectedBattleground() == this;
     }
-    
     
 }

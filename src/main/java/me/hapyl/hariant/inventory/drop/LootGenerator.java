@@ -1,12 +1,10 @@
 package me.hapyl.hariant.inventory.drop;
 
+import me.hapyl.hariant.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public interface LootGenerator {
     
-    @NotNull
-    List<Droppable> generateLoot();
+    @NotNull DropSummary generateLoot(@NotNull PlayerProfile profile);
     
 }

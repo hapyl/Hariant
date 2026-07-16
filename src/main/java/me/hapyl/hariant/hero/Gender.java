@@ -2,10 +2,10 @@ package me.hapyl.hariant.hero;
 
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.component.Styled;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.util.Prefixed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
@@ -15,19 +15,19 @@ public enum Gender implements Prefixed, Named, Styled, ComponentLike {
     MALE(
             Component.text("♂"),
             Component.text("Male"),
-            NamedTextColor.AQUA
+            Colors.AQUA
     ),
     
     FEMALE(
             Component.text("♀"),
             Component.text("Female"),
-            NamedTextColor.LIGHT_PURPLE
+            Colors.LIGHT_PURPLE
     ),
     
     OTHER(
             Component.text("❓"),
             Component.text("Other"),
-            NamedTextColor.GRAY
+            Colors.GRAY
     );
     
     private final Component prefix;
@@ -44,6 +44,12 @@ public enum Gender implements Prefixed, Named, Styled, ComponentLike {
     @Override
     public Component getPrefix() {
         return prefix;
+    }
+    
+    @NotNull
+    @Override
+    public Component getPrefixStyled() {
+        return prefix.style(style);
     }
     
     @NotNull

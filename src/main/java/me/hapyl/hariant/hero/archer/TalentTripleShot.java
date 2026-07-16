@@ -27,7 +27,7 @@ public final class TalentTripleShot extends Talent {
     
     private final Color arrowColor = Color.fromRGB(Colors.ELEMENT_ELECTRIC.value());
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.of(AttributeType.ATTACK, 135);
+    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 135);
     
     @DisplayField private final Decimal additionalArrowDamageMultiplier = Decimal.ofPercentage(50);
     @DisplayField private final Decimal additionalArrowSpread = Decimal.ofValue(5, v -> Component.text(v).append(Component.text("°")).color(TextColor.color(0xFFF854)));

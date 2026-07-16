@@ -8,7 +8,6 @@ import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.EffectType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @AutoRegisteredListener
 public class StatusEffectImpl implements StatusEffect {
@@ -64,15 +63,15 @@ public class StatusEffectImpl implements StatusEffect {
     }
     
     @Override
-    public void onApply(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+    public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
     }
     
     @Override
-    public void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+    public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
     }
     
 }

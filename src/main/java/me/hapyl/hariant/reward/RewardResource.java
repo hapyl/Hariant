@@ -50,8 +50,6 @@ public class RewardResource implements Reward {
         final HariantInventory inventory = profile.getDatabase().inventory;
         
         resources.forEach(inventory::addResource);
-        
-        // TODO @Feb 28, 2026 (xanyjl) -> Notify and shit
     }
     
 }

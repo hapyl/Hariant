@@ -4,28 +4,26 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.HariantEntity;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * Represents an interface with support of {@link AttributeModifier}.
+ */
 public interface AttributeModifiable {
     
     // *-* Add Operations *-* //
     
     void addModifier(@NotNull AttributeModifier attributeModifier);
     
-    default void addModifier(@NotNull Key key, int duration, @Nullable HariantEntity applier, @NotNull AttributeModifierAdderHandler handler) {
+    default void addModifier(@NotNull Key key, int duration, @NotNull HariantEntity applier, @NotNull AttributeModifierAdderHandler handler) {
         final AttributeModifier modifier = new AttributeModifier(key, Component.text(key.capitalize()), applier, duration);
         handler.handle(modifier);
         
         this.addModifier(modifier);
-    }
-    
-    default void addModifier(@NotNull Key key, int duration, @NotNull AttributeModifierAdderHandler handler) {
-        this.addModifier(key, duration, null, handler);
     }
     
     default void addModifierIfAbsent(@NotNull AttributeModifier attributeModifier) {

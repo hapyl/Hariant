@@ -1,8 +1,7 @@
 package me.hapyl.hariant.database.rank;
 
-import me.hapyl.eterna.module.component.Components;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.database.PlayerDatabase;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
@@ -21,7 +20,7 @@ public enum PlayerRank implements Rank {
         @Override
         @NotNull
         public Component getPrefix() {
-            return Component.empty();
+            return Component.text("ᴅᴇꜰᴀᴜʟᴛ", TextColor.color(0x7D7D7D));
         }
         
         @Override

@@ -14,7 +14,6 @@ import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.event.HariantHealEvent;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -24,12 +23,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements Listener {
     
     private final Key modifierKey = Key.ofString("bleed");
     
-    private final Decimal vitalityReduction = Decimal.ofAttributeBonus(AttributeType.VITALITY, 50);
+    private final Decimal vitalityReduction = Decimal.ofAttribute(AttributeType.VITALITY, 50);
     
     private final int bleedDuration = Tick.fromSeconds(6);
     private final int bleedPeriod = Tick.fromSeconds(0.75f);
@@ -53,7 +53,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
     private final DeathMessage deathMessage = DeathMessage.createWithDefaultKiller("{player} bled to death");
     
     ElementalAnomalyBleed() {
-        super(Key.ofString("bleed"), Component.text("Bleed"));
+        super(Key.ofString("bleed"), Component.text("Bleed"), ElementType.PHYSICAL);
         
         this.setDescription(
                 Component.empty()
@@ -87,13 +87,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         final int duration = this.calculateBleedDuration(source);
         final double damage = this.calculateBleedDamage(source);
         
-        entity.getAttributes().addModifier(new ElementalAnomalyBleedAttributeModifier(modifierKey, source, duration, damage));
-    }
-    
-    @NotNull
-    @Override
-    public Style getStyle() {
-        return ElementType.PHYSICAL.getStyle();
+        entity.getAttributes().addModifier(new ElementalAnomalyBleedAttributeModifier(modifierKey, source != null ? source : entity, duration, damage));
     }
     
     public int calculateBleedDuration(@Nullable HariantEntity source) {
@@ -119,7 +113,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         
         private final DamageSource damageSource;
         
-        ElementalAnomalyBleedAttributeModifier(@NotNull Key key, @Nullable HariantEntity applier, int duration, double damage) {
+        ElementalAnomalyBleedAttributeModifier(@NotNull Key key, @NotNull HariantEntity applier, int duration, double damage) {
             super(key, ElementalAnomalyBleed.this.getName(), applier, duration);
             
             // Reduce vitality
@@ -130,19 +124,19 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         }
         
         @Override
-        public void onApply(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+        public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
             entity.sendMessage(componentBleeding);
             entity.playWorldSound(Sound.ENTITY_ZOMBIE_INFECT, 1.0f);
         }
         
         @Override
-        public void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+        public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
             entity.sendMessage(componentNoLongerBleeding);
             entity.playWorldSound(Sound.ENTITY_HORSE_SADDLE, 1.25f);
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
             if (tick % bleedPeriod != 0) {
                 return;
             }
@@ -160,7 +154,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
                     DamageType.ANOMALY,
                     ElementType.PHYSICAL,
                     List.of(DamageComponent.elemental()),
-                    List.of(),
+                    Set.of(),
                     damage,
                     0
             );

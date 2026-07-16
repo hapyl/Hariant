@@ -1,45 +1,42 @@
 package me.hapyl.hariant.entity;
 
-import me.hapyl.hariant.entity.player.HariantPlayer;
-
 /**
  * Represents the affect result from one {@link HariantEntity} to another.
  */
 public enum AffectResult {
     
     /**
-     * Defines that this {@link HariantEntity} can affect the other.
+     * Defines that this entity can be affected.
      */
     CAN_AFFECT,
     
     /**
-     * Defines that this {@link HariantEntity} cannot affect the other because it is the same entity.
+     * Defines that this entity cannot be affected by another because it's the same entity.
      */
     CANNOT_AFFECT_SELF,
     
     /**
-     * Defines that this {@link HariantEntity} cannot affect the other because the entity has died.
+     * Defines that this entity cannot be affected by another because it's dead.
      *
      * <p>
-     * The dead check differs for {@link HariantPlayer}, because it's managed by their {@link PlayerState}, rather than
-     * checking for underlying entity death.
+     * For players, they're considered dead even if they're respawning.
      * </p>
      */
     CANNOT_AFFECT_DEAD,
     
     /**
-     * Defines that this {@link HariantEntity} cannot affect the other because they're in the same team.
+     * Defines that this entity cannot be affected by another because they're in the same team.
      */
     CANNOT_AFFECT_TEAMMATE,
     
     /**
-     * Defines that this {@link HariantEntity} cannot affect the other because it's invisible and cannot be seen by this entity.
+     * Defines that this entity cannot be affected by another because it's invisible and the other cannot see it.
      */
     CANNOT_AFFECT_INVISIBLE,
     
     /**
-     * Defines that this {@link HariantEntity} cannot affect the other because it's a {@link HariantMarkerEntity}.
+     * Defines that this entity cannot be affected by another because it has invulnerability frames.
      */
-    CANNOT_AFFECT_MARKER
+    CANNOT_AFFECT_INVULNERABLE
     
 }

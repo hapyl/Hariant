@@ -10,10 +10,8 @@ public final class Promise {
         this.callback = null;
     }
     
-    @NotNull
-    public Promise then(@NotNull Runnable runnable) {
+    public void then(@NotNull Runnable runnable) {
         this.callback = runnable;
-        return this;
     }
     
     public void fulfil() {

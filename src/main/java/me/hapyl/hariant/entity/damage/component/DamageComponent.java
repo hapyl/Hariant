@@ -4,35 +4,58 @@ import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.util.Identified;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
 public interface DamageComponent extends Identified {
     
-    @NotNull
     @Override
-    String identify();
+    @NotNull String identify();
     
     double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot snapshotEntity, @NotNull AttributesInstanceSnapshot snapshotAttacker);
     
-    @NotNull
-    static DamageComponent elemental() {
-        return new DamageComponentElemental();
+    static @NotNull DamageComponent elemental() {
+        return Holder.ELEMENTAL;
     }
     
-    @NotNull
-    static DamageComponent defense() {
-        return new DamageComponentDefense();
+    static @NotNull DamageComponent defense() {
+        return Holder.DEFENSE;
     }
     
-    @NotNull
-    static DamageComponent critical() {
-        return new DamageComponentCritical();
+    static @NotNull DamageComponent critical() {
+        return Holder.CRITICAL;
     }
     
-    @NotNull
-    static List<DamageComponent> common() {
-        return List.of(elemental(), defense(), critical());
+    static @NotNull List<? extends DamageComponent> common() {
+        return Holder.COMMON;
     }
+    
+    static @NotNull List<? extends DamageComponent> trueDamage() {
+        return Holder.TRUE_DAMAGE;
+    }
+    
+    static @NotNull List<? extends DamageComponent> environmentDamage() {
+        return Holder.ENVIRONMENT_DAMAGE;
+    }
+    
+    final class Holder {
+        private static final @NotNull DamageComponent ELEMENTAL = new DamageComponentElemental();
+        private static final @NotNull DamageComponent DEFENSE = new DamageComponentDefense();
+        private static final @NotNull DamageComponent CRITICAL = new DamageComponentCritical();
+        
+        /* Commons components scale of ELEMENTAL, DEF and can deal CRIT DMG. */
+        private static final @NotNull @Unmodifiable List<? extends DamageComponent> COMMON = List.of(ELEMENTAL, DEFENSE, CRITICAL);
+        
+        /* True damage ignores DEF. */
+        private static final @NotNull @Unmodifiable List<? extends DamageComponent> TRUE_DAMAGE = List.of(ELEMENTAL, CRITICAL);
+        
+        /* Environment damage cannot CRIT. */
+        private static final @NotNull @Unmodifiable List<? extends DamageComponent> ENVIRONMENT_DAMAGE = List.of(ELEMENTAL, DEFENSE);
+        
+        private Holder() {
+        }
+    }
+    
     
 }

@@ -1,32 +1,25 @@
 package me.hapyl.hariant.profile.message;
 
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.database.rank.RankFormatter;
 import me.hapyl.hariant.profile.PlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class MessageChannelImpl implements MessageChannel {
     
-    private final Pattern lookupPattern;
+    private final Component prefix;
     
-    MessageChannelImpl(@Nullable String ch) {
-        this.lookupPattern = ch != null ? Pattern.compile("^%s\\s*".formatted(Pattern.quote(ch))) : null;
-    }
-    
-    @Nullable
-    @Override
-    public Pattern lookupPattern() {
-        return lookupPattern;
+    MessageChannelImpl(@NotNull Component prefix) {
+        this.prefix = prefix;
     }
     
     @NotNull
     @Override
-    public Component channelPrefix(@NotNull PlayerProfile profile) {
-        return Component.empty();
+    public Component channelPrefix() {
+        return prefix;
     }
     
     @Override
@@ -34,11 +27,14 @@ public class MessageChannelImpl implements MessageChannel {
         return true;
     }
     
-    @NotNull
     @Override
-    public Stream<PlayerProfile> recipients(@NotNull PlayerProfile profile) {
-        // TODO @Feb 16, 2026 (xanyjl) -> Filter blocks, etc
-        return Hariant.getPlayerProfiles();
+    public @NotNull Stream<PlayerProfile> recipients() {
+        return Hariant.getPlayerProfiles().filter(this::isAccessible);
+    }
+    
+    @Override
+    public @NotNull Component formatProfile(@NotNull PlayerProfile profile) {
+        return profile.getNameFormattedSocial();
     }
     
 }

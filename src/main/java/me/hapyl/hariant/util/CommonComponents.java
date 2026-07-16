@@ -2,10 +2,8 @@ package me.hapyl.hariant.util;
 
 import me.hapyl.eterna.module.text.Capitalizable;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.attribute.AttributeType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
@@ -17,8 +15,8 @@ public final class CommonComponents implements ComponentLike {
     public static final CommonComponents HEALTH;
     
     static {
-        ENEMY = create("enemy", "enemies", NamedTextColor.RED);
-        ALLY = create("ally", "allies", NamedTextColor.GREEN);
+        ENEMY = create("enemy", "enemies", Colors.RED);
+        ALLY = create("ally", "allies", Colors.GREEN);
         HEALTH = create("health", "health", Colors.ATTRIBUTE_MAX_HEALTH);
     }
     

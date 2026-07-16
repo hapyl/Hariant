@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.component.Styled;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.eterna.module.text.Capitalizable;
 import me.hapyl.eterna.module.util.CollectionUtils;
 import me.hapyl.hariant.Colors;
@@ -40,7 +41,6 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
     GREEN(NamedTextColor.GREEN, Material.GREEN_BANNER),
     BLUE(NamedTextColor.AQUA, Material.BLUE_BANNER),
     ORANGE(NamedTextColor.GOLD, Material.ORANGE_BANNER),
-    PINK(NamedTextColor.LIGHT_PURPLE, Material.PINK_BANNER),
     PURPLE(NamedTextColor.DARK_PURPLE, Material.PURPLE_BANNER),
     WHITE(NamedTextColor.WHITE, Material.WHITE_BANNER),
     BLACK(NamedTextColor.DARK_GRAY /* Vanilla black is way too dark */, Material.BLACK_BANNER);
@@ -58,7 +58,7 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
     private final Component firstLetter;
     
     EnumTeam(@NotNull NamedTextColor color, @NotNull Material material) {
-        this.entries = Sets.newHashSet();
+        this.entries = Sets.newLinkedHashSet();
         
         this.color = color;
         this.style = Style.style(color);
@@ -111,6 +111,12 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
     
     @NotNull
     @Override
+    public Component getPrefixStyled() {
+        return prefix.style(style);
+    }
+    
+    @NotNull
+    @Override
     public Component getName() {
         return name;
     }
@@ -121,12 +127,28 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
         return style;
     }
     
+    
     @NotNull
     @Override
     public ItemBuilder createBuilder() {
         final ItemBuilder builder = icon.createBuilder();
         
-        // TODO @Feb 20, 2026 (xanyjl) ->
+        builder.setName(asComponent());
+        builder.addLore();
+        
+        final List<PlayerProfile> profiles = getPlayerProfiles().toList();
+        
+        // Display members
+        builder.addLore(Component.text("Members:"));
+        
+        for (int j = 0; j < EnumTeam.MAX_PLAYERS; j++) {
+            if (j >= profiles.size()) {
+                builder.addLore(Component.text(" - Empty!", Colors.DARK_GRAY));
+            }
+            else {
+                builder.addLore(Component.text(" - ", Colors.DARK_GRAY).append(profiles.get(j).getNameFormatted()));
+            }
+        }
         
         return builder;
     }
@@ -184,8 +206,8 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
                              .color(Colors.SUCCESS)
             );
             
-            case CANNOT_JOIN_TEAM_IS_FULL -> sendMessage(player, Component.text("This team is full!"));
-            case CANNOT_JOIN_ALREADY_IN_THIS_TEAM -> sendMessage(player, Component.text("You are already in this team!"));
+            case CANNOT_JOIN_TEAM_IS_FULL -> sendMessage(player, Component.text("This team is full!", Colors.ERROR));
+            case CANNOT_JOIN_ALREADY_IN_THIS_TEAM -> sendMessage(player, Component.text("You are already in this team!", Colors.ERROR));
         }
     }
     
@@ -221,7 +243,7 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
                                                     .map(profile -> {
                                                         final String playerName = profile.getPlayer().getName();
                                                         
-                                                        return Component.text(playerName.substring(0, Math.min(playerName.length(), HariantConstants.AVERAGE_NICKNAME_LENGTH)), NamedTextColor.WHITE);
+                                                        return Component.text(playerName.substring(0, Math.min(playerName.length(), HariantConstants.AVERAGE_NICKNAME_LENGTH)), Colors.WHITE);
                                                     })
                                                     .toList();
         
@@ -245,8 +267,29 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
     }
     
     @NotNull
+    public Stream<HariantPlayer> getPlayers() {
+        return entries.stream()
+                      .map(entry -> Hariant.getEntity(entry.getUuid(), HariantPlayer.class))
+                      .filter(Optional::isPresent)
+                      .map(Optional::get);
+    }
+    
+    @NotNull
     public Component getFirstLetterFormatted() {
         return firstLetter.style(Style.style(style.color(), TextDecoration.BOLD));
+    }
+    
+    @NotNull
+    public PacketTeamColor getPacketTeamColor() {
+        return switch (this) {
+            case RED -> PacketTeamColor.RED;
+            case GREEN -> PacketTeamColor.GREEN;
+            case BLUE -> PacketTeamColor.BLUE;
+            case ORANGE -> PacketTeamColor.GOLD;
+            case PURPLE -> PacketTeamColor.DARK_PURPLE;
+            case WHITE -> PacketTeamColor.WHITE;
+            case BLACK -> PacketTeamColor.DARK_GRAY;
+        };
     }
     
     @Nullable

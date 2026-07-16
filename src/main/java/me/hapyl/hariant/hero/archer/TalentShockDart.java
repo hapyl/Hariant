@@ -27,7 +27,7 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTask;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
-import me.hapyl.hariant.term.EnumTerm;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -38,13 +38,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public final class TalentShockDart extends Talent implements Listener {
     
-    @DisplayField private final AttributeScaling arrowDamage = AttributeScaling.of(AttributeType.ATTACK, 67);
-    @DisplayField private final AttributeScaling explosionMaxDamage = AttributeScaling.of(AttributeType.ATTACK, 345);
+    @DisplayField private final AttributeScaling arrowDamage = AttributeScaling.create(AttributeType.ATTACK, 67);
+    @DisplayField private final AttributeScaling explosionMaxDamage = AttributeScaling.create(AttributeType.ATTACK, 345);
     
     @DisplayField private final Decimal explosionRadius = Decimal.ofValue(4.0);
     @DisplayField private final Decimal explosionDelay = Decimal.ofSeconds(1.2f);
@@ -71,7 +71,7 @@ public final class TalentShockDart extends Talent implements Listener {
                          .append(Component.text("Upon hit, the arrow charges and explodes, dealing "))
                          .append(ElementType.ELECTRIC.asComponentDamage())
                          .append(Component.text(" in small "))
-                         .append(EnumTerm.AREA_OF_EFFECT)
+                         .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text("."))
         );
     }
@@ -191,7 +191,7 @@ public final class TalentShockDart extends Talent implements Listener {
     
     public class ShockDartExplosionDamageSource extends DamageSourceImpl {
         ShockDartExplosionDamageSource(@NotNull HariantPlayer attacker, double damage) {
-            super(TalentShockDart.this, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponent.common(), List.of(), damage, elementApplication.doubleValue());
+            super(TalentShockDart.this, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponent.common(), Set.of(), damage, elementApplication.doubleValue());
         }
     }
     

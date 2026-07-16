@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.UUID;
 
-public class TeamEntryImpl implements TeamEntry {
+public final class TeamEntryImpl implements TeamEntry {
     
     private final UUID uuid;
     private final boolean isPlayer;

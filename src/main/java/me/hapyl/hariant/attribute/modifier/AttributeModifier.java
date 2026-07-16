@@ -3,11 +3,13 @@ package me.hapyl.hariant.attribute.modifier;
 import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.registry.Keyed;
 import me.hapyl.eterna.module.util.Streamable;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.TickingEntity;
+import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.ui.ComponentDisplay;
@@ -15,14 +17,17 @@ import me.hapyl.hariant.ui.ComponentDisplayable;
 import me.hapyl.hariant.util.TickDuration;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class AttributeModifier implements Effect, TickDuration, TickingEntity, Streamable<AttributeModifier.Entry>, AttributeModifierAdder, ComponentDisplayable, Named {
+public class AttributeModifier
+        implements
+        Effect, TickDuration, TickingEntity, Streamable<AttributeModifier.Entry>,
+        AttributeModifierAdder, ComponentDisplayable, AssistSource {
     
     protected final Set<Entry> entries;
     protected final int duration;
@@ -33,13 +38,23 @@ public class AttributeModifier implements Effect, TickDuration, TickingEntity, S
     
     private int tick;
     
-    public AttributeModifier(@NotNull Key key, @NotNull Component name, @Nullable HariantEntity applier, int duration) {
+    public AttributeModifier(@NotNull Key key, @NotNull Component name, @NotNull HariantEntity applier, int duration) {
         this.key = key;
         this.name = name;
         this.applier = applier;
         this.duration = duration;
         this.tick = duration;
         this.entries = Sets.newLinkedHashSet();
+    }
+    
+    public <K extends Keyed & Named> AttributeModifier(@NotNull K k, @NotNull HariantEntity applier, int duration) {
+        this(k.getKey(), k.getName(), applier, duration);
+    }
+    
+    @NotNull
+    @Override
+    public HariantEntity source() {
+        return applier;
     }
     
     @Override
@@ -83,18 +98,18 @@ public class AttributeModifier implements Effect, TickDuration, TickingEntity, S
     }
     
     @Override
-    public void onApply(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+    public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
     }
     
     @Override
-    public void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+    public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
     }
     
-    @Nullable
+    @NotNull
     public HariantEntity getApplier() {
         return applier;
     }
@@ -170,7 +185,8 @@ public class AttributeModifier implements Effect, TickDuration, TickingEntity, S
         return "%s{key=%s, applier=%s, entries=%s}".formatted(this.getClass().getSimpleName(), this.key.getKey(), this.applier, this.entries);
     }
     
-    void onRemove0(@NotNull HariantEntity entity) {
+    @ApiStatus.Internal
+    public final void onRemove0(@NotNull HariantEntity entity) {
         this.onRemove(entity, applier);
     }
     

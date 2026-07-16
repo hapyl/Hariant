@@ -1,38 +1,59 @@
 package me.hapyl.hariant.command;
 
 import me.hapyl.eterna.module.command.ArgumentList;
-import me.hapyl.eterna.module.text.Capitalizable;
-import me.hapyl.eterna.module.util.TypeConverter;
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.rank.PlayerRank;
-import me.hapyl.hariant.entity.EntitySpawner;
-import me.hapyl.hariant.entity.VanillaEntityType;
+import me.hapyl.hariant.entity.vanilla.VanillaEntity;
+import me.hapyl.hariant.entity.vanilla.VanillaEntityType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class HariantCommandSpawnEntity extends HariantPlayerCommand {
+import java.util.List;
+
+public final class HariantCommandSpawnEntity extends HariantPlayerCommand {
     
     public HariantCommandSpawnEntity(@NotNull String name) {
         super(name, PlayerRank.ADMIN);
     }
     
     @Override
-    protected void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+    public void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
         // entity (entity_type)
-        final TypeConverter argument0 = args.get(0);
-        final VanillaEntityType<? extends LivingEntity> entityType = VanillaEntityType.byName(argument0.toString());
+        final Key key = args.get(0).toKey();
         
-        if (entityType == null) {
-            HariantLogger.error(player, Component.text("Invalid entity type: %s".formatted(argument0)));
+        if (key == null) {
+            HariantLogger.error(player, Component.text("Invalid key: %s!".formatted(args.get(0))));
             return;
         }
         
-        Hariant.createEntity(EntitySpawner.ofBukkit(player.getLocation(), entityType, self -> {}));
+        final VanillaEntityType<? extends LivingEntity> entityType = VanillaEntityType.byKey(key);
         
-        HariantLogger.success(player, Component.text("Spawned %s!".formatted(Capitalizable.capitalize(entityType.getName()))));
+        if (entityType == null) {
+            HariantLogger.error(player, Component.text("Unknown entity type: %s!".formatted(key)));
+            return;
+        }
+        
+        final VanillaEntity<? extends LivingEntity> entity = Hariant.createEntity(() -> entityType.spawn(player.getLocation()));
+        
+        HariantLogger.success(
+                player,
+                Component.empty()
+                         .append(Component.text("Spawned "))
+                         .append(entity.getName())
+                         .append(Component.text("!"))
+        );
     }
     
+    @Override
+    public @NotNull List<String> tabComplete(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+        if (args.length == 1) {
+            return VanillaEntityType.listKeys();
+        }
+        
+        return List.of();
+    }
 }

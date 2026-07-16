@@ -1,15 +1,17 @@
 package me.hapyl.hariant.attribute;
 
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.attribute.instance.AttributesBase;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.VanillaAttributeModifier;
+import me.hapyl.hariant.util.BaseChance;
 import me.hapyl.hariant.util.decimal.DecimalFormat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
-import org.bukkit.attribute.AttributeInstance;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -176,20 +178,15 @@ public enum AttributeType implements Attribute {
             new AttributeImpl(
                     Component.text("\uD83D\uDC3E"),
                     Component.text("Movement Speed"),
-                    Component.text("The movement speed of the player."),
+                    Component.text("The movement speed multiplier."),
                     Colors.ATTRIBUTE_MOVEMENT_SPEED,
                     DecimalFormat.PERCENTAGE
             ) {
-                private static final double SCALE = 1000;
+                private static final Key MODIFIER_KEY = Key.ofString("movement_speed_modifier");
                 
                 @Override
                 public double defaultValue() {
                     return 100;
-                }
-                
-                @Override
-                public double minValue() {
-                    return -100;
                 }
                 
                 @Override
@@ -205,9 +202,15 @@ public enum AttributeType implements Attribute {
                 
                 @Override
                 public void update(@NotNull HariantEntity entity, double newValue) {
-                    final AttributeInstance vanillaAttribute = entity.getVanillaAttribute(org.bukkit.attribute.Attribute.MOVEMENT_SPEED);
+                    // Apply modifier
+                    final double modifierValue = (newValue - 100) / 100;
                     
-                    vanillaAttribute.setBaseValue(newValue / SCALE);
+                    entity.addVanillaAttributeModifier(VanillaAttributeModifier.create(
+                            MODIFIER_KEY,
+                            org.bukkit.attribute.Attribute.MOVEMENT_SPEED,
+                            VanillaAttributeModifier.Operation.MULTIPLICATIVE,
+                            modifierValue
+                    ));
                 }
             }
     ),
@@ -241,7 +244,7 @@ public enum AttributeType implements Attribute {
     EFFECT_RESISTANCE(
             new AttributeImpl(
                     Component.text("🐚"),
-                    Component.text("Effect Resistance"),
+                    Component.text("Effect RES"),
                     Component.text("The chance to resist negative effects."),
                     Colors.ATTRIBUTE_EFFECT_RESISTANCE,
                     DecimalFormat.PERCENTAGE
@@ -266,7 +269,7 @@ public enum AttributeType implements Attribute {
     KNOCKBACK_RESISTANCE(
             new AttributeImpl(
                     Component.text("⚓"),
-                    Component.text("Knockback Resistance"),
+                    Component.text("Knockback RES"),
                     Component.text("The percentage of knockback resisted."),
                     Colors.ATTRIBUTE_KNOCKBACK_RESISTANCE,
                     DecimalFormat.PERCENTAGE
@@ -313,6 +316,39 @@ public enum AttributeType implements Attribute {
             }
     ),
     
+    /**
+     * {@link BaseChance#baseChance(double)}
+     */
+    LUCK(
+            new AttributeImpl(
+                    Component.text("🍀"),
+                    Component.text("Luck"),
+                    Component.text("Increases the base chances probabilities."),
+                    Colors.ATTRIBUTE_LUCK,
+                    DecimalFormat.FLAT
+            ) {
+                @Override
+                public double maxValue() {
+                    return 1000;
+                }
+            }
+    ),
+    
+    COOLDOWN_REDUCTION(
+            new AttributeImpl(
+                    Component.text("⌚"),
+                    Component.text("Cooldown Reduction"),
+                    Component.text("Reduces cooldowns of talents and weapons."),
+                    Colors.ATTRIBUTE_COOLDOWN_REDUCTION,
+                    DecimalFormat.PERCENTAGE
+            ) {
+                @Override
+                public double maxValue() {
+                    return 80;
+                }
+            }
+    ),
+    
     // *-* Elemental Damage Bonus *-* //
     
     PHYSICAL_DAMAGE_BONUS(AttributeElementalImpl.ofElementalDamageBonus(ElementType.PHYSICAL)),
@@ -333,13 +369,19 @@ public enum AttributeType implements Attribute {
     ELECTRIC_RESISTANCE(AttributeElementalImpl.ofElementalResistance(ElementType.ELECTRIC)),
     AETHER_RESISTANCE(AttributeElementalImpl.ofElementalResistance(ElementType.AETHER));
     
-    
-    private static final List<AttributeType> ELEMENTAL_DAMAGE_BONUSES;
-    private static final List<AttributeType> ELEMENTAL_RESISTANCE;
+    private static final List<? extends AttributeType> BASE_ATTRIBUTES;
+    private static final List<? extends AttributeType> ADVANCED_ATTRIBUTES;
+    private static final List<? extends AttributeType> ELEMENTAL_DAMAGE_BONUSES;
+    private static final List<? extends AttributeType> ELEMENTAL_RESISTANCE;
     
     private static final Map<ElementType, AttributeType[]> ELEMENTAL_ATTRIBUTES;
     
     static {
+        BASE_ATTRIBUTES = Arrays.stream(AttributeType.values()).filter(AttributeType::isBase).toList();
+        ADVANCED_ATTRIBUTES = Arrays.stream(AttributeType.values())
+                                    .filter(attributeType -> !attributeType.isBase() && !(attributeType.attribute instanceof AttributeElementalImpl))
+                                    .toList();
+        
         ELEMENTAL_DAMAGE_BONUSES = List.of(PHYSICAL_DAMAGE_BONUS, FIRE_DAMAGE_BONUS, WATER_DAMAGE_BONUS, ICE_DAMAGE_BONUS, TOXIC_DAMAGE_BONUS, ELECTRIC_DAMAGE_BONUS, AETHER_DAMAGE_BONUS);
         ELEMENTAL_RESISTANCE = List.of(PHYSICAL_RESISTANCE, FIRE_RESISTANCE, WATER_RESISTANCE, ICE_RESISTANCE, TOXIC_RESISTANCE, ELECTRIC_RESISTANCE, AETHER_RESISTANCE);
         
@@ -432,12 +474,22 @@ public enum AttributeType implements Attribute {
     }
     
     @NotNull
-    public static List<AttributeType> getElementalDamageBonuses() {
+    public static List<? extends AttributeType> getBaseAttributes() {
+        return BASE_ATTRIBUTES;
+    }
+    
+    @NotNull
+    public static List<? extends AttributeType> getAdvancedAttributes() {
+        return ADVANCED_ATTRIBUTES;
+    }
+    
+    @NotNull
+    public static List<? extends AttributeType> getElementalDamageBonuses() {
         return ELEMENTAL_DAMAGE_BONUSES;
     }
     
     @NotNull
-    public static List<AttributeType> getElementalResistances() {
+    public static List<? extends AttributeType> getElementalResistances() {
         return ELEMENTAL_RESISTANCE;
     }
     

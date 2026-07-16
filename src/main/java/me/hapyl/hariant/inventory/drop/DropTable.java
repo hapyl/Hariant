@@ -1,31 +1,32 @@
 package me.hapyl.hariant.inventory.drop;
 
 import com.google.common.collect.Lists;
-import me.hapyl.eterna.module.annotate.Immutable;
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.event.HariantLootGenerationEvent;
 import me.hapyl.hariant.inventory.item.ResourceRegistry;
 import me.hapyl.hariant.profile.PlayerProfile;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DropTable implements LootGenerator {
     
-    private final List<Content> contents;
-    private final Amount rolls;
     private final int totalWeight;
     
-    protected DropTable(@NotNull List<Droppable> contents, final Amount rolls) {
+    private final List<? extends Content> contents;
+    private final Amount rolls;
+    
+    protected DropTable(@NotNull List<? extends Droppable> contents, final Amount rolls) {
+        // We have to compute total weight before Content, since drop tiers and chances are constants that require total weight
+        this.totalWeight = contents.stream().mapToInt(Droppable::getWeight).sum();
         this.contents = contents.stream().map(Content::new).toList();
         this.rolls = rolls;
-        this.totalWeight = contents.stream().mapToInt(Droppable::getWeight).sum();
     }
     
     public int getTotalWeight() {
@@ -33,73 +34,76 @@ public class DropTable implements LootGenerator {
     }
     
     @NotNull
-    @Immutable
-    public List<Content> getContents() {
+    @Unmodifiable
+    public List<? extends Content> getContents() {
         return contents;
     }
     
+    public @NotNull Amount getRolls() {
+        return rolls;
+    }
+    
     @NotNull
+    public Map<DropTier, List<Content>> getContentsTiered() {
+        return contents.stream()
+                       .collect(Collectors.groupingBy(
+                               Content::getDropTier,
+                               () -> new TreeMap<>(Comparator.comparingInt(Enum::ordinal)),
+                               Collectors.toList()
+                       ));
+    }
+    
     @Override
-    public List<Droppable> generateLoot() {
-        final List<Droppable> loot = Lists.newArrayList();
+    public @NotNull DropSummary generateLoot(@NotNull PlayerProfile profile) {
+        final List<Content> generatedContents = Lists.newArrayList();
         
-        // Generate guaranteed loot
-        this.contents.stream().filter(Droppable::isGuaranteedDrop).forEach(loot::add);
+        // Roll guaranteed loot
+        this.contents.stream().filter(Content::isGuaranteedDrop).forEach(generatedContents::add);
         
-        // totalWeight can easily be 0 if we only have guaranteed drops, which is kinda weird to use DropTable for
-        // only guaranteed drops, but that can happen
+        // Only roll if `totalWeight` is higher than 0, which can happen if the drop table
+        // only contains guaranteed items
         if (this.totalWeight > 0) {
             int rollAmount = rolls.amount();
             
-            final HariantLootGenerationEvent event = new HariantLootGenerationEvent(rollAmount);
+            final HariantLootGenerationEvent event = new HariantLootGenerationEvent(this, rollAmount);
             event.callEvent();
             
             // Update roll amount from the event
             rollAmount = event.getRollAmount();
             
             for (int i = 0; i < rollAmount; i++) {
-                loot.add(this.randomDrop());
+                generatedContents.add(this.randomEntry());
             }
         }
         
-        return loot;
-    }
-    
-    public void generateLootAnDrop(@NotNull PlayerProfile profile) {
-        final List<Droppable> loot = this.generateLoot();
+        // Generate drops
+        final DropSummary dropSummary = DropSummary.create();
         
-        // Notify
-        profile.sendMessage(Component.text("LOOT!", NamedTextColor.GOLD, TextDecoration.BOLD));
+        for (Content content : generatedContents) {
+            dropSummary.append(content.drop(profile));
+        }
         
-        loot.forEach(droppable -> {
-            final Drop drop = droppable.drop(profile);
-            
-            profile.sendMessage(
-                    Component.empty()
-                             .append(Component.text(" + ", NamedTextColor.GREEN))
-                             .append(drop)
-            );
-        });
+        return dropSummary;
     }
     
     @NotNull
-    private Droppable randomDrop() {
+    private DropTable.Content randomEntry() {
         final Random random = Hariant.getRandom();
         
         final double randomWeight = random.nextDouble() * totalWeight;
         double cumulativeWeight = 0;
         
-        for (Droppable droppable : contents) {
+        for (Content content : contents) {
             // Skip guaranteed drop because it's faster
-            if (droppable.isGuaranteedDrop()) {
+            if (content.isGuaranteedDrop()) {
                 continue;
             }
             
-            final int weight = droppable.getWeight();
+            final int weight = content.getWeight();
             cumulativeWeight += weight;
             
             if (randomWeight <= cumulativeWeight) {
-                return droppable;
+                return content;
             }
         }
         
@@ -118,46 +122,57 @@ public class DropTable implements LootGenerator {
     }
     
     public final class Content implements Droppable {
+        
         private final Droppable droppable;
+        private final double dropChance;
+        private final DropTier dropTier;
         
         Content(@NotNull Droppable droppable) {
             this.droppable = droppable;
-        }
-        
-        @Range(from = 0, to = Integer.MAX_VALUE)
-        @Override
-        public int getWeight() {
-            return droppable.getWeight();
-        }
-        
-        @NotNull
-        @Override
-        public Component getName() {
-            return droppable.getName();
-        }
-        
-        @NotNull
-        @Override
-        public Amount getAmount() {
-            return droppable.getAmount();
-        }
-        
-        @NotNull
-        @Override
-        public Drop drop(@NotNull PlayerProfile profile) {
-            return droppable.drop(profile);
+            this.dropChance = droppable.isGuaranteedDrop() ? 1.0 : (double) droppable.getWeight() / totalWeight;
+            this.dropTier = DropTier.fromDropChance(dropChance);
         }
         
         public double getDropChance() {
-            return droppable.isGuaranteedDrop()
-                   ? 1.0
-                   : (double) droppable.getWeight() / totalWeight;
+            return dropChance;
         }
         
         @NotNull
-        public Component getDropChanceFormatted() {
-            return Component.text("%.1f%%".formatted(this.getDropChance() * 100));
+        public DropTier getDropTier() {
+            return dropTier;
         }
+        
+        @Override
+        public @NotNull Key getKey() {
+            return droppable.getKey();
+        }
+        
+        @Override
+        public @NotNull Component getName() {
+            return droppable.getName();
+        }
+        
+        @Override
+        public @NotNull Amount getAmount() {
+            return droppable.getAmount();
+        }
+        
+        @Override
+        public @Range(from = 0, to = Integer.MAX_VALUE) int getWeight() {
+            return droppable.getWeight();
+        }
+        
+        @Override
+        public @NotNull Drop drop(@NotNull PlayerProfile profile, int amount) {
+            return droppable.drop(profile, amount);
+        }
+        
+        private @NotNull DropResult drop(@NotNull PlayerProfile profile) {
+            final int amount = droppable.getAmount().amount();
+            final Drop drop = droppable.drop(profile, amount);
+            
+            return new DropResult(drop, amount, dropChance, dropTier);
+        }
+        
     }
-    
 }

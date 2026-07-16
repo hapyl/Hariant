@@ -3,21 +3,24 @@ package me.hapyl.hariant.inventory.item.resource;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.database.PlayerDatabase;
+import me.hapyl.hariant.inventory.item.Rarity;
 import me.hapyl.hariant.inventory.item.Resource;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.Prefixed;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
-public class ResourceRuby extends Resource implements Prefixed {
+public final class ResourceRuby extends Resource implements Prefixed, ResourceUnlocksHero {
     
-    private static final Component PREFIX = Component.text("\uD83D\uDC8E", Colors.RESOURCE_RUBY);
+    public static final Component PREFIX = Component.text("\uD83D\uDC8E", Colors.RESOURCE_RUBY);
     
     public ResourceRuby(@NotNull Key key) {
-        super(key, Component.text("Ruby"), Icon.ofTexture("4d7318c21c2a53693222cd60191518a8e2a885956dd0823b6142c9ce77d13811"));
+        super(key, Component.text("Ruby"), Icon.ofTexture("94ebf5606ac83a74c1cb9f7e5604be3ce297892a4ca1005ce510ca25eba2888"));
         
-        this.setDescription(Component.empty());
+        this.setRarity(Rarity.FIVE_STAR);
+        
+        this.setDescription(Component.text("A resource that can be spent on unlocking unique rewards and heroes."));
+        this.setFlavorText(Component.text("A flawless, shiny ruby gem. Whoever cut it sure knows how to do their job."));
     }
     
     @Override
@@ -35,6 +38,11 @@ public class ResourceRuby extends Resource implements Prefixed {
     @Override
     public Component getPrefix() {
         return PREFIX;
+    }
+    
+    @Override
+    public int unlockAmount() {
+        return 100;
     }
     
 }

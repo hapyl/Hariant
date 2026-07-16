@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 public class DecimalSecondsImpl extends DecimalImpl {
+    
     private static final int MULTIPLIER = 20;
     
     DecimalSecondsImpl(double value) {
@@ -34,6 +35,6 @@ public class DecimalSecondsImpl extends DecimalImpl {
     @NotNull
     @Override
     public Component format() {
-        return super.format().color(Colors.FORMAT_TICK);
+        return super.format().color(Colors.TICK);
     }
 }

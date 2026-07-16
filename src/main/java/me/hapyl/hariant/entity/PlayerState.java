@@ -3,14 +3,13 @@ package me.hapyl.hariant.entity;
 import me.hapyl.hariant.Colors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 public enum PlayerState implements ComponentLike {
     
     ALIVE(Component.text("Alive", Colors.SUCCESS)),
     DEAD(Component.text("Dead", Colors.ERROR)),
-    RESPAWNING(Component.text("Respawning", NamedTextColor.YELLOW));
+    RESPAWNING(Component.text("Respawning", Colors.YELLOW));
     
     private final Component component;
     

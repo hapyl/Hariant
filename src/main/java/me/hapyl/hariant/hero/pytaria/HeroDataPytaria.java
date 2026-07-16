@@ -4,13 +4,16 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
 import me.hapyl.hariant.hero.pytaria.bee.BeeSwarm;
+import me.hapyl.hariant.profile.ui.ActionbarSupplier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class HeroDataPytaria extends HeroData<HeroPytaria> implements ComponentLike {
+import java.util.List;
+
+public class HeroDataPytaria extends HeroData<HeroPytaria> implements ComponentLike, ActionbarSupplier {
     
     @Nullable
     public BeeSwarm swarm;
@@ -48,4 +51,10 @@ public class HeroDataPytaria extends HeroData<HeroPytaria> implements ComponentL
                         .append(Component.text("\uD83C\uDF38", excellency > 0 ? Colors.FLOWER_ROSE : Colors.FLOWER_DEAD))
                         .append(Component.text("\uD83C\uDF3C", excellency > 2 ? Colors.FLOWER_TULIP : Colors.FLOWER_DEAD));
     }
+    
+    @Override
+    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+        return List.of(this.asComponent());
+    }
+    
 }

@@ -29,7 +29,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Arrow;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -39,7 +38,7 @@ public final class TalentChainLightning extends Talent implements Listener {
     private static final Color ARROW_COLOR = Color.fromRGB(Colors.ELEMENT_ELECTRIC.value());
     private static final ParticleBuilder PARTICLE_CHAIN_LIGHTNING = ParticleBuilder.dustColorTransition(Color.fromRGB(240, 213, 79), Color.fromRGB(252, 186, 3), 1);
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.of(AttributeType.ATTACK, 207);
+    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 207);
     @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 200);
     
     @DisplayField private final Decimal maxChainReaction = Decimal.ofValue(2);
@@ -58,6 +57,7 @@ public final class TalentChainLightning extends Talent implements Listener {
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Upon hitting an enemy, the arrow creates a chain reaction that deals "))
+                         .appendNewline()
                          .append(ElementType.ELECTRIC.asComponentDamage())
                          .append(Component.text(" up to "))
                          .append(maxChainReaction)

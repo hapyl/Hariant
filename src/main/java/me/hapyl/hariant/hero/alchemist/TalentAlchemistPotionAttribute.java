@@ -51,6 +51,7 @@ public class TalentAlchemistPotionAttribute extends TalentAlchemistPotion {
         player.getAttributes().addModifier(
                 ATTRIBUTE_MODIFIER_KEY,
                 this.getDuration(),
+                player,
                 adder -> adder.of(attributeType, AttributeModifierType.ADDITIVE, attributeIncrease.doubleValue())
         );
         

@@ -2,20 +2,25 @@ package me.hapyl.hariant.hero.alchemist;
 
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.text.RomanNumber;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.hero.Definition;
 import me.hapyl.hariant.hero.HeroData;
+import me.hapyl.hariant.profile.ui.ActionbarSupplier;
 import me.hapyl.hariant.talent.TalentRegistry;
+import me.hapyl.hariant.util.Definition;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class HeroDataAlchemist extends HeroData<HeroAlchemist> {
+import java.util.List;
+
+public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements ActionbarSupplier {
     
     private static final DamageSourceIdentity OVERDOSE = DamageSourceIdentity.create(
             Key.ofString("overdose"),
@@ -81,15 +86,15 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> {
             final int corrosionLevel = this.getAbyssalCorrosionLevel();
             
             if (corrosionLevel >= 1) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_1, 5);
+                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_1, 5, player);
             }
             
             if (corrosionLevel >= 2) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_2, 5);
+                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_2, 5, player);
             }
             
             if (corrosionLevel >= 3) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_3, 5);
+                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_3, 5, player);
             }
         }
         
@@ -167,7 +172,7 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> {
         this.abyssalCorrosion += abyssalCorrosion;
     }
     
-    public Component getAlchemicalMadnessFormatted() {
+    public @NotNull Component getAlchemicalMadnessFormatted() {
         final Definition definition = Definition.ALCHEMICAL_MADNESS;
         final Style style = definition.getStyle();
         
@@ -175,5 +180,38 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> {
                         .append(definition.getPrefixStyled())
                         .appendSpace()
                         .append(Component.text(Tick.format(alchemicalMadness), style));
+    }
+    
+    @Override
+    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+        final Style abyssalCorrosionStyle = Definition.ABYSSAL_CORROSION.getStyle();
+        final int abyssalCorrosionLevel = this.getAbyssalCorrosionLevel();
+        
+        return List.of(
+                // Append corrosion
+                Component.empty()
+                         .append(Definition.ABYSSAL_CORROSION.getPrefixStyled())
+                         .appendSpace()
+                         .append(Component.text("%.0f".formatted(abyssalCorrosion), abyssalCorrosionStyle))
+                         .appendSpace()
+                         .append(
+                                 abyssalCorrosionLevel == 0
+                                 ? Component.text("✗", abyssalCorrosionStyle)
+                                 : Component.text(RomanNumber.toRoman(abyssalCorrosionLevel), abyssalCorrosionStyle)
+                         ),
+                
+                // Append current potion
+                potionInstance != null
+                ? Component.empty()
+                           .append(Component.text("\uD83E\uDDEA ", Colors.DARK_PURPLE))
+                           .append(Component.text(Tick.format(potionInstance.currentTick()), Colors.LIGHT_PURPLE))
+                : Component.empty(),
+                
+                // Append cauldron
+                alchemicalCauldron != null ? alchemicalCauldron.asComponent() : Component.empty(),
+                
+                // Append madness
+                alchemicalMadness > 0 ? this.getAlchemicalMadnessFormatted() : Component.empty()
+        );
     }
 }

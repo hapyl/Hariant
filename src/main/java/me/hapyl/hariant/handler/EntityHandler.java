@@ -2,13 +2,12 @@ package me.hapyl.hariant.handler;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
-import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.damage.EnvironmentDamageSupplier;
+import me.hapyl.hariant.entity.damage.environment.*;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import org.bukkit.GameMode;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -18,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -30,84 +30,18 @@ public final class EntityHandler implements Listener {
     
     public EntityHandler() {
         this.environmentDamageMap = Map.ofEntries(
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.CACTUS,
-                        ElementType.PHYSICAL,
-                        DeathMessage.createWithDefaultKiller("{player} was prickled to death"),
-                        50
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.CAMPFIRE,
-                        ElementType.FIRE,
-                        DeathMessage.createWithDefaultKiller("{player} burnt to death"),
-                        50
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.DROWN,
-                        ElementType.WATER,
-                        DeathMessage.createWithDefaultKiller("{player} drowned"),
-                        50
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.EXPLOSION,
-                        ElementType.PHYSICAL,
-                        DeathMessage.createWithDefaultKiller("{player} exploded to death"),
-                        250
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.FREEZE,
-                        ElementType.ICE,
-                        DeathMessage.createWithDefaultKiller("{player} froze to death"),
-                        50
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.HOT_FLOOR,
-                        ElementType.FIRE,
-                        DeathMessage.createWithDefaultKiller("{player} had their toes burnt"),
-                        50
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.IN_FIRE,
-                        ElementType.FIRE,
-                        DeathMessage.createWithDefaultKiller("{player} burnt to a crisp"),
-                        50
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.IN_WALL,
-                        ElementType.PHYSICAL,
-                        DeathMessage.createWithDefaultKiller("{player} suffocated"),
-                        50
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.LAVA,
-                        ElementType.FIRE,
-                        DeathMessage.create("{player} tried to swim in lava [while running from {killer}]"),
-                        100
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.ON_FIRE,
-                        ElementType.FIRE,
-                        DeathMessage.createWithDefaultKiller("{player} burnt to death"),
-                        10
-                ),
-                
-                EnvironmentDamageSupplier.entry(
-                        org.bukkit.damage.DamageType.GENERIC_KILL,
-                        ElementType.PHYSICAL,
-                        DeathMessage.create("{player} was killed [by {killer}]"),
-                        1_000_000
-                ),
-                
-                Map.entry(org.bukkit.damage.DamageType.FALL, EnvironmentDamageSupplier.fallDamage())
+                Map.entry(DamageType.CACTUS, entity -> new EnvironmentDamageSourceCactus()),
+                Map.entry(DamageType.CAMPFIRE, entity -> new EnvironmentDamageSourceCampfire()),
+                Map.entry(DamageType.DROWN, entity -> new EnvironmentDamageSourceDrown()),
+                Map.entry(DamageType.EXPLOSION, entity -> new EnvironmentDamageSourceExplosion()),
+                Map.entry(DamageType.FREEZE, entity -> new EnvironmentDamageSourceFreeze()),
+                Map.entry(DamageType.HOT_FLOOR, entity -> new EnvironmentDamageSourceHotFloor()),
+                Map.entry(DamageType.IN_FIRE, entity -> new EnvironmentDamageSourceInFire()),
+                Map.entry(DamageType.IN_WALL, entity -> new EnvironmentDamageSourceInWall()),
+                Map.entry(DamageType.LAVA, entity -> new EnvironmentDamageSourceLava()),
+                Map.entry(DamageType.ON_FIRE, entity -> new EnvironmentDamageSourceOnFire()),
+                Map.entry(DamageType.GENERIC_KILL, entity -> new EnvironmentDamageSourceGenericKill()),
+                Map.entry(DamageType.FALL, EnvironmentDamageSourceFall.createSupplier())
         );
     }
     
@@ -166,7 +100,17 @@ public final class EntityHandler implements Listener {
     
     @EventHandler
     public void handleHangingEvent(HangingBreakEvent ev) {
-        if (Hariant.isGameInProgress()) {
+        // If removed by an entity, check for the remover
+        if (ev instanceof HangingBreakByEntityEvent ev2) {
+            final Entity remover = ev2.getRemover();
+            
+            // If remover isn't a player or the player is not in creative mode, cancel the removal
+            if (!(remover instanceof Player player) || player.getGameMode() != GameMode.CREATIVE) {
+                ev.setCancelled(true);
+            }
+        }
+        // Otherwise, always cancel removal
+        else {
             ev.setCancelled(true);
         }
     }
@@ -189,7 +133,7 @@ public final class EntityHandler implements Listener {
         
         final HariantPlayer player = Hariant.getPlayer(ev.getPlayer()).orElse(null);
         
-        if (player == null || player.isOnCooldown(Holder.INTERACTION_COOLDOWN)) {
+        if (player == null || player.hasCooldown(Holder.INTERACTION_COOLDOWN)) {
             return;
         }
         

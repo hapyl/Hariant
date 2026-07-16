@@ -5,7 +5,6 @@ import me.hapyl.hariant.entity.damage.DamageInstance;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class HariantDeathEvent extends HariantEntityEvent implements Cancellable {
     

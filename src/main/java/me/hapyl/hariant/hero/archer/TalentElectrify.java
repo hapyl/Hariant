@@ -12,6 +12,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileLaunchEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
@@ -22,13 +23,13 @@ import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
-import me.hapyl.hariant.talent.ultimate.TalentUltimateResource;
+import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.HariantTask;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.task.executor.Executable;
 import me.hapyl.hariant.task.executor.While;
-import me.hapyl.hariant.term.EnumTerm;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -46,14 +47,14 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
     @DisplayField private final Decimal explosionDuration = Decimal.ofSeconds(3);
     @DisplayField private final Decimal explosionDamagePeriod = Decimal.ofSeconds(0.5f);
     
-    @DisplayField private final AttributeScaling explosionDamage = AttributeScaling.of(AttributeType.ATTACK, 236);
+    @DisplayField private final AttributeScaling explosionDamage = AttributeScaling.create(AttributeType.ATTACK, 236);
     @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 50);
     
     private final ParticleBuilder particleFx = ParticleBuilder.dustColorTransition(Color.fromRGB(247, 181, 47), Color.fromRGB(250, 224, 170), 1);
     private final ProgressBar progressBar = new ProgressBar("⚡", 20, Style.style(Colors.ELEMENT_ELECTRIC));
     
     public TalentElectrify(@NotNull Key key) {
-        super(key, Component.text("Electrify"), Icon.ofMaterial(Material.BLAZE_POWDER), TalentUltimateResource.ENERGY, 100);
+        super(key, Component.text("Electrify"), Icon.ofMaterial(Material.BLAZE_POWDER), UltimateResourceType.ENERGY, 100);
         
         this.setDurationSeconds(10);
         
@@ -71,7 +72,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
                          .append(Component.text("Upon impact, the arrow release the energy that deals "))
                          .append(ElementType.ELECTRIC.asComponentDamage())
                          .append(Component.text(" in large "))
-                         .append(EnumTerm.AREA_OF_EFFECT)
+                         .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text(" over "))
                          .append(this.getDurationFormatted())
                          .append(Component.text("."))
@@ -110,6 +111,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
         final ElectrifyArrowDamageSource damageSource = new ElectrifyArrowDamageSource(player);
         projectile.setDamageSource(damageSource);
         
+        // Delegate the arrow to the player
         player.delegate(new HariantTask(Scheduler.ofTimer(1)) {
             @Override
             public void run() {
@@ -124,7 +126,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
                 createExplosion(player, projectile.getLocation(), damageSource);
                 cancel();
             }
-        });
+        }, DelegateType.PERSISTENT);
         
         // Fx
         player.playWorldSound(Sound.ENTITY_BREEZE_DEATH, 1.0f);
@@ -154,6 +156,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
         final int duration = explosionDuration.intValue();
         final int damagePeriod = explosionDamagePeriod.intValue();
         
+        // Don't delegate to the player
         new HariantTickingTask(Scheduler.ofTimer(1)) {
             @Override
             public void run(int tick) {

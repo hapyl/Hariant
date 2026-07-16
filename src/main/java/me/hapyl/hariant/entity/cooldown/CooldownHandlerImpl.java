@@ -3,6 +3,7 @@ package me.hapyl.hariant.entity.cooldown;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.HariantConstants;
+import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -23,7 +24,7 @@ public final class CooldownHandlerImpl implements CooldownHandler {
     }
     
     @Override
-    public void setCooldown(@NotNull Key key, @Range(from = HariantConstants.INDEFINITE_COOLDOWN, to = Integer.MAX_VALUE) int duration) {
+    public void setCooldown(@NotNull Key key, @Range(from = HariantConstants.INDEFINITE_COOLDOWN, to = Integer.MAX_VALUE) int duration, boolean respectCooldownReduction) {
         if (debugNoCooldowns) {
             return;
         }
@@ -33,13 +34,16 @@ public final class CooldownHandlerImpl implements CooldownHandler {
             this.cooldowns.remove(key);
         }
         else {
+            // If the cooldown respects the COOLDOWN_REDUCTION attribute, scale by it
+            if (respectCooldownReduction) {
+                final double cooldownReduction = entity.getAttributes().get(AttributeType.COOLDOWN_REDUCTION);
+                
+                duration = (int) (duration * (1 - cooldownReduction / 100));
+            }
+            
             this.cooldowns.put(
                     key,
-                    new CooldownInstance(
-                            duration == HariantConstants.INDEFINITE_COOLDOWN
-                            ? HariantConstants.INDEFINITE_COOLDOWN
-                            : entity.getTicksAlive() + duration
-                    )
+                    new CooldownInstance(duration == HariantConstants.INDEFINITE_COOLDOWN ? HariantConstants.INDEFINITE_COOLDOWN : entity.localTicks() + duration)
             );
         }
         
@@ -53,15 +57,15 @@ public final class CooldownHandlerImpl implements CooldownHandler {
         return instance != null
                ? instance.isIndefinite()
                  ? HariantConstants.INDEFINITE_COOLDOWN
-                 : instance.endTick - entity.getTicksAlive()
+                 : instance.endTick - entity.localTicks()
                : 0;
     }
     
     @Override
-    public boolean isOnCooldown(@NotNull Key key) {
+    public boolean hasCooldown(@NotNull Key key) {
         final CooldownInstance instance = cooldowns.get(key);
         
-        return instance != null && (instance.isIndefinite() || entity.getTicksAlive() < instance.endTick);
+        return instance != null && (instance.isIndefinite() || entity.localTicks() < instance.endTick);
     }
     
     @Override
@@ -74,7 +78,7 @@ public final class CooldownHandlerImpl implements CooldownHandler {
     public String toString() {
         return this.cooldowns.entrySet()
                              .stream()
-                             .map(entry -> "%s = %s".formatted(entry.getKey(), entry.getValue().endTick - entity.getTicksAlive()))
+                             .map(entry -> "%s = %s".formatted(entry.getKey(), entry.getValue().endTick - entity.localTicks()))
                              .collect(Collectors.joining(", ", "{", "}"));
     }
     

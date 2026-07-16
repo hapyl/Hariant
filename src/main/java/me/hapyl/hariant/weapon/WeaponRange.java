@@ -7,9 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class WeaponRange extends Weapon {
     
-    private final NormalAttack normalAttackRanged;
+    protected final NormalAttackRanged normalAttackRanged;
     
-    public WeaponRange(@NotNull Key key, @NotNull Icon icon, @NotNull NormalAttack normalAttackMelee, @NotNull NormalAttack normalAttackRanged) {
+    public WeaponRange(@NotNull Key key, @NotNull Icon icon, @NotNull NormalAttack normalAttackMelee, @NotNull NormalAttackRanged normalAttackRanged) {
         super(key, icon, normalAttackMelee);
         
         this.normalAttackRanged = normalAttackRanged;
@@ -17,7 +17,7 @@ public class WeaponRange extends Weapon {
     
     @NotNull
     @Override
-    public NormalAttack getRangedAttack() {
+    public NormalAttackRanged getRangedAttack() {
         return normalAttackRanged;
     }
     

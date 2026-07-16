@@ -12,14 +12,13 @@ import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.util.TriState;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
     
@@ -35,7 +34,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
     private final DeathMessage deathMessage = DeathMessage.createWithDefaultKiller("{player} burnt to death");
     
     ElementalAnomalyBurn() {
-        super(Key.ofString("burn"), Component.text("Burn"));
+        super(Key.ofString("burn"), Component.text("Burn"), ElementType.FIRE);
         
         this.setDescription(
                 Component.empty()
@@ -54,13 +53,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
         final int duration = this.calculateBurnDuration(source);
         final double damage = this.calculateBurnDamage(source);
         
-        entity.getAttributes().addModifier(new ElementalAnomalyBurnAttributeModifier(source, duration, damage));
-    }
-    
-    @NotNull
-    @Override
-    public Style getStyle() {
-        return ElementType.FIRE.getStyle();
+        entity.getAttributes().addModifier(new ElementalAnomalyBurnAttributeModifier(source != null ? source : entity, duration, damage));
     }
     
     public int calculateBurnDuration(@Nullable HariantEntity source) {
@@ -90,7 +83,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
         
         private final DamageSource damageSource;
         
-        ElementalAnomalyBurnAttributeModifier(@Nullable HariantEntity applier, int duration, double damage) {
+        ElementalAnomalyBurnAttributeModifier(@NotNull HariantEntity applier, int duration, double damage) {
             super(modifierKey, ElementalAnomalyBurn.this.getName(), applier, duration);
             
             this.of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, -attackDecrease.doubleValue());
@@ -99,16 +92,12 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
         }
         
         @Override
-        public void onApply(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
+        public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
             entity.playWorldSound(Sound.ITEM_FLINTANDSTEEL_USE, 0.0f);
         }
         
         @Override
-        public void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier) {
-        }
-        
-        @Override
-        public void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
             if (tick % burnPeriod == 0) {
                 entity.damage(damageSource);
             }
@@ -126,7 +115,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
                     DamageType.ANOMALY,
                     ElementType.FIRE,
                     List.of(DamageComponent.elemental()),
-                    List.of(),
+                    Set.of(),
                     damage,
                     0
             );

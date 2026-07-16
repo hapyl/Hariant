@@ -1,10 +1,16 @@
 package me.hapyl.hariant.hero.pytaria;
 
+import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.CollectionUtils;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
+import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -15,7 +21,6 @@ import me.hapyl.hariant.task.HariantDurationTask;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -28,9 +33,9 @@ public final class TalentFlowerBreeze extends Talent {
     
     @DisplayField private final Decimal healthSacrifice = Decimal.ofPercentage(20);
     @DisplayField private final Decimal attackIncrease = Decimal.ofPercentage(50);
-    @DisplayField private final Decimal defenseIncrease = Decimal.ofPercentage(400);
+    @DisplayField private final Decimal defenseIncrease = Decimal.ofValue(400);
     
-    private final Key modifierKey = Key.ofString("flower_breeze");
+    private final ItemStack angryPytariaHead = ItemBuilder.playerHead("cb3a2c6fa906d782e9bf33cc79ebd043feae0e1284c7e6e43e31e24a59a5d6b1").asIcon();
     
     private final ItemStack[] fxFlowers = {
             new ItemStack(Material.DANDELION),
@@ -53,14 +58,14 @@ public final class TalentFlowerBreeze extends Talent {
         super(key, Component.text("Flower Breeze"), Icon.ofMaterial(Material.RED_DYE));
         
         this.setCooldownSeconds(16);
-        this.setDurationSeconds(6);
+        this.setDurationSeconds(4);
         
         this.setTalentType(TalentType.ENHANCE);
         
         this.setDescription(
                 Component.empty()
                          .append(Component.text("Feel the breeze of beautiful flowers, that brings back terrible memories, "))
-                         .append(Component.text(" hurts ", NamedTextColor.RED))
+                         .append(Component.text(" hurts ", Colors.RED))
                          .append(Component.text("and enrages you for "))
                          .append(this.getDurationFormatted())
                          .append(Component.text("."))
@@ -69,11 +74,12 @@ public final class TalentFlowerBreeze extends Talent {
                          .append(Component.text("While enraged, your "))
                          .append(AttributeType.ATTACK)
                          .append(Component.text(" and "))
+                         .appendNewline()
                          .append(AttributeType.DEFENSE)
                          .append(Component.text(" are greatly increased."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("This talent cannot kill.", NamedTextColor.DARK_GRAY))
+                         .append(Component.text("This talent cannot kill.", Colors.DARK_GRAY))
         );
     }
     
@@ -91,19 +97,14 @@ public final class TalentFlowerBreeze extends Talent {
         player.decrementHealth(healthSacrifice);
         
         // Apply modifiers
-        player.getAttributes().addModifier(
-                modifierKey,
-                this.getDuration(),
-                adder ->
-                        adder.of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue())
-                             .of(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, defenseIncrease.doubleValue())
-        );
+        player.getAttributes().addModifier(new ModifierFlowerBreeze(player));
         
         // Fx
         player.playWorldSound(Sound.ENTITY_HORSE_BREATHE, 0.0f);
         player.addVanillaEffect(PotionEffectType.SLOWNESS, 2, 10);
         
         player.delegate(
+                // Just a fx that removes flowers, don't care keep it a task
                 new HariantDurationTask(20) {
                     @Override
                     public void run(int tick, int duration) {
@@ -127,9 +128,31 @@ public final class TalentFlowerBreeze extends Talent {
                             self.setVelocity(new Vector(player.getRandom().nextSignedDouble(0.25), 0.75, player.getRandom().nextSignedDouble(0.25)));
                         });
                     }
-                }
+                },
+                DelegateType.PERSISTENT
         );
         
         return Response.ok();
     }
+    
+    private class ModifierFlowerBreeze extends AttributeModifier {
+        
+        ModifierFlowerBreeze(@NotNull HariantEntity applier) {
+            super(TalentFlowerBreeze.this, applier, TalentFlowerBreeze.this.getDuration());
+            
+            of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue());
+            of(AttributeType.DEFENSE, AttributeModifierType.FLAT, defenseIncrease.doubleValue());
+        }
+        
+        @Override
+        public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
+            entity.getEquipment().setHelmet(angryPytariaHead);
+        }
+        
+        @Override
+        public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
+            entity.getEquipment().setHelmet(HeroRegistry.PYTARIA.getEquipment().getHelmet());
+        }
+    }
+    
 }

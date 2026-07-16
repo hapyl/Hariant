@@ -1,13 +1,16 @@
 package me.hapyl.hariant.talent.ultimate;
 
 import me.hapyl.eterna.module.annotate.EventLike;
+import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.component.Keybind;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.HariantTalentUltimateEvent;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -22,24 +25,29 @@ import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.SoundFx;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public abstract class TalentUltimate extends Talent implements Duration {
     
-    private final TalentUltimateResource resource;
+    private static final Style STYLE_ULTIMATE_ON_COOLDOWN = Style.style(Colors.DARK_GRAY, TextDecoration.STRIKETHROUGH);
+    private static final Component CHARGED_COMPONENT = Component.text("Your ultimate has charged!", Colors.DEFAULT_COLOR);
+    
+    private final UltimateResourceType ultimateResourceType;
     private final double cost;
     
     private SoundFx soundFx;
     
-    public TalentUltimate(@NotNull Key key, @NotNull Component name, @NotNull Icon icon, @NotNull TalentUltimateResource resource, final double cost) {
+    public TalentUltimate(@NotNull Key key, @NotNull Component name, @NotNull Icon icon, @NotNull UltimateResourceType ultimateResourceType, final double cost) {
         super(key, name, icon);
         
-        this.resource = resource;
+        this.ultimateResourceType = ultimateResourceType;
         this.cost = cost;
         this.soundFx = SoundFx.create(Sound.ENTITY_ENDER_DRAGON_GROWL, 2.0f);
     }
@@ -54,71 +62,86 @@ public abstract class TalentUltimate extends Talent implements Duration {
     }
     
     @NotNull
-    public TalentUltimateResource getResource() {
-        return resource;
+    public UltimateResourceType getUltimateResourceType() {
+        return ultimateResourceType;
     }
     
-    public double getResourceCost() {
+    public double getMinimumCost() {
+        return cost;
+    }
+    
+    public double getMaximumCost() {
+        return cost;
+    }
+    
+    public double getConsumption() {
         return cost;
     }
     
     @EventLike
     public void onResourceValue(@NotNull HariantPlayer player, final double previousValue, final double newValue) {
-        final double minimumResourceCost = getResourceCost();
+        final double minimumResourceCost = this.getMinimumCost();
         
         if (previousValue < minimumResourceCost && newValue >= minimumResourceCost) {
             player.sendSubtitle(Component.text("ᴜʟᴛɪᴍᴀᴛᴇ ᴄʜᴀʀɢᴇᴅ", Colors.ULTIMATE_RESOURCE_ENERGY, TextDecoration.BOLD), 5, 10, 5);
-            player.sendMessage(this.getUltimateUsageComponent());
+            player.sendMessage(createUsageComponent(CHARGED_COMPONENT));
             
             player.playSound(Sound.BLOCK_CONDUIT_ACTIVATE, 2.0f);
-            
-            // TODO @Feb 16, 2026 (xanyjl) -> Fx & chat message
         }
     }
     
-    @NotNull
-    public Component getComponent(@NotNull HariantPlayer player) {
-        final TextComponent.Builder builder = Component.text();
-        final TextColor resourceColor = resource.getStyle().color();
+    @ApiStatus.OverrideOnly
+    public @NotNull Component getComponent(@NotNull HariantPlayer player, double ultimateResource) {
+        final double percent = ultimateResource / this.getMinimumCost();
         
-        builder.append(resource.getPrefix().style(resource.getStyle()));
+        return Component.text(percent >= 1.0 ? "CHARGED!" : "%,.0f%%".formatted(percent * 100), this.ultimateResourceType.getStyle().decorate(TextDecoration.BOLD));
+    }
+    
+    @NotNull
+    public final Component getComponent(@NotNull HariantPlayer player) {
+        final TextComponent.Builder builder = Component.text();
+        final TextColor resourceColor = ultimateResourceType.getStyle().color();
+        
+        // Always append resource prefix
+        builder.append(ultimateResourceType.getPrefix().style(ultimateResourceType.getStyle()));
         builder.appendSpace();
         
+        // If ultimate currently in use, show how much time is left
         if (player.isUsingUltimate()) {
-            final int ticksAlive = player.getTicksAlive();
-            final int usedUltimateAt = player.getUsedUltimateAt();
-            final int durationTimeLeft = Math.max(0, getDuration() - (ticksAlive - usedUltimateAt));
+            final int ticksAlive = player.localTicks();
+            final int durationTimeLeft = Math.max(0, getDuration() - (ticksAlive - player.getUsedUltimateAt()));
             
-            builder.append(Component.text("IN USE", resourceColor, TextDecoration.BOLD))
-                   .append(Component.text(" (%s)".formatted(durationTimeLeft == 0 ? Tick.INFINITY_CHAR : Tick.format(durationTimeLeft)), resourceColor));
+            builder.append(Component.text("IN USE", resourceColor, TextDecoration.BOLD));
+            builder.append(Component.text(" (%s)".formatted(durationTimeLeft == 0 ? Tick.INFINITY_CHAR : Tick.format(durationTimeLeft)), resourceColor));
         }
+        // Otherwise, call `getComponent()`
         else {
-            final double percentCharged = player.getUltimateResource() / cost;
-            final Style resourceStyle = resource.getStyle().decorate(TextDecoration.BOLD);
+            final Component component = this.getComponent(player, player.getUltimateResource());
             
-            final Component ultimateResourceFormatted = Component.text(percentCharged >= 1.0 ? "CHARGED!" : "%,.0f%%".formatted(percentCharged * 100), resourceStyle);
-            
-            // If on cooldown, show the percentage grayed out with a cooldown in parentheses
-            if (player.isOnCooldown(this)) {
-                builder.append(ultimateResourceFormatted.color(NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH))
-                       .append(Component.text(" (%s)".formatted(Tick.format(player.getCooldownTimeLeft(this))), Colors.FORMAT_TICK));
+            // If ultimate is on cooldown, gray-out the component and append the cooldown time left
+            if (player.hasCooldown(this)) {
+                final int cooldownTimeLeft = player.getCooldownTimeLeft(this);
+                
+                builder.append(Components.applyStyle(component, STYLE_ULTIMATE_ON_COOLDOWN));
+                builder.append(Component.text(" (%s)".formatted(Tick.format(cooldownTimeLeft)), Colors.TICK));
             }
-            // Otherwise show the percentage charged
+            // Otherwise append normally
             else {
-                builder.append(ultimateResourceFormatted);
+                builder.append(component);
             }
         }
         
         return builder.build();
     }
     
-    @NotNull
-    public Component getUltimateUsageComponent() {
+    protected final @NotNull Component createUsageComponent(@NotNull Component component) {
         return Component.empty()
-                        .append(HariantConstants.GENERIC_ULTIMATE_PREFIX.color(Colors.ULTIMATE_RESOURCE_ENERGY))
+                        .append(ultimateResourceType.getPrefixStyled())
                         .appendSpace()
-                        .append(Component.text("Your ultimate has charged! Press ", Colors.DEFAULT_COLOR))
-                        .append(Component.keybind(Keybind.SWAP_OFFHAND, NamedTextColor.GOLD, TextDecoration.BOLD))
+                        .append(component)
+                        .appendSpace()
+                        .append(Component.text("Press ", Colors.DEFAULT_COLOR))
+                        .append(Component.keybind(Keybind.SWAP_OFFHAND, Colors.GOLD, TextDecoration.BOLD))
                         .append(Component.text(" to use it!", Colors.DEFAULT_COLOR));
     }
     
@@ -144,21 +167,26 @@ public abstract class TalentUltimate extends Talent implements Duration {
     public final Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
         // Check for cost
         final double ultimateResource = player.getUltimateResource();
-        final double resourceCost = this.getResourceCost();
-        
-        if (ultimateResource < resourceCost) {
-            return Response.error("Your ultimate is not ready!");
-        }
+        final double resourceCost = this.getMinimumCost();
         
         if (player.isUsingUltimate()) {
             return Response.error("You are already using ultimate!");
         }
         
+        if (ultimateResource < resourceCost) {
+            return Response.error("Your ultimate is not ready!");
+        }
+        
         // Decrement energy
-        player.decrementUltimateResource(resourceCost);
+        final double resourceConsumption = this.getConsumption();
+        
+        player.decrementUltimateResource(resourceConsumption);
         player.setUsingUltimate(true);
         
         final Executable executable = execute(player, context, ultimateResource);
+        
+        // Ultimates always delegate to player and can only be cancelled on death
+        player.delegate(executable, DelegateType.PERSISTENT);
         
         executable.execute().then(() -> {
             player.setUsingUltimate(false);
@@ -166,6 +194,9 @@ public abstract class TalentUltimate extends Talent implements Duration {
         });
         
         this.broadcast(player);
+        
+        // Call event
+        new HariantTalentUltimateEvent(player, this, resourceConsumption).callEvent();
         
         return Response.ok();
     }
@@ -177,13 +208,11 @@ public abstract class TalentUltimate extends Talent implements Duration {
     }
     
     @Override
-    protected void initLocalAttributeFields() {
-        super.initLocalAttributeFields();
+    protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
+        super.initAttributeFields(attributeFields);
         
-        this.attributeFields.add(new DisplayFieldInstance(
-                Component.empty()
-                         .append(this.resource.getName())
-                         .append(Component.text(" Cost")),
+        attributeFields.add(new DisplayFieldInstance(
+                ultimateResourceType.getName().append(Component.text(" Cost")),
                 Component.text("%.0f".formatted(cost))
         ));
     }
@@ -203,7 +232,7 @@ public abstract class TalentUltimate extends Talent implements Duration {
                              .appendSpace()
                              .append(youOrPlayerName)
                              .append(Component.text(" used ", Colors.DEFAULT_COLOR))
-                             .append(this.getName().color(NamedTextColor.GOLD))
+                             .append(this.getName().color(Colors.GOLD))
                              .append(Component.text("!", Colors.DEFAULT_COLOR))
             );
             

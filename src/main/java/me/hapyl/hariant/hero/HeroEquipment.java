@@ -2,15 +2,14 @@ package me.hapyl.hariant.hero;
 
 import me.hapyl.eterna.module.inventory.ItemStacks;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HeadComponent;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -22,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
+// #norender
 public class HeroEquipment implements HeadComponent {
     
     private static final String BASE_64_PATTERN = "{\"textures\" : {\"SKIN\" : {\"url\" : \"https://textures.minecraft.net/texture/%s\"}}}";
@@ -82,42 +82,66 @@ public class HeroEquipment implements HeadComponent {
         return this.equipment[INDEX_BOOTS];
     }
     
-    public void setChestPlate(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
-        this.equipment[INDEX_CHEST_PLATE] = createItem(material, null, trimPattern, trimMaterial);
-    }
-    
     // *-* Chest Plate *-* //
     
+    public void setChestPlate(@NotNull ItemStack itemStack) {
+        this.equipment[INDEX_CHEST_PLATE] = itemStack;
+    }
+    
+    public void setChestPlate(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
+        this.setChestPlate(createItem(material, null, trimPattern, trimMaterial));
+    }
+    
+    public void setChestPlate(@NotNull Material material) {
+        this.setChestPlate(material, null, null);
+    }
+    
     public void setChestPlate(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
-        this.equipment[INDEX_CHEST_PLATE] = createItem(Material.LEATHER_CHESTPLATE, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial);
+        this.setChestPlate(createItem(Material.LEATHER_CHESTPLATE, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial));
     }
     
     public void setChestPlate(int colorRed, int colorGreen, int colorBlue) {
         this.setChestPlate(colorRed, colorGreen, colorBlue, null, null);
     }
     
-    public void setLeggings(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
-        this.equipment[INDEX_LEGGINGS] = createItem(material, null, trimPattern, trimMaterial);
-    }
-    
     // *-* Leggings *-* //
     
+    public void setLeggings(@NotNull ItemStack itemStack) {
+        this.equipment[INDEX_LEGGINGS] = itemStack;
+    }
+    
+    public void setLeggings(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
+        this.setLeggings(createItem(material, null, trimPattern, trimMaterial));
+    }
+    
+    public void setLeggings(@NotNull Material material) {
+        this.setLeggings(material, null, null);
+    }
+    
     public void setLeggings(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
-        this.equipment[INDEX_LEGGINGS] = createItem(Material.LEATHER_LEGGINGS, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial);
+        this.setLeggings(createItem(Material.LEATHER_LEGGINGS, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial));
     }
     
     public void setLeggings(int colorRed, int colorGreen, int colorBlue) {
         this.setLeggings(colorRed, colorGreen, colorBlue, null, null);
     }
     
-    public void setBoots(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
-        this.equipment[INDEX_BOOTS] = createItem(material, null, trimPattern, trimMaterial);
-    }
-    
     // *-* Boots *-* //
     
+    public void setBoots(@NotNull ItemStack itemStack) {
+        this.equipment[INDEX_BOOTS] = itemStack;
+    }
+    
+    public void setBoots(@NotNull Material material, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
+        this.setBoots(createItem(material, null, trimPattern, trimMaterial));
+    }
+    
+    public void setBoots(@NotNull Material material) {
+        this.setBoots(material, null, null);
+    }
+    
     public void setBoots(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
-        this.equipment[INDEX_BOOTS] = createItem(Material.LEATHER_BOOTS, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial);
+        this.setBoots(createItem(Material.LEATHER_BOOTS, Color.fromRGB(colorRed, colorGreen, colorBlue), trimPattern, trimMaterial));
     }
     
     public void setBoots(int colorRed, int colorGreen, int colorBlue) {
@@ -144,7 +168,7 @@ public class HeroEquipment implements HeadComponent {
                 ObjectContents.playerHead()
                               .profileProperty(PlayerHeadObjectContents.property("textures", base64, ""))
                               .build()
-        ).color(NamedTextColor.WHITE);
+        ).color(Colors.WHITE);
     }
     
     @NotNull

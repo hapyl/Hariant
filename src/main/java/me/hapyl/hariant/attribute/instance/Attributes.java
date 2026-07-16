@@ -2,16 +2,13 @@ package me.hapyl.hariant.attribute.instance;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.annotate.NotEmpty;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
-import java.util.List;
 
 public class Attributes implements AttributesBase {
     
@@ -42,35 +39,43 @@ public class Attributes implements AttributesBase {
         this.attributeMap.put(attributeType, value);
     }
     
+    @Override
+    public void add(@NotNull AttributeType attributeType, double value) {
+        attributeMap.merge(attributeType, value, Double::sum);
+    }
+    
     @NotNull
     public Attributes adjust(@NotNull AttributeType attributeType, double value) {
         this.set(attributeType, value);
         return this;
     }
     
-    @NotNull
-    public Component getRating(@NotNull AttributeType attributeType) {
-        class Holder {
-            private static final int MID_RATING = 3;
-            private static final int MAX_RATING = 6;
-        }
-        
+    public @NotNull Component createLore(@NotNull AttributeType attributeType, @Nullable Double externalValue) {
+        return createLore0(attributeType, externalValue != null ? externalValue : 0).append(createExternalValueComponent(externalValue));
+    }
+    
+    public @NotNull Component createLore(@NotNull AttributeType attributeType) {
+        return createLore0(attributeType, 0);
+    }
+    
+    private @NotNull Component createLore0(@NotNull AttributeType attributeType, double externalValue) {
+        return Component.empty()
+                        .append(this.createRelativeArrow(attributeType))
+                        .appendSpace()
+                        .append(attributeType.asComponent())
+                        .appendSpace()
+                        .append(attributeType.format(attributeType.clamp(this.get(attributeType) + externalValue)));
+    }
+    
+    public @NotNull Component createRelativeArrow(@NotNull AttributeType attributeType) {
+        final double baseValue = this.base(attributeType);
         final double defaultValue = attributeType.defaultValue();
-        final double value = this.base(attributeType); // Force base call
         
-        final double ratio = value / defaultValue;
-        final double quality = Math.clamp(Math.round(ratio * Holder.MID_RATING), 0, Holder.MAX_RATING);
-        
-        final TextComponent.Builder builder = Component.text();
-        
-        final Component prefix = attributeType.getPrefixStyled();
-        final Component prefixGrayed = attributeType.getPrefix().color(NamedTextColor.DARK_GRAY);
-        
-        for (int i = 0; i < Holder.MAX_RATING; i++) {
-            builder.append(i < quality ? prefix : prefixGrayed);
-        }
-        
-        return builder.build();
+        return baseValue > defaultValue
+               ? Component.text("▲", Colors.GREEN)
+               : baseValue < defaultValue
+                 ? Component.text("▼", Colors.RED)
+                 : Component.text("■", Colors.DARK_GRAY);
     }
     
     @NotNull
@@ -96,5 +101,13 @@ public class Attributes implements AttributesBase {
         return base(1000, 100, 100);
     }
     
+    @NotNull
+    public static Attributes copyOf(@NotNull Attributes attributes) {
+        return new Attributes(attributes);
+    }
+    
+    public static @NotNull Component createExternalValueComponent(@Nullable Double externalValue) {
+        return externalValue != null ? Component.text(" +%,.0f".formatted(externalValue), Colors.GREEN) : Component.empty();
+    }
     
 }

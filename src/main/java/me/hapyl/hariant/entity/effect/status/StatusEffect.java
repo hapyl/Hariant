@@ -9,10 +9,10 @@ import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public interface StatusEffect extends Effect, Named, Described, DamageSourceIdentity {
+public interface StatusEffect extends Effect, Named, Described, DamageSourceIdentity, ComponentLike {
     
     @Override
     @NotNull
@@ -23,13 +23,13 @@ public interface StatusEffect extends Effect, Named, Described, DamageSourceIden
     EffectType getEffectType();
     
     @Override
-    void onApply(@NotNull HariantEntity entity, @Nullable HariantEntity applier);
+    void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration);
     
     @Override
-    void onRemove(@NotNull HariantEntity entity, @Nullable HariantEntity applier);
+    void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier);
     
     @Override
-    void onTick(@NotNull HariantEntity entity, @Nullable HariantEntity applier, int tick);
+    void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick);
     
     @Override
     @NotNull
@@ -43,4 +43,9 @@ public interface StatusEffect extends Effect, Named, Described, DamageSourceIden
     @Override
     Component getDescription();
     
+    @NotNull
+    @Override
+    default Component asComponent() {
+        return getName();
+    }
 }

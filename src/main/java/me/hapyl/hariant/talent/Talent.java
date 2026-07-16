@@ -8,27 +8,28 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.annotate.StrictNamingConvention;
-import me.hapyl.hariant.attribute.AttributeFormatter;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantTalentEvent;
+import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import me.hapyl.hariant.inventory.item.ItemCreator;
 import me.hapyl.hariant.profile.setting.Settings;
 import me.hapyl.hariant.registry.Registrable;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
+import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.util.Duration;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.Identified;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,6 +37,8 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
 @AutoRegisteredListener
 @StrictNamingConvention(startsWith = "Talent")
@@ -45,7 +48,7 @@ public abstract class Talent
         Registrable, Cooldown, Duration, DamageSourceIdentity,
         Identified {
     
-    protected final List<DisplayFieldInstance> attributeFields;
+    private final List<DisplayFieldInstance> attributeFields;
     
     private final Key key;
     private final Component name;
@@ -90,7 +93,7 @@ public abstract class Talent
     
     @NotNull
     @Override
-    public final Key getCooldownKey() {
+    public Key getCooldownKey() {
         return key;
     }
     
@@ -125,7 +128,7 @@ public abstract class Talent
         builder.setName(getName());
         
         // Append talent type
-        builder.addLore(this.getTalentTypeWithClassName().color(NamedTextColor.DARK_GRAY));
+        builder.addLore(this.getTalentTypeWithClassName().color(Colors.DARK_GRAY));
         builder.addLore();
         
         // Add description
@@ -140,27 +143,30 @@ public abstract class Talent
         
         builder.setName(getName());
         
-        builder.addLore(Component.text("Details", NamedTextColor.DARK_GRAY));
+        builder.addLore(Component.text("Details", Colors.DARK_GRAY));
         builder.addLore();
         
         // Append talent type description
-        builder.addLore(this.talentType.getName().color(NamedTextColor.GOLD));
-        builder.addWrappedLore(this.talentType.getDescription(), _component -> Component.text("  ").append(_component).color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC));
+        builder.addLore(this.talentType.getName().color(Colors.GOLD));
+        builder.addWrappedLore(this.talentType.getDescription(), HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_2);
         builder.addLore();
         
         // Append attribute fields
-        builder.addLore(Component.text("Attributes", NamedTextColor.GOLD));
-        
-        attributeFields.forEach(instance -> {
-            builder.addLore(instance.asComponent());
-        });
+        if (!attributeFields.isEmpty()) {
+            builder.addLore(Component.text("Attributes", Colors.GOLD));
+            
+            attributeFields.forEach(instance -> {
+                builder.addLore(instance.asComponent());
+            });
+        }
         
         return builder;
     }
     
+    @OverridingMethodsMustInvokeSuper
     @Override
     public void onRegister() {
-        this.initAttributeFields();
+        this.initAttributeFields0();
     }
     
     @Override
@@ -220,11 +226,11 @@ public abstract class Talent
     @NotNull
     public abstract Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context);
     
-    public final void execute0(@NotNull HariantPlayer player) {
+    public void execute0(@NotNull HariantPlayer player) {
         // Precondition checks
         final int cooldownTimeLeft = player.getCooldownTimeLeft(this);
         
-        if (player.isOnCooldown(this)) {
+        if (player.hasCooldown(this)) {
             if (player.getSetting(Settings.COOLDOWN_FEEDBACK)) {
                 player.messageError(
                         Component.text("This talent is on cooldown for ")
@@ -249,10 +255,16 @@ public abstract class Talent
         }
         
         // Call talent event execution
-        final HariantTalentEvent event = new HariantTalentEvent(player, this);
+        final HariantTalentPreconditionEvent event = new HariantTalentPreconditionEvent(player, this);
         
         if (event.callEvent()) {
-            player.messageError(event.getCancelReason());
+            player.messageError(
+                    Component.empty()
+                             .append(Component.text("Cannot use talent! "))
+                             .append(Component.text("(", Colors.DARK_GRAY))
+                             .append(event.getCancelReason().color(Colors.DARK_GRAY))
+                             .append(Component.text(")", Colors.DARK_GRAY))
+            );
             return;
         }
         
@@ -280,6 +292,9 @@ public abstract class Talent
         else if (response.isAwait()) {
             player.setIndefiniteCooldown(this);
         }
+        
+        // Call the talent event AFTER the execution
+        new HariantTalentEvent(player, this, response).callEvent();
     }
     
     @NotNull
@@ -293,7 +308,7 @@ public abstract class Talent
     }
     
     @OverridingMethodsMustInvokeSuper
-    protected void initLocalAttributeFields() {
+    protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
         if (cooldown > 0) {
             attributeFields.add(new DisplayFieldInstance(Component.text("Cooldown"), this.getCooldownFormatted()));
         }
@@ -303,38 +318,54 @@ public abstract class Talent
         }
     }
     
-    private void initAttributeFields() {
+    private void initAttributeFields0() {
         if (!attributeFields.isEmpty()) {
             throw new IllegalStateException("Attribute fields already initiated!");
         }
         
-        this.initLocalAttributeFields();
+        this.initAttributeFields(attributeFields);
         
         try {
-            for (Field field : this.getClass().getDeclaredFields()) {
-                final DisplayField displayField = field.getAnnotation(DisplayField.class);
-                
-                if (displayField == null) {
-                    continue;
+            for (Class<?> clazz : getClassHierarchyReversed()) {
+                for (Field field : clazz.getDeclaredFields()) {
+                    final DisplayField displayField = field.getAnnotation(DisplayField.class);
+                    
+                    if (displayField == null) {
+                        continue;
+                    }
+                    
+                    field.setAccessible(true);
+                    final Object fieldValue = field.get(this);
+                    
+                    if (!(fieldValue instanceof ComponentFormatter formatter)) {
+                        throw new IllegalArgumentException(
+                                "Field %s (%s) in %s must implement %s!".formatted(field.getName(), clazz.getSimpleName(), field.getType().getSimpleName(), ComponentFormatter.class.getSimpleName()));
+                    }
+                    
+                    final String fieldName = !displayField.name().isEmpty()
+                                             ? displayField.name()
+                                             : formatFieldName(field);
+                    
+                    attributeFields.add(new DisplayFieldInstance(Component.text(fieldName), formatter.format()));
                 }
-                
-                field.setAccessible(true);
-                final Object fieldValue = field.get(this);
-                
-                if (!(fieldValue instanceof AttributeFormatter formatter)) {
-                    throw new IllegalArgumentException("%s must implement %s!".formatted(field.getType().getSimpleName(), AttributeFormatter.class.getSimpleName()));
-                }
-                
-                final String fieldName = !displayField.name().isEmpty()
-                                         ? displayField.name()
-                                         : formatFieldName(field);
-                
-                attributeFields.add(new DisplayFieldInstance(Component.text(fieldName), formatter.format()));
             }
         }
         catch (IllegalAccessException e) {
             throw new RuntimeException("Error parsing attribute fields in %s: %s".formatted(this.getClass().getSimpleName(), e.getMessage()), e);
         }
+    }
+    
+    @NotNull
+    private List<Class<?>> getClassHierarchyReversed() {
+        final List<Class<?>> hierarchy = Lists.newArrayList();
+        Class<?> clazz = this.getClass();
+        
+        while (clazz != Talent.class) {
+            hierarchy.addFirst(clazz);
+            clazz = clazz.getSuperclass();
+        }
+        
+        return hierarchy;
     }
     
     @NotNull
@@ -366,6 +397,12 @@ public abstract class Talent
         }
         
         return builder.toString();
+    }
+    
+    public static @NotNull List<? extends Component> createSubloreComponent(@NotNull IntFunction<Component> prefixSupplier, @NotNull Component... components) {
+        return IntStream.range(0, components.length)
+                        .mapToObj(i -> prefixSupplier.apply(i).append(components[i]))
+                        .toList();
     }
     
 }

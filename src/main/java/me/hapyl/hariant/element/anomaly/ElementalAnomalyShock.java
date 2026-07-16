@@ -12,8 +12,8 @@ import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
-import me.hapyl.hariant.talent.ultimate.TalentUltimateResource;
-import me.hapyl.hariant.term.EnumTerm;
+import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -39,18 +39,18 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
     );
     
     ElementalAnomalyShock() {
-        super(Key.ofString("shock"), Component.text("Shock"));
+        super(Key.ofString("shock"), Component.text("Shock"), ElementType.ELECTRIC);
         
         setDescription(
                 Component.empty()
                          .append(Component.text("Creates an explosion in small "))
-                         .append(EnumTerm.AREA_OF_EFFECT)
+                         .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text(" that deals "))
                          .append(ElementType.ELECTRIC.asComponentDamage())
                          .append(Component.text(" and drains "))
                          .append(energyDrainOfMaxEnergy)
                          .append(Component.text(" of max "))
-                         .append(TalentUltimateResource.ENERGY)
+                         .append(UltimateResourceType.ENERGY)
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
@@ -59,7 +59,7 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
                          .append(Component.text(" is a player, transfer "))
                          .append(energyPlayerTransferPercentOfDrainedEnergy)
                          .append(Component.text(" of total "))
-                         .append(TalentUltimateResource.ENERGY)
+                         .append(UltimateResourceType.ENERGY)
                          .append(Component.text(" drained."))
         );
     }
@@ -87,13 +87,13 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
             // Decrement energy if entity is a player
             if (affectedEntity instanceof HariantPlayer player) {
                 final TalentUltimate ultimateTalent = player.getHero().getUltimateTalent();
-                final TalentUltimateResource ultimateResource = ultimateTalent.getResource();
+                final UltimateResourceType ultimateResourceType = ultimateTalent.getUltimateResourceType();
                 
-                if (ultimateResource != TalentUltimateResource.ENERGY) {
+                if (ultimateResourceType != UltimateResourceType.ENERGY) {
                     continue;
                 }
                 
-                final double ultimateDrain = Math.min(player.getUltimateResource(), ultimateTalent.getResourceCost() * energyDrainOfMaxEnergy.doubleValue());
+                final double ultimateDrain = Math.min(player.getUltimateResource(), ultimateTalent.getMaximumCost() * energyDrainOfMaxEnergy.doubleValue());
                 totalEnergyDrained += ultimateDrain;
                 
                 player.decrementUltimateResource(ultimateDrain);
@@ -106,7 +106,7 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
         }
         
         // Transfer energy if the source is a player
-        if (totalEnergyDrained > 0 && source instanceof HariantPlayer player && player.getHero().getUltimateTalent().getResource() == TalentUltimateResource.ENERGY) {
+        if (totalEnergyDrained > 0 && source instanceof HariantPlayer player && player.getHero().getUltimateTalent().getUltimateResourceType() == UltimateResourceType.ENERGY) {
             player.incrementUltimateResource(totalEnergyDrained * energyPlayerTransferPercentOfDrainedEnergy.doubleValue());
             
             // Fx
@@ -131,4 +131,5 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
         
         return baseDamage * (1 + (attack / 500 + elementalMastery / 1000));
     }
+    
 }

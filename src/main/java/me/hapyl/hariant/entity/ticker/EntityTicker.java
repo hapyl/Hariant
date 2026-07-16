@@ -1,6 +1,5 @@
 package me.hapyl.hariant.entity.ticker;
 
-import me.hapyl.eterna.module.util.Predicates;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageType;
@@ -23,7 +22,7 @@ public class EntityTicker implements Ticking, Resettable {
      * Note that some {@link DamageType} may ignore the invulnerability ticks.
      * </p>
      */
-    public final Ticker invulnerability; // FIXME @Mar 10, 2026 (xanyjl) -> This is not needed I think?
+    public final Ticker invulnerability;
     
     private final HariantEntity entity;
     private final List<Ticker> tickerList;
@@ -32,8 +31,8 @@ public class EntityTicker implements Ticking, Resettable {
         this.entity = entity;
         
         this.tickerList = List.of(
-                life = new TickerImpl("life", TickerType.INCREMENT, Predicates.truthy()),
-                invulnerability = new TickerImpl("invulnerability", TickerType.DECREMENT, Predicates.truthy())
+                life = new TickerImpl("life", TickerType.INCREMENT, _ -> true),
+                invulnerability = new TickerImpl("invulnerability", TickerType.DECREMENT, _ -> true)
         );
     }
     

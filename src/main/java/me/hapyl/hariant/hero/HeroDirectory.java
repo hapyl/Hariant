@@ -2,7 +2,6 @@ package me.hapyl.hariant.hero;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseEntry;
 import me.hapyl.hariant.database.problem.Problem;
@@ -19,7 +18,7 @@ public final class HeroDirectory extends PlayerDatabaseEntry {
     
     private final Map<Hero, HeroInstance> heroes;
     
-    private Hero selectedHero;
+    @NotNull private Hero selectedHero;
     
     @MongoSerializableConstructor
     private HeroDirectory(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull String parent) {

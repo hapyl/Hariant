@@ -6,6 +6,10 @@ import me.hapyl.hariant.hero.HeroDataSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 public interface HeroDataRetriever {
     
     /**
@@ -29,6 +33,7 @@ public interface HeroDataRetriever {
      * @param <H>      - The hero type.
      * @param <D>      - The data type.
      * @return an existing or newly computed hero data.
+     * @see #touchHeroData(Hero, Class, Consumer)
      */
     @NotNull
     <H extends Hero, D extends HeroData<H>> D getHeroData(@NotNull H hero, @NotNull HeroDataSupplier<H, D> supplier);
@@ -40,5 +45,35 @@ public interface HeroDataRetriever {
      * @return {@code true} if this player has existing data for the given hero; {@code false} otherwise.
      */
     <H extends Hero> boolean hasHeroData(@NotNull H hero);
+    
+    /**
+     * Touches an <b><u>existing</u></b> data for the given {@link Hero} and {@link HeroData} without computing the data.
+     *
+     * <p>
+     * This result of the given consumer will be ignored if the player doesn't have the expected data.
+     * </p>
+     *
+     * @param hero          - The hero of the data.
+     * @param heroDataClass - The target data class.
+     * @param consumer      - The consumer.
+     * @param <H>           - The hero type.
+     * @param <D>           - The hero data type.
+     */
+    <H extends Hero, D extends HeroData<H>> void touchHeroData(@NotNull H hero, @NotNull Class<D> heroDataClass, @NotNull Consumer<@NotNull D> consumer);
+    
+    /**
+     * Touches an <b><u>existing</u></b> data for the given {@link Hero} and {@link HeroData} without computing the data and returns the value
+     * as instructed in the given {@link Function} wrapped in a {@link Optional}.
+     *
+     * @param hero          - The hero of the data.
+     * @param heroDataClass - The target data class.
+     * @param function      - The function.
+     * @param <H>           - The hero type.
+     * @param <D>           - The hero data type.
+     * @param <R>           - The return value type.
+     * @return an optional with the value; or an empty optional if data or value doesn't exist.
+     */
+    <H extends Hero, D extends HeroData<H>, R> @NotNull Optional<R> touchHeroData(@NotNull H hero, @NotNull Class<D> heroDataClass, @NotNull Function<@NotNull D, @Nullable R> function);
+    
     
 }

@@ -6,22 +6,28 @@ import me.hapyl.hariant.config.HariantConfig;
 import me.hapyl.hariant.config.HariantConfigImpl;
 import me.hapyl.hariant.database.Database;
 import me.hapyl.hariant.database.DatabaseSyncer;
+import me.hapyl.hariant.entity.EntityGarbageCollector;
 import me.hapyl.hariant.event.HariantEntityMoveEvent;
-import me.hapyl.hariant.handler.EntityHandler;
-import me.hapyl.hariant.handler.PlayerHandler;
-import me.hapyl.hariant.handler.ProjectileHandler;
+import me.hapyl.hariant.game.booster.BoosterHandler;
+import me.hapyl.hariant.handler.*;
+import me.hapyl.hariant.npc.NpcHandler;
+import me.hapyl.hariant.weapon.ability.AbilityHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.World;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
 public final class HariantPlugin extends JavaPlugin {
     
-    public static final String REQUIRED_ETERNA_VERSION = "6.2.1";
+    /**
+     * Defines the minimum EternaAPI version plugin requires, using any versions below that will shut down the server.
+     */
+    public static final String REQUIRED_ETERNA_VERSION = "6.2.16";
     
     private HariantConfig config;
     private Database database;
@@ -29,13 +35,13 @@ public final class HariantPlugin extends JavaPlugin {
     
     @Override
     public void onDisable() {
-        Hariant.handler.onDestroy();
+        Hariant.HANDLER.onDestroy();
         database.close();
     }
     
     @Override
     public void onEnable() {
-        Hariant.plugin = this;
+        Hariant.PLUGIN = this;
         
         // Instantiate EternaAPI
         EternaAPI.instantiate(this, REQUIRED_ETERNA_VERSION);
@@ -49,20 +55,28 @@ public final class HariantPlugin extends JavaPlugin {
         // Load database
         database = new Database(this);
         
-        // Schedule database syncer
-        databaseSyncer = new DatabaseSyncer();
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, databaseSyncer, HariantConstants.DATABASE_SYNC_PERIOD, HariantConstants.DATABASE_SYNC_PERIOD);
-        
-        // Load manager
-        Hariant.handler = new Hariant(this);
-        
-        // Load listeners
+        final BukkitScheduler scheduler = Bukkit.getScheduler();
         final PluginManager pluginManager = Bukkit.getPluginManager();
         
+        // Schedule database syncer
+        databaseSyncer = new DatabaseSyncer();
+        scheduler.scheduleSyncRepeatingTask(this, databaseSyncer, HariantConstants.DATABASE_SYNC_PERIOD, HariantConstants.DATABASE_SYNC_PERIOD);
+        pluginManager.registerEvents(databaseSyncer, this);
+        
+        // Load manager
+        Hariant.HANDLER = new Hariant(this);
+        
+        // Load listeners
         pluginManager.registerEvents(new PlayerHandler(), this);
         pluginManager.registerEvents(new EntityHandler(), this);
         pluginManager.registerEvents(new ProjectileHandler(), this);
         pluginManager.registerEvents(new HariantEntityMoveEvent.Handler(), this);
+        pluginManager.registerEvents(new AbilityHandler(), this);
+        pluginManager.registerEvents(new NpcHandler(), this);
+        pluginManager.registerEvents(new PlayerSitHandler(), this);
+        pluginManager.registerEvents(new EntityGarbageCollector(), this);
+        pluginManager.registerEvents(new ServerHandler(), this);
+        pluginManager.registerEvents(new BoosterHandler(), this);
         
         for (final World world : Bukkit.getWorlds()) {
             setDefaultGamerules(world);
@@ -91,7 +105,7 @@ public final class HariantPlugin extends JavaPlugin {
     
     @NotNull
     public static RuntimeException severeExceptionShutdownServer(@NotNull RuntimeException ex) {
-        final Logger logger = Hariant.plugin.getLogger();
+        final Logger logger = Hariant.PLUGIN.getLogger();
         
         logger.severe("");
         logger.severe("+---------------------------------------------------------+");
@@ -101,7 +115,7 @@ public final class HariantPlugin extends JavaPlugin {
         logger.severe("+---------------------------------------------------------+");
         logger.severe("");
         
-        Bukkit.getScheduler().runTask(Hariant.plugin, () -> Bukkit.getServer().shutdown());
+        Bukkit.getScheduler().runTask(Hariant.PLUGIN, () -> Bukkit.getServer().shutdown());
         return ex;
     }
     

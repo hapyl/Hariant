@@ -1,9 +1,11 @@
 package me.hapyl.hariant.util.decimal;
 
 import me.hapyl.eterna.module.text.NumberToWord;
-import me.hapyl.hariant.attribute.AttributeFormatter;
+import me.hapyl.hariant.annotate.Percentage;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.util.Arithmetic;
+import me.hapyl.hariant.util.ComponentFormatter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +31,7 @@ import org.jetbrains.annotations.Range;
  * </p>
  *
  * <p>
- * The {@link #getValue()} returns the logical value used exclusively for
+ * The {@link #value()} returns the logical value used exclusively for
  * {@link #format() formatting}. It is not intended for numeric access and
  * must not be used as a replacement for the {@link Number} conversion methods.
  * </p>
@@ -39,15 +41,15 @@ import org.jetbrains.annotations.Range;
  * instantiated through the factory methods declared in this class.
  * </p>
  */
-public abstract class Decimal extends Number implements AttributeFormatter, ComponentLike {
+public abstract class Decimal extends Number implements ComponentFormatter, ComponentLike, Arithmetic<Decimal> {
     
     protected final double value;
     
-    Decimal(final double value) {
+    public Decimal(final double value) {
         this.value = value;
     }
     
-    public double getValue() {
+    public double value() {
         return value;
     }
     
@@ -102,33 +104,103 @@ public abstract class Decimal extends Number implements AttributeFormatter, Comp
         return NumberToWord.toWord(intValue());
     }
     
-    @NotNull
-    public static Decimal ofValue(final double value) {
-        return new DecimalImpl(value);
+    @Override
+    public double add(@NotNull Decimal that) {
+        return this.value + that.value;
     }
     
+    @Override
+    public double subtract(@NotNull Decimal that) {
+        return this.value - that.value;
+    }
+    
+    @Override
+    public double multiply(@NotNull Decimal that) {
+        return this.value * that.value;
+    }
+    
+    @Override
+    public double divide(@NotNull Decimal that) {
+        return that.value != 0 ? this.value / that.value : 0;
+    }
+    
+    /**
+     * A static factory method for creating a {@link Decimal} instance for a whole number, formatted via the given {@link DecimalFormat}.
+     *
+     * @param value  - The value.
+     * @param format - The formatter to use.
+     * @return a new decimal instance.
+     */
     @NotNull
     public static Decimal ofValue(final double value, @NotNull DecimalFormat format) {
         return new DecimalImpl(value, format);
     }
     
+    /**
+     * A static factory method for creating a {@link Decimal} instance for a whole number, formatted via {@link DecimalFormat#DECIMAL}.
+     *
+     * @param value - The value.
+     * @return a new decimal instance.
+     */
     @NotNull
-    public static Decimal ofPercentage(@Range(from = 1, to = Integer.MAX_VALUE) final double percentage) {
+    public static Decimal ofValue(final double value) {
+        return ofValue(value, DecimalFormat.DECIMAL);
+    }
+    
+    /**
+     * A static factory method for creating a {@link Decimal} instance for a percentage, which must be passed as a whole number (eg: {@code 30} for {@code 30%}, <b><u>not</u></b> {@code 0.3});
+     *
+     * <p>
+     * Calling the numeric methods divides the percentage value by {@code 100}, returning a decimal representation of the percentage, where displaying
+     * the decimal formatted via {@link DecimalFormat#decimal(String, String)} with up to two decimal points.
+     * </p>
+     *
+     * @param percentage - The percentage value.
+     * @return a new decimal instance.
+     */
+    @NotNull
+    public static Decimal ofPercentage(@Percentage(Percentage.Type.WHOLE_NUMBER) final double percentage) {
         return new DecimalPercentageImpl(percentage);
     }
     
+    /**
+     * A static factory method for creating a {@link Decimal} instance for an {@link AttributeType} value, formatted with that attribute's {@link DecimalFormat}.
+     *
+     * @param attributeType - The attribute type.
+     * @param value         - The value.
+     * @return a new decimal instance.
+     */
     @NotNull
-    public static Decimal ofAttributeBonus(@NotNull AttributeType attributeType, @Range(from = 1, to = Integer.MAX_VALUE) final double value) {
-        return new DecimalAttributeBonusImpl(attributeType, value);
+    public static Decimal ofAttribute(@NotNull AttributeType attributeType, @Range(from = 1, to = Integer.MAX_VALUE) final double value) {
+        return new DecimalAttributeImpl(attributeType, value);
     }
     
+    /**
+     * A static factory method for creating a {@link Decimal} instance for a time unit of seconds.
+     *
+     * <p>
+     * Calling the numeric methods multiplies the value by {@code 20}, returning a {@code tick} representation of the seconds, where displaying
+     * the decimal formatted via {@link DecimalFormat#SECONDS}.
+     * </p>
+     *
+     * @param seconds - The time unit in seconds.
+     * @return a new decimal instance.
+     */
     @NotNull
-    public static Decimal ofSeconds(@Range(from = 0, to = Integer.MAX_VALUE) float seconds) {
+    public static Decimal ofSeconds(@Range(from = 0, to = Integer.MAX_VALUE) final float seconds) {
         return new DecimalSecondsImpl(seconds);
     }
     
+    /**
+     * A static factory method for creating a {@link Decimal} instance for {@link ElementType} application units, which is formatted with a special
+     * character and the element type name.
+     *
+     * @param elementType - The element type.
+     * @param units       - The elemental units.
+     * @return a new decimal.
+     */
     @NotNull
-    public static Decimal ofElementalApplication(@NotNull ElementType elementType, double units) {
+    public static Decimal ofElementalApplication(@NotNull ElementType elementType, final double units) {
         return new DecimalElementalApplicationImpl(elementType, units);
     }
     

@@ -3,8 +3,8 @@ package me.hapyl.hariant.menu.hero;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
-import me.hapyl.eterna.module.inventory.menu.PlayerMenu;
 import me.hapyl.hariant.hero.HeroInstance;
+import me.hapyl.hariant.menu.Menu;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.SlotBound;
 import net.kyori.adventure.text.Component;
@@ -81,7 +81,7 @@ public enum Category implements SlotBound, Icon, Named, Described {
     }
     
     @NotNull
-    public PlayerMenu createMenu(@NotNull Player player, @NotNull HeroInstance instance) {
+    public Menu createMenu(@NotNull Player player, @NotNull HeroInstance instance) {
         return this.menuSupplier.apply(player, instance);
     }
     

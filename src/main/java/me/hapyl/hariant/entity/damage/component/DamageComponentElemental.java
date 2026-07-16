@@ -5,7 +5,10 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import org.jetbrains.annotations.NotNull;
 
-public class DamageComponentElemental implements DamageComponent {
+public final class DamageComponentElemental implements DamageComponent {
+    
+    DamageComponentElemental() {
+    }
     
     @NotNull
     @Override

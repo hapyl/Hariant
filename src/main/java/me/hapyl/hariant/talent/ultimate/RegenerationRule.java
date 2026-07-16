@@ -9,7 +9,8 @@ public interface RegenerationRule {
     
     double regenerateOnElimination();
     
-    @Nullable
-    AttributeType getEffectiveAttribute();
+    double regenerateOnAssist();
+    
+    @Nullable AttributeType getEffectiveAttribute();
     
 }

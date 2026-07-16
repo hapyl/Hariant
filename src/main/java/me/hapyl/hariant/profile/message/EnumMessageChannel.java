@@ -1,12 +1,9 @@
 package me.hapyl.hariant.profile.message;
 
-import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,71 +12,36 @@ import java.util.stream.Stream;
 
 public enum EnumMessageChannel implements MessageChannel {
     
-    GLOBAL(new MessageChannelImpl(null)),
+    GLOBAL(null, new MessageChannelImpl(Component.empty())),
+    TEAM_RED(lookupPatternTeam(), new MessageChannelTeam(EnumTeam.RED)),
+    TEAM_GREEN(lookupPatternTeam(), new MessageChannelTeam(EnumTeam.GREEN)),
+    TEAM_BLUE(lookupPatternTeam(), new MessageChannelTeam(EnumTeam.BLUE)),
+    TEAM_ORANGE(lookupPatternTeam(), new MessageChannelTeam(EnumTeam.ORANGE)),
+    TEAM_PURPLE(lookupPatternTeam(), new MessageChannelTeam(EnumTeam.PURPLE)),
+    TEAM_WHITE(lookupPatternTeam(), new MessageChannelTeam(EnumTeam.WHITE)),
+    TEAM_BLACK(lookupPatternTeam(), new MessageChannelTeam(EnumTeam.BLACK)),
+    STAFF(lookupPattern("!"), new MessageChannelStaff());
     
-    TEAM(
-            new MessageChannelImpl("#") {
-                
-                @NotNull
-                @Override
-                public Component channelPrefix(@NotNull PlayerProfile profile) {
-                    final EnumTeam team = profile.getTeam();
-                    final Style style = team.getStyle();
-                    
-                    return Component.empty()
-                                    .append(Component.text("[", style))
-                                    .append(team.asComponent())
-                                    .append(Component.text("]", style))
-                                    .appendSpace();
-                }
-                
-                @NotNull
-                @Override
-                public Stream<PlayerProfile> recipients(@NotNull PlayerProfile profile) {
-                    return profile.getTeam().getPlayerProfiles();
-                }
-            }
-    ),
+    private final @Nullable Pattern lookupPattern;
+    private final @NotNull MessageChannel messageChannel;
     
-    STAFF(
-            new MessageChannelImpl("!") {
-                private static final Component CHANNEL_PREFIX = Component.text("[STAFF] ", TextColor.color(0x1FEEFF));
-                
-                @NotNull
-                @Override
-                public Component channelPrefix(@NotNull PlayerProfile profile) {
-                    return CHANNEL_PREFIX;
-                }
-                
-                @Override
-                public boolean isAccessible(@NotNull PlayerProfile profile) {
-                    return profile.getRank().isStaff();
-                }
-                
-                @NotNull
-                @Override
-                public Stream<PlayerProfile> recipients(@NotNull PlayerProfile profile) {
-                    return Hariant.getPlayerProfiles().filter(otherProfile -> otherProfile.getRank().isStaff());
-                }
-            }
-    );
-    
-    private final MessageChannel messageChannel;
-    
-    EnumMessageChannel(@NotNull MessageChannel messageChannel) {
+    EnumMessageChannel(@Nullable Pattern lookupPattern, @NotNull MessageChannel messageChannel) {
+        this.lookupPattern = lookupPattern;
         this.messageChannel = messageChannel;
     }
     
-    @Nullable
-    @Override
-    public Pattern lookupPattern() {
-        return messageChannel.lookupPattern();
+    public @Nullable Pattern lookupPattern() {
+        return lookupPattern;
     }
     
-    @NotNull
     @Override
-    public Component channelPrefix(@NotNull PlayerProfile profile) {
-        return messageChannel.channelPrefix(profile);
+    public @NotNull Component formatProfile(@NotNull PlayerProfile profile) {
+        return messageChannel.formatProfile(profile);
+    }
+    
+    @Override
+    public @NotNull Component channelPrefix() {
+        return messageChannel.channelPrefix();
     }
     
     @Override
@@ -87,25 +49,31 @@ public enum EnumMessageChannel implements MessageChannel {
         return messageChannel.isAccessible(profile);
     }
     
-    @NotNull
     @Override
-    public Stream<PlayerProfile> recipients(@NotNull PlayerProfile profile) {
-        return messageChannel.recipients(profile);
+    public @NotNull Stream<PlayerProfile> recipients() {
+        return messageChannel.recipients();
     }
     
-    @NotNull
-    public static MessageChannel getChannel(@NotNull PlayerProfile sender, @NotNull TextComponent message) {
+    public static @NotNull EnumMessageChannel fromMessage(@NotNull PlayerProfile profile, @NotNull TextComponent message) {
         final String text = message.content();
         
         for (EnumMessageChannel messageChannel : values()) {
-            final Pattern lookupPattern = messageChannel.lookupPattern();
+            final Pattern lookupPattern = messageChannel.lookupPattern;
             
-            if (lookupPattern != null && lookupPattern.matcher(text).find() && messageChannel.isAccessible(sender)) {
+            if (lookupPattern != null && lookupPattern.matcher(text).find() && messageChannel.isAccessible(profile)) {
                 return messageChannel;
             }
         }
         
         return EnumMessageChannel.GLOBAL;
+    }
+    
+    private static @NotNull Pattern lookupPattern(@NotNull String ch) {
+        return Pattern.compile("^%s\\s*".formatted(Pattern.quote(ch)));
+    }
+    
+    private static @NotNull Pattern lookupPatternTeam() {
+        return lookupPattern("#");
     }
     
 }

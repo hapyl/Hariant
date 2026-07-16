@@ -1,11 +1,11 @@
 package me.hapyl.hariant.entity.damage;
 
 import me.hapyl.eterna.module.component.Named;
-import me.hapyl.hariant.term.Term;
+import me.hapyl.hariant.term.Terminology;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public enum DamageType implements Named, Term {
+public enum DamageType implements Named, Terminology {
     
     MELEE(
             Component.text("Melee DMG"),

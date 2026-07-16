@@ -25,6 +25,7 @@ It is advised, though not required, to follow the talent order, which should be:
 * **Signature Talent** - Something that defines the playstyle of the hero should be on the first slot.
 * **Movement Talent** - If hero has a movement talent, it should be on the second slot, which will feel better for the
   player when using different heroes with movement talents.
+* **Additional Talent** - An additional talent goes to the third slot.
 
 ## Class Packages
 
@@ -33,7 +34,11 @@ all `Talent`'s should be inside `Hero`'s main package, since hero **owns** talen
 
 ## Annotations
 
-The project must only use JetBrains annotations for nullability, (eg: `@Nullabe`, `@NotNull`).
+The project must only use **JetBrains** annotations for nullability, (eg: `@Nullabe`, `@NotNull`).
+
+## Finalization
+
+All singleton classes (Talents, Items, etc), must be finalized (have `final` modifier on them).
 
 ------------------------------------------------------------------------
 
@@ -71,6 +76,15 @@ the lore significance of an object.
 
 ## Lore
 
-* TBD
+* Lore is extended version of flavor text, that describes the story of an object. Lore can only be viewed from the
+  Archive.
+
+---
+
+## Comments
+
+The following should always be commented:
+
+* Effects, be it particles, sounds or anything else. (eg: `// Fx, // Effects, // Sfx`, etc) 
 
 ---

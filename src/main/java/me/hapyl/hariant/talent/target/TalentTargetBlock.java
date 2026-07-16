@@ -28,7 +28,7 @@ public final class TalentTargetBlock implements TalentTarget {
             return null;
         }
         
-        return TalentContext.of(hitBlock);
+        return TalentContext.create(hitBlock);
     }
     
     @NotNull

@@ -1,8 +1,8 @@
 package me.hapyl.hariant.entity.damage;
 
+import me.hapyl.hariant.Colors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,8 +10,10 @@ import java.util.List;
 
 public class DeathMessageImpl implements DeathMessage {
     
-    private static final String PLACEHOLDER_PLAYER = "{player}";
-    private static final String PLACEHOLDER_KILLER = "{killer}";
+    static final String PLACEHOLDER_PLAYER = "{player}";
+    static final String PLACEHOLDER_KILLER = "{killer}";
+    
+    static final String DEFAULT_KILLER_SUFFIX = "[with help from {killer}]";
     
     private final Component withoutKiller;
     private final Component withKiller;
@@ -35,8 +37,8 @@ public class DeathMessageImpl implements DeathMessage {
         final String baseString = (template.substring(0, optionalStart) + template.substring(optionalEnd + 1)).trim();
         final String optionalString = template.substring(optionalStart + 1, optionalEnd).trim();
         
-        this.withoutKiller = Component.text(baseString, NamedTextColor.GRAY);
-        this.withKiller = Component.text(baseString, NamedTextColor.GRAY).appendSpace().append(Component.text(optionalString, NamedTextColor.GRAY));
+        this.withoutKiller = Component.text(baseString, Colors.GRAY);
+        this.withKiller = Component.text(baseString, Colors.GRAY).appendSpace().append(Component.text(optionalString, Colors.GRAY));
     }
     
     @NotNull
@@ -54,21 +56,21 @@ public class DeathMessageImpl implements DeathMessage {
         
         return message;
     }
-
+    
     @NotNull
     private static Component createAssistsComponent(@NotNull List<? extends DeathComponent> assists) {
         final TextComponent.Builder builder = Component.text();
-        builder.append(Component.text("(", NamedTextColor.DARK_GRAY));
+        builder.append(Component.text("(", Colors.DARK_GRAY));
         
         for (int i = 0; i < assists.size(); i++) {
             if (i != 0) {
-                builder.append(Component.text(", ", NamedTextColor.DARK_GRAY));
+                builder.append(Component.text(", ", Colors.DARK_GRAY));
             }
             
             builder.append(assists.get(i).asAssistComponent());
         }
         
-        return builder.append(Component.text(")", NamedTextColor.DARK_GRAY)).build();
+        return builder.append(Component.text(")", Colors.DARK_GRAY)).build();
     }
     
 }

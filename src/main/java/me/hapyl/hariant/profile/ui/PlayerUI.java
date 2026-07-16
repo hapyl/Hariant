@@ -4,21 +4,21 @@ import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.player.ScoreboardBuilder;
 import me.hapyl.eterna.module.player.tablist.Tablist;
-import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Ticking;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.VanillaTeamManager;
-import me.hapyl.hariant.util.Identified;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Scoreboard;
@@ -82,7 +82,7 @@ public final class PlayerUI implements Ticking {
         
         // Attributes
         builder.appendNewline();
-        builder.append(Component.text("ATTRIBUTES", NamedTextColor.GOLD, TextDecoration.BOLD));
+        builder.append(Component.text("ATTRIBUTES", Colors.GOLD, TextDecoration.BOLD));
         builder.appendNewline();
         
         for (AttributeType attributeType : AttributeType.values()) {
@@ -98,11 +98,11 @@ public final class PlayerUI implements Ticking {
         builder.appendNewline();
         
         // Modifiers
-        builder.append(Component.text("MODIFIERS", NamedTextColor.GOLD, TextDecoration.BOLD));
+        builder.append(Component.text("MODIFIERS", Colors.GOLD, TextDecoration.BOLD));
         builder.appendNewline();
         
         if (modifiers.isEmpty()) {
-            builder.append(Component.text("None!", NamedTextColor.DARK_GRAY));
+            builder.append(Component.text("None!", Colors.DARK_GRAY));
         }
         else {
             for (int i = 0; i < modifiers.size(); i++) {
@@ -113,18 +113,15 @@ public final class PlayerUI implements Ticking {
                 final AttributeModifier modifier = modifiers.get(i);
                 final HariantEntity applier = modifier.getApplier();
                 
-                builder.append(modifier.getName().color(NamedTextColor.YELLOW));
-                
-                if (applier != null) {
-                    builder.append(Component.text(" from %s".formatted(applier.toString()), NamedTextColor.DARK_GRAY));
-                }
+                builder.append(modifier.getName().color(Colors.YELLOW));
+                builder.append(Component.text(" from %s".formatted(applier.equals(player) ? "self" : applier.toString()), Colors.DARK_GRAY));
                 
                 builder.appendNewline();
                 
                 // Append duration
                 final int durationTimeLeft = modifier.currentTick();
                 
-                builder.append(Component.text(Tick.format(durationTimeLeft), NamedTextColor.GRAY));
+                builder.append(Component.text(Tick.format(durationTimeLeft), Colors.GRAY));
                 builder.appendNewline();
                 
                 // Append modifiers
@@ -135,7 +132,7 @@ public final class PlayerUI implements Ticking {
                     final double value = entry.value();
                     final boolean isBuff = value > 0;
                     
-                    final NamedTextColor valueColor = isBuff ? NamedTextColor.GREEN : NamedTextColor.RED;
+                    final TextColor valueColor = isBuff ? Colors.GREEN : Colors.RED;
                     
                     builder.append(
                             Component.empty()
@@ -144,7 +141,7 @@ public final class PlayerUI implements Ticking {
                                      .append(isBuff ? Component.text("+", valueColor) : Component.text("-", valueColor))
                                      .append(modifierType.format(Math.abs(value)).color(valueColor))
                                      .appendSpace()
-                                     .append(Component.text("(%s)".formatted(modifierType), NamedTextColor.DARK_GRAY))
+                                     .append(Component.text("(%s)".formatted(modifierType), Colors.DARK_GRAY))
                     );
                     builder.appendNewline();
                 });
@@ -165,7 +162,7 @@ public final class PlayerUI implements Ticking {
     
     private void updateScoreboard() {
         final ComponentList components = ComponentList.empty();
-        components.append(Component.text(this.getTodayFormatted(), NamedTextColor.DARK_GRAY));
+        components.append(Component.text(this.getTodayFormatted(), Colors.DARK_GRAY));
         components.append(Component.empty());
         
         this.formatter().formatScoreboard(profile, components);

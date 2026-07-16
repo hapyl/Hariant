@@ -2,10 +2,15 @@ package me.hapyl.hariant.weapon;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
+import me.hapyl.hariant.weapon.ability.AbilityDescriptionOnly;
+import me.hapyl.hariant.weapon.ability.AbilityType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -25,8 +30,10 @@ public class WeaponBow extends WeaponRange {
             )
             .asIcon();
     
-    public WeaponBow(@NotNull Key key, @NotNull NormalAttack normalAttackMelee, @NotNull NormalAttack normalAttackRanged) {
+    public WeaponBow(@NotNull Key key, @NotNull NormalAttack normalAttackMelee, @NotNull NormalAttackRanged normalAttackRanged) {
         super(key, Icon.ofMaterial(Material.BOW), normalAttackMelee, normalAttackRanged);
+        
+        this.setAbility(AbilityType.RIGHT_CLICK, new AbilityWeaponBowShoot(normalAttackRanged));
     }
     
     @Override
@@ -52,7 +59,7 @@ public class WeaponBow extends WeaponRange {
     
     @Override
     public final boolean hasCooldown(@NotNull HariantPlayer player) {
-        // Because of the reason above, call vanilla hasCooldown on BOW
+        // We don't care about the cooldown really, but to be consistent, get the actual BOW cooldown
         return player.getHandle().hasCooldown(Material.BOW);
     }
     
@@ -66,5 +73,26 @@ public class WeaponBow extends WeaponRange {
                 .addEnchant(Enchantment.INFINITY, 1)
                 .setUnbreakable()
                 .hideComponents();
+    }
+    
+    public static class AbilityWeaponBowShoot extends AbilityDescriptionOnly {
+        
+        AbilityWeaponBowShoot(@NotNull NormalAttack normalAttackRanged) {
+            super(
+                    Component.text("Shoot"),
+                    Component.empty()
+                             .append(Component.text("Shoot an arrow that deals "))
+                             .append(normalAttackRanged.getElementType().asComponentDamage())
+                             .append(Component.text("."))
+                             .appendNewline()
+                             .appendNewline()
+                             .append(Component.text("Fully charged shots "))
+                             .append(Component.text("always", Colors.WHITE, TextDecoration.UNDERLINED))
+                             .append(Component.text(" deal "))
+                             .append(EnumTerminology.CRITICAL_DAMAGE)
+                             .append(Component.text("."))
+            );
+        }
+        
     }
 }

@@ -3,6 +3,7 @@ package me.hapyl.hariant.ui;
 import me.hapyl.eterna.module.annotate.Mutates;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.task.HariantTickingTask;
@@ -17,10 +18,7 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.TextDisplay;
-import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
-import org.joml.AxisAngle4f;
-import org.joml.Vector3f;
 
 import java.util.Random;
 
@@ -51,7 +49,7 @@ public class ComponentDisplay {
             self.setTeleportDuration(1);
             self.setInterpolationDuration(1);
             self.setTransformation(MatrixUtils.scale(scale));
-            self.text(component);
+            self.text(component.shadowColor(NO_SHADOW));
             self.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
             self.setViewRange(16f);
         });
@@ -92,8 +90,8 @@ public class ComponentDisplay {
         
         new ComponentDisplay(
                 Component.empty()
-                         .append(Component.text(MathFont.format((int) damage), style).shadowColor(NO_SHADOW))
-                         .append(critical ? Component.text("‼", style).shadowColor(NO_SHADOW) : Component.empty()),
+                         .append(Component.text(MathFont.format((int) damage), style))
+                         .append(critical ? HariantConstants.CHARACTER_CRITICAL_DAMAGE.style(style) : Component.empty()),
                 ComponentDisplayAnimation.ofFalloff(),
                 20,
                 1.75f

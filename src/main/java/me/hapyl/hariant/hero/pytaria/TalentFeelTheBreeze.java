@@ -13,38 +13,40 @@ import me.hapyl.hariant.talent.TalentRegistry;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
-import me.hapyl.hariant.talent.ultimate.TalentUltimateResource;
+import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.executor.Executable;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 public final class TalentFeelTheBreeze extends TalentUltimate {
     
-    @DisplayField public final Decimal numberOfBees = Decimal.ofValue(10);
+    public final @DisplayField Decimal numberOfBees = Decimal.ofValue(5);
+    public final @DisplayField Decimal delayBeforeBeesCanTarget = Decimal.ofSeconds(1.5f);
+    public final @DisplayField Decimal beeGivesUpAfterChasingFor = Decimal.ofSeconds(10);
+    public final @DisplayField Decimal beeTargetLossCooldown = Decimal.ofSeconds(2);
     
-    @DisplayField public final Decimal maxStrayDistance = Decimal.ofValue(16);
-    @DisplayField public final Decimal stingDistance = Decimal.ofValue(1.5);
-    @DisplayField public final Decimal enemyLookupRadius = Decimal.ofValue(5);
+    public final @DisplayField Decimal maxStrayDistance = Decimal.ofValue(16);
+    public final @DisplayField Decimal stingDistance = Decimal.ofValue(1.5);
+    public final @DisplayField Decimal enemyLookupRadius = Decimal.ofValue(5);
     
-    @DisplayField public final AttributeScaling beeDamage = AttributeScaling.of(AttributeType.ATTACK, 124);
-    @DisplayField public final AttributeScaling beeDamageIvy = AttributeScaling.of(AttributeType.ATTACK, 166);
+    public final @DisplayField AttributeScaling beeDamage = AttributeScaling.create(AttributeType.ATTACK, 164);
+    public final @DisplayField AttributeScaling beeDamageIvy = AttributeScaling.create(AttributeType.ATTACK, 204);
     
-    @DisplayField public final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 25);
+    public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 100);
     
     public TalentFeelTheBreeze(@NotNull Key key) {
-        super(key, Component.text("Feel the Breeze"), Icon.ofTexture("d4579f1ea3864269c2148d827c0887b0c5ed43a975b102a01afb644efb85ccfd"), TalentUltimateResource.ENERGY, 60);
+        super(key, Component.text("Feel the Breeze"), Icon.ofTexture("d4579f1ea3864269c2148d827c0887b0c5ed43a975b102a01afb644efb85ccfd"), UltimateResourceType.ENERGY, 60);
         
         this.setCooldownSeconds(20);
         
         this.setDescription(
                 Component.empty()
                          .append(Component.text("Summon a swarm of "))
-                         .append(Component.text("bees", NamedTextColor.GOLD))
+                         .append(Component.text("bees", Colors.GOLD))
                          .append(Component.text(" that float around "))
-                         .append(Component.text("Pytaria", NamedTextColor.LIGHT_PURPLE))
+                         .append(Component.text("Pytaria", Colors.LIGHT_PURPLE))
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
@@ -62,7 +64,7 @@ public final class TalentFeelTheBreeze extends TalentUltimate {
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("The swarm lasts until all the bees die and Pytaria cannot gain Energy while the swarm is alive.", NamedTextColor.DARK_GRAY))
+                         .append(Component.text("The swarm lasts until all the bees die and Pytaria cannot gain Energy while the swarm is alive.", Colors.DARK_GRAY))
         );
     }
     

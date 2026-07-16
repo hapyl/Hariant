@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Represents a death message that will be shown upon players death.
  * <p>
- *     Any death message must follow the specific pattern, which includes:
+ * Any death message must follow the specific pattern, which includes:
  *     <ul>
  *         <li>{@code {player}} tag that will be replaced with the player's name.
  *         <li>Optional killer part, which is wrapped in between {@code []} and must contain {@code {killer}}.
@@ -30,12 +30,12 @@ public interface DeathMessage {
     }
     
     @NotNull
-    static DeathMessage createWithDefaultKiller(@NotNull String base) {
-        class Holder {
-            private static final String DEFAULT_KILLER_SUFFIX = "[with help from {killer}]";
+    static DeathMessage createWithDefaultKiller(@NotNull String base) throws IllegalArgumentException {
+        if (base.contains(DeathMessageImpl.PLACEHOLDER_KILLER)) {
+            throw new IllegalArgumentException("Death message must not already contain %s!".formatted(DeathMessageImpl.PLACEHOLDER_KILLER));
         }
         
-        return create(base + " " + Holder.DEFAULT_KILLER_SUFFIX);
+        return create(base + " " + DeathMessageImpl.DEFAULT_KILLER_SUFFIX);
     }
     
 }

@@ -3,9 +3,6 @@ package me.hapyl.hariant.security;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.database.DatabaseCollection;
 import me.hapyl.hariant.database.async.SecurityDatabaseAsyncCollection;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

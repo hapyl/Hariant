@@ -2,7 +2,9 @@ package me.hapyl.hariant.game;
 
 import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.text.TimeFormat;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.HariantGameInstanceStateEvent;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
 import me.hapyl.hariant.game.type.GameType;
 import me.hapyl.hariant.profile.PlayerProfile;
@@ -11,7 +13,6 @@ import me.hapyl.hariant.team.TeamData;
 import me.hapyl.hariant.team.TeamDataMap;
 import me.hapyl.hariant.util.HexId;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 public class GameInstanceImpl implements GameInstance {
@@ -43,6 +44,9 @@ public class GameInstanceImpl implements GameInstance {
     @Override
     public void setState(@NotNull GameInstanceState state) {
         this.state = state;
+        
+        // Call event
+        new HariantGameInstanceStateEvent(this, state).callEvent();
     }
     
     @NotNull
@@ -85,6 +89,9 @@ public class GameInstanceImpl implements GameInstance {
     @Override
     public void tick() {
         this.timeLeft--;
+        
+        // Tick battleground
+        this.battleground.tick();
     }
     
     @Override
@@ -110,14 +117,14 @@ public class GameInstanceImpl implements GameInstance {
     public void formatScoreboard(@NotNull PlayerProfile profile, @NotNull ComponentList components) {
         components.append(
                 Component.empty()
-                         .append(Component.text("ᴍᴏᴅᴇ: ", NamedTextColor.WHITE))
-                         .append(gameType.getName().color(NamedTextColor.GOLD))
+                         .append(Component.text("ᴍᴏᴅᴇ: ", Colors.WHITE))
+                         .append(gameType.getName().color(Colors.GOLD))
         );
         
         components.append(
                 Component.empty()
-                         .append(Component.text("ᴛɪᴍᴇ ʟᴇꜰᴛ: ", NamedTextColor.WHITE))
-                         .append(Component.text(TimeFormat.format(this.getTimeLeft() * 50L, TimeFormat.Part.MINUTES, TimeFormat.Part.SECONDS), NamedTextColor.GOLD))
+                         .append(Component.text("ᴛɪᴍᴇ ʟᴇꜰᴛ: ", Colors.WHITE))
+                         .append(Component.text(TimeFormat.format(this.getTimeLeft() * 50L, TimeFormat.Part.MINUTES, TimeFormat.Part.SECONDS), Colors.GOLD))
         );
         
         components.appendEmpty();

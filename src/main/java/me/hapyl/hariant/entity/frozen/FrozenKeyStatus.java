@@ -1,7 +1,7 @@
 package me.hapyl.hariant.entity.frozen;
 
+import me.hapyl.hariant.Colors;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
@@ -9,10 +9,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class FrozenKeyStatus {
     
-    private static final Style STYLE_CURRENT = Style.style(NamedTextColor.GRAY, TextDecoration.UNDERLINED);
-    private static final Style STYLE_NOT_CURRENT = Style.style(NamedTextColor.DARK_GRAY);
-    private static final Style STYLE_CORRECT = Style.style(NamedTextColor.GREEN);
-    private static final Style STYLE_INCORRECT = Style.style(NamedTextColor.RED);
+    private static final Style STYLE_CURRENT = Style.style(Colors.GRAY, TextDecoration.UNDERLINED);
+    private static final Style STYLE_NOT_CURRENT = Style.style(Colors.DARK_GRAY);
+    private static final Style STYLE_CORRECT = Style.style(Colors.GREEN);
+    private static final Style STYLE_INCORRECT = Style.style(Colors.RED);
     
     private final FrozenKey key;
     private Boolean status;
@@ -48,4 +48,5 @@ public class FrozenKeyStatus {
                     : STYLE_INCORRECT
         );
     }
+    
 }

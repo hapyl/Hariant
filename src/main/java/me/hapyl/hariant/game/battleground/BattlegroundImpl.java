@@ -4,34 +4,44 @@ import com.google.common.collect.Lists;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.HariantConstants;
+import me.hapyl.hariant.annotate.AutoRegisteredListener;
+import me.hapyl.hariant.game.battleground.feature.BattlegroundFeature;
+import me.hapyl.hariant.inventory.drop.Amount;
 import me.hapyl.hariant.inventory.drop.DropTable;
+import me.hapyl.hariant.inventory.drop.DropTier;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.ImmutableLocation;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+@AutoRegisteredListener
 public class BattlegroundImpl implements Battleground {
     
     private final Component name;
     private final Icon icon;
     private final List<ImmutableLocation> spawnLocations;
+    private final List<BattlegroundFeature> features;
     
     private DropTable dropTable;
     private Component description;
     private int timeBeforePlayersReveal;
     
-    BattlegroundImpl(@NotNull Component name, @NotNull Icon icon) {
+    public BattlegroundImpl(@NotNull Component name, @NotNull Icon icon) {
         this.name = name;
         this.icon = icon;
         this.spawnLocations = Lists.newArrayList();
         this.dropTable = DropTable.empty();
         this.description = Described.defaultValue();
-        this.timeBeforePlayersReveal = 20;
+        this.timeBeforePlayersReveal = 100;
+        this.features = Lists.newArrayList();
+        
+        AutoRegisteredListener.Registry.register(this);
     }
     
     @NotNull
@@ -53,8 +63,13 @@ public class BattlegroundImpl implements Battleground {
     
     @NotNull
     @Override
-    public List<ImmutableLocation> getSpawnLocations() {
+    public List<? extends ImmutableLocation> getSpawnLocations() {
         return spawnLocations;
+    }
+    
+    @Override
+    public @NotNull List<? extends BattlegroundFeature> getFeatures() {
+        return features;
     }
     
     @NotNull
@@ -65,28 +80,55 @@ public class BattlegroundImpl implements Battleground {
         builder.addLore();
         
         // Append description
-        builder.addWrappedLore(description);
+        builder.addWrappedLore(description, HariantConstants.COMPONENT_STYLER_DESCRIPTION);
         builder.addLore();
         
         // Append features
-        // TODO @Feb 15, 2026 (xanyjl) ->
+        if (!features.isEmpty()) {
+            builder.addLore(Component.text("Features:", Colors.DEFAULT_COLOR));
+            
+            features.forEach(feature -> {
+                builder.addLore(Component.space().append(feature.getName().color(Colors.SUCCESS)));
+                builder.addWrappedLore(feature.getDescription(), HariantConstants.COMPONENT_STYLER_DESCRIPTION);
+                builder.addLore();
+            });
+        }
         
         // Append drops
-        final List<DropTable.Content> dropTableContents = dropTable.getContents();
+        final Map<DropTier, List<DropTable.Content>> dropTableContents = dropTable.getContentsTiered();
         
-        builder.addLore(Component.text("Possible Drops:", NamedTextColor.GOLD));
+        builder.addLore(Component.text("Possible Drops:", Colors.DEFAULT_COLOR));
         
-        dropTableContents.forEach(droppable -> {
+        dropTableContents.forEach((dropTier, contents) -> {
             builder.addLore(
                     Component.empty()
-                             .append(Component.text("  "))
-                             .append(droppable.getAmount().asComponent().color(TextColor.color(0x5fabef)))
-                             .append(Component.text(" "))
-                             .append(droppable.getName())
-                             .append(Component.text("  "))
-                             .append(droppable.getDropChanceFormatted().color(NamedTextColor.DARK_GRAY))
+                             .appendSpace()
+                             .append(dropTier.asComponent().decorate(TextDecoration.BOLD))
+                             .append(Component.text(" (%.0f%%)".formatted(dropTier.threshold() * 100), Colors.DARK_GRAY))
             );
+            
+            contents.forEach(content -> {
+                final Amount amount = content.getAmount();
+                
+                builder.addLore(
+                        Component.empty()
+                                 .append(Component.text("  ● ", Colors.DARK_GRAY))
+                                 .append(content.getName())
+                                 .appendSpace()
+                                 .append(amount.amount() == 1 ? Component.empty() : amount.asComponent().color(Colors.GRAY))
+                );
+            });
+            
+            builder.addLore();
         });
+        
+        // Append disclaimer
+        builder.addWrappedLore(
+                Component.empty()
+                         .append(Component.text("At least ", Colors.DARK_GRAY))
+                         .append(dropTable.getRolls().asComponent().color(Colors.DARK_GRAY))
+                         .append(Component.text(" non-guaranteed items is guaranteed to drop!", Colors.DARK_GRAY))
+        );
         
         return builder;
     }
@@ -106,6 +148,17 @@ public class BattlegroundImpl implements Battleground {
         return timeBeforePlayersReveal;
     }
     
+    @Override
+    public void tick() {
+        // Tick features
+        this.features.forEach(BattlegroundFeature::tick);
+    }
+    
+    protected void setFeatures(@NotNull BattlegroundFeature... features) {
+        this.features.clear();
+        this.features.addAll(Arrays.asList(features));
+    }
+    
     protected void setSpawnLocations(@NotNull ImmutableLocation... locations) {
         this.spawnLocations.clear();
         this.spawnLocations.addAll(Arrays.asList(locations));
@@ -114,4 +167,5 @@ public class BattlegroundImpl implements Battleground {
     protected void setTimeBeforePlayersReveal(int timeBeforePlayersReveal) {
         this.timeBeforePlayersReveal = timeBeforePlayersReveal;
     }
+    
 }

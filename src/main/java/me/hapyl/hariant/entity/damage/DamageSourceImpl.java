@@ -1,14 +1,17 @@
 package me.hapyl.hariant.entity.damage;
 
-import me.hapyl.eterna.module.annotate.Immutable;
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 public class DamageSourceImpl implements DamageSource {
     
@@ -17,22 +20,18 @@ public class DamageSourceImpl implements DamageSource {
     @NotNull private final DamageSourceIdentity identity;
     @NotNull private final ElementType elementType;
     @NotNull private final DamageType damageType;
-    @NotNull private final List<DamageComponent> damageComponents;
-    @NotNull private final List<DamageFlag> damageFlags;
+    
+    @NotNull @Unmodifiable private final List<? extends DamageComponent> damageComponents;
+    @NotNull @Unmodifiable private final Set<? extends DamageFlag> damageFlags;
     
     private final double damage;
     private final double elementUnits;
     
-    public DamageSourceImpl(
-            @NotNull DamageSourceIdentity identity,
-            @Nullable HariantEntity source,
-            @NotNull DamageType damageType,
-            @NotNull ElementType elementType,
-            @NotNull @Immutable List<DamageComponent> damageComponents,
-            @NotNull @Immutable List<DamageFlag> damageFlags,
-            final double damage,
-            final double elementUnits
-    ) {
+    private final Key cooldownKey;
+    private final int cooldown;
+    
+    // #norender
+    public DamageSourceImpl(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents, @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags, final double damage, final double elementUnits, @NotNull Key cooldownKey, int cooldown) {
         this.identity = identity;
         this.source = source;
         this.elementType = elementType;
@@ -41,18 +40,24 @@ public class DamageSourceImpl implements DamageSource {
         this.damageFlags = damageFlags;
         this.damage = damage;
         this.elementUnits = elementUnits;
+        this.cooldownKey = cooldownKey;
+        this.cooldown = cooldown;
     }
+    
+    public DamageSourceImpl(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents, @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags, final double damage, final double elementUnits) {
+        this(identity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, Key.empty(), 0);
+    }
+    
+    public DamageSourceImpl(@NotNull DamageSourceIdentity damageSourceIdentity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull List<? extends DamageComponent> damageComponents, @NotNull Set<DamageFlag> damageFlags, double damage, double elementUnits, @NotNull Cooldown cooldown) {
+        this(damageSourceIdentity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, cooldown.getCooldownKey(), cooldown.getCooldown());
+    }
+    
+    // #render
     
     @NotNull
     @Override
     public DamageSourceIdentity getIdentity() {
         return identity;
-    }
-    
-    @Nullable
-    @Override
-    public HariantEntity getSource() {
-        return source;
     }
     
     @NotNull
@@ -61,9 +66,26 @@ public class DamageSourceImpl implements DamageSource {
         return elementType;
     }
     
+    @Nullable
+    @Override
+    public HariantEntity getSource() {
+        return source;
+    }
+    
     @Override
     public double getElementUnits() {
         return elementUnits;
+    }
+    
+    @NonNull
+    @Override
+    public Key getCooldownKey() {
+        return cooldownKey;
+    }
+    
+    @Override
+    public int getCooldown() {
+        return cooldown;
     }
     
     @NotNull
@@ -72,15 +94,13 @@ public class DamageSourceImpl implements DamageSource {
         return damageType;
     }
     
-    @NotNull
     @Override
-    public List<DamageComponent> getDamageComponents() {
+    public @NotNull List<? extends DamageComponent> getDamageComponents() {
         return damageComponents;
     }
     
-    @NotNull
     @Override
-    public List<DamageFlag> getDamageFlags() {
+    public @NotNull Set<? extends DamageFlag> getDamageFlags() {
         return damageFlags;
     }
     
@@ -94,16 +114,4 @@ public class DamageSourceImpl implements DamageSource {
         return damageFlags.contains(damageFlag);
     }
     
-    @Override
-    public String toString() {
-        return "DamageSourceImpl{" +
-               "source=" + source +
-               ", elementType=" + elementType +
-               ", damageType=" + damageType +
-               ", damageComponents=" + damageComponents.stream().map(DamageComponent::identify).collect(Collectors.joining(", ")) +
-               ", damageFlags=" + damageFlags +
-               ", damage=" + damage +
-               ", elementUnits=" + elementUnits +
-               '}';
-    }
 }

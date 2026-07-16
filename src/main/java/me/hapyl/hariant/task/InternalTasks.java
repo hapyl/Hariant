@@ -9,7 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.BiFunction;
 
 /**
- * Prefer {@link HariantTask} unless you know exactly what you're doing.
+ * Represents internal tasks helper class, but unless you know that you're doing, use proper implementations!
+ *
+ * @see HariantTask
+ * @see HariantTickingTask
+ * @see HariantTickingStepTask
+ * @see HariantDurationTask
  */
 public final class InternalTasks {
     
@@ -25,7 +30,7 @@ public final class InternalTasks {
     }
     
     public static void now(@NotNull Runnable runnable) {
-        runTask(runnable, (BukkitRunnable::runTask));
+        runTask(runnable, BukkitRunnable::runTask);
     }
     
     private static void runTask(@NotNull Runnable runnable, @NotNull BiFunction<BukkitRunnable, Plugin, BukkitTask> function) {

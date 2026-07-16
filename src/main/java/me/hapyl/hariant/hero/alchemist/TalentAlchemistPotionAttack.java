@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.alchemist;
 
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
@@ -18,5 +19,7 @@ public final class TalentAlchemistPotionAttack extends TalentAlchemistPotionAttr
                 Decimal.ofPercentage(100),
                 Decimal.ofSeconds(10)
         );
+        
+        setTalentType(TalentType.ENHANCE);
     }
 }

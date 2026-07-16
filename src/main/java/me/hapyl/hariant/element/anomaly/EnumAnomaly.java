@@ -16,9 +16,7 @@ public enum EnumAnomaly implements ElementalAnomaly {
     FROZEN(new ElementalAnomalyFrozen()),
     INFESTED(new ElementalAnomalyInfested()),
     SHOCK(new ElementalAnomalyShock()),
-    INTANGIBILITY(new ElementalAnomalyIntangibility()),
-    
-    ;
+    INTANGIBILITY(new ElementalAnomalyIntangibility());
     
     private final ElementalAnomaly anomaly;
     
@@ -30,6 +28,18 @@ public enum EnumAnomaly implements ElementalAnomaly {
     @Override
     public Key getKey() {
         return anomaly.getKey();
+    }
+    
+    @NotNull
+    @Override
+    public Component getPrefix() {
+        return anomaly.getPrefix();
+    }
+    
+    @NotNull
+    @Override
+    public Component getPrefixStyled() {
+        return anomaly.getPrefixStyled();
     }
     
     @NotNull

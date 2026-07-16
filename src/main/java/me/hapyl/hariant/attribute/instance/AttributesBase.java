@@ -22,4 +22,10 @@ public interface AttributesBase {
     }
     
     void set(@NotNull AttributeType attributeType, double value);
+    
+    void add(@NotNull AttributeType attributeType, double value);
+    
+    default void subtract(@NotNull AttributeType attributeType, double value) {
+        add(attributeType, -value);
+    }
 }

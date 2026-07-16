@@ -3,7 +3,6 @@ package me.hapyl.hariant.talent.target;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.TalentContextImpl;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.block.Block;
@@ -64,7 +63,7 @@ public interface TalentTarget {
     
     @Deprecated // Not implemented
     @NotNull
-    static TalentTarget targetEntityDotProduct(double maxDistance, double dot, @NotNull Predicate<HariantEntity> filter) {
+    static TalentTarget targetEntityDotProduct(double maxDistance, double dot, @NotNull Predicate<HariantEntity> filter) throws NotImplementedException {
         throw new NotImplementedException();
     }
     

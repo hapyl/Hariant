@@ -1,15 +1,16 @@
 package me.hapyl.hariant.hero.alchemist;
 
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
+import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Color;
 import org.bukkit.Sound;
@@ -21,16 +22,17 @@ import static org.bukkit.Sound.BLOCK_BREWING_STAND_BREW;
 
 public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion implements Listener {
     
-    @DisplayField private final Decimal healing = Decimal.ofPercentage(30);
-    @DisplayField private final Decimal extraHealing = Decimal.ofPercentage(10);
+    @DisplayField private final Decimal healing = Decimal.ofPercentage(15);
+    @DisplayField private final Decimal extraHealing = Decimal.ofPercentage(15);
     
     TalentAlchemistPotionHealing(@NotNull TalentAbyssalBottle talent) {
         super(talent, "healing", Component.text("Potion of Healing"), Color.fromRGB(209, 13, 19), 20);
         
         // This is also used for extra healing delay
-        this.setDurationSeconds(3);
+        setDurationSeconds(3);
+        setTalentType(TalentType.SUPPORT);
         
-        this.setDescription(
+        setDescription(
                 Component.empty()
                          .append(Component.text("Heals your for "))
                          .append(healing)
@@ -40,7 +42,7 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("If you "))
-                         .append(Component.text("don't take", NamedTextColor.GRAY, TextDecoration.UNDERLINED))
+                         .append(Component.text("don't take", Colors.GRAY, TextDecoration.UNDERLINED))
                          .append(Component.text(" damage in "))
                          .append(this.getDurationFormatted())
                          .append(Component.text(" after using this potion, heal for an additional "))
@@ -58,7 +60,7 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
         final double maxHealth = player.getMaxHealth();
         
         // Heal the player
-        player.heal(HealingSource.create(maxHealth * healing.doubleValue()));
+        player.heal(HealingSource.create(maxHealth * healing.doubleValue(), TalentAlchemistPotionHealing.this));
         
         // Schedule extra healing
         return new ExtraHealingPotionInstance(player);
@@ -89,12 +91,12 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
     
     public class ExtraHealingPotionInstance extends AlchemistPotionInstance {
         
-        private final double extraHealing;
+        private final HealingSource extraHealingSource;
         
         ExtraHealingPotionInstance(@NotNull HariantPlayer player) {
             super(player, TalentAlchemistPotionHealing.this);
             
-            this.extraHealing = TalentAlchemistPotionHealing.this.extraHealing.doubleValue() * player.getMaxHealth();
+            this.extraHealingSource = HealingSource.create(extraHealing.doubleValue() * player.getMaxHealth(), Component.text("Extra Healing"));
         }
         
         @Override
@@ -103,11 +105,11 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
             
             // Heal the player
             if (this.currentTick() == 0) {
-                player.heal(HealingSource.create(extraHealing));
+                player.heal(extraHealingSource);
                 
                 player.sendTitleSubtitle(
-                        Component.text("\uD83D\uDC9E", NamedTextColor.DARK_GREEN),
-                        Component.text("ʜᴇᴀʟᴇᴅ!", NamedTextColor.GREEN),
+                        Component.text("\uD83D\uDC9E", Colors.DARK_GREEN),
+                        Component.text("ʜᴇᴀʟᴇᴅ!", Colors.GREEN),
                         5, 10, 5
                 );
                 
@@ -120,8 +122,8 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
         public void cancel() {
             // Fx
             player.sendTitleSubtitle(
-                    Component.text("\uD83D\uDC9E", NamedTextColor.DARK_RED),
-                    Component.text("ʜᴇᴀʟɪɴɢ ᴄᴀɴᴄᴇʟʟᴇᴅ, ʏᴏᴜ ᴛᴏᴏᴋ ᴅᴀᴍᴀɢᴇ!", NamedTextColor.RED),
+                    Component.text("\uD83D\uDC9E", Colors.DARK_RED),
+                    Component.text("ʜᴇᴀʟɪɴɢ ᴄᴀɴᴄᴇʟʟᴇᴅ, ʏᴏᴜ ᴛᴏᴏᴋ ᴅᴀᴍᴀɢᴇ!", Colors.RED),
                     5, 10, 5
             );
             

@@ -5,9 +5,12 @@ import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
+import me.hapyl.hariant.menu.Menu;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import org.bson.Document;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 
 public interface Setting<I> extends Keyed, Named, Described, Icon {
@@ -29,13 +32,22 @@ public interface Setting<I> extends Keyed, Named, Described, Icon {
     ItemBuilder createBuilder();
     
     @NotNull
+    SettingCategory getCategory();
+    
+    @NotNull
     I defaultValue();
     
     @NotNull
     I getValue(@NotNull Document document);
     
-    default void setValue(@NotNull Document document, @NotNull I value) {
-        document.put(this.getKeyAsString(), value);
-    }
+    void setValue(@NotNull Document document, @NotNull I value);
+    
+    @NotNull
+    ItemBuilder menuButton(@NotNull SettingEntry settingEntry);
+    
+    void menuClick(@NotNull Player player, @NotNull SettingEntry settingEntry, @NotNull Menu menuSettings, @NotNull ClickType clickType);
+    
+    @NotNull
+    ItemBuilder menuFormat(@NotNull SettingEntry settingEntry, @NotNull ItemBuilder builder);
     
 }

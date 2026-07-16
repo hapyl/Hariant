@@ -6,12 +6,14 @@ import me.hapyl.eterna.module.util.Enums;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.HariantPlugin;
+import me.hapyl.hariant.achievement.AchievementEntry;
 import me.hapyl.hariant.database.problem.*;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.database.serialize.MongoSerializable;
+import me.hapyl.hariant.dialog.DialogDatabaseEntry;
 import me.hapyl.hariant.hero.HeroDirectory;
 import me.hapyl.hariant.inventory.HariantInventory;
-import me.hapyl.hariant.level.LevelEntry;
+import me.hapyl.hariant.experience.LevelEntry;
 import me.hapyl.hariant.profile.setting.SettingEntry;
 import me.hapyl.hariant.security.KickReason;
 import me.hapyl.hariant.task.InternalTasks;
@@ -23,15 +25,22 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 public sealed class PlayerDatabase permits PlayerDatabaseView {
     
+    // *-* Public Entries *-* //
+    
     public final HariantInventory inventory;
-    public final HeroDirectory hero;
+    public final HeroDirectory heroDirectory;
     public final SettingEntry settings;
     public final LevelEntry level;
+    public final DialogDatabaseEntry dialog;
+    public final AchievementEntry achievements;
+    
+    // *-* Private Fields *-* //
     
     private final Database database;
     private final UUID uuid;
@@ -72,9 +81,11 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
          */
         
         this.inventory = deserialize("inventory", HariantInventory.class, problemReporter);
-        this.hero = deserialize("hero", HeroDirectory.class, problemReporter);
+        this.heroDirectory = deserialize("hero", HeroDirectory.class, problemReporter);
         this.settings = deserialize("setting", SettingEntry.class, problemReporter);
         this.level = deserialize("level", LevelEntry.class, problemReporter);
+        this.dialog = deserialize("dialog", DialogDatabaseEntry.class, problemReporter);
+        this.achievements = deserialize("achievements", AchievementEntry.class, problemReporter);
         
         // Handle problems
         problemReporter.handle(problem -> {
@@ -88,16 +99,16 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
             // `SEVERE` problems throw error, and if player is online, kicks them
             else if (problemType == ProblemType.SEVERE) {
                 // If the player is online, kick them
-                if (getPlayer() instanceof Player onlinePlayer) {
+                this.getPlayer().ifPresent(player -> {
                     Hariant.getSecurityManager().kick(
-                            onlinePlayer,
+                            player,
                             KickReason.create(
-                                    onlinePlayer.getUniqueId(),
+                                    uuid,
                                     "There was an error loading your database, try logging again. If the issue persists, contact support.",
                                     problem.toString()
                             )
                     );
-                }
+                });
                 
                 throw new RuntimeException(problem.toString());
             }
@@ -109,9 +120,13 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
         return root;
     }
     
-    @NotNull
-    public OfflinePlayer getPlayer() {
-        return Bukkit.getOfflinePlayer(uuid);
+    /**
+     * Gets an <b>online</b> player instance for whom this database belongs to.
+     *
+     * @return a player wrapped in an optional, or an empty optional.
+     */
+    public @NotNull Optional<Player> getPlayer() {
+        return Optional.ofNullable(Bukkit.getPlayer(uuid));
     }
     
     @NotNull
@@ -129,6 +144,10 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
     }
     
     public void save() {
+        this.save(true);
+    }
+    
+    public void save(boolean async) {
         root.append("last_known_name", Bukkit.getOfflinePlayer(uuid).getName());
         root.append("last_online", System.currentTimeMillis());
         
@@ -153,19 +172,38 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
             }
         });
         
-        // Save asynchronously
-        InternalTasks.asynchronously(() -> {
-            database.getCollection(DatabaseCollection.PLAYERS).replaceOne(filter, root);
-        });
+        // Save
+        final Runnable runnable = () -> database.getCollection(DatabaseCollection.PLAYERS).replaceOne(filter, root);
+        
+        if (async) {
+            InternalTasks.asynchronously(runnable);
+        }
+        else {
+            runnable.run();
+        }
     }
     
     @NotNull
     public String getName() {
-        return root.get("last_known_name", "");
+        // Using lazy initialization here
+        String name = root.get("last_known_name", String.class);
+        
+        if (name == null) {
+            final String offlineName = Bukkit.getOfflinePlayer(uuid).getName();
+            
+            if (offlineName != null) {
+                root.put("last_known_name", name = offlineName);
+            }
+            else {
+                name = "";
+            }
+        }
+        
+        return name;
     }
     
     private <E extends PlayerDatabaseEntry> E deserialize(@NotNull String parent, @NotNull Class<E> clazz, @NotNull ProblemReporter problemReporter) {
-        final E deserialize = MongoSerializable.deserialize(parent, clazz, this, root, problemReporter);
+        final E deserialize = MongoSerializable.Deserializer.deserialize(parent, clazz, this, root, problemReporter);
         
         // Add to the list for serialization
         entries.add(deserialize);

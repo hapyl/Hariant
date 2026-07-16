@@ -6,7 +6,7 @@ import me.hapyl.hariant.util.ImmutableLocation;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 
-public class BattlegroundWinery extends BattlegroundImpl {
+public final class BattlegroundWinery extends BattlegroundImpl {
     BattlegroundWinery() {
         super(Component.text("Winery `Drunk Cat`"), Icon.ofMaterial(Material.SWEET_BERRIES));
         
