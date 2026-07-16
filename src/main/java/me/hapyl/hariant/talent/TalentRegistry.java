@@ -8,6 +8,10 @@ import me.hapyl.hariant.hero.archer.*;
 import me.hapyl.hariant.hero.blast_knight.*;
 import me.hapyl.hariant.hero.inferno.*;
 import me.hapyl.hariant.hero.mage.*;
+import me.hapyl.hariant.hero.ninja.HeroNinja;
+import me.hapyl.hariant.hero.ninja.TalentHappoShuriken;
+import me.hapyl.hariant.hero.ninja.TalentKemuridama;
+import me.hapyl.hariant.hero.ninja.TalentShunshin;
 import me.hapyl.hariant.hero.nyx.*;
 import me.hapyl.hariant.hero.pytaria.*;
 import me.hapyl.hariant.hero.shark.*;
@@ -106,7 +110,14 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentBubbleTrap BUBBLE_TRAP;
     public static final TalentApexPredator APEX_PREDATOR;
     public static final TalentSharknado SHARKNADO;
-    
+
+    /**
+     * {@link HeroNinja}
+     */
+    public static final TalentHappoShuriken HAPPO_SHURIKEN;
+    public static final TalentKemuridama KEMURIDAMA;
+    public static final TalentShunshin SHUNSHIN;
+
     private static final StaticRegistryMap<Talent> REGISTRY;
     private static final TalentUltimate DUMMY_ULTIMATE;
     
@@ -168,6 +179,10 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         BUBBLE_TRAP = REGISTRY.register("bubble_trap", TalentBubbleTrap::new);
         APEX_PREDATOR = REGISTRY.register("apex_predator", TalentApexPredator::new);
         SHARKNADO = REGISTRY.register("sharknado", TalentSharknado::new);
+
+        HAPPO_SHURIKEN = REGISTRY.register("happo_shuriken", TalentHappoShuriken::new);
+        KEMURIDAMA = REGISTRY.register("kemuridama", TalentKemuridama::new);
+        SHUNSHIN = REGISTRY.register("shunshin", TalentShunshin::new);
     }
     
     @NotNull
