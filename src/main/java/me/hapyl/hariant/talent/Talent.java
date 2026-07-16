@@ -52,8 +52,8 @@ public abstract class Talent
     private final String identity;
     private final Icon icon;
     
-    @NotNull private Component description;
-    @NotNull private TalentType talentType;
+    private @NotNull Component description;
+    private @NotNull TalentType talentType;
     
     private int cooldown;
     private int duration;

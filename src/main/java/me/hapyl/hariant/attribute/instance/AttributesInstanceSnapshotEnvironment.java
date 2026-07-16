@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class AttributesInstanceSnapshotEnvironment implements AttributesInstanceSnapshot {
@@ -48,11 +47,6 @@ public final class AttributesInstanceSnapshotEnvironment implements AttributesIn
     
     @Override
     public boolean removeModifier(@NotNull Key key) {
-        return false;
-    }
-    
-    @Override
-    public boolean removeModifiers(@NotNull Predicate<AttributeModifier> filter) {
         return false;
     }
     

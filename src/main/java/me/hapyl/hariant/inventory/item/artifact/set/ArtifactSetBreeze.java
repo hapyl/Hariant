@@ -94,6 +94,10 @@ public final class ArtifactSetBreeze extends ArtifactSet implements Listener {
         final double critDamageIncreaseStacks = (int) (healthLostOfMaxHealth / healthLostPercentage.doubleValue());
         final double critDamageIncrease = fourPieceCritDamageIncrease.doubleValue() * critDamageIncreaseStacks;
         
+        if (critDamageIncreaseStacks == 0) {
+            return;
+        }
+        
         final AttributesInstance attributes = player.getAttributes();
         final ModifierFourPiece previousModifier = attributes.getModifier(ModifierFourPiece.class).orElse(null);
         

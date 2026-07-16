@@ -52,7 +52,7 @@ public class ElementData implements ElementHandler, Ticking, Resettable {
     
     @Override
     public double getElementalUnit(@NotNull ElementType elementType) {
-        return elementUnits.getOrDefault(elementType, 0.0);
+        return elementUnits.computeIfAbsent(elementType, _ -> 0.0);
     }
     
     @Override

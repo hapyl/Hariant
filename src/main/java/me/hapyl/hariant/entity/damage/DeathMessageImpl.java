@@ -26,7 +26,6 @@ public class DeathMessageImpl implements DeathMessage {
             throw new IllegalArgumentException("Template must contain `%s`!".formatted(PLACEHOLDER_KILLER));
         }
         
-        // Split template into two strings and just combine on deathMessage()
         final int optionalStart = template.indexOf('[');
         final int optionalEnd = template.indexOf(']');
         
@@ -34,13 +33,12 @@ public class DeathMessageImpl implements DeathMessage {
             throw new IllegalArgumentException("Template must contain optional part!");
         }
         
-        // FIXME (xanyjl @ Thursday, July 16) -> This forces killer part to be at the end ???
+        final String before = template.substring(0, optionalStart);
+        final String optional = template.substring(optionalStart + 1, optionalEnd).trim();
+        final String after = template.substring(optionalEnd + 1);
         
-        final String baseString = (template.substring(0, optionalStart) + template.substring(optionalEnd + 1)).trim();
-        final String optionalString = template.substring(optionalStart + 1, optionalEnd).trim();
-        
-        this.withoutKiller = Component.text(baseString, Colors.GRAY);
-        this.withKiller = Component.text(baseString, Colors.GRAY).appendSpace().append(Component.text(optionalString, Colors.GRAY));
+        this.withoutKiller = Component.text((before + after).trim().replaceAll("\\s+", " "), Colors.GRAY);
+        this.withKiller = Component.text((before + optional + after).trim().replaceAll("\\s+", " "), Colors.GRAY);
     }
     
     @NotNull

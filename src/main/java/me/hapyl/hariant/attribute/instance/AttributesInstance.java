@@ -1,7 +1,6 @@
 package me.hapyl.hariant.attribute.instance;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -14,8 +13,10 @@ import me.hapyl.hariant.util.Resettable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class AttributesInstance extends Attributes implements AttributeModifiable, Ticking, Resettable {
@@ -27,7 +28,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
         super(copyFrom);
         
         this.entity = entity;
-        this.modifiers = Maps.newLinkedHashMap(); // Keep order, literally just for the display purpose
+        this.modifiers = Maps.newLinkedHashMap();    // Keep order, literally just for the display purpose
     }
     
     @NotNull
@@ -71,33 +72,16 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     
     @Override
     public boolean removeModifier(@NotNull Key key) {
-        final AttributeModifier modifier = this.modifiers.remove(key);
+        final AttributeModifier attributeModifier = modifiers.remove(key);
         
-        if (modifier == null) {
+        if (attributeModifier == null) {
             return false;
         }
         
-        modifier.onRemove0(entity);
-        this.triggerAttributeUpdate(modifier);
+        attributeModifier.onRemove0(entity);
+        this.triggerAttributeUpdate(attributeModifier);
+        
         return true;
-    }
-    
-    @Override
-    public boolean removeModifiers(@NotNull Predicate<AttributeModifier> filter) {
-        final Set<AttributeType> attributesToUpdate = Sets.newHashSet();
-        
-        final boolean modified = this.modifiers.values().removeIf(modifier -> {
-            if (!filter.test(modifier)) {
-                return false;
-            }
-            
-            modifier.stream().map(AttributeModifier.Entry::attributeType).forEach(attributesToUpdate::add);
-            modifier.onRemove0(entity);
-            return true;
-        });
-        
-        attributesToUpdate.forEach(this::updateAttribute);
-        return modified;
     }
     
     @Override
@@ -127,46 +111,41 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     }
     
     @Override
-    public void tick() {
-        // Tick modifiers
-        final Iterator<AttributeModifier> iterator = modifiers.values().iterator();
-        
-        while (iterator.hasNext()) {
-            final AttributeModifier modifier = iterator.next();
-            
-            // Tick modifier
-            modifier.tick(entity);
-            
-            if (modifier.isOver()) {
-                modifier.onRemove0(entity);
-                iterator.remove();
-                this.triggerAttributeUpdate(modifier);
-            }
-        }
-    }
-    
-    @Override
     @NotNull
     public Stream<AttributeModifier> streamModifiers() {
         return modifiers.values().stream();
     }
     
+    @Override
+    public void tick() {
+        // Tick modifiers over a defensive copy
+        for (AttributeModifier attributeModifier : Set.copyOf(modifiers.values())) {
+            // Tick modifier
+            attributeModifier.tick(entity);
+            
+            // If modifier is over, remove it
+            if (attributeModifier.isOver()) {
+                this.removeModifier(attributeModifier.getKey());
+            }
+        }
+    }
+    
     public double getFlatModifierBonus(@NotNull AttributeType attributeType) {
         return streamModifierEntries(attributeType, AttributeModifierType.FLAT)
-                          .mapToDouble(AttributeModifier.Entry::value)
-                          .sum();
+                .mapToDouble(AttributeModifier.Entry::value)
+                .sum();
     }
     
     public double getAdditiveModifierBonus(@NotNull AttributeType attributeType) {
         return 1 + streamModifierEntries(attributeType, AttributeModifierType.ADDITIVE)
-                              .mapToDouble(AttributeModifier.Entry::value)
-                              .sum();
+                .mapToDouble(AttributeModifier.Entry::value)
+                .sum();
     }
     
     public double getMultiplicativeModifierBonus(@NotNull AttributeType attributeType) {
         return streamModifierEntries(attributeType, AttributeModifierType.MULTIPLICATIVE)
-                          .mapToDouble(entry -> 1 + entry.value())
-                          .reduce(1, (value1, value2) -> value1 * value2);
+                .mapToDouble(entry -> 1 + entry.value())
+                .reduce(1, (value1, value2) -> value1 * value2);
     }
     
     @Override

@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class AttributesInstanceSnapshotImpl extends AttributesInstance implements AttributesInstanceSnapshot {
@@ -31,12 +30,6 @@ public final class AttributesInstanceSnapshotImpl extends AttributesInstance imp
     
     @Override
     public boolean removeModifier(@NotNull Key key) {
-        // Removing modifiers isn't supported
-        return false;
-    }
-    
-    @Override
-    public boolean removeModifiers(@NotNull Predicate<AttributeModifier> filter) {
         // Removing modifiers isn't supported
         return false;
     }

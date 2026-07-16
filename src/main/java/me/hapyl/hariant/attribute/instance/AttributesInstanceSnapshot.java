@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * Represents a <b>snapshot</b> of entity attributes, where the attribute values are "frozen".
@@ -48,9 +47,6 @@ public interface AttributesInstanceSnapshot extends AttributesBase, AttributeMod
     
     @Override
     void addModifier(@NotNull AttributeModifier attributeModifier);
-    
-    @Override
-    boolean removeModifiers(@NotNull Predicate<AttributeModifier> filter);
     
     @Override
     @NotNull

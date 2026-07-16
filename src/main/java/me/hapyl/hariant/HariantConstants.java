@@ -189,26 +189,36 @@ public interface HariantConstants {
      * Defines the component styler for flavor text.
      */
     @NotNull ComponentStyler COMPONENT_STYLER_FLAVOR_TEXT = ComponentStyler.create(Style.style(Colors.DARK_GRAY, TextDecoration.ITALIC));
+    
     /**
      * Defines the duration in seconds for the game start countdown.
      */
     @Range(from = 1, to = 10) int GAME_START_COUNTDOWN_IN_SECONDS = 5;
+    
     /**
      * Defines the duration in ticks before the game ends.
      */
     int GAME_END_DELAY = Tick.fromSeconds(5);
+    
     /**
      * Defines the character used for critical damage.
      */
     @NotNull Component CHARACTER_CRITICAL_DAMAGE = Component.text("‼");
+    
     /**
      * Defines the character used for shielded damage.
      */
     @NotNull Component CHARACTER_SHIELDED_DAMAGE = Component.text("🛡");
+    
     /**
      * Defines the character used for lethal damage.
      */
     @NotNull Component CHARACTER_LETHAL_DAMAGE = Component.text("☠");
+    
+    /**
+     * Defines the duration of effect resistance, in ticks.
+     */
+    int EFFECT_RESISTANCE_DURATION = 20;
     
     private static @NotNull ComponentStyler createStylerWithPadding(int padding) {
         return ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(padding).build();

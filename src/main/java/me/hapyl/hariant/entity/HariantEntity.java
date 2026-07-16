@@ -108,8 +108,6 @@ public class HariantEntity
     private static final String HEAD_TEXTURE_URL = "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/%s\"}}}";
     private static final Component DEFAULT_HEAD_COMPONENT = createHeadComponent("da99b05b9a1db4d29b5e673d77ae54a77eab66818586035c8a2005aeb810602a");
     
-    private static final Cooldown COOLDOWN_EFFECT_RESISTANCE = Cooldown.ofSeconds(Key.ofString("environment_no_damage_ticks"), 1);
-    
     private static final ComponentDisplay COMPONENT_DISPLAY_IMMUNE = new ComponentDisplay(
             Component.text("ɪᴍᴍᴜɴᴇ", Colors.DARK_GRAY),
             ComponentDisplayAnimation.ofFalloff(),
@@ -132,7 +130,7 @@ public class HariantEntity
     private final EntityTicker ticker;
     private final LinkedHashMap<Class<? extends HealthMutator>, HealthMutator> healthMutators;
     
-    @Nullable protected HariantEntity lastAttacker;
+    protected @Nullable HariantEntity lastAttacker;
     
     protected double health;
     
@@ -142,6 +140,7 @@ public class HariantEntity
     private @Nullable RemovalReason removalReason;
     private @Nullable SoundFx soundHurt;
     private @Nullable SoundFx soundDeath;
+    private @Nullable EffectResistance effectResistance;
     
     public HariantEntity(@NotNull LivingEntity entity, @NotNull Attributes attributes) {
         this.entity = entity;
@@ -965,6 +964,8 @@ public class HariantEntity
         elementData.reset();
         healthMutators.clear();
         
+        effectResistance = null;
+        
         if (trap != null) {
             trap.onEscape0(TrapEscape.DIED);
             trap = null;
@@ -1129,24 +1130,30 @@ public class HariantEntity
             return false;
         }
         
-        if (this.hasCooldown(COOLDOWN_EFFECT_RESISTANCE)) {
-            return true;
+        // Check for existing effect resistance
+        if (effectResistance != null && effectResistance.hasNotExpired(this)) {
+            return effectResistance.value();
         }
         
-        final double effectResistance = attributes.normalized(AttributeType.EFFECT_RESISTANCE);
+        final double chance = attributes.normalized(AttributeType.EFFECT_RESISTANCE);
         
-        // Resisted the effect
-        if (random.nextDouble() < effectResistance) {
-            this.setCooldown(COOLDOWN_EFFECT_RESISTANCE);
+        // Has resisted effect
+        if (random.nextDouble() < chance) {
+            effectResistance = new EffectResistance(true, this);
+            
             EFFECT_RESISTANCE_DISPLAY.display(getLocation());
             return true;
         }
-        
-        // Otherwise reassign last damager and add as assister
-        lastAttacker = source;
-        combatTracker.assist(assistSource);
-        
-        return false;
+        // Has not resisted effect
+        else {
+            effectResistance = new EffectResistance(false, this);
+            
+            // Reassign `lastAttacker` and save the assist
+            lastAttacker = source;
+            combatTracker.assist(assistSource);
+            
+            return false;
+        }
     }
     
     @NotNull
