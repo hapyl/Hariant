@@ -12,33 +12,6 @@
 - Cycle arrow is a little offset
 - Next Hero -> Zealot
 
-[Pytaria]
-
-### Attributes
-- DEF 20 -> 50
-
-### Weapon
-- DMG 65% ATK -> 71.5% ATK
-
-### Flower Breeze:
-- Duration 4s -> 5s
-- DEF increase +400 -> 1000% (~420 -> ~550)
-
-### Flower Escape:
-- You can now dash forward while holding SNEAK
-
-### Rose Ivy
-- DMG 54% ATK -> 64.8% ATK
-- Speed decrease 25% -> 50%
-
-## Excellency:
-
-- ATK increase 25% -> 30%
-- RES threshold 50% Max HP -> 25% Max HP
-- RES increase 20% -> 40%
-- DMG threshold 25% Math HP -> 50% Max HP 
-
-
 [IDEAS]
 
 - Maybe change damage report to use team color bars
@@ -47,6 +20,7 @@
 
 # FIXED
 
+- ~~Change how Effect RES works~~
 - ~~Map features description is wrong~~
 - ~~Add /ready~~
 - ~~Auto ready wrong item~~

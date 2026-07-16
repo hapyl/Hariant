@@ -90,8 +90,6 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         final int duration = this.calculateBleedDuration(source);
         final double damage = this.calculateBleedDamage(source);
         
-        
-        
         entity.getAttributes().addModifier(new ElementalAnomalyBleedAttributeModifier(modifierKey, source != null ? source : entity, duration, damage));
     }
     
@@ -149,14 +147,12 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         
         @Override
         public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
-            if (tick % bleedPeriod != 0) {
-                return;
+            if (tick % bleedPeriod == 0) {
+                entity.damage(damageSource);
             }
             
-            // TODO (xanyjl @ Thursday, July 16) -> Change this to DoT
-            
-            entity.damage(damageSource);
-            entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.DUST_COLOR_TRANSITION, 3, 0.4, 0.2, 0.4, 0.015f, dustTransition);
+            // Fx always
+            entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.DUST_COLOR_TRANSITION, 1, 0.2, 0.2, 0.2, 0.015f, dustTransition);
         }
     }
     

@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -38,7 +37,9 @@ public interface AttributeModifiable {
     
     boolean removeModifier(@NotNull Key key);
     
-    boolean removeModifiers(@NotNull Predicate<AttributeModifier> filter);
+    default boolean removeModifier(@NotNull AttributeModifier attributeModifier) {
+        return this.removeModifier(attributeModifier.getKey());
+    }
     
     // *-* Query Operations *-* //
     
