@@ -34,7 +34,7 @@ public class TalentFunnyTime extends TalentUltimate {
     @Override
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
         return Executable.execute(() ->{
-            player.playWorldSound(Sound.ENTITY_WITCH_CELEBRATE, 1.0f);
+            player.playWorldSound(Sound.ENTITY_WITCH_CELEBRATE, 2.0f);
 
             new HariantTickingTask(Scheduler.ofTimer(20)) {
                 @Override
