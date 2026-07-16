@@ -69,6 +69,7 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentRepulsor REPULSOR;
     public static final TalentLastLaugh LAST_LAUGH;
     public static final TalentStickySituation STICKY_SITUATION;
+    public static final TalentFunnyTime FUNNY_TIME;
     
     /**
      * {@link HeroInferno}
@@ -142,6 +143,7 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         REPULSOR = REGISTRY.register("repulsor", TalentRepulsor::new);
         LAST_LAUGH = REGISTRY.register("last_laugh", TalentLastLaugh::new);
         STICKY_SITUATION = REGISTRY.register("sticky_situation", TalentStickySituation::new);
+        FUNNY_TIME = REGISTRY.register("funny_time", TalentFunnyTime::new);
         
         FIRE_PIT = REGISTRY.register("fire_pit", TalentFirePit::new);
         DEMONSPLIT_QUAZII = REGISTRY.register("demonsplit_quazii", TalentDemonsplitQuazii::new);

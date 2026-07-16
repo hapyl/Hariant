@@ -65,8 +65,8 @@ public final class HeroTroll extends Hero {
     }
     
     @Override
-    public @NotNull TalentStickySituation getUltimateTalent() {
-        return TalentRegistry.STICKY_SITUATION;
+    public @NotNull TalentFunnyTime getUltimateTalent() {
+        return TalentRegistry.FUNNY_TIME;
     }
     
     public static class WeaponStickonator extends WeaponMelee {
