@@ -11,7 +11,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.shield.Shield;
 import me.hapyl.hariant.entity.shield.ShieldStrength;
 import me.hapyl.hariant.event.Cancel;
-import me.hapyl.hariant.event.HariantEffectEvent;
+import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;

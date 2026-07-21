@@ -19,7 +19,7 @@ public class StatusEffectTalentLock extends StatusEffectImpl implements Listener
     public void handleHariantTalentEvent(HariantTalentPreconditionEvent ev) {
         final HariantPlayer player = ev.getPlayer();
         
-        if (!player.hasEffect(EnumStatusEffect.TALENT_LOCK)) {
+        if (!player.hasEffect(StatusEffectType.TALENT_LOCK)) {
             return;
         }
         

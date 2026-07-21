@@ -1,6 +1,6 @@
 package me.hapyl.hariant.hero.blast_knight;
 
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
 import me.hapyl.hariant.profile.ui.ActionbarSupplier;
@@ -96,7 +96,7 @@ public final class HeroDataBlastKnight extends HeroData<HeroBlastKnight> impleme
         );
     }
     
-    public void incrementQuantumEnergyIfNotOnCooldown(@NotNull Decimal energy, @NotNull Cooldown cooldown) {
+    public void incrementQuantumEnergyIfNotOnCooldown(@NotNull Decimal energy, @NotNull HariantCooldown cooldown) {
         if (player.hasCooldown(cooldown)) {
             return;
         }

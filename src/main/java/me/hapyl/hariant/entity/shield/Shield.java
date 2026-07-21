@@ -11,6 +11,8 @@ import me.hapyl.hariant.entity.damage.environment.EnvironmentDamageSource;
 import me.hapyl.hariant.event.HariantShieldRemoveEvent;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.util.Identified;
+import me.hapyl.hariant.util.Prioritable;
+import me.hapyl.hariant.util.Priority;
 import me.hapyl.hariant.util.TickDuration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -18,7 +20,7 @@ import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
-public class Shield implements Ticking, TickDuration, ComponentLike, Identified {
+public class Shield implements Ticking, TickDuration, ComponentLike, Identified, Prioritable {
     
     public static final Component SHIELD_CHARACTER = HariantConstants.CHARACTER_SHIELDED_DAMAGE.color(Colors.YELLOW);
     
@@ -32,8 +34,10 @@ public class Shield implements Ticking, TickDuration, ComponentLike, Identified 
     private final double maximumCapacity;
     private final int duration;
     
-    private double capacity;
+    protected double capacity;
+    
     private int tick;
+    private @NotNull String identity;
     
     public Shield(@NotNull HariantEntity entity, @NotNull HariantEntity applier, @NotNull ShieldStrength strength, double maximumCapacity, int duration) {
         this.entity = entity;
@@ -43,6 +47,7 @@ public class Shield implements Ticking, TickDuration, ComponentLike, Identified 
         this.capacity = maximumCapacity;
         this.duration = duration;
         this.tick = duration;
+        this.identity = Identified.ofClassName(this);
     }
     
     public void regenerate(double capacity) {
@@ -88,15 +93,28 @@ public class Shield implements Ticking, TickDuration, ComponentLike, Identified 
         }
     }
     
-    public @NotNull ShieldResult shield(double damage, @NotNull DamageSource damageSource) {
-        final double mitigated = damage / strength.strength(damageSource.getElementType());
-        final double mitigatedMin = Math.min(mitigated, capacity);
+    public double shield(double damage) {
+        return this.capacity -= damage;
+    }
+    
+    public final @NotNull ShieldResult shield0(double damage, @NotNull DamageSource damageSource) {
+        // Scale damage to strength
+        final double damageScaled = damage / strength.strength(damageSource.getElementType());
         
-        this.capacity -= mitigated;
-        this.onHit(mitigatedMin);
+        final double capacityBeforeHit = capacity;
+        final double capacityAfterHit = this.shield(damageScaled);
+        
+        // Calculate the total amount of damage shielded, which is used for display purposes
+        final double shielded = capacityBeforeHit - Math.max(0, capacityAfterHit);
+        
+        // Calculate the decrement of the damage
+        final double decrement = damage + Math.min(0, capacityAfterHit);
+        
+        // Call update methods
+        this.onHit(shielded);
         this.updateYellowHearts();
         
-        return new ShieldResult(capacity, mitigated, mitigatedMin);
+        return new ShieldResult(capacityBeforeHit, capacityAfterHit, shielded, decrement);
     }
     
     @EventLike
@@ -189,7 +207,7 @@ public class Shield implements Ticking, TickDuration, ComponentLike, Identified 
     
     @Override
     public @NotNull String identify() {
-        return this.getClass().getSimpleName();
+        return identity;
     }
     
     public void display(double shielded, @NotNull Location location) {
@@ -201,6 +219,11 @@ public class Shield implements Ticking, TickDuration, ComponentLike, Identified 
                 20,
                 1.5f
         );
+    }
+    
+    @Override
+    public @NotNull Priority getPriority() {
+        return Priority.NORMAL;
     }
     
     private void updateYellowHearts() {

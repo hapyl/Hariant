@@ -14,7 +14,7 @@ import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -99,7 +99,7 @@ public final class TalentFirePit extends Talent {
                          .append(Component.text("Stepping into fire deals "))
                          .append(ElementType.FIRE.asComponentDamage())
                          .append(Component.text(" and applies "))
-                         .append(EnumStatusEffect.HELLBURN.asComponent().color(Colors.EFFECT_HELLBURN))
+                         .append(StatusEffectType.HELLBURN.asComponent().color(Colors.EFFECT_HELLBURN))
                          .append(Component.text(" effect for "))
                          .append(hellburnDuration)
                          .append(Component.text(" that rapidly builds up "))
@@ -150,7 +150,7 @@ public final class TalentFirePit extends Talent {
             this.firePits = Maps.newHashMap();
             this.damageSource = DamageSource.builder(damageSourceIdentity, damage.getScaledValue(player))
                                             .source(player)
-                                            .units(elementalApplication.doubleValue())
+                                            .elementalUnits(elementalApplication.doubleValue())
                                             .elementType(ElementType.FIRE)
                                             .damageType(DamageType.TALENT)
                                             .components(DamageComponent.ofCommon())
@@ -208,7 +208,7 @@ public final class TalentFirePit extends Talent {
                               // If the fire is lit, deal damage
                               if (isLit) {
                                   entity.damage(damageSource);
-                                  entity.addEffect(EnumStatusEffect.HELLBURN, hellburnDuration.intValue(), player);
+                                  entity.addEffect(StatusEffectType.HELLBURN, hellburnDuration.intValue(), player);
                               }
                               
                               // Always show danger

@@ -58,7 +58,7 @@ public final class PlayerProfile
         implements
         Lifecycle, Ticking, UniquelyIdentified, TeamEntryProvider,
         ForwardingAudience.Single, GameInstanceHandler, HeadComponent, SettingRetriever,
-        NameFormatter {
+        NameFormatter, HariantLogger.Sender {
     
     private static final int TICK_MODULO_UI = 5;
     private static final char PING_CHAR = '@';

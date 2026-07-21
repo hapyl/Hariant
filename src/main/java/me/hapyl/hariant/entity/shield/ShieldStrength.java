@@ -24,6 +24,10 @@ public interface ShieldStrength {
         return elementType -> strength;
     }
     
+    static @NotNull ShieldStrength always1() {
+        return ShieldStrengthImpl.INSTANCE;
+    }
+    
     static @NotNull Builder builder() {
         return new Builder();
     }

@@ -3,7 +3,7 @@ package me.hapyl.hariant.handler;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.environment.*;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import org.bukkit.GameMode;
@@ -124,7 +124,7 @@ public final class EntityHandler implements Listener {
     @EventHandler
     public void handlePlayerInteractEvent(PlayerInteractEntityEvent ev) {
         class Holder {
-            private static final Cooldown INTERACTION_COOLDOWN = Cooldown.ofTicks(Key.ofString("interaction_cooldown"), 5);
+            private static final HariantCooldown INTERACTION_COOLDOWN = HariantCooldown.ofTicks(Key.ofString("interaction_cooldown"), 5);
         }
         
         if (ev.getHand() == EquipmentSlot.OFF_HAND) {

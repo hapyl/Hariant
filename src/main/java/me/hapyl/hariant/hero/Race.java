@@ -41,6 +41,13 @@ public enum Race implements Prefixed, Named, Described, Styled, ComponentLike {
             Colors.SHARK
     ),
     
+    ALIEN(
+            Component.text("👽"),
+            Component.text("Alien"),
+            Component.text("A creation from beyong this world."),
+            Colors.ALIEN
+    ),
+    
     ;
     
     private final Component prefix;

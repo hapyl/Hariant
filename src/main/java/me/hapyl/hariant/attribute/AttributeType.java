@@ -352,6 +352,21 @@ public enum AttributeType implements Attribute {
             }
     ),
     
+    FEROCITY(
+            new AttributeImpl(
+                    Component.text("\uD83C\uDF00"),
+                    Component.text("Ferocity"),
+                    Component.text("The chance to perform an additional attack."),
+                    Colors.ATTRIBUTE_FEROCITY,
+                    DecimalFormat.PERCENTAGE
+            ) {
+                @Override
+                public double maxValue() {
+                    return 300;
+                }
+            }
+    ),
+    
     // *-* Elemental Damage Bonus *-* //
     
     PHYSICAL_DAMAGE_BONUS(AttributeElementalImpl.ofElementalDamageBonus(ElementType.PHYSICAL)),

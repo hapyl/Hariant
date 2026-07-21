@@ -213,7 +213,7 @@ public final class TalentFlowerEscape extends Talent {
             player.playWorldSound(location, Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, pitch);
             player.playWorldSound(location, Sound.ENTITY_PLAYER_HURT_SWEET_BERRY_BUSH, pitch);
             
-            // Randomly offset the location for SWEEP particle
+            // Randomly decrement the location for SWEEP particle
             for (int i = 0; i < 10; ++i) {
                 final double randomX = player.getRandom().nextSignedDouble(flowerRadiusAsDouble);
                 final double randomZ = player.getRandom().nextSignedDouble(flowerRadiusAsDouble);

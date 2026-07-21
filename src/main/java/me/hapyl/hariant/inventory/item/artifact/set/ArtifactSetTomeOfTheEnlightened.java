@@ -2,7 +2,6 @@ package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
@@ -79,7 +78,7 @@ public final class ArtifactSetTomeOfTheEnlightened extends ArtifactSet implement
     
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, twoPieceElementalMasteryIncrease);
+            super(ArtifactSetTomeOfTheEnlightened.this, PieceCount.TWO_PIECE, applier, twoPieceElementalMasteryIncrease);
         }
     }
     

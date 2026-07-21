@@ -19,6 +19,7 @@ public final class ArtifactSetRegistry extends StaticRegistry<ArtifactSet> {
     public static final ArtifactSet BULWARK;
     public static final ArtifactSet GLASS_CANNON;
     public static final ArtifactSet BLOODSCENT;
+    public static final ArtifactSet SWORN_OATH;
     
     private static final StaticRegistryMap<ArtifactSet> REGISTRY;
     
@@ -38,6 +39,7 @@ public final class ArtifactSetRegistry extends StaticRegistry<ArtifactSet> {
         BULWARK = REGISTRY.register("artifact_set_bulwark", ArtifactSetBulwark::new);
         GLASS_CANNON = REGISTRY.register("artifact_set_glass_cannon", ArtifactSetGlassCannon::new);
         BLOODSCENT = REGISTRY.register("artifact_set_bloodscent", ArtifactSetBloodscent::new);
+        SWORN_OATH = REGISTRY.register("artifact_set_sworn_oath", ArtifactSetSwornOath::new);
     }
     
     private ArtifactSetRegistry() {

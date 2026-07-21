@@ -2,7 +2,6 @@ package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
@@ -73,7 +72,7 @@ public final class ArtifactSetSearingInferno extends ArtifactSet implements List
             return;
         }
         
-        if (!(damageSource instanceof ElementalAnomalyBurn.ElementalAnomalyBurnDamageSource)) {
+        if (!damageSource.compareIdentity(ElementalAnomalyBurn.DAMAGE_SOURCE_IDENTITY)) {
             return;
         }
         
@@ -91,7 +90,7 @@ public final class ArtifactSetSearingInferno extends ArtifactSet implements List
     
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantPlayer applier) {
-            super(ArtifactSetSearingInferno.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, elementalMasteryIncrease);
+            super(ArtifactSetSearingInferno.this, PieceCount.TWO_PIECE, applier, elementalMasteryIncrease);
         }
     }
 }

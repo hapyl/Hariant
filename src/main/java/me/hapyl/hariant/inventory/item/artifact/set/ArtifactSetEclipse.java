@@ -2,13 +2,12 @@ package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantShieldCreateEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
@@ -31,7 +30,7 @@ public final class ArtifactSetEclipse extends ArtifactSet implements Listener {
     private final Decimal fourPieceDamageIncrease = Decimal.ofAttribute(AttributeType.AETHER_DAMAGE_BONUS, 10);
     private final Decimal fourPieceDamageIncreaseDuration = Decimal.ofSeconds(6);
     
-    private final Cooldown fourPieceCooldown = Cooldown.ofSeconds(Key.ofString("eclipse_cooldown"), 2f);
+    private final HariantCooldown fourPieceCooldown = HariantCooldown.ofSeconds(Key.ofString("eclipse_cooldown"), 2f);
     
     ArtifactSetEclipse(@NotNull Key key) {
         super(key, Component.text("Eclipse"));
@@ -93,7 +92,7 @@ public final class ArtifactSetEclipse extends ArtifactSet implements Listener {
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetEclipse.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, twoPieceBonus);
+            super(ArtifactSetEclipse.this, PieceCount.TWO_PIECE, applier, twoPieceBonus);
         }
         
     }

@@ -1,21 +1,18 @@
 package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
+import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageCalculationsEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
-import me.hapyl.hariant.term.Terminology;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
@@ -25,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ArtifactSetSoulFracture extends ArtifactSet implements Listener {
     
     private final ArtifactSetModifier elementalMasteryIncrease = CommonArtifactSetModifiers.ELEMENTAL_MASTERY;
-    private final Decimal aetherDamageBonus = Decimal.ofAttribute(AttributeType.AETHER_DAMAGE_BONUS, 20);
+    private final Decimal aetherResistanceIgnore = Decimal.ofAttribute(AttributeType.AETHER_RESISTANCE, 20);
     
     public ArtifactSetSoulFracture(@NotNull Key key) {
         super(key, Component.text("Soul Fracture"));
@@ -37,12 +34,12 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
         setPieceDescription(
                 PieceCount.FOUR_PIECE,
                 Component.empty()
-                         .append(Component.text("Increases "))
+                         .append(Component.text("Dealing "))
                          .append(ElementType.AETHER.asComponentDamage())
-                         .append(Component.text(" of "))
-                         .append(Component.text("ranged", Terminology.TERM_STYLE))
-                         .append(Component.text(" attacks by "))
-                         .append(aetherDamageBonus)
+                         .append(Component.text(" ignores "))
+                         .append(aetherResistanceIgnore)
+                         .append(Component.text(" of target's "))
+                         .append(AttributeType.AETHER_RESISTANCE)
                          .append(Component.text("."))
         );
     }
@@ -54,8 +51,8 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
     
     @EventHandler
     public void handleHariantDamageCalculationsEvent(HariantDamageCalculationsEvent ev) {
-        final AttributesInstanceSnapshot snapshotAttacker = ev.getSnapshotAttacker();
-        final HariantEntity entity = snapshotAttacker.entity().orElse(null);
+        final AttributesInstanceSnapshot attacker = ev.getAttacker();
+        final HariantEntity entity = attacker.entity().orElse(null);
         
         if (!(entity instanceof HariantPlayer player)) {
             return;
@@ -67,13 +64,7 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
             return;
         }
         
-        final DamageSource damageSource = ev.getDamageSource();
-        
-        if (damageSource.getDamageType() != DamageType.RANGED) {
-            return;
-        }
-        
-        snapshotAttacker.addModifier(new ModifierFourPiece(player));
+        attacker.addModifier(player, AttributeModifier.entry(AttributeType.AETHER_RESISTANCE, AttributeModifierType.FLAT, -aetherResistanceIgnore.doubleValue()));
     }
     
     @Override
@@ -85,15 +76,8 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
     
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetSoulFracture.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, elementalMasteryIncrease);
+            super(ArtifactSetSoulFracture.this, PieceCount.TWO_PIECE, applier, elementalMasteryIncrease);
         }
     }
     
-    public class ModifierFourPiece extends AttributeModifierArtifactSet {
-        ModifierFourPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetSoulFracture.this, PieceCount.FOUR_PIECE, applier, HariantConstants.INDEFINITE_DURATION);
-            
-            of(AttributeType.AETHER_DAMAGE_BONUS, AttributeModifierType.FLAT, aetherDamageBonus.doubleValue());
-        }
-    }
 }

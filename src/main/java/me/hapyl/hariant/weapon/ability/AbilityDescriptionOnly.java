@@ -1,5 +1,6 @@
 package me.hapyl.hariant.weapon.ability;
 
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import net.kyori.adventure.text.Component;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class AbilityDescriptionOnly extends Ability {
     
     public AbilityDescriptionOnly(@NotNull Component name, @NotNull Component description) {
-        super(name);
+        super(Key.empty(), name);
         
         this.setDescription(description);
     }

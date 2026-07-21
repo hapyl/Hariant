@@ -11,6 +11,17 @@
 - Clear vanilla effects on game start
 - Cycle arrow is a little offset
 - Next Hero -> Zealot
+- Invisibility duration
+- Do something with damage display with shields
+- ~~Effect event -> Per-Effect events~~
+- Hellburn should really NOT be effect
+- Nyx missing "Wither" talent fx
+- Inferno ultimate change
+- Add animation to ULTIMATE CHARGED
+
+- ~~Reset entity on target~~
+- ~~Ferocity deals double damage to demons~~
+- ~~Shark's a little too strong~~
 
 [IDEAS]
 

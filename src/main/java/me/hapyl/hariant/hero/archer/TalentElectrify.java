@@ -45,12 +45,12 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentElectrify extends TalentUltimate implements Listener {
     
-    @DisplayField private final Decimal explosionRadius = Decimal.ofValue(10);
-    @DisplayField private final Decimal explosionDuration = Decimal.ofSeconds(3);
-    @DisplayField private final Decimal explosionDamagePeriod = Decimal.ofSeconds(0.5f);
+    private final @DisplayField Decimal explosionRadius = Decimal.ofValue(10);
+    private final @DisplayField Decimal explosionDuration = Decimal.ofSeconds(3);
+    private final @DisplayField Decimal explosionDamagePeriod = Decimal.ofSeconds(0.5f);
     
-    @DisplayField private final AttributeScaling explosionDamage = AttributeScaling.create(AttributeType.ATTACK, 236);
-    @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 50);
+    private final @DisplayField AttributeScaling explosionDamage = AttributeScaling.create(AttributeType.ATTACK, 236);
+    private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 50);
     
     private final ParticleBuilder particleFx = ParticleBuilder.dustColorTransition(Color.fromRGB(247, 181, 47), Color.fromRGB(250, 224, 170), 1);
     private final ProgressBar progressBar = new ProgressBar("⚡", 20, Style.style(Colors.ELEMENT_ELECTRIC));
@@ -213,7 +213,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
             this.damageSource = DamageSource.builder(damageSourceIdentity, explosionDamage.getScaledValue(attacker))
                                             .source(attacker)
                                             .elementType(ElementType.ELECTRIC)
-                                            .units(elementalApplication.doubleValue())
+                                            .elementalUnits(elementalApplication.doubleValue())
                                             .damageType(DamageType.ULTIMATE)
                                             .components(DamageComponent.ofCommon())
                                             .build();

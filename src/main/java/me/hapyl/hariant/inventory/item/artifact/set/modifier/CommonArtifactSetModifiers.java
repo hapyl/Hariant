@@ -23,6 +23,7 @@ public final class CommonArtifactSetModifiers {
     public static final ArtifactSetModifier ELEMENTAL_MASTERY;
     public static final ArtifactSetModifier LUCK;
     public static final ArtifactSetModifier COOLDOWN_REDUCTION;
+    public static final ArtifactSetModifier FEROCITY;
     
     public static final ArtifactSetModifier PHYSICAL_DAMAGE_BONUS;
     public static final ArtifactSetModifier FIRE_DAMAGE_BONUS;
@@ -48,6 +49,7 @@ public final class CommonArtifactSetModifiers {
         ELEMENTAL_MASTERY = createAdvanced(AttributeType.ELEMENTAL_MASTERY, 120);
         LUCK = createAdvanced(AttributeType.LUCK, 40);
         COOLDOWN_REDUCTION = createAdvanced(AttributeType.COOLDOWN_REDUCTION, 20);
+        FEROCITY = createAdvanced(AttributeType.FEROCITY, 20);
         
         PHYSICAL_DAMAGE_BONUS = createDamageBonus(ElementType.PHYSICAL);
         FIRE_DAMAGE_BONUS = createDamageBonus(ElementType.FIRE);

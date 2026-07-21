@@ -4,7 +4,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.VanillaAttributeModifier;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -104,7 +104,7 @@ public final class TalentShieldRam extends Talent {
                 }
                 
                 // Stun the entity
-                entity.addEffect(EnumStatusEffect.STUNNED, ramStunDuration.intValue(), player);
+                entity.addEffect(StatusEffectType.STUNNED, ramStunDuration.intValue(), player);
                 this.cancel();
                 
                 // Fx

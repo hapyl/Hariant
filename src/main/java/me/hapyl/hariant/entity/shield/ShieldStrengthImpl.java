@@ -8,6 +8,8 @@ import java.util.EnumMap;
 
 public final class ShieldStrengthImpl implements ShieldStrength {
     
+    public static final @NotNull ShieldStrength INSTANCE = _ -> 1;
+    
     private final EnumMap<? extends ElementType, Double> elementalStrengthMap;
     
     ShieldStrengthImpl(final EnumMap<? extends ElementType, Double> elementalStrengthMap) {

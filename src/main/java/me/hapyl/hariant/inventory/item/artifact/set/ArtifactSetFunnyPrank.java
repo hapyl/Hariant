@@ -2,14 +2,13 @@ package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantEffectEvent;
+import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
@@ -73,7 +72,7 @@ public final class ArtifactSetFunnyPrank extends ArtifactSet implements Listener
     
     public class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetFunnyPrank.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, twoPieceLuckIncrease);
+            super(ArtifactSetFunnyPrank.this, PieceCount.TWO_PIECE, applier, twoPieceLuckIncrease);
         }
     }
     

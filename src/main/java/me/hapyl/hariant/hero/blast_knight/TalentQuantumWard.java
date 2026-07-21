@@ -8,7 +8,7 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.HeadComponent;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
@@ -41,7 +41,7 @@ public final class TalentQuantumWard extends Talent implements Listener {
     private final @DisplayField Decimal damageSplit = Decimal.ofPercentage(50);
     
     private final @DisplayField Decimal quantumEnergyGeneration = Decimal.ofValue(1);
-    private final @DisplayField Cooldown quantumEnergyGenerationCooldown = Cooldown.ofSeconds(Key.ofString("ward_quantum_generation_cooldown"), 1.0f);
+    private final @DisplayField HariantCooldown quantumEnergyGenerationCooldown = HariantCooldown.ofSeconds(Key.ofString("ward_quantum_generation_cooldown"), 1.0f);
     
     private final @DisplayField AttributeScaling wardStrength = AttributeScaling.create(AttributeType.DEFENSE, 180);
     

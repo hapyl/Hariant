@@ -7,7 +7,7 @@ import me.hapyl.hariant.entity.effect.EffectType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public enum EnumStatusEffect implements StatusEffect {
+public enum StatusEffectType implements StatusEffect {
     
     ROSE_IVY(new StatusEffectRoseIvy()),
     INVISIBILITY(new StatusEffectInvisibility()),
@@ -26,7 +26,7 @@ public enum EnumStatusEffect implements StatusEffect {
     
     private final StatusEffect statusEffect;
     
-    EnumStatusEffect(@NotNull StatusEffect statusEffect) {
+    StatusEffectType(@NotNull StatusEffect statusEffect) {
         this.statusEffect = statusEffect;
     }
     

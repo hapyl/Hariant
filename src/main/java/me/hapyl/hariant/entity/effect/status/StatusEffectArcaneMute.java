@@ -41,7 +41,7 @@ public class StatusEffectArcaneMute extends StatusEffectImpl implements Listener
         
         final HariantPlayer player = Hariant.getPlayer(ev.getPlayer()).orElse(null);
         
-        if (player == null || !player.hasEffect(EnumStatusEffect.ARCANE_MUTE)) {
+        if (player == null || !player.hasEffect(StatusEffectType.ARCANE_MUTE)) {
             return;
         }
         
@@ -50,7 +50,7 @@ public class StatusEffectArcaneMute extends StatusEffectImpl implements Listener
     
     @EventHandler
     public void handleHariantTalentEvent(HariantTalentPreconditionEvent ev) {
-        if (!ev.getPlayer().hasEffect(EnumStatusEffect.ARCANE_MUTE)) {
+        if (!ev.getPlayer().hasEffect(StatusEffectType.ARCANE_MUTE)) {
             return;
         }
         

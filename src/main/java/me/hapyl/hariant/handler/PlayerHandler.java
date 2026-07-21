@@ -27,7 +27,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import org.bukkit.GameMode;
-import org.bukkit.Input;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -278,14 +277,15 @@ public final class PlayerHandler implements Listener {
     @EventHandler
     public void handleHariantMonitorDamageEvent(HariantMonitorDamageEvent ev) {
         final DamageInstance damageInstance = ev.getDamageInstance();
-        final DamageSource damageSource = damageInstance.getSource();
+        final DamageSource damageSource = damageInstance.getDamageSource();
         
         final HariantEntity entity = ev.getEntity();
         final HariantEntity source = damageSource.getSource();
         
         final double damage = damageInstance.getDamage();
         
-        if (damage <= MINIMUM_DAMAGE) {
+        // Check whether the damage should be displayed
+        if (damage <= MINIMUM_DAMAGE && !damageInstance.isShielded()) {
             return;
         }
         

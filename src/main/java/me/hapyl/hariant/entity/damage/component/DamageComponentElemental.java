@@ -21,7 +21,7 @@ public final class DamageComponentElemental implements DamageComponent {
     
     @Override
     public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot entity, @NotNull AttributesInstanceSnapshot attacker) {
-        final ElementType element = damageInstance.getSource().getElementType();
+        final ElementType element = damageInstance.getDamageSource().getElementType();
         
         final @Nullable AttributeType offensiveAttribute = element.getOffensiveAttribute();
         final @Nullable AttributeType defensiveAttribute = element.getDefensiveAttribute();

@@ -15,9 +15,9 @@ import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.ui.ComponentDisplayable;
 import me.hapyl.hariant.util.TickDuration;
+import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -185,14 +185,16 @@ public class AttributeModifier
         return "%s{key=%s, applier=%s, entries=%s}".formatted(this.getClass().getSimpleName(), this.key.getKey(), this.applier, this.entries);
     }
     
-    @ApiStatus.Internal
     public final void onRemove0(@NotNull HariantEntity entity) {
         this.onRemove(entity, applier);
     }
     
-    @NotNull
-    public static Entry entry(@NotNull AttributeType attributeType, @NotNull AttributeModifierType modifierType, double value) {
+    public static @NotNull Entry entry(@NotNull AttributeType attributeType, @NotNull AttributeModifierType modifierType, double value) {
         return new Entry(attributeType, modifierType, value);
+    }
+    
+    public static @NotNull Entry entry(@NotNull AttributeType attributeType, @NotNull AttributeModifierType modifierType, @NotNull Decimal value) {
+        return entry(attributeType, modifierType, value.doubleValue());
     }
     
     public static final class Entry {

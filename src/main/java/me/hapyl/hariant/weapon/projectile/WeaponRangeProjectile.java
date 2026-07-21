@@ -41,7 +41,7 @@ public class WeaponRangeProjectile extends WeaponRange {
         private final WeaponRangeProjectile weapon;
         
         WeaponProjectileAbility(@NotNull WeaponRangeProjectile weapon) {
-            super(Component.text("Shoot"));
+            super(Key.ofString("ability_shoot"), Component.text("Shoot"));
             
             this.weapon = weapon;
             

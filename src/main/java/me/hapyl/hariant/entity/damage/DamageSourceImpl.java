@@ -3,7 +3,7 @@ package me.hapyl.hariant.entity.damage;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class DamageSourceImpl implements DamageSource {
@@ -48,7 +49,7 @@ public class DamageSourceImpl implements DamageSource {
         this(identity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, Key.empty(), 0);
     }
     
-    public DamageSourceImpl(@NotNull DamageSourceIdentity damageSourceIdentity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull List<? extends DamageComponent> damageComponents, @NotNull Set<DamageFlag> damageFlags, double damage, double elementUnits, @NotNull Cooldown cooldown) {
+    public DamageSourceImpl(@NotNull DamageSourceIdentity damageSourceIdentity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull List<? extends DamageComponent> damageComponents, @NotNull Set<DamageFlag> damageFlags, double damage, double elementUnits, @NotNull HariantCooldown cooldown) {
         this(damageSourceIdentity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, cooldown.getCooldownKey(), cooldown.getCooldown());
     }
     
@@ -112,6 +113,21 @@ public class DamageSourceImpl implements DamageSource {
     @Override
     public boolean isFlagged(@NotNull DamageFlag damageFlag) {
         return damageFlags.contains(damageFlag);
+    }
+    
+    @Override
+    public boolean equals(@Nullable Object object) {
+        if (object == null || this.getClass() != object.getClass()) {
+            return false;
+        }
+        
+        final DamageSourceImpl that = (DamageSourceImpl) object;
+        return Objects.equals(this.identity, that.identity);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.identity);
     }
     
 }

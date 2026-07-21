@@ -24,7 +24,7 @@ public enum DamageType implements Named, Terminology {
     
     ULTIMATE(
             Component.text("Ultimate DMG"),
-            Component.text("Damage caused by a an ultimate talent.")
+            Component.text("Damage caused by an ultimate talent.")
     ),
     
     ENVIRONMENT(
@@ -35,6 +35,11 @@ public enum DamageType implements Named, Terminology {
     ANOMALY(
             Component.text("Anomaly DMG"),
             Component.text("Damage dealt by elemental anomaly.")
+    ),
+    
+    FEROCITY(
+            Component.text("Ferocity DMG"),
+            Component.text("Damage dealt by a repeated attack.")
     ),
     
     ;

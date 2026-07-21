@@ -6,7 +6,7 @@ import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public class ItemArtifactCannonball extends ItemArtifact {
+public final class ItemArtifactCannonball extends ItemArtifact {
     
     public ItemArtifactCannonball(@NotNull Key key) {
         super(

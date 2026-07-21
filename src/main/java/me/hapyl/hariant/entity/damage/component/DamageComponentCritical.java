@@ -2,7 +2,6 @@ package me.hapyl.hariant.entity.damage.component;
 
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.instance.AttributesBase;
 import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
 import me.hapyl.hariant.entity.damage.DamageFlag;
 import me.hapyl.hariant.entity.damage.DamageInstance;
@@ -28,7 +27,7 @@ public final class DamageComponentCritical implements DamageComponent {
         }
         
         final double critChance = attacker.normalized(AttributeType.CRIT_CHANCE);
-        final boolean forceCritical = damageInstance.getSource().isFlagged(DamageFlag.FORCE_CRITICAL);
+        final boolean forceCritical = damageInstance.getDamageSource().isFlagged(DamageFlag.FORCE_CRITICAL);
         
         final Random random = Hariant.getRandom();
         

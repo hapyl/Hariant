@@ -36,7 +36,7 @@ public class HeroEquipment implements HeadComponent {
     private String headTexture;
     private Component headComponent;
     
-    HeroEquipment() {
+    public HeroEquipment() {
         this.equipment = new ItemStack[] {
                 ItemStacks.empty(),
                 ItemStacks.empty(),
@@ -63,22 +63,22 @@ public class HeroEquipment implements HeadComponent {
     }
     
     @NotNull
-    public ItemStack getHelmet() {
+    public ItemStack helmet() {
         return this.equipment[INDEX_HELMET];
     }
     
     @NotNull
-    public ItemStack getChestPlate() {
+    public ItemStack chestPlate() {
         return this.equipment[INDEX_CHEST_PLATE];
     }
     
     @NotNull
-    public ItemStack getLeggings() {
+    public ItemStack leggings() {
         return this.equipment[INDEX_LEGGINGS];
     }
     
     @NotNull
-    public ItemStack getBoots() {
+    public ItemStack boots() {
         return this.equipment[INDEX_BOOTS];
     }
     
@@ -93,7 +93,7 @@ public class HeroEquipment implements HeadComponent {
     }
     
     public void setChestPlate(@NotNull Material material) {
-        this.setChestPlate(material, null, null);
+        this.setChestPlate(createItem(material, null, null, null));
     }
     
     public void setChestPlate(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
@@ -115,7 +115,7 @@ public class HeroEquipment implements HeadComponent {
     }
     
     public void setLeggings(@NotNull Material material) {
-        this.setLeggings(material, null, null);
+        this.setLeggings(createItem(material, null, null, null));
     }
     
     public void setLeggings(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
@@ -137,7 +137,7 @@ public class HeroEquipment implements HeadComponent {
     }
     
     public void setBoots(@NotNull Material material) {
-        this.setBoots(material, null, null);
+        this.setBoots(createItem(material, null, null, null));
     }
     
     public void setBoots(int colorRed, int colorGreen, int colorBlue, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
@@ -151,10 +151,10 @@ public class HeroEquipment implements HeadComponent {
     public void equip(@NotNull HariantPlayer player) {
         final PlayerInventory inventory = player.getInventory();
         
-        inventory.setHelmet(this.getHelmet());
-        inventory.setChestplate(this.getChestPlate());
-        inventory.setLeggings(this.getLeggings());
-        inventory.setBoots(this.getBoots());
+        inventory.setHelmet(helmet());
+        inventory.setChestplate(chestPlate());
+        inventory.setLeggings(leggings());
+        inventory.setBoots(boots());
         
         // For some reason we have to forcefully update the inventory ¯\_(ツ)_/¯
         player.getHandle().updateInventory();

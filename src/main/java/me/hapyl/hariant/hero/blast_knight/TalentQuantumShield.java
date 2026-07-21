@@ -6,8 +6,8 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -48,7 +48,7 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
     private final @DisplayField Decimal parryQuantumEnergyGeneration = Decimal.ofValue(5);
     
     private final @DisplayField Decimal blockingQuantumEnergyGeneration = Decimal.ofValue(1);
-    private final @DisplayField Cooldown blockingQuantumEnergyGenerationCooldown = Cooldown.ofSeconds(Key.ofString("quantum_energy_generation_cooldown"), 0.2f);
+    private final @DisplayField HariantCooldown blockingQuantumEnergyGenerationCooldown = HariantCooldown.ofSeconds(Key.ofString("quantum_energy_generation_cooldown"), 0.2f);
     
     private final @DisplayField BoundingBoxBlueprint parryBoundingBox = BoundingBoxBlueprint.define(1, 2.5, 1);
     
@@ -170,6 +170,10 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
             return;
         }
         
+        if (attacker.isSelfOrTeammate(entity)) {
+            return;
+        }
+        
         final HeroDataBlastKnight heroData = player.getHeroData(HeroRegistry.BLAST_KNIGHT, HeroDataBlastKnight::new);
         
         if (heroData.getShieldState() == ShieldState.NOT_BLOCKING) {
@@ -211,7 +215,7 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
               .filter(player::canAffect)
               .forEach(entity -> {
                   // Stun entity
-                  entity.addEffect(EnumStatusEffect.STUNNED, parryStunDuration, player);
+                  entity.addEffect(StatusEffectType.STUNNED, parryStunDuration, player);
               });
         
         // Fx

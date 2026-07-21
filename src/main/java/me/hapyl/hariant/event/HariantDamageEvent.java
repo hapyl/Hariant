@@ -26,29 +26,25 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
         this.damageInstance = damageInstance;
     }
     
-    @NotNull
-    public DamageSource getDamageSource() {
-        return damageInstance.getSource();
+    /**
+     * Gets the {@link DamageSource} of the event.
+     *
+     * <p>
+     * Note that {@link HariantDamageCalculationsEvent} may modify the damage source instance, therefore you should not do a {@code instanceof} check,
+     * since it may fail if the damage source was modified, instead you should use {@link DamageSource#compareIdentity(DamageSourceIdentity)}.
+     * </p>
+     *
+     * @return the current damage source of the event.
+     */
+    public @NotNull DamageSource getDamageSource() {
+        return damageInstance.getDamageSource();
     }
     
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
-        return HANDLER_LIST;
-    }
-    
-    @NotNull
-    public DamageInstance getDamageInstance() {
-        return damageInstance;
-    }
-    
-    @NotNull
-    public HariantEntity getEntity() {
+    public @NotNull HariantEntity getEntity() {
         return damageInstance.getEntity();
     }
     
-    @Nullable
-    public HariantEntity getAttacker() {
+    public @Nullable HariantEntity getAttacker() {
         return damageInstance.getAttacker();
     }
     
@@ -56,28 +52,22 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
         return damageInstance.isCritical();
     }
     
-    @NotNull
-    public ElementType getElementType() {
-        return damageInstance.getSource().getElementType();
+    public @NotNull ElementType getElementType() {
+        return damageInstance.getDamageSource().getElementType();
     }
     
-    @NotNull
-    public DamageType getDamageType() {
-        return damageInstance.getSource().getDamageType();
+    public @NotNull DamageType getDamageType() {
+        return damageInstance.getDamageSource().getDamageType();
     }
     
     @Override
     public @NotNull Set<? extends DamageFlag> getDamageFlags() {
-        return damageInstance.getSource().getDamageFlags();
+        return damageInstance.getDamageSource().getDamageFlags();
     }
     
     @Override
     public boolean isFlagged(@NotNull DamageFlag damageFlag) {
-        return damageInstance.getSource().isFlagged(damageFlag);
-    }
-    
-    public double getBaseDamage() {
-        return damageInstance.getSource().getDamage();
+        return damageInstance.getDamageSource().isFlagged(damageFlag);
     }
     
     public double getDamage() {
@@ -109,6 +99,11 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
     
     public boolean isStartCooldownIfCancelled() {
         return startCooldownIfCancelled;
+    }
+    
+    @Override
+    public @NotNull HandlerList getHandlers() {
+        return HANDLER_LIST;
     }
     
     @NotNull

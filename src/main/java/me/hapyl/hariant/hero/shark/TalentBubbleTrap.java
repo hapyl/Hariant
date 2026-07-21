@@ -212,7 +212,7 @@ public final class TalentBubbleTrap extends Talent implements Effect {
             this.elementSource = ElementSource.create(
                     ElementType.WATER,
                     source,
-                    // Element is applied over the duration of the talent, so offset by the decrement to apply the whole value in total
+                    // Element is applied over the duration of the talent, so decrement by the decrement to apply the whole value in total
                     (totalAnomalyApplication.doubleValue() + HariantConstants.ELEMENTAL_UNITS_DECREMENT_PER_TICK * getDuration()) / getDuration()
             );
             this.damageSource = new BubbleDamageSource(source, popDamage.getScaledValue(source));

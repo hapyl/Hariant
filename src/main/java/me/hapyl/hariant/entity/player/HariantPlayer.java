@@ -1,10 +1,9 @@
 package me.hapyl.hariant.entity.player;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import me.hapyl.eterna.Eterna;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.reflect.Reflect;
-import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
@@ -12,11 +11,12 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.database.rank.FormatRules;
 import me.hapyl.hariant.entity.*;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.tracker.CombatData;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.event.HariantPlayerCreateEvent;
 import me.hapyl.hariant.game.GameInstance;
@@ -33,13 +33,14 @@ import me.hapyl.hariant.profile.setting.Settings;
 import me.hapyl.hariant.profile.ui.ActionbarBuilder;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentIndex;
+import me.hapyl.hariant.talent.rechargeable.RechargeableTalentData;
+import me.hapyl.hariant.talent.rechargeable.TalentRechargeable;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
-import me.hapyl.hariant.util.Cancellable;
 import me.hapyl.hariant.weapon.NormalAttackRanged;
 import me.hapyl.hariant.weapon.Weapon;
 import me.hapyl.hariant.weapon.WeaponBow;
@@ -71,7 +72,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class HariantPlayer extends HariantEntity implements CooldownHandler, HeroDataRetriever, SettingRetriever, NameFormatter, Delegatable {
+public class HariantPlayer extends HariantEntity implements CooldownHandler, HeroDataRetriever, SettingRetriever, NameFormatter {
     
     /**
      * Defines default attributes that are reset each time player is spawner or removed, used to ensure
@@ -98,10 +99,10 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     
     private final PlayerProfile profile;
     private final HeroInstance heroInstance;
-    private final Set<DelegateCancellable> delegatedCancellable;
     private final ActionbarCache actionbarCache;
     
     private final Map<Class<? extends Hero>, HeroData<? extends Hero>> heroData;
+    private final Map<TalentRechargeable, RechargeableTalentData> rechargeableTalentData;
     
     private double ultimateResource;
     private int usedUltimateAt;
@@ -113,10 +114,10 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         
         this.profile = profile;
         this.heroInstance = heroInstance;
-        this.delegatedCancellable = Sets.newHashSet();
         this.heroData = Maps.newHashMap();
         this.state = PlayerState.ALIVE;
         this.actionbarCache = new ActionbarCache();
+        this.rechargeableTalentData = Maps.newHashMap();
     }
     
     public void interrupt(@NotNull AssistSource source) {
@@ -126,14 +127,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         }
         
         // Cancel interruptible delegates
-        delegatedCancellable.removeIf(delegate -> {
-            if (delegate.getDelegateType() == DelegateType.INTERRUPTABLE) {
-                delegate.cancel();
-                return true;
-            }
-            
-            return false;
-        });
+        cancelDelegates(DelegateCancellable::isInterruptable);
         
         // Interrupt weapon
         final PlayerInventory inventory = getInventory();
@@ -200,7 +194,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
      * Increments the ultimate resource for this player.
      *
      * @param value                      - The value by which to increment.
-     * @param offsetByEffectiveAttribute - {@code true} to offset the value by the effective attribute.
+     * @param offsetByEffectiveAttribute - {@code true} to decrement the value by the effective attribute.
      */
     public void incrementUltimateResource(final double value, boolean offsetByEffectiveAttribute) {
         double absoluteValue = Math.abs(value);
@@ -242,14 +236,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     
     public double getUltimateResource() {
         return ultimateResource;
-    }
-    
-    @Override
-    public void onCooldownChange(@NotNull Key key, int cooldown) {
-        final NamespacedKey bukkitKey = key.asNamespacedKey();
-        final int duration = cooldown == HariantConstants.INDEFINITE_COOLDOWN ? 1_000_000 : cooldown;
-        
-        this.sendPacket(new ClientboundCooldownPacket(Identifier.fromNamespaceAndPath(bukkitKey.getNamespace(), bukkitKey.getKey()), duration));
     }
     
     @NotNull
@@ -508,10 +494,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     public void onDestroy() {
         super.onDestroy();
         
-        // Cancel all delegated tasks
-        this.delegatedCancellable.forEach(Cancellable::cancel);
-        this.delegatedCancellable.clear();
-        
         // Reset hero data
         this.heroData.values().forEach(HeroData::dispose);
         this.heroData.clear();
@@ -521,6 +503,8 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         
         // Call weapon PlayerLifecycle
         this.heroInstance.getOrigin().onDestroy(this);
+        
+        this.rechargeableTalentData.clear();
     }
     
     @Override
@@ -572,6 +556,19 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     @Override
     public @NotNull Input getCurrentInput() {
         return this.getHandle().getCurrentInput();
+    }
+    
+    @Override
+    public void onCooldownStarted(@NotNull HariantCooldown cooldown, int duration) {
+        // Flip -1 cooldown to something big that vanilla supports, 1,000,000 seem to work fine, and it's
+        // equal to about 13 real life hours, so you're never seeing it move
+        this.sendCooldownPacket(cooldown, duration == HariantConstants.INDEFINITE_COOLDOWN ? 1_000_000 : duration);
+    }
+    
+    @Override
+    public void onCooldownEnded(@NotNull HariantCooldown cooldown) {
+        // Send the packet with 0 duration to reset the visual cooldown
+        this.sendCooldownPacket(cooldown, 0);
     }
     
     public @NotNull String getEntityName() {
@@ -704,11 +701,6 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         return heroInstance.getOrigin().equals(hero);
     }
     
-    @Override
-    public void delegate(@NotNull Cancellable cancellable, @NotNull DelegateType delegateType) {
-        this.delegatedCancellable.add(new DelegateCancellable(cancellable, delegateType));
-    }
-    
     @NotNull
     public PlayerInventory getInventory() {
         return getHandle().getInventory();
@@ -765,7 +757,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         this.onCreate();
         
         // Add respawn resistance
-        addEffect(EnumStatusEffect.RESPAWN_RESISTANCE, 40, this);
+        addEffect(StatusEffectType.RESPAWN_RESISTANCE, 40, this);
         
         // Fx
         addVanillaEffect(PotionEffectType.BLINDNESS, 1, 20);
@@ -868,6 +860,16 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     @Override
     public @NotNull Component getNameFormattedSocial() {
         return profile.getNameFormatted();
+    }
+    
+    public @NotNull RechargeableTalentData getRechargeableTalentData(@NotNull TalentRechargeable talent) {
+        return rechargeableTalentData.computeIfAbsent(talent, _ -> new RechargeableTalentData(this, talent));
+    }
+    
+    private void sendCooldownPacket(@NotNull HariantCooldown cooldown, int duration) {
+        final Identifier vanillaKey = Identifier.fromNamespaceAndPath(Eterna.getPlugin().namespace(), cooldown.getCooldownKey().getKey());
+        
+        this.sendPacket(new ClientboundCooldownPacket(vanillaKey, duration));
     }
     
     private void sendDeathDamageReport() {

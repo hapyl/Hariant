@@ -5,7 +5,7 @@ import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.rank.PlayerRank;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
@@ -19,7 +19,7 @@ public class HariantCommandStatusEffect extends HariantPlayerCommand {
     
     @Override
     public void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
-        final EnumStatusEffect statusEffect = args.get(0).toEnum(EnumStatusEffect.class);
+        final StatusEffectType statusEffect = args.get(0).toEnum(StatusEffectType.class);
         final int duration = args.get(1).toInt();
         
         if (statusEffect == null) {

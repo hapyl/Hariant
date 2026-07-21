@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifiable;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
+import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.event.HariantDamageCalculationsEvent;
@@ -47,6 +48,10 @@ public interface AttributesInstanceSnapshot extends AttributesBase, AttributeMod
     
     @Override
     void addModifier(@NotNull AttributeModifier attributeModifier);
+    
+    default void addModifier(@NotNull HariantEntity applier, @NotNull AttributeModifier.Entry... entries) {
+        this.addModifier(new AttributeModifierSnapshot(applier, entries));
+    }
     
     @Override
     @NotNull

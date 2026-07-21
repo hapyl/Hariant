@@ -25,10 +25,6 @@ public final class HeroDataPytaria extends HeroData<HeroPytaria> implements Comp
     }
     
     public void excellency(int excellency) {
-        if (this.excellency == excellency) {
-            return;
-        }
-        
         this.excellency = excellency;
         
         // Notify

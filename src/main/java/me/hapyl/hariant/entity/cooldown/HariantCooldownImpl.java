@@ -5,12 +5,12 @@ import me.hapyl.hariant.util.decimal.DecimalFormat;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public final class CooldownImpl implements Cooldown {
+public final class HariantCooldownImpl implements HariantCooldown {
     
     private final Key key;
     private final int cooldown;
     
-    CooldownImpl(@NotNull Key key, final int cooldown) {
+    HariantCooldownImpl(@NotNull Key key, final int cooldown) {
         this.key = key;
         this.cooldown = cooldown;
     }
