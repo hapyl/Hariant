@@ -59,6 +59,8 @@ public final class Colors {
     public static final TextColor ATTRIBUTE_ELEMENTAL_MASTERY = TextColor.color(0xD785F2);
     public static final TextColor ATTRIBUTE_LUCK = TextColor.color(0x55D25C);
     public static final TextColor ATTRIBUTE_COOLDOWN_REDUCTION = TextColor.color(0xD2CECE);
+    public static final TextColor ATTRIBUTE_FEROCITY = TextColor.color(0xB92F1F);
+    public static final TextColor ATTRIBUTE_ATTACK_SPEED = TextColor.color(0xF5CA2C);
     
     public static final TextColor ELEMENT_PHYSICAL = TextColor.color(0xDCDCDC);
     public static final TextColor ELEMENT_FIRE = TextColor.color(0xFF4B35);
@@ -123,6 +125,7 @@ public final class Colors {
     public static final TextColor CHAOS = TextColor.color(0x660499);
     public static final TextColor VOID = TextColor.color(0x5F3087);
     public static final TextColor SHARK = TextColor.color(0x96B7C0);
+    public static final TextColor ALIEN = TextColor.color(0x18C040);
     
     private Colors() {
     }

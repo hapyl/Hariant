@@ -53,6 +53,12 @@ public enum Definition implements Prefixed, Named, Styled, ComponentLike {
             Style.style(TextColor.color(0x4A91FF))
     ),
     
+    ZEALOT_MARK(
+            Component.text("✦"),
+            Component.text("Zealot's Mark"),
+            Style.style(Colors.ELEMENT_AETHER)
+    ),
+    
     ;
     
     private final Component prefix;

@@ -5,6 +5,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.trap.Trap;
 import me.hapyl.hariant.entity.trap.TrapEscape;
 import me.hapyl.hariant.entity.trap.TrapName;
+import me.hapyl.hariant.util.Priority;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +33,11 @@ public class TrapFrozen extends Trap {
         super.tick();
         
         entity.getHandle().setFreezeTicks(100);
+    }
+    
+    @Override
+    public @NotNull Priority getPriority() {
+        return Priority.HIGH;
     }
     
     @Override

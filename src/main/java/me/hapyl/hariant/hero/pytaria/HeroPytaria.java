@@ -88,7 +88,7 @@ public final class HeroPytaria extends Hero {
             super(
                     Key.ofString("annihilallium"),
                     Icon.ofMaterial(Material.ALLIUM),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 71.5, 10)
+                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 78.65, 10)
             );
             
             setName(Component.text("Annihilallium"));

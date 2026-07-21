@@ -6,7 +6,7 @@ import me.hapyl.eterna.module.util.Buildable;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,18 +16,15 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Set;
 
-public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
+public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSource {
     
-    @NotNull
-    DamageSourceIdentity getIdentity();
+    @NotNull DamageSourceIdentity getIdentity();
     
-    @NotNull
     @Override
-    ElementType getElementType();
+    @NotNull ElementType getElementType();
     
-    @Nullable
     @Override
-    HariantEntity getSource();
+    @Nullable HariantEntity getSource();
     
     @Range(from = 0, to = Integer.MAX_VALUE)
     @Override
@@ -35,8 +32,7 @@ public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
         return 0;
     }
     
-    @NotNull
-    default Key getCooldownKey() {
+    default @NotNull Key getCooldownKey() {
         return Key.empty();
     }
     
@@ -45,20 +41,20 @@ public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
         return 0;
     }
     
-    @NotNull
-    DamageType getDamageType();
+    @NotNull DamageType getDamageType();
     
-    @NotNull
-    List<? extends DamageComponent> getDamageComponents();
+    @NotNull List<? extends DamageComponent> getDamageComponents();
     
     @Unmodifiable
-    @NotNull
-    Set<? extends DamageFlag> getDamageFlags();
+    @NotNull Set<? extends DamageFlag> getDamageFlags();
     
     double getDamage();
     
-    @NotNull
-    default Builder toBuilder(final double newDamage) {
+    default boolean compareIdentity(@NotNull DamageSourceIdentity identity) {
+        return this.getIdentity().equals(identity);
+    }
+    
+    default @NotNull Builder toBuilder(final double newDamage) {
         final Builder builder = new Builder(this.getIdentity(), newDamage);
         builder.source = this.getSource();
         builder.damageType = this.getDamageType();
@@ -70,16 +66,22 @@ public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
         return builder;
     }
     
-    @NotNull
-    default Builder toBuilder() {
+    default @NotNull Builder toBuilder() {
         return toBuilder(this.getDamage());
     }
     
     default void startCooldownIfExists(@NotNull HariantEntity hariantEntity) {
         if (hasCooldown()) {
-            // Set the cooldown without respecting the cooldown reduction
-            hariantEntity.setCooldown(getCooldownKey(), getCooldown(), false);
+            // Set the damage cooldown, which isn't scaled by any attribute
+            hariantEntity.setCooldown(this, getCooldown(), null);
         }
+    }
+    
+    default boolean canTriggerFerocity() {
+        return switch (this.getDamageType()) {
+            case MELEE, RANGED -> true;
+            default -> false;
+        };
     }
     
     @NotNull
@@ -157,7 +159,7 @@ public interface DamageSource extends DamageFlagged, Cooldown, ElementSource {
         }
         
         @SelfReturn
-        public Builder units(double units) {
+        public Builder elementalUnits(double units) {
             this.elementUnits = units;
             return this;
         }

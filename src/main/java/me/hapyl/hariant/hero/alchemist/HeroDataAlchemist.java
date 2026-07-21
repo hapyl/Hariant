@@ -7,7 +7,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
 import me.hapyl.hariant.profile.ui.ActionbarSupplier;
@@ -86,15 +86,15 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements Action
             final int corrosionLevel = this.getAbyssalCorrosionLevel();
             
             if (corrosionLevel >= 1) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_1, 5, player);
+                player.addEffect(StatusEffectType.ABYSSAL_CORROSION_1, 5, player);
             }
             
             if (corrosionLevel >= 2) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_2, 5, player);
+                player.addEffect(StatusEffectType.ABYSSAL_CORROSION_2, 5, player);
             }
             
             if (corrosionLevel >= 3) {
-                player.addEffect(EnumStatusEffect.ABYSSAL_CORROSION_3, 5, player);
+                player.addEffect(StatusEffectType.ABYSSAL_CORROSION_3, 5, player);
             }
         }
         

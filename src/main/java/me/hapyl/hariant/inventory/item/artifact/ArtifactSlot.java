@@ -46,7 +46,8 @@ public enum ArtifactSlot implements SlotBound, ItemCreator, Named, ComponentLike
                     ArtifactAffix.ELEMENTAL_MASTERY,
                     ArtifactAffix.VITALITY,
                     ArtifactAffix.MENDING,
-                    ArtifactAffix.LUCK
+                    ArtifactAffix.LUCK,
+                    ArtifactAffix.FEROCITY
             ))
     ),
     

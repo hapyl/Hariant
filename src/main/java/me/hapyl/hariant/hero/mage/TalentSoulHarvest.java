@@ -4,7 +4,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
@@ -25,7 +25,7 @@ public final class TalentSoulHarvest extends TalentPassive implements Listener {
     @DisplayField public final Decimal maximumSouls = Decimal.ofValue(10);
     @DisplayField public final Decimal startingSouls = Decimal.ofValue(5);
     
-    @DisplayField private final Cooldown harvestCooldown = Cooldown.ofSeconds(Key.ofString("soul_harvest"), 0.25f);
+    @DisplayField private final HariantCooldown harvestCooldown = HariantCooldown.ofSeconds(Key.ofString("soul_harvest"), 0.25f);
     
     @DisplayField private final Decimal soulHarvest = Decimal.ofValue(1);
     @DisplayField private final Decimal soulHarvestElementalMasteryIncreasePerOnePoint = Decimal.ofPercentage(0.25);

@@ -24,7 +24,6 @@ public final class StepBaseImpl implements Step {
     
     StepBaseImpl(double damage) {
         this.component = Component.text("%,.1f".formatted(damage), Colors.GRAY);
-        
     }
     
     @NotNull

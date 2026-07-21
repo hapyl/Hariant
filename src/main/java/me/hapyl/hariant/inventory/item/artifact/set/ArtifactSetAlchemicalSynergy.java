@@ -2,7 +2,6 @@ package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.element.ElementType;
@@ -88,7 +87,7 @@ public final class ArtifactSetAlchemicalSynergy extends ArtifactSet implements L
     
     private class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetAlchemicalSynergy.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, toxicDamageBonus);
+            super(ArtifactSetAlchemicalSynergy.this, PieceCount.TWO_PIECE, applier, toxicDamageBonus);
         }
     }
     

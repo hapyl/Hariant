@@ -21,11 +21,15 @@ import java.util.stream.Collectors;
 public class DamageReport implements Hoverable {
     
     private final DamageInstance damageInstance;
-    private final List<Step> stepList;
+    private final List<Step> steplist;
+    
+    private DamageReport(@NotNull DamageInstance damageInstance, @NotNull List<Step> steplist) {
+        this.damageInstance = damageInstance;
+        this.steplist = steplist;
+    }
     
     public DamageReport(@NotNull DamageInstance damageInstance) {
-        this.damageInstance = damageInstance;
-        this.stepList = Lists.newArrayList(new StepBaseImpl(damageInstance.getSource().getDamage()));
+        this(damageInstance, Lists.newArrayList(new StepBaseImpl(damageInstance.getDamageSource().getDamage())));
     }
     
     @NotNull
@@ -33,7 +37,7 @@ public class DamageReport implements Hoverable {
     public HoverEvent<?> createHoverEvent() {
         final TextComponent.Builder builder = Component.text();
         
-        final DamageSource damageSource = damageInstance.getSource();
+        final DamageSource damageSource = damageInstance.getDamageSource();
         final HariantEntity entity = damageInstance.getEntity();
         final HariantEntity attacker = damageInstance.getAttacker();
         
@@ -43,21 +47,21 @@ public class DamageReport implements Hoverable {
         // Add source data
         builder.append(
                 Component.empty()
-                         .append(Component.text("SRC ", Colors.GRAY))
+                         .append(Component.text("Source ", Colors.GRAY))
                          .append(damageSource.getIdentity().getName())
                          .appendNewline()
         );
         
         builder.append(
                 Component.empty()
-                         .append(Component.text("ENT ", Colors.GRAY))
+                         .append(Component.text("Entity ", Colors.GRAY))
                          .append(entity.getName()).color(Colors.WHITE)
                          .appendNewline()
         );
         
         builder.append(
                 Component.empty()
-                         .append(Component.text("ATK ", Colors.GRAY))
+                         .append(Component.text("Attacker ", Colors.GRAY))
                          .append(attacker != null ? attacker.getName() : Component.text("None!", Colors.DARK_GRAY))
                          .appendNewline()
         );
@@ -71,14 +75,14 @@ public class DamageReport implements Hoverable {
         
         builder.append(
                 Component.empty()
-                         .append(Component.text("DTP ", Colors.GRAY))
+                         .append(Component.text("Damage Type ", Colors.GRAY))
                          .append(damageSource.getDamageType().getName().color(Colors.WHITE))
                          .appendNewline()
         );
         
         builder.append(
                 Component.empty()
-                         .append(Component.text("FLG ", Colors.GRAY))
+                         .append(Component.text("Damage Flags ", Colors.GRAY))
                          .append(
                                  (Component) damageSource.getDamageFlags()
                                                          .stream()
@@ -97,8 +101,8 @@ public class DamageReport implements Hoverable {
         builder.append(Component.text("COMPONENTS", Colors.GOLD, TextDecoration.BOLD));
         builder.appendNewline();
         
-        for (int i = 0; i < stepList.size(); i++) {
-            final Step step = stepList.get(i);
+        for (int i = 0; i < steplist.size(); i++) {
+            final Step step = steplist.get(i);
             
             if (i != 0) {
                 builder.appendNewline();
@@ -116,7 +120,11 @@ public class DamageReport implements Hoverable {
     }
     
     public void report(@NotNull Identified identified, @NotNull DamageMutator damageMutator, double value, double damageBeforeMutation, double damageAfterMutation) {
-        this.stepList.add(new StepImpl(identified, damageMutator, value, damageBeforeMutation, damageAfterMutation));
+        this.steplist.add(new StepImpl(identified, damageMutator, value, damageBeforeMutation, damageAfterMutation));
+    }
+    
+    public static @NotNull DamageReport copyOf(@NotNull DamageInstance damageInstance, @NotNull DamageReport damageReport) {
+        return new DamageReport(damageInstance, Lists.newArrayList(damageReport.steplist));
     }
     
 }

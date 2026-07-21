@@ -8,7 +8,8 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.VanillaAttributeModifier;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.util.ComponentProgress;
-import me.hapyl.hariant.util.Replaceable;
+import me.hapyl.hariant.util.Prioritable;
+import me.hapyl.hariant.util.Priority;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
@@ -19,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class Trap implements Ticking, AssistSource, Replaceable {
+public class Trap implements Ticking, AssistSource, Prioritable {
     
     private static final TextColor[] GRADIENT = {
             TextColor.color(0x0A8BF5),
@@ -149,8 +150,8 @@ public class Trap implements Ticking, AssistSource, Replaceable {
     }
     
     @Override
-    public boolean isReplaceable() {
-        return true;
+    public @NotNull Priority getPriority() {
+        return Priority.NORMAL;
     }
     
     public boolean blocksTalents() {

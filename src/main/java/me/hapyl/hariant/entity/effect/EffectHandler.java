@@ -2,7 +2,7 @@ package me.hapyl.hariant.entity.effect;
 
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.event.HariantEffectEvent;
+import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import org.jetbrains.annotations.NotNull;
 
 public interface EffectHandler {

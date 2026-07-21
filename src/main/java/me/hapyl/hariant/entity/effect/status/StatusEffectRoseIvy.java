@@ -29,7 +29,7 @@ public final class StatusEffectRoseIvy extends StatusEffectImpl implements Liste
     @EventHandler
     public void handleHariantEntityMoveEvent(HariantEntityMoveEvent ev) {
         final HariantEntity entity = ev.getEntity();
-        final StatusEffectInstance effectInstance = entity.getEffect(EnumStatusEffect.ROSE_IVY).orElse(null);
+        final StatusEffectInstance effectInstance = entity.getEffect(StatusEffectType.ROSE_IVY).orElse(null);
         
         if (effectInstance == null || !ev.hasChangedBlock()) {
             return;

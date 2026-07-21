@@ -7,6 +7,7 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.ImmunityResult;
 import me.hapyl.hariant.entity.StreamRules;
+import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageResult;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
@@ -65,15 +66,16 @@ public abstract class InfernoDemonEntity extends HariantEntity implements Infern
     }
     
     @Override
-    public @NotNull DamageResult damage(@NotNull DamageSource source) {
-        final DamageType damageType = source.getDamageType();
+    public @NotNull DamageResult damage(@NotNull DamageInstance damageInstance) {
+        final DamageSource damageSource = damageInstance.getDamageSource();
+        final DamageType damageType = damageSource.getDamageType();
         
         // Only redirect melee and ranged damage
         if (damageType != DamageType.MELEE && damageType != DamageType.RANGED) {
             return DamageResult.IMMUNE;
         }
         
-        final DamageResult damageResult = player.damage(source);
+        final DamageResult damageResult = player.damage(damageInstance);
         
         // If damage is success, play hurt fx
         if (damageResult == DamageResult.OK) {

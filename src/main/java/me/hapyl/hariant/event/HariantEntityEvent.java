@@ -7,7 +7,7 @@ public abstract class HariantEntityEvent extends HariantEvent {
     
     private final HariantEntity entity;
     
-    HariantEntityEvent(@NotNull HariantEntity entity) {
+    public HariantEntityEvent(@NotNull HariantEntity entity) {
         this.entity = entity;
     }
     

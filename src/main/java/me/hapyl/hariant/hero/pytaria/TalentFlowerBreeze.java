@@ -162,7 +162,7 @@ public final class TalentFlowerBreeze extends Talent {
         
         @Override
         public void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier) {
-            entity.getEquipment().setHelmet(HeroRegistry.PYTARIA.getEquipment().getHelmet());
+            entity.getEquipment().setHelmet(HeroRegistry.PYTARIA.getEquipment().helmet());
         }
     }
     

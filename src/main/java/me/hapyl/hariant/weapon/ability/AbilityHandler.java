@@ -1,7 +1,6 @@
 package me.hapyl.hariant.weapon.ability;
 
 import me.hapyl.eterna.module.math.Tick;
-import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.Hero;
@@ -68,11 +67,8 @@ public final class AbilityHandler implements Listener {
         }
         
         // Cooldowns are a little weird for abilities, since they're stored on ability type, not the ability itself
-        final Key cooldownKey = abilityType.getKey();
-        final int cooldown = ability.getCooldown();
-        
-        if (player.hasCooldown(cooldownKey)) {
-            final int cooldownTimeLeft = player.getCooldownTimeLeft(cooldownKey);
+        if (player.hasCooldown(ability)) {
+            final int cooldownTimeLeft = player.getCooldownTimeLeft(ability);
             
             if (player.getSetting(Settings.COOLDOWN_FEEDBACK)) {
                 player.messageError(
@@ -93,13 +89,8 @@ public final class AbilityHandler implements Listener {
             return;
         }
         
-        // Start cooldown
-        if (response.isOk()) {
-            player.setCooldown(cooldownKey, cooldown, true);
-        }
-        else if (response.isAwait()) {
-            player.setIndefiniteCooldown(cooldownKey);
-        }
+        // Handle cooldown
+        response.getStatus().setCooldown(player, ability);
     }
     
 }

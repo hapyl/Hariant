@@ -6,6 +6,7 @@ import me.hapyl.eterna.module.command.SimpleCommand;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.util.StringList;
 import me.hapyl.eterna.module.util.TypeConverter;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -19,7 +20,6 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.damage.tracker.CombatData;
 import me.hapyl.hariant.entity.effect.Effect;
@@ -30,9 +30,12 @@ import me.hapyl.hariant.entity.shield.Shield;
 import me.hapyl.hariant.entity.shield.ShieldStrength;
 import me.hapyl.hariant.entity.type.HariantEntityDummy;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
+import me.hapyl.hariant.hero.Hero;
+import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.inventory.drop.DropSummary;
 import me.hapyl.hariant.inventory.drop.DropTable;
+import me.hapyl.hariant.lobby.EnumLobbyItem;
 import me.hapyl.hariant.menu.hero.MenuHeroUnlock;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.talent.TalentContext;
@@ -122,8 +125,8 @@ public final class HariantCommandRegistry {
             }
             
             final HariantPlayer player = context.getHariantPlayer();
-            final Type type = context.get(0).toEnum(Type.class);
-            final int value = context.get(1).toInt();
+            final Type type = context.argument(0).toEnum(Type.class);
+            final int value = context.argument(1).toInt();
             
             if (type == null || value < 0) {
                 return;
@@ -140,10 +143,10 @@ public final class HariantCommandRegistry {
         
         register("triggerElementalAnomaly", context -> {
             final HariantPlayer player = context.getHariantPlayer();
-            final TypeConverter arg0 = context.get(0);
+            final TypeConverter arg0 = context.argument(0);
             final ElementalAnomalyType elementalAnomaly = arg0.toEnum(ElementalAnomalyType.class);
             
-            final String argument = context.get(1).toString();
+            final String argument = context.argument(1).toString();
             
             if (!argument.isEmpty() && !argument.startsWith("-")) {
                 player.messageError(Component.text("Argument must start with `-`!"));
@@ -180,15 +183,9 @@ public final class HariantCommandRegistry {
             HariantLogger.success(player, Component.text("Spawned a training dummy!"));
         });
         
-        register("iWantToIgnoreAllCooldownsForDebugReasonsAndByAllIMeanAllThisWillEvenIgnoreDamageCooldowns", context -> {
-            CooldownHandlerImpl.debugNoCooldowns = !CooldownHandlerImpl.debugNoCooldowns;
-            
-            HariantLogger.system(context.getPlayer(), CooldownHandlerImpl.debugNoCooldowns ? Component.text("Now ignoring cooldowns.") : Component.text("No longer ignoring cooldowns."));
-        });
-        
         register("playerHead", context -> {
             final Player player = context.getPlayer();
-            final ItemBuilder builder = ItemBuilder.playerHead(context.get(0).toString());
+            final ItemBuilder builder = ItemBuilder.playerHead(context.argument(0).toString());
             
             player.getInventory().addItem(builder.asIcon());
         });
@@ -213,8 +210,8 @@ public final class HariantCommandRegistry {
         
         register("addElementalUnits", context -> {
             final HariantPlayer player = context.getHariantPlayer();
-            final ElementType elementType = context.get(0).toEnum(ElementType.class);
-            final double units = context.get(1).toDouble();
+            final ElementType elementType = context.argument(0).toEnum(ElementType.class);
+            final double units = context.argument(1).toDouble();
             
             if (elementType == null) {
                 player.messageError(Component.text("Unknown element!"));
@@ -231,8 +228,8 @@ public final class HariantCommandRegistry {
         
         register("applyDecay", context -> {
             final HariantPlayer player = context.getHariantPlayer();
-            final double percentage = context.get(0).toDouble(25);
-            final int duration = context.get(1).toInt(60);
+            final double percentage = context.argument(0).toDouble(25);
+            final int duration = context.argument(1).toInt(60);
             
             if (percentage < 0 || percentage > 100) {
                 player.messageError(Component.text("Decay value must be a percentage between 0 and 100!"));
@@ -262,16 +259,16 @@ public final class HariantCommandRegistry {
         register("shield", context -> {
             final HariantPlayer player = context.getHariantPlayer();
             
-            final double amount = context.get(0).toDouble(200);
-            final double strength = context.get(1).toDouble(1.0);
-            final int duration = context.get(2).toInt(200);
+            final double amount = context.argument(0).toDouble(200);
+            final double strength = context.argument(1).toDouble(1.0);
+            final int duration = context.argument(2).toInt(200);
             
             player.setShield(new Shield(player, player, ShieldStrength.strength(strength), amount, duration));
             player.messageSuccess(Component.text("Applied shield with capacity %s and strength %s for %s!".formatted(amount, strength, Tick.format(duration))));
         });
         
         register("openHeroUnlockMenu", context -> {
-            context.get(0).toRegistryItem(HeroRegistry.getRegistry()).ifPresent(hero -> {
+            context.argument(0).toRegistryItem(HeroRegistry.getRegistry()).ifPresent(hero -> {
                 new MenuHeroUnlock(context.getPlayer(), hero);
             });
         });
@@ -310,8 +307,8 @@ public final class HariantCommandRegistry {
         
         register("trigger_drop_table", context -> {
             final Player player = context.getPlayer();
-            final EnumBattleground battleground = context.get(0).toEnum(EnumBattleground.class);
-            final int times = context.get(1).toInt();
+            final EnumBattleground battleground = context.argument(0).toEnum(EnumBattleground.class);
+            final int times = context.argument(1).toInt();
             
             if (battleground == null) {
                 HariantLogger.error(player, Component.text("Invalid battleground!"));
@@ -338,7 +335,7 @@ public final class HariantCommandRegistry {
         
         register("trigger_effect", context -> {
             final HariantPlayer player = context.getHariantPlayer();
-            final EffectType effectType = context.get(0).toEnum(EffectType.class);
+            final EffectType effectType = context.argument(0).toEnum(EffectType.class);
             
             if (effectType == null) {
                 player.messageError(Component.text(
@@ -435,7 +432,7 @@ public final class HariantCommandRegistry {
                         double horizontalOffset = Math.sin(theta) * radius;
                         double forwardOffset = Math.cos(theta) * depth; // Center curves forward, edges trail back
                         
-                        // Calculate the 3D offset relative to player's looking direction
+                        // Calculate the 3D decrement relative to player's looking direction
                         Vector offset = u.clone().multiply(horizontalOffset)
                                          .add(forward.clone().multiply(forwardOffset));
                         
@@ -662,11 +659,55 @@ public final class HariantCommandRegistry {
                 HariantLogger.success(player, Component.text("Removed riptide!"));
             }
             else {
-                final double scale = context.get(0).toDouble(1.0);
+                final double scale = context.argument(0).toDouble(1.0);
                 
                 Holder.riptideFx = new RiptideFx(player.getLocation(), scale);
                 
                 HariantLogger.success(player, Component.text("Created riptide with scale %.1f!".formatted(scale)));
+            }
+        });
+        
+        register("c", (Function<String, SimpleCommand>) command -> new HariantPlayerCommand(command, PlayerRank.ADMIN) {
+            @Override
+            public void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+                final PlayerProfile profile = Hariant.getPlayerProfile(player);
+                
+                if (Hariant.entityExists(profile.getUuid())) {
+                    Hariant.destroyEntity(profile.getUuid());
+                    EnumLobbyItem.clearInventoryAndGiveAllItems(player);
+                    
+                    profile.messageSuccess(Component.text("Successfully deleted player instance!"));
+                    return;
+                }
+                
+                final HeroInstance heroInstance;
+                
+                if (args.length == 0) {
+                    heroInstance = profile.getSelectedHeroInstance();
+                }
+                else {
+                    final Hero hero = args.get(0).toRegistryItem(HeroRegistry.getRegistry()).orElse(null);
+                    
+                    if (hero == null) {
+                        profile.messageError(Component.text("Unknown hero: %s!".formatted(args.get(0))));
+                        return;
+                    }
+                    
+                    heroInstance = profile.getDatabase().heroDirectory.getHero(hero).orElse(null);
+                    
+                    if (heroInstance == null) {
+                        profile.messageError(Component.text("You don't own this hero!"));
+                        return;
+                    }
+                }
+                
+                Hariant.createPlayer(player, heroInstance);
+                HariantLogger.success(profile, Component.text("Created player instance with ").append(heroInstance.getOrigin().getName()).append(Component.text("!")));
+            }
+            
+            @Override
+            public @NotNull List<String> tabComplete(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+                return StringList.ofRegistryKeys(HeroRegistry.getRegistry());
             }
         });
     }

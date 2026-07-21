@@ -8,15 +8,17 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifiable;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.event.HariantEffectEvent;
+import me.hapyl.hariant.event.effect.HariantAttributeAddEvent;
+import me.hapyl.hariant.event.effect.HariantAttributeRemoveEvent;
+import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import me.hapyl.hariant.util.Resettable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class AttributesInstance extends Attributes implements AttributeModifiable, Ticking, Resettable {
@@ -52,7 +54,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
         final HariantEntity applier = attributeModifier.getApplier();
         
         // Check for effect resistance for negative modifiers
-        if (HariantEffectEvent.callEvent(entity, applier, attributeModifier)) {
+        if (HariantEffectEvent.callEvent(entity, applier, attributeModifier, HariantAttributeAddEvent::new)) {
             return;
         }
         
@@ -78,9 +80,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
             return false;
         }
         
-        attributeModifier.onRemove0(entity);
-        this.triggerAttributeUpdate(attributeModifier);
-        
+        this.removeModifier0(attributeModifier);
         return true;
     }
     
@@ -119,13 +119,21 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     @Override
     public void tick() {
         // Tick modifiers over a defensive copy
-        for (AttributeModifier attributeModifier : Set.copyOf(modifiers.values())) {
+        final Iterator<Map.Entry<Key, AttributeModifier>> iterator = modifiers.entrySet().iterator();
+        
+        while (iterator.hasNext()) {
+            final Map.Entry<Key, AttributeModifier> entry = iterator.next();
+            
+            final Key key = entry.getKey();
+            final AttributeModifier attributeModifier = entry.getValue();
+            
             // Tick modifier
             attributeModifier.tick(entity);
             
             // If modifier is over, remove it
             if (attributeModifier.isOver()) {
-                this.removeModifier(attributeModifier.getKey());
+                iterator.remove();
+                this.removeModifier0(attributeModifier);
             }
         }
     }
@@ -155,6 +163,14 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     
     public void updateAttribute(@NotNull AttributeType attributeType) {
         attributeType.update(entity, get(attributeType));
+    }
+    
+    private void removeModifier0(@NotNull AttributeModifier attributeModifier) {
+        attributeModifier.onRemove0(entity);
+        this.triggerAttributeUpdate(attributeModifier);
+        
+        // Call event
+        new HariantAttributeRemoveEvent(entity, attributeModifier).callEvent();
     }
     
     private void triggerAttributeUpdate(@NotNull AttributeModifier modifier) {

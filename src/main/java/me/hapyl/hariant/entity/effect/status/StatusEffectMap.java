@@ -3,7 +3,9 @@ package me.hapyl.hariant.entity.effect.status;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.event.HariantEffectEvent;
+import me.hapyl.hariant.event.effect.HariantEffectEvent;
+import me.hapyl.hariant.event.effect.HariantStatusEffectAddEvent;
+import me.hapyl.hariant.event.effect.HariantStatusEffectRemoveEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -14,11 +16,11 @@ import java.util.stream.Stream;
 public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     
     private final HariantEntity entity;
-    private final Map<EnumStatusEffect, StatusEffectInstance> effectMap;
+    private final Map<StatusEffectType, StatusEffectInstance> effectMap;
     
     public StatusEffectMap(@NotNull HariantEntity entity) {
         this.entity = entity;
-        this.effectMap = Maps.newEnumMap(EnumStatusEffect.class);
+        this.effectMap = Maps.newEnumMap(StatusEffectType.class);
     }
     
     @NotNull
@@ -43,8 +45,8 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     }
     
     @Override
-    public void addEffect(@NotNull EnumStatusEffect effect, int duration, @NotNull HariantEntity applier) {
-        if (HariantEffectEvent.callEvent(entity, applier, effect)) {
+    public void addEffect(@NotNull StatusEffectType effect, int duration, @NotNull HariantEntity applier) {
+        if (HariantEffectEvent.callEvent(entity, applier, effect, HariantStatusEffectAddEvent::new)) {
             return;
         }
         
@@ -65,11 +67,14 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     }
     
     @Override
-    public void removeEffect(@NotNull EnumStatusEffect effect) {
+    public void removeEffect(@NotNull StatusEffectType effect) {
         final StatusEffectInstance previousEffect = effectMap.remove(effect);
         
         if (previousEffect != null) {
             previousEffect.remove();
+            
+            // Call event
+            new HariantStatusEffectRemoveEvent(entity, previousEffect.getEffect()).callEvent();
         }
     }
     
@@ -80,13 +85,13 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     }
     
     @Override
-    public boolean hasEffect(@NotNull EnumStatusEffect effect) {
+    public boolean hasEffect(@NotNull StatusEffectType effect) {
         return effectMap.containsKey(effect);
     }
     
     @NotNull
     @Override
-    public Optional<StatusEffectInstance> getEffect(@NotNull EnumStatusEffect effect) {
+    public Optional<StatusEffectInstance> getEffect(@NotNull StatusEffectType effect) {
         return Optional.ofNullable(effectMap.get(effect));
     }
     

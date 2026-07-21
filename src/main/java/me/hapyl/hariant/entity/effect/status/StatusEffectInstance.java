@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class StatusEffectInstance implements Ticking, TickDuration, Removable {
     
-    private final EnumStatusEffect effect;
+    private final StatusEffectType effect;
     private final HariantEntity entity;
     
     private HariantEntity applier;
@@ -18,7 +18,7 @@ public class StatusEffectInstance implements Ticking, TickDuration, Removable {
     private int duration;
     private int tick;
     
-    StatusEffectInstance(@NotNull EnumStatusEffect effect, @NotNull HariantEntity entity, @Nullable HariantEntity applier, int duration) {
+    StatusEffectInstance(@NotNull StatusEffectType effect, @NotNull HariantEntity entity, @Nullable HariantEntity applier, int duration) {
         this.effect = effect;
         this.entity = entity;
         this.applier = applier;
@@ -40,7 +40,7 @@ public class StatusEffectInstance implements Ticking, TickDuration, Removable {
     }
     
     @NotNull
-    public EnumStatusEffect getEffect() {
+    public StatusEffectType getEffect() {
         return effect;
     }
     

@@ -27,6 +27,7 @@ import me.hapyl.hariant.registry.Registrable;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentIndex;
 import me.hapyl.hariant.talent.TalentPassive;
+import me.hapyl.hariant.talent.rechargeable.TalentRechargeable;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.weapon.Weapon;
 import net.kyori.adventure.text.Component;
@@ -156,6 +157,16 @@ public abstract class Hero
     @NotNull
     public Talent getTalent(@NotNull TalentIndex index) {
         return talentsMapped.get(index);
+    }
+    
+    public @NotNull TalentIndex getTalentIndex(@NotNull TalentRechargeable talent) {
+        for (Map.Entry<TalentIndex, Talent> entry : talentsMapped.entrySet()) {
+            if (entry.getValue().equals(talent)) {
+                return entry.getKey();
+            }
+        }
+        
+        throw new IllegalArgumentException("Talent %s does not belong to %s!".formatted(talent.getClass().getSimpleName(), this.getClass().getSimpleName()));
     }
     
     @NotNull
@@ -298,12 +309,14 @@ public abstract class Hero
     @Override
     public void onCreate(@NotNull HariantPlayer player) {
         weapon.onCreate(player);
+        talentsMapped.values().forEach(talent -> talent.onCreate(player));
     }
     
     @OverridingMethodsMustInvokeSuper
     @Override
     public void onDestroy(@NotNull HariantPlayer player) {
         weapon.onDestroy(player);
+        talentsMapped.values().forEach(talent -> talent.onDestroy(player));
     }
     
 }

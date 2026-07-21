@@ -32,7 +32,7 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
     public void handleHariantAttackEvent(HariantAttackEvent ev) {
         final HariantEntity attacker = ev.getAttacker();
         
-        if (attacker.hasEffect(EnumStatusEffect.INVISIBILITY)) {
+        if (attacker.hasEffect(StatusEffectType.INVISIBILITY)) {
             this.loseInvisibility(attacker, "dealt");
         }
     }
@@ -41,7 +41,7 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
     public void handleHariantDamageEvent(HariantDamageEvent ev) {
         final HariantEntity entity = ev.getEntity();
         
-        if (entity.hasEffect(EnumStatusEffect.INVISIBILITY)) {
+        if (entity.hasEffect(StatusEffectType.INVISIBILITY)) {
             this.loseInvisibility(entity, "took");
         }
     }
@@ -59,7 +59,7 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
     }
     
     private void loseInvisibility(@NotNull HariantEntity attacker, @NotNull String type) {
-        attacker.removeEffect(EnumStatusEffect.INVISIBILITY);
+        attacker.removeEffect(StatusEffectType.INVISIBILITY);
         
         // Notify that they lost invisibility
         attacker.sendMessage(Component.text("You %s damage and lost your invisibility!".formatted(type), Colors.ERROR));

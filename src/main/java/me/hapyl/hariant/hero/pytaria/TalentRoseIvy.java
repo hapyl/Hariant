@@ -19,7 +19,7 @@ import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileHitEvent;
@@ -203,7 +203,7 @@ public final class TalentRoseIvy extends Talent implements Listener {
                 collectNearbyEntities(origin, radius, 1, radius)
                         .filter(player::canAffect)
                         .forEach(entity -> {
-                            entity.addEffect(EnumStatusEffect.ROSE_IVY, effectDuration, player);
+                            entity.addEffect(StatusEffectType.ROSE_IVY, effectDuration, player);
                             entity.getAttributes().addModifier(new RoseIvyModifier(player));
                             
                             // Fx

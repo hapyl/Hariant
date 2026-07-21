@@ -10,6 +10,7 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Particle;
@@ -22,6 +23,12 @@ import java.util.Set;
 
 public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
     
+    public static final DamageSourceIdentity DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(
+            Key.ofString("burning"),
+            Component.text("Burning"),
+            DeathMessage.createWithDefaultKiller("{player} burnt to death")
+    );
+    
     private final Key modifierKey = Key.ofString("burn");
     
     private final Decimal attackDecrease = Decimal.ofPercentage(20);
@@ -30,11 +37,6 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
     private final int burnPeriod = Tick.fromSeconds(0.5f);
     
     private final double burnDamage = 20;
-    
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            this,
-            DeathMessage.createWithDefaultKiller("{player} burnt to death")
-    );
     
     ElementalAnomalyBurn() {
         super(Key.ofString("burn"), Component.text("Burn"), ElementType.FIRE);
@@ -107,7 +109,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
         @Override
         public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
             if (tick % burnPeriod == 0) {
-                entity.damage(damageSource);
+                InternalTasks.now(() -> entity.damage(damageSource));
             }
             
             // Fx
@@ -115,10 +117,11 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
         }
     }
     
-    public class ElementalAnomalyBurnDamageSource extends DamageSourceImpl {
+    public static class ElementalAnomalyBurnDamageSource extends DamageSourceImpl {
+        
         ElementalAnomalyBurnDamageSource(@Nullable HariantEntity source, double damage) {
             super(
-                    damageSourceIdentity,
+                    DAMAGE_SOURCE_IDENTITY,
                     source,
                     DamageType.ANOMALY,
                     ElementType.FIRE,
@@ -129,4 +132,5 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl {
             );
         }
     }
+    
 }

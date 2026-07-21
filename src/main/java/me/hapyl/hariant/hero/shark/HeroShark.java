@@ -27,7 +27,7 @@ public final class HeroShark extends Hero {
             Key.ofString("shark_modifier"),
             Attribute.WATER_MOVEMENT_EFFICIENCY,
             VanillaAttributeModifier.Operation.FLAT,
-            1.5
+            2.5
     );
     
     public HeroShark(@NotNull Key key) {
@@ -46,6 +46,14 @@ public final class HeroShark extends Hero {
         equipment.setBoots(157, 175, 194, TrimPattern.RIB, TrimMaterial.QUARTZ);
         
         setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.ELEMENTAL_MASTERY, AttributeType.ENERGY_RECHARGE, AttributeType.PHYSICAL_DAMAGE_BONUS, AttributeType.WATER_DAMAGE_BONUS));
+        
+        setDescription(
+                Component.empty()
+                         .append(Component.text("A warrior from the depths of this world."))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("Specializes in bleeding enemies to death."))
+        );
     }
     
     @Override

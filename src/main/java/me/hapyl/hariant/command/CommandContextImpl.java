@@ -7,9 +7,6 @@ import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 public class CommandContextImpl implements CommandContext {
     
@@ -34,8 +31,13 @@ public class CommandContextImpl implements CommandContext {
     }
     
     @Override
-    public @NotNull TypeConverter get(int index) {
+    public @NotNull TypeConverter argument(int index) {
         return args.get(index);
+    }
+    
+    @Override
+    public int argumentLength() {
+        return args.length;
     }
     
     @Override

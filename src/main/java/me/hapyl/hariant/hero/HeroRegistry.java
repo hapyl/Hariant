@@ -9,6 +9,7 @@ import me.hapyl.hariant.hero.nyx.HeroNyx;
 import me.hapyl.hariant.hero.pytaria.HeroPytaria;
 import me.hapyl.hariant.hero.shark.HeroShark;
 import me.hapyl.hariant.hero.troll.HeroTroll;
+import me.hapyl.hariant.hero.zealot.HeroZealot;
 import me.hapyl.hariant.registry.StaticRegistry;
 import me.hapyl.hariant.registry.StaticRegistryMap;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +27,7 @@ public final class HeroRegistry extends StaticRegistry<Hero> {
     public static final HeroNyx NYX;
     public static final HeroBlastKnight BLAST_KNIGHT;
     public static final HeroShark SHARK;
+    public static final HeroZealot ZEALOT;
     
     private static final StaticRegistryMap<Hero> REGISTRY;
     private static final List<Hero> DEFAULT_HEROES;
@@ -42,6 +44,7 @@ public final class HeroRegistry extends StaticRegistry<Hero> {
         NYX = REGISTRY.register("nyx", HeroNyx::new);
         BLAST_KNIGHT = REGISTRY.register("blast_knight", HeroBlastKnight::new);
         SHARK = REGISTRY.register("shark", HeroShark::new);
+        ZEALOT = REGISTRY.register("zealot", HeroZealot::new);
         
         // Assign default heroes, which are: [ ARCHER, PYTARIA, ALCHEMIST, MAGE ]
         DEFAULT_HEROES = List.of(ARCHER, PYTARIA, ALCHEMIST, MAGE);

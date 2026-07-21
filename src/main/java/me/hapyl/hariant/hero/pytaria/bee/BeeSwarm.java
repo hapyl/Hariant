@@ -9,7 +9,7 @@ import me.hapyl.hariant.entity.HariantRandom;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.pytaria.TalentFeelTheBreeze;
 import me.hapyl.hariant.task.HariantTickingTask;
@@ -122,7 +122,7 @@ public class BeeSwarm extends HariantTickingTask {
             if (distanceToSquared < talent.stingDistance.doubleValueSquared()) {
                 // If the target exists, deal damage and FUCKING DIE
                 if (bee.target != null) {
-                    final double damage = bee.target.getEntity().hasEffect(EnumStatusEffect.ROSE_IVY)
+                    final double damage = bee.target.getEntity().hasEffect(StatusEffectType.ROSE_IVY)
                                           ? talent.beeDamageIvy.getScaledValue(player)
                                           : talent.beeDamage.getScaledValue(player);
                     

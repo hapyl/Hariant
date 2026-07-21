@@ -83,7 +83,7 @@ public class ComponentDisplay {
     }
     
     public static void ofDamage(@NotNull DamageInstance damageInstance, @NotNull Location location) {
-        final Style style = damageInstance.getSource().getElementType().getStyle();
+        final Style style = damageInstance.getDamageSource().getElementType().getStyle();
         
         final double damage = damageInstance.getDamage();
         final boolean critical = damageInstance.isCritical();

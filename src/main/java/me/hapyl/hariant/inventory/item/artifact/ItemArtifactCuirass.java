@@ -6,14 +6,14 @@ import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public final class ItemArtifactCuirass extends ItemArtifact{
+public final class ItemArtifactCuirass extends ItemArtifact {
     public ItemArtifactCuirass(@NotNull Key key) {
         super(
                 key,
                 Icon.ofTemporaryTexture(),
                 ArtifactSetRegistry.BULWARK,
-                Component.text("Cuirass"),
-                Component.text("TBD")
+                Component.text("Kingdom's Cuirass"),
+                Component.text("A piece of advanced heavy armor issued by the Kingdom.")
         );
     }
     

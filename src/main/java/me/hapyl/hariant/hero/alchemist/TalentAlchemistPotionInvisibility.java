@@ -1,6 +1,6 @@
 package me.hapyl.hariant.hero.alchemist;
 
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentType;
 import net.kyori.adventure.text.Component;
@@ -19,14 +19,14 @@ public final class TalentAlchemistPotionInvisibility extends TalentAlchemistPoti
         
         setTalentType(TalentType.SUPPORT);
         
-        setDescription(EnumStatusEffect.INVISIBILITY.getDescription());
+        setDescription(StatusEffectType.INVISIBILITY.getDescription());
         setDurationSeconds(8);
     }
     
     @NotNull
     @Override
     public AlchemistPotionInstance drink(@NotNull HariantPlayer player, @NotNull HeroDataAlchemist heroData) {
-        player.addEffect(EnumStatusEffect.INVISIBILITY, this.getDuration(), player);
+        player.addEffect(StatusEffectType.INVISIBILITY, this.getDuration(), player);
         
         return new AlchemistPotionInvisibilityInstance(player);
     }
@@ -43,7 +43,7 @@ public final class TalentAlchemistPotionInvisibility extends TalentAlchemistPoti
             
             // A little wonky way of checking for whether player has invisibility or not,
             // but there isn't a callback for that
-            if (!player.hasEffect(EnumStatusEffect.INVISIBILITY)) {
+            if (!player.hasEffect(StatusEffectType.INVISIBILITY)) {
                 return true;
             }
             

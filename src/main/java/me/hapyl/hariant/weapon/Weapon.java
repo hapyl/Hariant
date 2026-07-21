@@ -10,6 +10,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.Attacker;
 import me.hapyl.hariant.entity.NormalAttack;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.player.LifecyclePlayer;
 import me.hapyl.hariant.hero.Hero;
@@ -39,7 +40,7 @@ import java.util.Objects;
 /// </pre>
 public class Weapon implements
         Keyed, ItemCreator, Icon, Named,
-        Described, LifecyclePlayer, Attacker {
+        Described, LifecyclePlayer, Attacker, HariantCooldown {
     
     protected final NormalAttack normalAttack;
     
@@ -182,15 +183,26 @@ public class Weapon implements
     }
     
     public void startCooldown(@NotNull HariantPlayer player, int cooldown) {
-        player.setCooldown(this.getKey(), cooldown, true);
+        // TODO (xanyjl @ Saturday, July 18) -> Maybe introduce ATTACK SPEED, but it would require different scaling (0% -> 100%
+        player.setCooldown(this, cooldown, null);
     }
     
     public int getCooldown(@NotNull HariantPlayer player) {
-        return player.getCooldownTimeLeft(this.getKey());
+        return player.getCooldownTimeLeft(this);
     }
     
     public boolean hasCooldown(@NotNull HariantPlayer player) {
-        return player.hasCooldown(this.getKey());
+        return player.hasCooldown(this);
+    }
+    
+    @Override
+    public @NotNull Key getCooldownKey() {
+        return key;
+    }
+    
+    @Override
+    public int getCooldown() {
+        return normalAttack.getAttackCooldown();
     }
     
     @NotNull

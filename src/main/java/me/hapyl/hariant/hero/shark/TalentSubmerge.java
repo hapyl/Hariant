@@ -43,8 +43,8 @@ import java.util.Set;
 public final class TalentSubmerge extends Talent {
     
     private final @DisplayField AttributeScaling damage = AttributeScaling.create(Map.of(
-            AttributeType.ATTACK, 83.2,
-            AttributeType.ELEMENTAL_MASTERY, 62.4
+            AttributeType.ATTACK, 63.2,
+            AttributeType.ELEMENTAL_MASTERY, 42.4
     ));
     
     private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.WATER, 250);

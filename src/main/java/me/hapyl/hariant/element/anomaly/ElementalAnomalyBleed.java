@@ -12,6 +12,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.event.HariantHealEvent;
+import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -47,7 +48,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
     private final Particle.DustTransition dustTransition = new Particle.DustTransition(
             org.bukkit.Color.fromRGB(125, 1, 20),
             org.bukkit.Color.fromRGB(194, 14, 41),
-            2
+            1
     );
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
@@ -148,11 +149,10 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         @Override
         public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
             if (tick % bleedPeriod == 0) {
-                entity.damage(damageSource);
+                InternalTasks.now(() -> entity.damage(damageSource));
             }
             
-            // Fx always
-            entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.DUST_COLOR_TRANSITION, 1, 0.2, 0.2, 0.2, 0.015f, dustTransition);
+            entity.spawnWorldParticle(entity.getLocation().add(0, 0.2, 0), Particle.DUST_COLOR_TRANSITION, 1, 0.2, 0.2, 0.2, 0.015f, dustTransition);
         }
     }
     

@@ -13,8 +13,9 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.annotate.StrictNamingConvention;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.entity.player.LifecyclePlayer;
 import me.hapyl.hariant.event.HariantTalentEvent;
 import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import me.hapyl.hariant.inventory.item.ItemCreator;
@@ -43,7 +44,8 @@ import java.util.stream.IntStream;
 public abstract class Talent
         implements
         Named, Described, Keyed, ItemCreator,
-        Registrable, Cooldown, Duration, Identified {
+        Registrable, HariantCooldown, Duration, Identified,
+        LifecyclePlayer {
     
     private final List<DisplayFieldInstance> attributeFields;
     
@@ -164,6 +166,14 @@ public abstract class Talent
     public void onUnregister() {
     }
     
+    @Override
+    public void onCreate(@NotNull HariantPlayer player) {
+    }
+    
+    @Override
+    public void onDestroy(@NotNull HariantPlayer player) {
+    }
+    
     @NotNull
     @Override
     public Component getName() {
@@ -217,11 +227,15 @@ public abstract class Talent
     @NotNull
     public abstract Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context);
     
+    public boolean respectCooldown() {
+        return true;
+    }
+    
     public void execute0(@NotNull HariantPlayer player) {
         // Precondition checks
         final int cooldownTimeLeft = player.getCooldownTimeLeft(this);
         
-        if (player.hasCooldown(this)) {
+        if (player.hasCooldown(this) && respectCooldown()) {
             if (player.getSetting(Settings.COOLDOWN_FEEDBACK)) {
                 player.messageError(
                         Component.text("This talent is on cooldown for ")
@@ -235,7 +249,7 @@ public abstract class Talent
         
         // If a game is in progress, make sure it's IN_GAME
         if (Hariant.isGameInProgressButNotActive()) {
-            player.messageError(Component.text("The game hasn't started yet!"));
+            player.messageError(Component.text("The game hasn't started or already ended!"));
             return;
         }
         
@@ -270,13 +284,8 @@ public abstract class Talent
             return;
         }
         
-        // Else start cooldown unless the response is await
-        if (response.isOk()) {
-            player.setCooldown(this);
-        }
-        else if (response.isAwait()) {
-            player.setIndefiniteCooldown(this);
-        }
+        // Handle cooldown
+        response.getStatus().setCooldown(player, this);
         
         // Call the talent event AFTER the execution
         new HariantTalentEvent(player, this, response).callEvent();
@@ -353,6 +362,12 @@ public abstract class Talent
         return hierarchy;
     }
     
+    public static @NotNull List<? extends Component> createSubloreComponent(@NotNull IntFunction<Component> prefixSupplier, @NotNull Component... components) {
+        return IntStream.range(0, components.length)
+                        .mapToObj(i -> prefixSupplier.apply(i).append(components[i]))
+                        .toList();
+    }
+    
     @NotNull
     private static String formatFieldName(@NotNull Field field) {
         final String fieldName = field.getName();
@@ -382,12 +397,6 @@ public abstract class Talent
         }
         
         return builder.toString();
-    }
-    
-    public static @NotNull List<? extends Component> createSubloreComponent(@NotNull IntFunction<Component> prefixSupplier, @NotNull Component... components) {
-        return IntStream.range(0, components.length)
-                        .mapToObj(i -> prefixSupplier.apply(i).append(components[i]))
-                        .toList();
     }
     
 }

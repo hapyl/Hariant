@@ -2,12 +2,11 @@ package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantElementalAnomalyEvent;
@@ -27,11 +26,11 @@ public final class ArtifactSetBloodscent extends ArtifactSet implements Listener
     private final ArtifactSetModifier attackIncrease = CommonArtifactSetModifiers.ATTACK;
     
     private final AttributeScaling healing = AttributeScaling.create(
-            Map.of(AttributeType.ATTACK, 50.0, AttributeType.ELEMENTAL_MASTERY, 25.0),
-            25
+            Map.of(AttributeType.ATTACK, 30.0, AttributeType.ELEMENTAL_MASTERY, 15.0),
+            20
     );
     
-    private final Cooldown cooldown = Cooldown.ofSeconds(Key.ofString("bloodscent_healing"), 0.1f);
+    private final HariantCooldown cooldown = HariantCooldown.ofSeconds(Key.ofString("bloodscent_healing"), 0.1f);
     
     ArtifactSetBloodscent(@NotNull Key key) {
         super(key, Component.text("Bloodscent"));
@@ -85,7 +84,7 @@ public final class ArtifactSetBloodscent extends ArtifactSet implements Listener
     
     private class ModifierTwoPiece extends AttributeModifierArtifactSet {
         ModifierTwoPiece(@NotNull HariantEntity applier) {
-            super(ArtifactSetBloodscent.this, PieceCount.TWO_PIECE, applier, HariantConstants.INDEFINITE_DURATION, attackIncrease);
+            super(ArtifactSetBloodscent.this, PieceCount.TWO_PIECE, applier, attackIncrease);
         }
     }
     

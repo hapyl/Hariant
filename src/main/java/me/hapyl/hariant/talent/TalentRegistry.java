@@ -12,6 +12,7 @@ import me.hapyl.hariant.hero.nyx.*;
 import me.hapyl.hariant.hero.pytaria.*;
 import me.hapyl.hariant.hero.shark.*;
 import me.hapyl.hariant.hero.troll.*;
+import me.hapyl.hariant.hero.zealot.*;
 import me.hapyl.hariant.registry.StaticRegistry;
 import me.hapyl.hariant.registry.StaticRegistryMap;
 import me.hapyl.hariant.talent.target.TalentTarget;
@@ -107,6 +108,16 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentApexPredator APEX_PREDATOR;
     public static final TalentSharknado SHARKNADO;
     
+    /**
+     * {@link HeroZealot}
+     */
+    public static final TalentZealotry ZEALOTRY;
+    public static final TalentPsionicOverload PSIONIC_OVERLOAD;
+    public static final TalentMalevolentHitshield MALEVOLENT_HITSHIELD;
+    public static final TalentReckoning RECKONING;
+    public static final TalentMaintainOrder MAINTAIN_ORDER;
+    
+    // Private fields
     private static final StaticRegistryMap<Talent> REGISTRY;
     private static final TalentUltimate DUMMY_ULTIMATE;
     
@@ -168,6 +179,12 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         BUBBLE_TRAP = REGISTRY.register("bubble_trap", TalentBubbleTrap::new);
         APEX_PREDATOR = REGISTRY.register("apex_predator", TalentApexPredator::new);
         SHARKNADO = REGISTRY.register("sharknado", TalentSharknado::new);
+        
+        ZEALOTRY = REGISTRY.register("zealotry",  TalentZealotry::new);
+        PSIONIC_OVERLOAD = REGISTRY.register("psionic_overload", TalentPsionicOverload::new);
+        MALEVOLENT_HITSHIELD = REGISTRY.register("malevolent_hitshield", TalentMalevolentHitshield::new);
+        RECKONING = REGISTRY.register("reckoning", TalentReckoning::new);
+        MAINTAIN_ORDER = REGISTRY.register("maintain_order", TalentMaintainOrder::new);
     }
     
     @NotNull

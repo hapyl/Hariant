@@ -1,9 +1,12 @@
-package me.hapyl.hariant.event;
+package me.hapyl.hariant.event.effect;
 
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
+import me.hapyl.hariant.event.Cancel;
+import me.hapyl.hariant.event.CancellableWithReason;
+import me.hapyl.hariant.event.HariantEntityEvent;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +22,7 @@ public class HariantEffectEvent extends HariantEntityEvent implements Cancellabl
     
     private @Nullable Cancel cancel;
     
-    HariantEffectEvent(@NotNull HariantEntity entity, @NotNull HariantEntity applier, @NotNull Effect effect, boolean hasResisted) {
+    public HariantEffectEvent(@NotNull HariantEntity entity, @NotNull HariantEntity applier, @NotNull Effect effect, boolean hasResisted) {
         super(entity);
         
         this.applier = applier;
@@ -59,7 +62,7 @@ public class HariantEffectEvent extends HariantEntityEvent implements Cancellabl
         return HANDLER_LIST;
     }
     
-    public static boolean callEvent(@NotNull HariantEntity entity, @NotNull HariantEntity applier, @NotNull Effect effect) {
+    public static <E extends Effect> boolean callEvent(@NotNull HariantEntity entity, @NotNull HariantEntity applier, @NotNull E effect, @NotNull EventConstructor<E> constructor) {
         final EffectType effectType = effect.getEffectType();
         
         boolean hasResisted = false;
@@ -70,7 +73,7 @@ public class HariantEffectEvent extends HariantEntityEvent implements Cancellabl
         }
         
         // Call event, which has the ultimate say of whether to cancel the effect
-        final HariantEffectEvent event = new HariantEffectEvent(entity, applier, effect, hasResisted);
+        final HariantEffectEvent event = constructor.construct(entity, applier, effect, hasResisted);
         event.callEvent();
         
         final Cancel cancel = event.getCancel();
@@ -86,6 +89,10 @@ public class HariantEffectEvent extends HariantEntityEvent implements Cancellabl
             ComponentDisplay.ofAscend(cancel.asComponent(), entity.getLocation(), 20, 1.75f);
             return true;
         }
+    }
+    
+    public interface EventConstructor<E extends Effect> {
+        @NotNull HariantEffectEvent construct(@NotNull HariantEntity entity, @NotNull HariantEntity applier, @NotNull E effect, boolean hasResisted);
     }
     
 }

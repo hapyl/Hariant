@@ -35,7 +35,7 @@ public final class TalentApexPredator extends TalentPassive implements Listener 
                 Component.empty()
                          .append(Component.text("Triggering "))
                          .append(ElementalAnomalyType.BLEED)
-                         .append(Component.text(" anomaly, applies "))
+                         .append(Component.text(" anomaly applies "))
                          .appendNewline()
                          .append(Definition.PREY)
                          .append(Component.text(" mark for "))

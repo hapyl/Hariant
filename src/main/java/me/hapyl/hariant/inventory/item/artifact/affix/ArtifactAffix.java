@@ -25,6 +25,7 @@ public enum ArtifactAffix implements ComponentLike {
     VITALITY(AttributeType.VITALITY, 30, 60),
     MENDING(AttributeType.MENDING, 30, 60),
     LUCK(AttributeType.LUCK, 20, 20),
+    FEROCITY(AttributeType.FEROCITY, 10, 20),
     
     PHYSICAL_DAMAGE_BONUS(AttributeType.PHYSICAL_DAMAGE_BONUS, 10, 100),
     FIRE_DAMAGE_BONUS(AttributeType.FIRE_DAMAGE_BONUS, 10, 100),

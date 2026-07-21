@@ -1,6 +1,7 @@
 package me.hapyl.hariant.entity;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.annotate.EventLike;
 import me.hapyl.eterna.module.location.Coordinates;
 import me.hapyl.eterna.module.location.Distanced;
@@ -8,6 +9,7 @@ import me.hapyl.eterna.module.location.Located;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.geometry.Drawable;
+import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.reflect.glowing.Glowing;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.eterna.module.registry.Key;
@@ -21,9 +23,9 @@ import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.element.*;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
+import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.damage.tracker.CombatData;
@@ -31,12 +33,14 @@ import me.hapyl.hariant.entity.damage.tracker.CombatTracker;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectHandler;
 import me.hapyl.hariant.entity.effect.EffectType;
-import me.hapyl.hariant.entity.effect.status.EnumStatusEffect;
 import me.hapyl.hariant.entity.effect.status.StatusEffectHandler;
 import me.hapyl.hariant.entity.effect.status.StatusEffectInstance;
 import me.hapyl.hariant.entity.effect.status.StatusEffectMap;
+import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.mutator.HealthMutator;
+import me.hapyl.hariant.entity.player.Delegatable;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.shield.Shield;
 import me.hapyl.hariant.entity.shield.ShieldResult;
@@ -45,12 +49,16 @@ import me.hapyl.hariant.entity.trap.Trap;
 import me.hapyl.hariant.entity.trap.TrapEscape;
 import me.hapyl.hariant.entity.trap.Trappable;
 import me.hapyl.hariant.event.*;
+import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import me.hapyl.hariant.handler.ProjectileHandler;
+import me.hapyl.hariant.task.HariantTickingTask;
+import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamEntry;
 import me.hapyl.hariant.team.TeamEntryProvider;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.ui.ComponentDisplayAnimation;
+import me.hapyl.hariant.util.Cancellable;
 import me.hapyl.hariant.util.MathFont;
 import me.hapyl.hariant.util.SoundFx;
 import me.hapyl.hariant.util.UniquelyIdentified;
@@ -86,6 +94,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -96,7 +105,7 @@ public class HariantEntity
         ParticleSpawner, EntityCollector, Distanced, Attacker,
         TeamEntryProvider, StatusEffectHandler, HeadComponent, DeathComponent,
         CooldownHandler, Elemental, ElementHandler, HariantLogger.Sender,
-        EffectHandler, TickSupplier, Trappable {
+        EffectHandler, TickSupplier, Trappable, Delegatable {
     
     private static final ComponentDisplay EFFECT_RESISTANCE_DISPLAY = new ComponentDisplay(
             Component.text("ᴇꜰꜰᴇᴄᴛ ʀᴇꜱ", AttributeType.EFFECT_RESISTANCE.getStyle()),
@@ -114,7 +123,8 @@ public class HariantEntity
             20, 1.75f
     );
     
-    private static final Cooldown HEALTH_MUTATOR_APPLICATION_COOLDOWN = Cooldown.ofSeconds(Key.ofString("health_mutator_cooldown"), 1.2f);
+    private static final HariantCooldown HEALTH_MUTATOR_APPLICATION_COOLDOWN = HariantCooldown.ofSeconds(Key.ofString("health_mutator_cooldown"), 1.2f);
+    private static final HariantCooldown FEROCITY_COOLDOWN = HariantCooldown.ofSeconds(Key.ofString("ferocity"), 0.2f);
     
     private static final Style DEFAULT_HEALTH_STYLE = Style.style(Colors.ATTRIBUTE_MAX_HEALTH);
     
@@ -126,9 +136,10 @@ public class HariantEntity
     protected final ElementData elementData;
     
     private final StatusEffectMap effectMap;
-    private final CooldownHandler cooldownHandler;
+    private final CooldownHandlerImpl cooldownHandler;
     private final EntityTicker ticker;
     private final LinkedHashMap<Class<? extends HealthMutator>, HealthMutator> healthMutators;
+    private final Set<DelegateCancellable> delegatedCancellable;
     
     protected @Nullable HariantEntity lastAttacker;
     
@@ -153,6 +164,7 @@ public class HariantEntity
         this.cooldownHandler = new CooldownHandlerImpl(this);
         this.elementData = new ElementData(this);
         this.healthMutators = Maps.newLinkedHashMap();
+        this.delegatedCancellable = Sets.newHashSet();
         
         this.updateAttributes();
         
@@ -190,6 +202,11 @@ public class HariantEntity
     
     public void setShield(@Nullable Shield shield) {
         if (shield != null) {
+            // If current shield has higher priority, cancel
+            if (this.shield != null && this.shield.hasHigherPriority(shield)) {
+                return;
+            }
+            
             // Call event
             if (new HariantShieldCreateEvent(shield).callEvent()) {
                 return;
@@ -229,27 +246,23 @@ public class HariantEntity
     }
     
     @Override
-    public void setCooldown(@NotNull Key key, @Range(from = 0, to = Integer.MAX_VALUE) int duration, boolean respectCooldownReduction) {
-        cooldownHandler.setCooldown(key, duration, respectCooldownReduction);
+    public void setCooldown(@NotNull HariantCooldown cooldown, @Range(from = 0, to = Integer.MAX_VALUE) int duration, @Nullable AttributeType cooldownReducingAttribute) {
+        cooldownHandler.setCooldown(cooldown, duration, cooldownReducingAttribute);
     }
     
     @Override
-    public int getCooldownTimeLeft(@NotNull Key key) {
-        return cooldownHandler.getCooldownTimeLeft(key);
+    public int getCooldownTimeLeft(@NotNull HariantCooldown cooldown) {
+        return cooldownHandler.getCooldownTimeLeft(cooldown);
     }
     
     @Override
-    public boolean hasCooldown(@NotNull Key key) {
-        return cooldownHandler.hasCooldown(key);
+    public boolean hasCooldown(@NotNull HariantCooldown cooldown) {
+        return cooldownHandler.hasCooldown(cooldown);
     }
     
     @Override
     public void resetCooldowns() {
         cooldownHandler.resetCooldowns();
-    }
-    
-    @EventLike
-    public void onCooldownChange(@NotNull Key key, int cooldown) {
     }
     
     public void updateAttributes() {
@@ -295,13 +308,97 @@ public class HariantEntity
         this.setHealth(event.getNewHealth());
     }
     
-    @NotNull
-    public ImmunityResult isImmuneTo(@NotNull DamageSource source) {
+    public @NotNull ImmunityResult isImmuneTo(@NotNull DamageSource source) {
         return ImmunityResult.NOT_IMMUNE;
     }
     
-    @NotNull
-    public DamageResult damage(@NotNull DamageSource source) {
+    public @NotNull DamageResult damage(@NotNull DamageInstance damageInstance) {
+        final HariantDamageEvent damageEvent = new HariantDamageEvent(damageInstance);
+        final DamageSource damageSource = damageInstance.getDamageSource();
+        
+        if (damageEvent.callEvent()) {
+            if (damageEvent.isStartCooldownIfCancelled()) {
+                damageSource.startCooldownIfExists(this);
+            }
+            
+            return broadcastImmune();
+        }
+        
+        final HariantEntity attacker = damageInstance.getAttacker();
+        
+        // Handle shields
+        if (shield != null && shield.canShield(damageSource)) {
+            final double damage = damageInstance.getDamage();
+            final ShieldResult shieldResult = shield.shield0(damage, damageSource);
+            
+            // Always mark shielded, regardless if the shield broke or not
+            damageInstance.markShielded();
+            
+            // Decrement the damage
+            damageInstance.mutateDamage(shield, DamageMutator.subtract(), shieldResult.decrement());
+            
+            // Display the damage shielded
+            if (shieldResult.shielded() > 0) {
+                shield.display(shieldResult.shielded(), this.getMidpointLocation());
+            }
+            
+            // If capacity is lower or equals to 0, the shield broke
+            if (shieldResult.capacityAfterHit() <= 0) {
+                shield.onRemove0(Shield.Cause.BROKE);
+                shield = null;
+            }
+        }
+        
+        final double damage = damageInstance.getDamage();
+        final double health = getFinalHealth();
+        
+        final boolean isLethal = health - damage <= 0.0 && !damageSource.isFlagged(DamageFlag.CANNOT_KILL);
+        
+        if (isLethal) {
+            damageInstance.markLethal();
+        }
+        
+        // Set last attacker so we know who to credit for the kill
+        if (attacker != null) {
+            this.lastAttacker = attacker;
+            this.lastAttacker.onDamageDealt0(damageInstance, this);
+        }
+        
+        // Pass the damage to trackers
+        this.incrementTrackerDamage(attacker, damageSource, damage, isLethal);
+        
+        // Call monitor event
+        new HariantMonitorDamageEvent(this, damageInstance).callEvent();
+        
+        // Broadcast hurt
+        this.broadcastHurt(damageInstance, !isLethal);
+        
+        // Check whether damage can kill and call death event
+        if (isLethal) {
+            if (new HariantDeathEvent(this, damageInstance).callEvent()) {
+                return DamageResult.IMMUNE;
+            }
+            
+            this.die(damageSource);
+            return DamageResult.DEAD;
+        }
+        
+        // Decrement health
+        this.decrementHealth(damage);
+        
+        // Call EventLike method
+        this.onDamageTaken(damageInstance, attacker);
+        
+        // Apply element
+        this.applyElement(damageSource);
+        
+        // Start cooldown if the damage was actually dealt
+        damageSource.startCooldownIfExists(this);
+        
+        return DamageResult.OK;
+    }
+    
+    public final @NotNull DamageResult damage(@NotNull DamageSource source) {
         final ImmunityResult immunityResult = this.isImmuneTo(source);
         
         // Don't damage already dead entities
@@ -324,98 +421,7 @@ public class HariantEntity
             return broadcastImmune();
         }
         
-        final DamageInstance damageInstance = new DamageInstance(this, source);
-        final HariantDamageEvent damageEvent = new HariantDamageEvent(damageInstance);
-        
-        if (damageEvent.callEvent()) {
-            if (damageEvent.isStartCooldownIfCancelled()) {
-                source.startCooldownIfExists(this);
-            }
-            
-            return broadcastImmune();
-        }
-        
-        final HariantEntity attacker = damageInstance.getAttacker();
-        
-        // Handle shields
-        if (shield != null && shield.canShield(source)) {
-            final double damage = damageInstance.getDamage();
-            final ShieldResult shieldResult = shield.shield(damage, source);
-            
-            // Always mark shielded, regardless if the shield broke or not
-            damageInstance.markShielded();
-            
-            final double mitigatedMin = shieldResult.mitigatedMin();
-            
-            // Display the amount of damage shielded
-            if (mitigatedMin > 0) {
-                shield.display(mitigatedMin, this.getMidpointLocation());
-            }
-            
-            // If the capacity of the shield is higher than 0, simple subtract the damage
-            if (shieldResult.capacity() > 0) {
-                damageInstance.mutateDamage(shield, DamageMutator.subtract(), mitigatedMin);
-            }
-            // Otherwise the shield broke, so offset the damage
-            else {
-                final double capacity = shieldResult.capacity();
-                final double mitigated = shieldResult.mitigated();
-                
-                damageInstance.mutateDamage(shield, DamageMutator.subtract(), mitigated + capacity);
-                
-                // Also call the removal methods
-                shield.onRemove0(Shield.Cause.BROKE);
-                shield = null;
-            }
-        }
-        
-        final double damage = damageInstance.getDamage();
-        final double health = getFinalHealth();
-        
-        final boolean isLethal = health - damage <= 0.0 && !source.isFlagged(DamageFlag.CANNOT_KILL);
-        
-        if (isLethal) {
-            damageInstance.markLethal();
-        }
-        
-        // Set last attacker so we know who to credit for the kill
-        if (attacker != null) {
-            this.lastAttacker = attacker;
-            this.lastAttacker.onDamageDealt(source, this);
-        }
-        
-        // Pass the damage to trackers
-        this.incrementTrackerDamage(attacker, source, damage, isLethal);
-        
-        // Call monitor event
-        new HariantMonitorDamageEvent(this, damageInstance).callEvent();
-        
-        // Broadcast hurt
-        this.broadcastHurt(damageInstance, !isLethal);
-        
-        // Check whether damage can kill and call death event
-        if (isLethal) {
-            if (new HariantDeathEvent(this, damageInstance).callEvent()) {
-                return DamageResult.IMMUNE;
-            }
-            
-            this.die(source);
-            return DamageResult.DEAD;
-        }
-        
-        // Decrement health
-        this.decrementHealth(damage);
-        
-        // Call EventLike method
-        this.onDamageTaken(damageInstance, attacker);
-        
-        // Apply element
-        this.applyElement(source);
-        
-        // Start cooldown if the damage was actually dealt
-        source.startCooldownIfExists(this);
-        
-        return DamageResult.OK;
+        return this.damage(createDamageInstance(source));
     }
     
     @NotNull
@@ -484,13 +490,46 @@ public class HariantEntity
         if (damageResult == DamageResult.OK) {
             entity.knockback(knockbackSource);
         }
-        
     }
     
     public void attack(@NotNull HariantEntity entity) {
         final NormalAttack meleeAttack = this.getMeleeAttack();
         
         this.attack(entity, meleeAttack.createDamageSource(this).build(), meleeAttack.createKnockbackCause(this));
+    }
+    
+    public void damageFerocity(@NotNull DamageInstance damageInstance, @Range(from = 1, to = Integer.MAX_VALUE) int ferocityStrikes, boolean force) {
+        // Check for cooldown
+        if (this.hasCooldown(FEROCITY_COOLDOWN) && !force) {
+            return;
+        }
+        
+        // Always delegate ferocity task to the entity
+        this.delegate(new FerocityTask(this, damageInstance, ferocityStrikes), DelegateType.PERSISTENT);
+        
+        // Start ferocity cooldown
+        if (!force) {
+            this.setCooldown(FEROCITY_COOLDOWN);
+        }
+        
+        // Fx
+        this.playWorldSound(entity.getLocation(), Sound.ITEM_FLINTANDSTEEL_USE, 6, 0.0f);
+    }
+    
+    public void delegate(@NotNull Cancellable cancellable, @NotNull DelegateType delegateType) {
+        this.delegatedCancellable.add(new DelegateCancellable(cancellable, delegateType));
+    }
+    
+    @Override
+    public void cancelDelegates(@NotNull Predicate<DelegateCancellable> filter) {
+        this.delegatedCancellable.removeIf(delegate -> {
+            if (filter.test(delegate)) {
+                delegate.cancel();
+                return true;
+            }
+            
+            return false;
+        });
     }
     
     public boolean heal(@NotNull HealingSource healingSource) {
@@ -640,7 +679,7 @@ public class HariantEntity
      * @return {@code true} if this entity is invisible; {@code false} otherwise.
      */
     public boolean isInvisible() {
-        return hasEffect(EnumStatusEffect.INVISIBILITY);
+        return hasEffect(StatusEffectType.INVISIBILITY);
     }
     
     public boolean canAttack(@NotNull HariantEntity entity, @NotNull DamageType damageType) {
@@ -767,6 +806,7 @@ public class HariantEntity
         this.attributes.tick();
         this.effectMap.tick();
         this.elementData.tick();
+        this.cooldownHandler.tick();
         
         this.tickHealthMutators();
         this.tickShield();
@@ -812,8 +852,8 @@ public class HariantEntity
     
     @Override
     public boolean trap(@NotNull Trap trap) {
-        // If already trapped, make sure the trap can be replaced
-        if (this.trap != null && !this.trap.isReplaceable()) {
+        // If already trapped, check for priority
+        if (this.trap != null && this.trap.hasHigherPriority(trap)) {
             return false;
         }
         
@@ -965,6 +1005,10 @@ public class HariantEntity
         healthMutators.clear();
         
         effectResistance = null;
+        
+        // Cancel all delegated tasks
+        delegatedCancellable.forEach(Cancellable::cancel);
+        delegatedCancellable.clear();
         
         if (trap != null) {
             trap.onEscape0(TrapEscape.DIED);
@@ -1248,12 +1292,12 @@ public class HariantEntity
     }
     
     @Override
-    public void addEffect(@NotNull EnumStatusEffect effect, int duration, @NotNull HariantEntity applier) {
+    public void addEffect(@NotNull StatusEffectType effect, int duration, @NotNull HariantEntity applier) {
         effectMap.addEffect(effect, duration, applier);
     }
     
     @Override
-    public void removeEffect(@NotNull EnumStatusEffect effect) {
+    public void removeEffect(@NotNull StatusEffectType effect) {
         effectMap.removeEffect(effect);
     }
     
@@ -1263,13 +1307,13 @@ public class HariantEntity
     }
     
     @Override
-    public boolean hasEffect(@NotNull EnumStatusEffect effect) {
+    public boolean hasEffect(@NotNull StatusEffectType effect) {
         return effectMap.hasEffect(effect);
     }
     
     @NotNull
     @Override
-    public Optional<StatusEffectInstance> getEffect(@NotNull EnumStatusEffect effect) {
+    public Optional<StatusEffectInstance> getEffect(@NotNull StatusEffectType effect) {
         return effectMap.getEffect(effect);
     }
     
@@ -1281,7 +1325,7 @@ public class HariantEntity
     
     @Override
     public boolean triggerEffect(@NotNull HariantEntity applier, @NotNull Effect effect) {
-        return HariantEffectEvent.callEvent(this, applier, effect);
+        return HariantEffectEvent.callEvent(this, applier, effect, HariantEffectEvent::new);
     }
     
     @Override
@@ -1498,6 +1542,20 @@ public class HariantEntity
         return entity.isSneaking();
     }
     
+    public double getEyeHeight() {
+        return entity.getEyeHeight();
+    }
+    
+    public void onCooldownStarted(@NotNull HariantCooldown cooldown, int duration) {
+    }
+    
+    public void onCooldownEnded(@NotNull HariantCooldown cooldown) {
+    }
+    
+    public @NotNull DamageInstance createDamageInstance(@NotNull DamageSource damageSource) {
+        return new DamageInstance(this, damageSource);
+    }
+    
     protected void playDamageFx(@NotNull Supplier<@Nullable SoundFx> supplier) {
         entity.playHurtAnimation(0);
         
@@ -1506,6 +1564,38 @@ public class HariantEntity
         if (soundFx != null) {
             this.playWorldSound(soundFx.sound(), soundFx.pitch());
         }
+    }
+    
+    private void onDamageDealt0(@NotNull DamageInstance damageInstance, @NotNull HariantEntity entity) {
+        this.onDamageDealt(damageInstance.getDamageSource(), entity);
+        
+        // Handle ferocity
+        if (!damageInstance.getDamageSource().canTriggerFerocity()) {
+            return;
+        }
+        
+        final int ferocityStrikes = this.calculateFerocityStrikes();
+        
+        if (ferocityStrikes > 0) {
+            entity.damageFerocity(damageInstance, ferocityStrikes, false);
+        }
+    }
+    
+    private int calculateFerocityStrikes() {
+        final double ferocity = attributes.normalized(AttributeType.FEROCITY);
+        
+        if (ferocity == 0) {
+            return 0;
+        }
+        
+        int strikes = (int) ferocity;
+        final double remainder = ferocity % 1;
+        
+        if (remainder > 0 && random.nextDouble() < remainder) {
+            strikes++;
+        }
+        
+        return strikes;
     }
     
     private void tickTrap() {
@@ -1637,6 +1727,65 @@ public class HariantEntity
         public boolean isSprint() {
             return false;
         }
+        
+    }
+    
+    private static class FerocityTask extends HariantTickingTask {
+        
+        private static final int FEROCITY_DELAY = 9;
+        private static final int FEROCITY_PERIOD = 3;
+        
+        private static final Scheduler SCHEDULER = Scheduler.ofTimer(FEROCITY_DELAY, FEROCITY_PERIOD);
+        private static final Particle.DustTransition DUST_TRANSITION = new Particle.DustTransition(Color.fromRGB(77, 2, 8), Color.fromRGB(181, 43, 54), 0.8f);
+        
+        private final HariantEntity entity;
+        private final DamageInstance damageSource;
+        private final int ferocityStrikes;
+        
+        FerocityTask(@NotNull HariantEntity entity, @NotNull DamageInstance damageInstance, int ferocityStrikes) {
+            super(SCHEDULER);
+            
+            this.entity = entity;
+            this.damageSource = DamageInstance.copyOf(damageInstance, builder -> {
+                // Set damage type to FEROCITY and zero elemental units
+                return builder.damageType(DamageType.FEROCITY).elementalUnits(0);
+            });
+            this.ferocityStrikes = ferocityStrikes;
+        }
+        
+        @Override
+        public void run(int tick) {
+            // If entity is no longer valid for ferocity or exceeding the strike limit, cancel
+            if (entity.isDead() || tick >= ferocityStrikes) {
+                this.cancel();
+                return;
+            }
+            
+            // Damage the entity
+            entity.damage(damageSource);
+            
+            // Fx
+            this.spawnFerocityFx();
+        }
+        
+        private void spawnFerocityFx() {
+            final Location location = entity.getLocation();
+            
+            entity.playWorldSound(location, Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR, 0.5f, 1.75f);
+            entity.playWorldSound(location, Sound.ENTITY_DONKEY_HURT, 0.5f, 1.25f);
+            
+            final double eyeHeight = entity.getEyeHeight();
+            
+            final double x = entity.random.nextSignedDouble(1.25);
+            final double z = entity.random.nextSignedDouble(1.25);
+            
+            Geometry.drawLine(
+                    LocationHelper.copyOfPosition(location).add(x, eyeHeight, z),
+                    LocationHelper.copyOfPosition(location).subtract(x, 0, z), 0.2d,
+                    _location -> entity.spawnWorldParticle(_location, Particle.DUST_COLOR_TRANSITION, 1, 0, 0, 0, 0, DUST_TRANSITION)
+            );
+        }
+        
     }
     
 }

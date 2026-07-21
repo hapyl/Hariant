@@ -1,5 +1,6 @@
-package me.hapyl.hariant.entity.player;
+package me.hapyl.hariant.entity;
 
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.util.Cancellable;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,6 +18,14 @@ public final class DelegateCancellable implements Cancellable {
     
     public @NotNull DelegateType getDelegateType() {
         return delegateType;
+    }
+    
+    public boolean isInterruptable() {
+        return delegateType == DelegateType.INTERRUPTABLE;
+    }
+    
+    public boolean isPersistent() {
+        return delegateType == DelegateType.PERSISTENT;
     }
     
     @Override

@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.annotate.EventLike;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import org.jetbrains.annotations.NotNull;
 
+// TODO (xanyjl @ Saturday, July 18) -> Rename this?
 public interface PlayerCallback {
     
     @EventLike

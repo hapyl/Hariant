@@ -14,7 +14,7 @@ import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.shield.Shield;
 import me.hapyl.hariant.entity.shield.ShieldStrength;
-import me.hapyl.hariant.event.HariantEffectEvent;
+import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.TalentType;

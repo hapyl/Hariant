@@ -72,8 +72,8 @@ public class StatusEffectStunned extends StatusEffectImpl implements Listener {
     public void handleHariantDamageEvent(HariantDamageEvent ev) {
         final HariantEntity entity = ev.getEntity();
         
-        if (entity.hasEffect(EnumStatusEffect.STUNNED)) {
-            entity.removeEffect(EnumStatusEffect.STUNNED);
+        if (entity.hasEffect(StatusEffectType.STUNNED)) {
+            entity.removeEffect(StatusEffectType.STUNNED);
             
             // Multiply damage
             ev.mutateDamage(() -> "Stunned", DamageMutator.multiply(), damageMultiplier);
@@ -84,7 +84,7 @@ public class StatusEffectStunned extends StatusEffectImpl implements Listener {
     public void handleHariantTalentPreconditionEvent(HariantTalentPreconditionEvent ev) {
         final HariantPlayer player = ev.getPlayer();
         
-        if (player.hasEffect(EnumStatusEffect.STUNNED)) {
+        if (player.hasEffect(StatusEffectType.STUNNED)) {
             ev.setCancel(Cancel.cancel(Component.text("Cannot use talents while stunned!")));
         }
     }
@@ -93,7 +93,7 @@ public class StatusEffectStunned extends StatusEffectImpl implements Listener {
     public void handleHariantAttackEvent(HariantAttackEvent ev) {
         final HariantEntity attacker = ev.getAttacker();
         
-        if (attacker.hasEffect(EnumStatusEffect.STUNNED)) {
+        if (attacker.hasEffect(StatusEffectType.STUNNED)) {
             ev.setCancelled(true);
             attacker.sendMessage(Component.text("Cannot attack while stunned!"));
         }

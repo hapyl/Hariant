@@ -30,10 +30,10 @@ public final class TalentExcellency extends TalentPassive implements Listener {
     private final @DisplayField Decimal attackIncrease = Decimal.ofPercentage(30);
     
     private final @DisplayField Decimal allTypeDamageThreshold = Decimal.ofPercentage(50);
-    private final @DisplayField Decimal allTypeDamageIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_DAMAGE_BONUS, 20);
+    private final @DisplayField Decimal allTypeDamageIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_DAMAGE_BONUS, 30);
     
     private final @DisplayField Decimal allTypeResistanceThreshold = Decimal.ofPercentage(25);
-    private final @DisplayField Decimal allTypeResistanceIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 40);
+    private final @DisplayField Decimal allTypeResistanceIncrease = Decimal.ofAttribute(AttributeType.PHYSICAL_RESISTANCE, 60);
     
     private final Key modifierKey = Key.ofString("excellency");
     
@@ -86,35 +86,42 @@ public final class TalentExcellency extends TalentPassive implements Listener {
         final AttributesInstance attributes = player.getAttributes();
         final HeroDataPytaria data = player.getHeroData(HeroRegistry.PYTARIA, HeroDataPytaria::new);
         
-        int excellency = 0;
-        
         if (threshold <= attackIncreaseThreshold.doubleValue()) {
             final ExcellencyAttributeModifier modifier = new ExcellencyAttributeModifier(player);
-            excellency++;
+            final ExcellencyAttributeModifier existingModifier = (ExcellencyAttributeModifier) attributes.getModifier(modifierKey).orElse(null);
+            
+            modifier.excellency++;
             
             modifier.of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue());
             
             if (threshold < allTypeDamageThreshold.doubleValue()) {
                 modifier.ofElementalDamageBonus(AttributeModifierType.FLAT, allTypeDamageIncrease.doubleValue());
-                excellency++;
+                modifier.excellency++;
             }
             
             if (threshold < allTypeResistanceThreshold.doubleValue()) {
                 modifier.ofElementalResistance(AttributeModifierType.FLAT, allTypeResistanceIncrease.doubleValue());
-                excellency++;
+                modifier.excellency++;
             }
             
-            attributes.addModifier(modifier);
+            // Don't add modifier if excellency is the same
+            if (existingModifier == null || existingModifier.excellency != modifier.excellency) {
+                attributes.addModifier(modifier);
+                data.excellency(modifier.excellency);
+            }
         }
         else {
             // Otherwise remove the modifier
-            attributes.removeModifier(modifierKey);
+            if (attributes.removeModifier(modifierKey)) {
+                data.excellency(0);
+            }
         }
-        
-        data.excellency(excellency);
     }
     
     public class ExcellencyAttributeModifier extends AttributeModifier {
+        
+        private int excellency;
+        
         ExcellencyAttributeModifier(@NotNull HariantEntity applier) {
             super(modifierKey, TalentExcellency.this.getName(), applier, HariantConstants.INDEFINITE_DURATION);
         }
