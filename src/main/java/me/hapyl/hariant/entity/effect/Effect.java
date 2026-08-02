@@ -38,7 +38,7 @@ public interface Effect extends Keyed, Named {
     }
     
     @EventLike
-    default void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+    default void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
     }
     
     static @NotNull Effect create(@NotNull Key key, @NotNull Component component, @NotNull EffectType effectType) {

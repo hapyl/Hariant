@@ -19,7 +19,7 @@ public class StatusEffectHellburn extends StatusEffectImpl implements Listener {
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
         final Decimal elementalApplication = TalentRegistry.FIRE_PIT.getHellburnElementalApplication();
         
         entity.applyElement(ElementSource.create(ElementType.FIRE, applier, elementalApplication.doubleValue()));

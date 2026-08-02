@@ -8,6 +8,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Enums;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.menu.Menu;
+import me.hapyl.hariant.menu.ObjectCycle;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -21,13 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class SettingImplEnum<E extends Enum<E> & ComponentLike> extends SettingImpl<E> {
     
-    private static final Style CONSTANT_STYLE = Style.style(Colors.DARK_GRAY);
-    private static final Style CONSTANT_STYLE_CURRENT = Style.style(Colors.GREEN);
-    
-    private static final Component ARROW_PREFIX = Component.text(" ➥ ", Colors.GREEN);
-    private static final Component EMPTY_PREFIX = Component.text("    ");
-    
-    private static final ComponentStyler DESCRIPTION_STYLER = ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(5).build();
+    private static final ComponentStyler DESCRIPTION_STYLER = ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(6).build();
     
     private final Class<E> enumClass;
     
@@ -82,7 +77,7 @@ public final class SettingImplEnum<E extends Enum<E> & ComponentLike> extends Se
             final Component component = enumConstant.asComponent();
             
             if (isCurrentValue) {
-                builder.addLore(ARROW_PREFIX.append(component.style(CONSTANT_STYLE_CURRENT)));
+                builder.addLore(ObjectCycle.COMPONENT_POINTER_CURRENT.appendSpace().append(component.color(Colors.GREEN)));
                 
                 // If enum has a description, append it
                 if (enumConstant instanceof Described described) {
@@ -90,7 +85,7 @@ public final class SettingImplEnum<E extends Enum<E> & ComponentLike> extends Se
                 }
             }
             else {
-                builder.addLore(EMPTY_PREFIX.append(component.style(CONSTANT_STYLE)));
+                builder.addLore(ObjectCycle.COMPONENT_POINTER.appendSpace().append(component.color(Colors.DARK_GRAY)));
             }
         }
         

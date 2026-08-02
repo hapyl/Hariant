@@ -2,7 +2,7 @@ package me.hapyl.hariant.weapon.projectile;
 
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.NormalAttack;
-import me.hapyl.hariant.entity.damage.DamageType;
+import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.handler.ProjectileHandler;
 import net.kyori.adventure.text.Component;
@@ -67,12 +67,9 @@ public class WeaponRangeProjectileTypeRayCast extends WeaponRangeProjectileType 
             if (hitEntity != null) {
                 // Deal damage to the entity
                 final NormalAttack rangedAttack = weapon.getRangedAttack();
+                final DamageSource damageSource = rangedAttack.createDamageSource(player);
                 
-                hitEntity.damage(
-                        rangedAttack.createDamageSource(player)
-                                    .damageType(DamageType.RANGED)
-                                    .build()
-                );
+                hitEntity.damage(damageSource);
                 
                 // Apply knockback
                 hitEntity.knockback(rangedAttack.createKnockbackCause(player));

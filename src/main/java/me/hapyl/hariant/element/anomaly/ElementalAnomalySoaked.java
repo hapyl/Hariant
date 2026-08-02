@@ -80,7 +80,7 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
             entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.SPLASH, 2, 0.25f, 0.4f, 0.25f, 0.0f);
         }
     }

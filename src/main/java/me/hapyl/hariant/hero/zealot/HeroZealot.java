@@ -50,8 +50,8 @@ public final class HeroZealot extends Hero {
         equipment.setLeggings(Material.DIAMOND_LEGGINGS, TrimPattern.SILENCE, TrimMaterial.DIAMOND);
         equipment.setBoots(Material.DIAMOND_BOOTS, TrimPattern.SILENCE, TrimMaterial.DIAMOND);
         
-        this.equipmentOverload = new HeroEquipment();
-        this.equipmentOverload.setHeadTexture(equipment.getHeadTexture());
+        this.equipmentOverload = new HeroEquipment(this);
+        this.equipmentOverload.setHeadTexture(equipment.getCachedHeadTexture().textureUrl());
         this.equipmentOverload.setChestPlate(104, 166, 232, TrimPattern.SILENCE, TrimMaterial.GOLD);
         this.equipmentOverload.setLeggings(Material.GOLDEN_LEGGINGS, TrimPattern.SILENCE, TrimMaterial.GOLD);
         this.equipmentOverload.setBoots(Material.GOLDEN_BOOTS, TrimPattern.RIB, TrimMaterial.GOLD);

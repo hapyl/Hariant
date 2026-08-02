@@ -6,6 +6,7 @@ import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.PlayerMenuTitle;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.menu.Menu;
 import me.hapyl.hariant.menu.MenuReturn;
@@ -55,6 +56,16 @@ public class AbstractMenuHero extends Menu {
     @Override
     public MenuReturn menuReturn() {
         return MenuReturn.create(Component.text("Hero Selection"), () -> new MenuHeroSelection(player));
+    }
+    
+    public static @NotNull AbstractMenuHero openMenu(@NotNull Player player, @NotNull Category category) {
+        final HeroInstance heroInstance = Hariant.getPlayerProfile(player).getSelectedHeroInstance();
+        
+        return switch (category) {
+            case PROFILE -> new MenuHeroProfile(player, heroInstance);
+            case TALENTS ->  new MenuHeroTalents(player, heroInstance);
+            case ARTIFACTS -> new MenuHeroArtifactEquip(player, heroInstance);
+        };
     }
     
 }

@@ -34,4 +34,8 @@ public class AdderImpl<I extends AbstractItem, R> implements Adder<I, R> {
         return this;
     }
     
+    @Override
+    public boolean isSuccess() {
+        return result != null;
+    }
 }

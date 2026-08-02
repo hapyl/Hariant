@@ -1,7 +1,9 @@
 package me.hapyl.hariant.command;
 
+import com.google.common.collect.ImmutableList;
 import me.hapyl.eterna.module.command.ArgumentList;
 import me.hapyl.eterna.module.math.Tick;
+import me.hapyl.eterna.module.util.StringList;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.database.rank.PlayerRank;
@@ -11,7 +13,14 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class HariantCommandStatusEffect extends HariantPlayerCommand {
+    
+    private static final List<String> COMPLETIONS = ImmutableList.<String>builder()
+                                                                 .addAll(StringList.ofEnumConstantLowercaseNames(StatusEffectType.class))
+                                                                 .add("clear")
+                                                                 .build();
     
     public HariantCommandStatusEffect(@NotNull String name) {
         super(name, PlayerRank.ADMIN);
@@ -19,6 +28,27 @@ public class HariantCommandStatusEffect extends HariantPlayerCommand {
     
     @Override
     public void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+        final HariantPlayer hariantPlayer = Hariant.getPlayer(player).orElse(null);
+        
+        if (hariantPlayer == null) {
+            HariantLogger.error(player, Component.text("You must have a player instance to execute this command!"));
+            return;
+        }
+        
+        // Clear
+        if (args.get(0).toString().equalsIgnoreCase("clear")) {
+            final int clearedEffects = hariantPlayer.clearEffects();
+            
+            if (clearedEffects == 0) {
+                hariantPlayer.messageError(Component.text("You don't have any status effects!"));
+            }
+            else {
+                hariantPlayer.messageSuccess(Component.text("Cleared %s status effects!".formatted(clearedEffects)));
+            }
+            
+            return;
+        }
+        
         final StatusEffectType statusEffect = args.get(0).toEnum(StatusEffectType.class);
         final int duration = args.get(1).toInt();
         
@@ -29,13 +59,6 @@ public class HariantCommandStatusEffect extends HariantPlayerCommand {
         
         if (duration < 0) {
             HariantLogger.error(player, Component.text("Duration must be positive!"));
-            return;
-        }
-        
-        final HariantPlayer hariantPlayer = Hariant.getPlayer(player).orElse(null);
-        
-        if (hariantPlayer == null) {
-            HariantLogger.error(player, Component.text("You must have a player instance to execute this command!"));
             return;
         }
         
@@ -54,6 +77,15 @@ public class HariantCommandStatusEffect extends HariantPlayerCommand {
                              .append(Component.text("."))
             );
         }
+    }
+    
+    @Override
+    public @NotNull List<String> tabComplete(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
+        if (args.length == 1) {
+            return COMPLETIONS;
+        }
+        
+        return List.of();
     }
     
 }

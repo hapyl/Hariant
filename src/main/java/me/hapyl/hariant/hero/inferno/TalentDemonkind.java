@@ -67,19 +67,19 @@ public final class TalentDemonkind extends TalentPassive implements Listener {
                 SUBLORE_PREFIX,
                 Component.text("You are immune to environment "),
                 Component.empty()
-                        .append(ElementType.FIRE.asComponentDamage())
-                        .append(Component.text(", and your "))
-                        .append(AttributeType.FIRE_RESISTANCE),
+                         .append(ElementType.FIRE.asComponentDamage())
+                         .append(Component.text(", and your "))
+                         .append(AttributeType.FIRE_RESISTANCE),
                 Component.text(" is greatly increased.")
         ));
         
         builder.addLore(createSubloreComponent(
                 SUBLORE_PREFIX,
                 Component.empty()
-                        .append(Component.text("Your "))
-                        .append(AttributeType.EFFECT_RESISTANCE)
-                        .append(Component.text(" and "))
-                        .append(AttributeType.KNOCKBACK_RESISTANCE),
+                         .append(Component.text("Your "))
+                         .append(AttributeType.EFFECT_RESISTANCE)
+                         .append(Component.text(" and "))
+                         .append(AttributeType.KNOCKBACK_RESISTANCE),
                 Component.text(" is greatly increased.")
         ));
         
@@ -100,7 +100,7 @@ public final class TalentDemonkind extends TalentPassive implements Listener {
         
         // Cancel all FIRE damage
         if (ev.getElementType() == ElementType.FIRE && ev.getDamageType() == DamageType.ENVIRONMENT) {
-            ev.setCancelled(true, true);
+            ev.setCancel(HariantDamageEvent.cancel(true, true));
         }
     }
     

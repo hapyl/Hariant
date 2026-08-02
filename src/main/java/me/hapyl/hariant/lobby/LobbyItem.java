@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.player.PlayerAction;
+import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.util.SlotBound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
@@ -23,11 +24,11 @@ public interface LobbyItem extends SlotBound, Named, Described, PlayerAction {
     Component getDescription();
     
     @NotNull
-    ItemBuilder createBuilder(@NotNull Player player);
+    ItemBuilder createBuilder(@NotNull PlayerProfile profile);
+    
+    void give(@NotNull PlayerProfile profile);
     
     @Override
     void use(@NotNull Player player);
-    
-    void give(@NotNull Player player);
     
 }

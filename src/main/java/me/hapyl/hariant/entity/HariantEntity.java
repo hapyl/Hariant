@@ -28,8 +28,6 @@ import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
 import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
-import me.hapyl.hariant.entity.damage.tracker.CombatData;
-import me.hapyl.hariant.entity.damage.tracker.CombatTracker;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectHandler;
 import me.hapyl.hariant.entity.effect.EffectType;
@@ -128,11 +126,13 @@ public class HariantEntity
     
     private static final Style DEFAULT_HEALTH_STYLE = Style.style(Colors.ATTRIBUTE_MAX_HEALTH);
     
+    private static final HealthComponentSupplier HEALTH_COMPONENT_SUPPLIER = (health, maxHealth) -> Component.text("%,.0f/%,.0f".formatted(health, maxHealth));
+    private static final HealthComponentSupplier HEALTH_COMPONENT_SUPPLIER_SIMPLE = (health, maxHealth) -> Component.text("%,.0f".formatted(health));
+    
     public final HariantRandom random;
     
     protected final LivingEntity entity;
     protected final AttributesInstance attributes;
-    protected final CombatTracker combatTracker;
     protected final ElementData elementData;
     
     private final StatusEffectMap effectMap;
@@ -160,7 +160,6 @@ public class HariantEntity
         this.random = new HariantRandom();
         this.health = attributes.get(AttributeType.MAX_HEALTH);
         this.effectMap = new StatusEffectMap(this);
-        this.combatTracker = new CombatTracker(this);
         this.cooldownHandler = new CooldownHandlerImpl(this);
         this.elementData = new ElementData(this);
         this.healthMutators = Maps.newLinkedHashMap();
@@ -240,11 +239,6 @@ public class HariantEntity
         mutator.onApply(this);
     }
     
-    @NotNull
-    public CombatTracker getCombatTracker() {
-        return combatTracker;
-    }
-    
     @Override
     public void setCooldown(@NotNull HariantCooldown cooldown, @Range(from = 0, to = Integer.MAX_VALUE) int duration, @Nullable AttributeType cooldownReducingAttribute) {
         cooldownHandler.setCooldown(cooldown, duration, cooldownReducingAttribute);
@@ -313,15 +307,40 @@ public class HariantEntity
     }
     
     public @NotNull DamageResult damage(@NotNull DamageInstance damageInstance) {
-        final HariantDamageEvent damageEvent = new HariantDamageEvent(damageInstance);
         final DamageSource damageSource = damageInstance.getDamageSource();
+        final ImmunityResult immunityResult = this.isImmuneTo(damageSource);
         
-        if (damageEvent.callEvent()) {
-            if (damageEvent.isStartCooldownIfCancelled()) {
+        // Don't damage already dead entities
+        if (damageSource.getDamage() <= 0 || this.isDead()) {
+            return DamageResult.IMMUNE;
+        }
+        
+        if (immunityResult.isImmune()) {
+            return immunityResult.isSilent() ? DamageResult.IMMUNE : broadcastImmune();
+        }
+        
+        // Check for cooldown
+        if (damageSource.hasCooldown() && this.hasCooldown(damageSource)) {
+            // Don't show the IMMUNE component display for cooldowns
+            return DamageResult.IMMUNE;
+        }
+        
+        // Check for invulnerability ticks
+        if (this.ticker.invulnerability.value() > 0 && !damageSource.isFlagged(DamageFlag.IGNORES_INVULNERABILITY)) {
+            return broadcastImmune();
+        }
+        
+        // Call damage event
+        final HariantDamageEvent damageEvent = new HariantDamageEvent(damageInstance);
+        damageEvent.callEvent();
+        
+        if (damageEvent.getCancel() instanceof HariantDamageEvent.Cancel cancel) {
+            // Check for whether we should start the cooldown
+            if (cancel.startsCooldown()) {
                 damageSource.startCooldownIfExists(this);
             }
             
-            return broadcastImmune();
+            return cancel.broadcastsImmunity() ? broadcastImmune() : DamageResult.IMMUNE;
         }
         
         final HariantEntity attacker = damageInstance.getAttacker();
@@ -364,11 +383,11 @@ public class HariantEntity
             this.lastAttacker.onDamageDealt0(damageInstance, this);
         }
         
-        // Pass the damage to trackers
-        this.incrementTrackerDamage(attacker, damageSource, damage, isLethal);
+        // Call EventLike method
+        this.onDamageTaken(damageInstance, attacker);
         
         // Call monitor event
-        new HariantMonitorDamageEvent(this, damageInstance).callEvent();
+        HariantMonitorDamageEvent.callEvent(this, damageInstance);
         
         // Broadcast hurt
         this.broadcastHurt(damageInstance, !isLethal);
@@ -386,9 +405,6 @@ public class HariantEntity
         // Decrement health
         this.decrementHealth(damage);
         
-        // Call EventLike method
-        this.onDamageTaken(damageInstance, attacker);
-        
         // Apply element
         this.applyElement(damageSource);
         
@@ -399,28 +415,6 @@ public class HariantEntity
     }
     
     public final @NotNull DamageResult damage(@NotNull DamageSource source) {
-        final ImmunityResult immunityResult = this.isImmuneTo(source);
-        
-        // Don't damage already dead entities
-        if (source.getDamage() <= 0 || this.isDead()) {
-            return DamageResult.IMMUNE;
-        }
-        
-        if (immunityResult.isImmune()) {
-            return immunityResult.isSilent() ? DamageResult.IMMUNE : broadcastImmune();
-        }
-        
-        // Check for cooldown
-        if (source.hasCooldown() && this.hasCooldown(source)) {
-            // Don't show the IMMUNE component display for cooldowns
-            return DamageResult.IMMUNE;
-        }
-        
-        // Check for invulnerability ticks
-        if (this.ticker.invulnerability.value() > 0 && !source.isFlagged(DamageFlag.IGNORES_INVULNERABILITY)) {
-            return broadcastImmune();
-        }
-        
         return this.damage(createDamageInstance(source));
     }
     
@@ -495,7 +489,7 @@ public class HariantEntity
     public void attack(@NotNull HariantEntity entity) {
         final NormalAttack meleeAttack = this.getMeleeAttack();
         
-        this.attack(entity, meleeAttack.createDamageSource(this).build(), meleeAttack.createKnockbackCause(this));
+        this.attack(entity, meleeAttack.createDamageSource(this), meleeAttack.createKnockbackCause(this));
     }
     
     public void damageFerocity(@NotNull DamageInstance damageInstance, @Range(from = 1, to = Integer.MAX_VALUE) int ferocityStrikes, boolean force) {
@@ -588,7 +582,7 @@ public class HariantEntity
     }
     
     @EventLike
-    public void onDamageDealt(@NotNull DamageSource damageSource, @NotNull HariantEntity entity) {
+    public void onDamageDealt(@NotNull DamageInstance damageInstance, @NotNull HariantEntity entity) {
     }
     
     @EventLike
@@ -614,6 +608,14 @@ public class HariantEntity
     @EventLike
     public void onRemove(@NotNull RemovalReason removalReason) {
         entity.remove();
+    }
+    
+    @EventLike
+    public void onEffectResistance(@NotNull AssistSource assistSource, @NotNull EffectResistance effectResistance) {
+    }
+    
+    @EventLike
+    public void onElementalAnomaly(@NotNull ElementalAnomalyType elementalAnomaly, @NotNull HariantEntity elementData) {
     }
     
     /**
@@ -823,10 +825,6 @@ public class HariantEntity
         return LocationHelper.center(entity.getLocation());
     }
     
-    public void assist(@NotNull AssistSource assistSource) {
-        combatTracker.assist(assistSource);
-    }
-    
     public boolean isFullHealth() {
         return health >= getMaxHealth();
     }
@@ -998,8 +996,7 @@ public class HariantEntity
         
         ticker.reset();
         attributes.reset();
-        combatTracker.reset();
-        effectMap.resetEffects();
+        effectMap.clearEffects();
         cooldownHandler.resetCooldowns();
         elementData.reset();
         healthMutators.clear();
@@ -1176,7 +1173,7 @@ public class HariantEntity
         
         // Check for existing effect resistance
         if (effectResistance != null && effectResistance.hasNotExpired(this)) {
-            return effectResistance.value();
+            return effectResistance.hasResisted();
         }
         
         final double chance = attributes.normalized(AttributeType.EFFECT_RESISTANCE);
@@ -1186,18 +1183,17 @@ public class HariantEntity
             effectResistance = new EffectResistance(true, this);
             
             EFFECT_RESISTANCE_DISPLAY.display(getLocation());
-            return true;
         }
         // Has not resisted effect
         else {
             effectResistance = new EffectResistance(false, this);
             
-            // Reassign `lastAttacker` and save the assist
+            // Reassign `lastAttacker`
             lastAttacker = source;
-            combatTracker.assist(assistSource);
-            
-            return false;
         }
+        
+        this.onEffectResistance(assistSource, effectResistance);
+        return effectResistance.hasResisted();
     }
     
     @NotNull
@@ -1302,8 +1298,8 @@ public class HariantEntity
     }
     
     @Override
-    public void resetEffects() {
-        effectMap.resetEffects();
+    public int clearEffects() {
+        return effectMap.clearEffects();
     }
     
     @Override
@@ -1389,44 +1385,12 @@ public class HariantEntity
         elementData.triggerAnomaly(elementalAnomaly, source);
     }
     
-    @NotNull
-    public Component getHealthFormatted() {
-        final double health = getFinalHealth();
-        
-        Component componentHealth = Component.text("%,.0f/%,.0f".formatted(health, getMaxHealth()), DEFAULT_HEALTH_STYLE);
-        Component componentHeart = Component.text("❤", DEFAULT_HEALTH_STYLE);
-        
-        final Map.Entry<Class<? extends HealthMutator>, HealthMutator> lastMutatorEntry = healthMutators.lastEntry();
-        
-        if (lastMutatorEntry != null) {
-            final HealthMutator lastMutator = lastMutatorEntry.getValue();
-            
-            componentHealth = componentHealth.style(lastMutator.getHealthStyle());
-            componentHeart = componentHeart.style(lastMutator.getHeartStyle());
-        }
-        
-        final TextComponent.Builder builder = Component.text();
-        
-        builder.append(componentHealth);
-        builder.appendSpace();
-        builder.append(componentHeart);
-        
-        // Shields
-        if (shield != null) {
-            builder.appendSpace();
-            builder.append(shield);
-        }
-        
-        // If entity has invulnerability frames, gray out the health and show the time left on invulnerability
-        if (this.isInvulnerable()) {
-            final int invulnerability = this.getInvulnerability();
-            
-            builder.applyDeep(deep -> deep.style(Style.style(Colors.DARK_GRAY)));
-            builder.appendSpace();
-            builder.append(Component.text("%s \uD83D\uDEE1".formatted(Tick.format(invulnerability)), TextColor.color(0x6A8FD9)));
-        }
-        
-        return builder.build();
+    public @NotNull Component getHealthFormatted() {
+        return this.getHealthFormatted0(HEALTH_COMPONENT_SUPPLIER);
+    }
+    
+    public @NotNull Component getHealthFormattedSimple() {
+        return this.getHealthFormatted0(HEALTH_COMPONENT_SUPPLIER_SIMPLE);
     }
     
     public void showWarning(@NotNull WarningType warningType, int duration) {
@@ -1566,18 +1530,56 @@ public class HariantEntity
         }
     }
     
-    private void onDamageDealt0(@NotNull DamageInstance damageInstance, @NotNull HariantEntity entity) {
-        this.onDamageDealt(damageInstance.getDamageSource(), entity);
+    private @NotNull Component getHealthFormatted0(@NotNull HealthComponentSupplier healthComponentSupplier) {
+        final double health = this.getFinalHealth();
+        final double maxHealth = this.getMaxHealth();
         
-        // Handle ferocity
-        if (!damageInstance.getDamageSource().canTriggerFerocity()) {
-            return;
+        Component componentHealth = healthComponentSupplier.supply(health, maxHealth).style(DEFAULT_HEALTH_STYLE);
+        Component componentHeart = Component.text("❤", DEFAULT_HEALTH_STYLE);
+        
+        final Map.Entry<Class<? extends HealthMutator>, HealthMutator> lastMutatorEntry = healthMutators.lastEntry();
+        
+        if (lastMutatorEntry != null) {
+            final HealthMutator lastMutator = lastMutatorEntry.getValue();
+            
+            componentHealth = componentHealth.style(lastMutator.getHealthStyle());
+            componentHeart = componentHeart.style(lastMutator.getHeartStyle());
         }
         
-        final int ferocityStrikes = this.calculateFerocityStrikes();
+        final TextComponent.Builder builder = Component.text();
         
-        if (ferocityStrikes > 0) {
-            entity.damageFerocity(damageInstance, ferocityStrikes, false);
+        builder.append(componentHealth);
+        builder.appendSpace();
+        builder.append(componentHeart);
+        
+        // Shields
+        if (shield != null) {
+            builder.appendSpace();
+            builder.append(shield);
+        }
+        
+        // If entity has invulnerability frames, gray out the health and show the time left on invulnerability
+        if (this.isInvulnerable()) {
+            final int invulnerability = this.getInvulnerability();
+            
+            builder.applyDeep(deep -> deep.style(Style.style(Colors.DARK_GRAY)));
+            builder.appendSpace();
+            builder.append(Component.text("%s \uD83D\uDEE1".formatted(Tick.format(invulnerability)), TextColor.color(0x6A8FD9)));
+        }
+        
+        return builder.build();
+    }
+    
+    private void onDamageDealt0(@NotNull DamageInstance damageInstance, @NotNull HariantEntity entity) {
+        this.onDamageDealt(damageInstance, entity);
+        
+        // Handle ferocity
+        if (damageInstance.getDamageSource().canTriggerFerocity()) {
+            final int ferocityStrikes = this.calculateFerocityStrikes();
+            
+            if (ferocityStrikes > 0) {
+                entity.damageFerocity(damageInstance, ferocityStrikes, false);
+            }
         }
     }
     
@@ -1606,13 +1608,6 @@ public class HariantEntity
                 this.untrap(TrapEscape.TIME_LIMIT);
             }
         }
-    }
-    
-    private void incrementTrackerDamage(@Nullable HariantEntity attacker, @NotNull DamageSource source, double damage, boolean isLethal) {
-        final @NotNull HariantEntity that = attacker != null ? attacker : this;
-        
-        this.combatTracker.incrementDamage(CombatData.Type.INCOMING, that, source.getIdentity(), damage, isLethal);
-        that.combatTracker.incrementDamage(CombatData.Type.OUTGOING, this, source.getIdentity(), damage, isLethal);
     }
     
     private void playWorldSound0(@NotNull Location location, @NotNull Sound sound, float volume, @Range(from = 0, to = 2) float pitch) {
@@ -1739,17 +1734,14 @@ public class HariantEntity
         private static final Particle.DustTransition DUST_TRANSITION = new Particle.DustTransition(Color.fromRGB(77, 2, 8), Color.fromRGB(181, 43, 54), 0.8f);
         
         private final HariantEntity entity;
-        private final DamageInstance damageSource;
+        private final DamageInstance damageInstance;
         private final int ferocityStrikes;
         
         FerocityTask(@NotNull HariantEntity entity, @NotNull DamageInstance damageInstance, int ferocityStrikes) {
             super(SCHEDULER);
             
             this.entity = entity;
-            this.damageSource = DamageInstance.copyOf(damageInstance, builder -> {
-                // Set damage type to FEROCITY and zero elemental units
-                return builder.damageType(DamageType.FEROCITY).elementalUnits(0);
-            });
+            this.damageInstance = copyDamageInstance(damageInstance);
             this.ferocityStrikes = ferocityStrikes;
         }
         
@@ -1762,7 +1754,7 @@ public class HariantEntity
             }
             
             // Damage the entity
-            entity.damage(damageSource);
+            entity.damage(damageInstance);
             
             // Fx
             this.spawnFerocityFx();
@@ -1786,6 +1778,21 @@ public class HariantEntity
             );
         }
         
+        private static @NotNull DamageInstance copyDamageInstance(@NotNull DamageInstance damageInstance) {
+            final DamageInstance newDamageInstance = damageInstance.createCopy();
+            final DamageSource newDamageSource = newDamageInstance.getDamageSource();
+            
+            // Set damage type to FEROCITY and zero elemental units
+            newDamageSource.setDamageType(DamageType.FEROCITY);
+            newDamageSource.setElementUnits(0);
+            
+            return newDamageInstance;
+        }
+        
+    }
+    
+    public interface HealthComponentSupplier {
+        @NotNull Component supply(final double health, final double maxHealth);
     }
     
 }

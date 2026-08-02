@@ -3,6 +3,7 @@ package me.hapyl.hariant.lobby;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.inventory.builder.ItemFunction;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.profile.PlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -46,17 +47,13 @@ public abstract class LobbyItemImpl implements LobbyItem {
     
     @NotNull
     @Override
-    public ItemBuilder createBuilder(@NotNull Player player) {
+    public ItemBuilder createBuilder(@NotNull PlayerProfile profile) {
         final ItemBuilder builder = new ItemBuilder(material, key);
         builder.setName(name);
         builder.addLore();
         
         builder.addWrappedLore(description);
-        builder.addFunction(
-                ItemFunction.builder(this::use)
-                            .cooldown(cooldown)
-                            .build()
-        );
+        builder.addFunction(ItemFunction.builder(this).cooldown(cooldown).build());
         
         return builder;
     }
@@ -65,8 +62,8 @@ public abstract class LobbyItemImpl implements LobbyItem {
     public abstract void use(@NotNull Player player);
     
     @Override
-    public void give(@NotNull Player player) {
-        player.getInventory().setItem(slot, createBuilder(player).build());
+    public void give(@NotNull PlayerProfile profile) {
+        profile.getPlayer().getInventory().setItem(slot, this.createBuilder(profile).build());
     }
     
 }

@@ -7,6 +7,7 @@ import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.achievement.AchievementCategory;
+import me.hapyl.hariant.experience.MenuLevelling;
 import me.hapyl.hariant.inventory.item.resource.ResourceRuby;
 import me.hapyl.hariant.menu.achievement.MenuAchievement;
 import net.kyori.adventure.text.Component;
@@ -49,12 +50,12 @@ public class MenuPlayerProfile extends Menu {
                                    Component.empty()
                                             .append(Component.text("Earn experience by playing the game to unlock "))
                                             .append(Component.text("unique", Colors.LIGHT_PURPLE))
-                                            .append(Component.text(" rewards!"))
+                                            .append(Component.text(" rewards and perks!"))
                            )
                            .addLore()
-                           .addLore(COMING_SOON)
+                           .addLore(ButtonComponents.left("open levelling menu"))
                            .asIcon(),
-                COMING_SOON_ACTION
+                PlayerMenuAction.of(MenuLevelling::new)
         );
         
         setItem(
@@ -93,6 +94,7 @@ public class MenuPlayerProfile extends Menu {
         final int unclaimedRewards = profile.getDatabase().achievements.countUnclaimedRewards();
         
         if (unclaimedRewards > 0) {
+            builder.glow();
             builder.addLore();
             builder.addLore(Component.text("You have %s unclaimed rewards!".formatted(unclaimedRewards), Colors.GREEN));
         }
@@ -100,7 +102,7 @@ public class MenuPlayerProfile extends Menu {
         builder.addLore();
         builder.addLore(ButtonComponents.left("open achievements menu"));
         
-        return builder.asIcon();
+        return builder.build();
     }
     
 }

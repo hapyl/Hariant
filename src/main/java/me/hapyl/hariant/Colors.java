@@ -74,7 +74,10 @@ public final class Colors {
     public static final TextColor TICK = TextColor.color(0xFF9C0A);
     
     public static final TextColor ULTIMATE_RESOURCE_ENERGY = TextColor.color(0x41B2F2);
+    public static final TextColor ULTIMATE_RESOURCE_ENERGY_SECONDARY = TextColor.color(0x4084C3);
+    
     public static final TextColor ULTIMATE_OVERCHARGE = TextColor.color(0xCB2FCD);
+    public static final TextColor ULTIMATE_OVERCHARGE_SECONDARY = TextColor.color(0xAD2FAF);
     
     public static final TextColor RESOURCE_CAT_COINS = TextColor.color(0xF2AA24);
     public static final TextColor RESOURCE_RUBY = TextColor.color(0xE0283E);
@@ -126,6 +129,7 @@ public final class Colors {
     public static final TextColor VOID = TextColor.color(0x5F3087);
     public static final TextColor SHARK = TextColor.color(0x96B7C0);
     public static final TextColor ALIEN = TextColor.color(0x18C040);
+    public static final TextColor EXPERIENCE = TextColor.color(0x1AFF16);
     
     private Colors() {
     }

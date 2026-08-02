@@ -83,6 +83,9 @@ public final class HariantPlugin extends JavaPlugin {
                 Bukkit.getServer().unloadWorld(world, false);
             }
         }
+        
+        // Ensure normal tick rate
+        Bukkit.getServerTickManager().setTickRate(Hariant.TICK_RATE_NORMAL);
     }
     
     @NotNull

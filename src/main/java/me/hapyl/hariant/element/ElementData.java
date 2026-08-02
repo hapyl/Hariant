@@ -65,6 +65,10 @@ public class ElementData implements ElementHandler, Ticking, Resettable {
         elementalAnomaly.trigger(entity, source);
         elementalAnomaly.display(entity.getMidpointLocation());
         
+        if (source != null) {
+            source.onElementalAnomaly(elementalAnomaly, entity);
+        }
+        
         // Fx
         entity.playWorldSound(Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 2.0f);
     }

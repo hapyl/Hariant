@@ -11,7 +11,7 @@ public class HariantMonitorDamageEvent extends HariantEntityEvent {
     
     private final DamageInstance damageInstance;
     
-    public HariantMonitorDamageEvent(@NotNull HariantEntity entity, @NotNull DamageInstance damageInstance) {
+    HariantMonitorDamageEvent(@NotNull HariantEntity entity, @NotNull DamageInstance damageInstance) {
         super(entity);
         
         this.damageInstance = damageInstance;
@@ -31,6 +31,10 @@ public class HariantMonitorDamageEvent extends HariantEntityEvent {
     @NotNull
     public static HandlerList getHandlerList() {
         return HANDLER_LIST;
+    }
+    
+    public static void callEvent(@NotNull HariantEntity entity, @NotNull DamageInstance damageInstance) {
+        new HariantMonitorDamageEvent(entity, damageInstance).callEvent();
     }
     
 }

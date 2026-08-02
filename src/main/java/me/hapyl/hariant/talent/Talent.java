@@ -13,6 +13,7 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.annotate.StrictNamingConvention;
+import me.hapyl.hariant.entity.SmallCapsLike;
 import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.player.LifecyclePlayer;
@@ -45,7 +46,7 @@ public abstract class Talent
         implements
         Named, Described, Keyed, ItemCreator,
         Registrable, HariantCooldown, Duration, Identified,
-        LifecyclePlayer {
+        LifecyclePlayer, SmallCapsLike {
     
     private final List<DisplayFieldInstance> attributeFields;
     
@@ -53,6 +54,7 @@ public abstract class Talent
     private final Component name;
     private final String identity;
     private final Icon icon;
+    private final Component smallCaps;
     
     private @NotNull Component description;
     private @NotNull TalentType talentType;
@@ -68,9 +70,15 @@ public abstract class Talent
         this.description = Described.defaultValue();
         this.talentType = TalentType.DAMAGE;
         this.attributeFields = Lists.newArrayList();
+        this.smallCaps = SmallCapsLike.asSmallCaps(name);
         
         AutoRegisteredListener.Registry.register(this);
         StrictNamingConvention.Validator.validate(this);
+    }
+    
+    @Override
+    public @NotNull Component asSmallCaps() {
+        return smallCaps;
     }
     
     @NotNull
@@ -287,8 +295,15 @@ public abstract class Talent
         // Handle cooldown
         response.getStatus().setCooldown(player, this);
         
+        // Call player callback
+        player.onTalentExecuted(this, response);
+        
         // Call the talent event AFTER the execution
         new HariantTalentEvent(player, this, response).callEvent();
+    }
+    
+    public boolean incrementsStatistics() {
+        return true;
     }
     
     @NotNull

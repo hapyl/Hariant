@@ -5,9 +5,12 @@ import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.player.PlayerLib;
 import me.hapyl.hariant.annotate.Singleton;
+import me.hapyl.hariant.database.Database;
 import me.hapyl.hariant.database.PlayerDatabase;
-import me.hapyl.hariant.database.PlayerDatabaseView;
-import me.hapyl.hariant.entity.*;
+import me.hapyl.hariant.entity.EntitySpawner;
+import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.Lifecycle;
+import me.hapyl.hariant.entity.StreamRules;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.*;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
@@ -24,11 +27,10 @@ import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.util.BooleanExplained;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.ServerTickManager;
 import org.bukkit.Sound;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -37,6 +39,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -53,6 +56,11 @@ public final class Hariant implements Runnable, Lifecycle {
     
     public static final Component GAME_NAME = Component.text("ʜᴀʀɪᴀɴᴛ", Colors.BRAND_COLOR, TextDecoration.BOLD);
     public static final Component UPDATE_TOPIC = Component.text("👽 Alien Invasion!", Colors.ALIEN);
+    
+    public static final int TICK_RATE_NORMAL = 20;
+    public static final int TICK_RATE_SLOW = 2;
+    
+    public static final ZoneOffset TIME_ZONE = ZoneOffset.ofHours(5);
     
     @Singleton static HariantPlugin PLUGIN;
     @Singleton static Hariant HANDLER;
@@ -103,17 +111,16 @@ public final class Hariant implements Runnable, Lifecycle {
         // Tick profiles
         this.profiles.values().forEach(PlayerProfile::tick);
         
-        // Tick game instance
-        if (currentGameInstance != null) {
+        // Tick game instance only if it's IN_PROGRESS
+        if (currentGameInstance != null && currentGameInstance.getState() == GameInstanceState.IN_PROGRESS) {
             currentGameInstance.tick();
             
             // We check for tick == 0 instead of <= 0 to not spam the method, even though it validates
             // and does not allow duplicate end of the current game instance
             if (currentGameInstance.getTimeLeft() == 0) {
                 final GameType gameType = currentGameInstance.getType();
-                final List<EnumTeam> winningTeams = gameType.getWiningTeamsWhenTimeLimit(currentGameInstance);
                 
-                endCurrentGameInstance(WinResult.create(WinType.TIME_LIMIT, winningTeams));
+                endCurrentGameInstance(WinResult.create(WinType.TIME_LIMIT, gameType.getWinningTeams(currentGameInstance)));
             }
         }
     }
@@ -136,8 +143,18 @@ public final class Hariant implements Runnable, Lifecycle {
     // *-* Static Members *-* //
     
     public static void startNewGameInstance() {
+        // Create players
+        final List<@NotNull HariantPlayer> players = HANDLER.profiles.values()
+                                                                     .stream()
+                                                                     .map(profile -> recreatePlayer(profile.getPlayer(), profile.getSelectedHeroInstance()))
+                                                                     .toList();
+        
+        // Create game instance
         HANDLER.currentGameInstance = new GameInstanceImpl(HANDLER.selectedGameType, HANDLER.selectedBattleground);
-        HANDLER.currentGameInstance.onCreate();
+        HANDLER.currentGameInstance.onCreate(players);
+        
+        // Handle instanced created by profiles
+        players.forEach(player -> player.getProfile().handleInstanceCreated(HANDLER.currentGameInstance));
         
         // Call team update
         HANDLER.profiles.values().forEach(profile -> {
@@ -175,89 +192,84 @@ public final class Hariant implements Runnable, Lifecycle {
         }, timeBeforePlayerReveal);
     }
     
-    public static void endCurrentGameInstance(@NotNull WinResult result) {
-        if (HANDLER.currentGameInstance == null || HANDLER.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS) {
-            return;
-        }
+    public static boolean endCurrentGameInstance(@NotNull WinResult winResult) {
+        final GameInstance gameInstance = HANDLER.currentGameInstance;
         
-        HANDLER.currentGameInstance.setState(GameInstanceState.POST_GAME);
-        HANDLER.currentGameInstance.onDestroy();
-        
-        // Keep the reference, we'll need it later
-        final List<HariantPlayer> players = getPlayers().toList();
-        
-        players.forEach(player -> {
-            if (result.isWinner(player.teamEntry())) {
-                player.setGameMode(GameMode.SURVIVAL);
-            }
-            else {
-                player.setGameMode(GameMode.SPECTATOR);
-            }
-            
-            // TODO (xanyjl @ Tuesday, June 9) -> Better
-            
-            // Display result
-            player.sendMessage(Component.text("GAME OVER", Colors.GOLD, TextDecoration.BOLD));
-            player.sendMessage(Component.text("Win type %s".formatted(result.getWinType())));
-            player.sendMessage(Component.text("Winners: %s".formatted(result.getWinningTeams())));
-        });
-        
-        // Schedule a cleanup via the bukkit runnable
-        new BukkitRunnable() {
-            private int tick;
-            
-            @Override
-            public void run() {
-                // Actually end the game
-                if (tick++ > HariantConstants.GAME_END_DELAY) {
-                    // Mark the game as finished
-                    HANDLER.currentGameInstance.setState(GameInstanceState.FINISHED);
-                    
-                    // Cleanup all tasks
-                    HariantTask.cancelAllTasks();
-                    
-                    // Destroy players via their profiles
-                    getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(HANDLER.currentGameInstance));
-                    
-                    // Destroy non-players entities
-                    clearEntities();
-                    
-                    // Nullate instance at the very end
-                    HANDLER.currentGameInstance = null;
-                    this.cancel();
-                    return;
-                }
-                
-                // TODO (xanyjl @ Tuesday, June 9) -> Trigger win cosmetics
-                
-                // Fx
-                players.forEach(player -> {
-                    player.sendSubtitle(
-                            Component.text("game ends in %s".formatted(HariantConstants.GAME_END_DELAY - tick), TextColor.color(0xA1DE9D)),
-                            0, 10, 0
-                    );
-                });
-            }
-        }.runTaskTimer(PLUGIN, 0, 1);
-    }
-    
-    public static boolean endCurrentGameInstanceIfWinConditionMet() {
-        if (HANDLER.currentGameInstance == null || HANDLER.currentGameInstance.getState() != GameInstanceState.IN_PROGRESS) {
+        if (gameInstance == null || gameInstance.getState() != GameInstanceState.IN_PROGRESS) {
             return false;
         }
         
-        final WinResult winResult = HANDLER.currentGameInstance.getType().checkWinCondition(HANDLER.currentGameInstance);
+        // Handle instance destroy
+        final ServerTickManager serverTickManager = Bukkit.getServerTickManager();
+        final List<? extends HariantPlayer> players = getPlayers().toList();
         
-        if (winResult != null) {
-            endCurrentGameInstance(winResult);
-            return true;
-        }
+        // Schedule instance destroy via a bukkit runnable
+        new BukkitRunnable() {
+            private int tick;
+            private int tickRate = TICK_RATE_SLOW;
+            
+            @Override
+            public void run() {
+                // Increment tick rate until it hits the normal tick rate
+                if (tickRate <= TICK_RATE_NORMAL) {
+                    serverTickManager.setTickRate(tickRate++);
+                }
+                else {
+                    // At the first tick, call onDestroy methods
+                    if (tick == 0) {
+                        gameInstance.setState(GameInstanceState.POST_GAME);
+                        gameInstance.onDestroy(players, winResult);
+                    }
+                    // After the game delay, finalize the game
+                    else if (tick == HariantConstants.GAME_END_DELAY) {
+                        // Mark the game as finished
+                        gameInstance.setState(GameInstanceState.FINISHED);
+                        gameInstance.onFinalize(players, winResult);
+                        
+                        // Cleanup all tasks
+                        HariantTask.cancelAllTasks();
+                        
+                        // Destroy players via their profiles
+                        getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(gameInstance));
+                        
+                        // Destroy non-players entities
+                        clearEntities();
+                        
+                        // Nullate instance at the very end
+                        HANDLER.currentGameInstance = null;
+                        this.cancel();
+                    }
+                    
+                    tick++;
+                }
+             
+            }
+        }.runTaskTimer(PLUGIN, 0, 1);
         
-        return false;
+        return true;
     }
     
-    @NotNull
-    public static BooleanExplained canStartNewGameInstance() {
+    public static boolean endCurrentGameInstanceIfWinConditionMet() {
+        final GameInstance gameInstance = HANDLER.currentGameInstance;
+        
+        if (gameInstance == null || gameInstance.getState() != GameInstanceState.IN_PROGRESS) {
+            return false;
+        }
+        
+        final GameType gameType = gameInstance.getType();
+        
+        // Check for win condition
+        if (!gameType.checkWinCondition(gameInstance)) {
+            return false;
+        }
+        
+        // Compute winning teams and end the current game instance
+        endCurrentGameInstance(WinResult.create(WinType.WIN_CONDITION_MET, gameType.getWinningTeams(gameInstance)));
+        
+        return true;
+    }
+    
+    public static @NotNull BooleanExplained canStartNewGameInstance() {
         if (HANDLER.currentGameInstance != null) {
             return BooleanExplained.ofFalse(Component.text("A game is already in progress!", Colors.RED));
         }
@@ -357,6 +369,10 @@ public final class Hariant implements Runnable, Lifecycle {
         return Optional.ofNullable(HANDLER.currentGameInstance);
     }
     
+    public static @Nullable GameInstance getCurrentGameInstanceOrNull() {
+        return HANDLER.currentGameInstance;
+    }
+    
     @NotNull
     public static HariantPlugin getPlugin() {
         return PLUGIN;
@@ -428,26 +444,6 @@ public final class Hariant implements Runnable, Lifecycle {
     @NotNull
     public static PlayerDatabase getPlayerDatabase(@NotNull Player player) {
         return getPlayerProfile(player).getDatabase();
-    }
-    
-    /**
-     * Creates a new instance of {@link PlayerDatabase} for the given {@link UUID}.
-     *
-     * <p>
-     * The returned instance is a view of a player database, mutating it does not
-     * affect the actual player database, even if the player is online.
-     * </p>
-     *
-     * <p>
-     * Saving the view is prohibited and will result in an {@link UnsupportedOperationException}.
-     * </p>
-     *
-     * @param uuid - The player uuid for whom to create the database.
-     * @return a new instance of the database.
-     */
-    @NotNull
-    public static PlayerDatabase getPlayerDatabase(@NotNull UUID uuid) {
-        return new PlayerDatabaseView(PLUGIN.getDatabase(), uuid);
     }
     
     @NotNull
@@ -681,6 +677,18 @@ public final class Hariant implements Runnable, Lifecycle {
     
     public static @NotNull String getVersion() {
         return PLUGIN.getPluginMeta().getVersion().replace("-SNAPSHOT", "");
+    }
+    
+    public static int currentTick() {
+        return Bukkit.getCurrentTick();
+    }
+    
+    public static boolean currentTickMod20() {
+        return currentTick() % 40 < 20;
+    }
+    
+    public static @NotNull Database getDatabase() {
+        return PLUGIN.getDatabase();
     }
     
     private static void clearEntities() {

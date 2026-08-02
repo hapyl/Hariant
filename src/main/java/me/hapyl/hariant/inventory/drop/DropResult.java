@@ -35,7 +35,7 @@ public final class DropResult {
     }
     
     @Override
-    public final boolean equals(Object object) {
+    public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
@@ -45,7 +45,7 @@ public final class DropResult {
     }
     
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return Objects.hashCode(this.drop.getKey());
     }
     

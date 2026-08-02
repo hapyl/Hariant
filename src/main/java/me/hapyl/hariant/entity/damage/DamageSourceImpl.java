@@ -16,22 +16,22 @@ import java.util.Set;
 
 public class DamageSourceImpl implements DamageSource {
     
-    private final @Nullable HariantEntity source;
-    
     private final @NotNull DamageSourceIdentity identity;
-    private final @NotNull ElementType elementType;
-    private final @NotNull DamageType damageType;
-    
-    private final @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents;
-    private final @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags;
-    
     private final double damage;
-    private final double elementUnits;
     
-    private final Key cooldownKey;
-    private final int cooldown;
+    private @Nullable HariantEntity source;
     
-    // #norender
+    private @NotNull ElementType elementType;
+    private @NotNull DamageType damageType;
+    
+    private @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents;
+    private @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags;
+    
+    private double elementUnits;
+    
+    private @NotNull Key cooldownKey;
+    private int cooldown;
+    
     public DamageSourceImpl(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents, @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags, final double damage, final double elementUnits, @NotNull Key cooldownKey, int cooldown) {
         this.identity = identity;
         this.source = source;
@@ -53,7 +53,9 @@ public class DamageSourceImpl implements DamageSource {
         this(damageSourceIdentity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, cooldown.getCooldownKey(), cooldown.getCooldown());
     }
     
-    // #render
+    public DamageSourceImpl(@NotNull DamageSourceIdentity identity, double damage) {
+        this(identity, null, DamageType.MELEE, ElementType.PHYSICAL, List.of(), Set.of(), damage, 0, Key.empty(), 0);
+    }
     
     @NotNull
     @Override
@@ -67,6 +69,11 @@ public class DamageSourceImpl implements DamageSource {
         return elementType;
     }
     
+    @Override
+    public void setElementType(@NotNull ElementType elementType) {
+        this.elementType = elementType;
+    }
+    
     @Nullable
     @Override
     public HariantEntity getSource() {
@@ -74,8 +81,18 @@ public class DamageSourceImpl implements DamageSource {
     }
     
     @Override
+    public void setSource(@Nullable HariantEntity source) {
+        this.source = source;
+    }
+    
+    @Override
     public double getElementUnits() {
         return elementUnits;
+    }
+    
+    @Override
+    public void setElementUnits(double units) {
+        this.elementUnits = units;
     }
     
     @NonNull
@@ -89,10 +106,21 @@ public class DamageSourceImpl implements DamageSource {
         return cooldown;
     }
     
+    @Override
+    public void setCooldown(@NotNull Key key, int cooldown) {
+        this.cooldownKey = key;
+        this.cooldown = cooldown;
+    }
+    
     @NotNull
     @Override
     public DamageType getDamageType() {
         return damageType;
+    }
+    
+    @Override
+    public void setDamageType(@NotNull DamageType damageType) {
+        this.damageType = damageType;
     }
     
     @Override
@@ -101,8 +129,18 @@ public class DamageSourceImpl implements DamageSource {
     }
     
     @Override
+    public void setDamageComponents(@NotNull List<? extends DamageComponent> damageComponents) {
+        this.damageComponents = damageComponents;
+    }
+    
+    @Override
     public @NotNull Set<? extends DamageFlag> getDamageFlags() {
         return damageFlags;
+    }
+    
+    @Override
+    public void setDamageFlags(@NotNull Set<? extends DamageFlag> damageFlags) {
+        this.damageFlags = damageFlags;
     }
     
     @Override
@@ -111,23 +149,45 @@ public class DamageSourceImpl implements DamageSource {
     }
     
     @Override
+    public final @NotNull DamageSource createCopy() {
+        // Copying damage source has one massive flaw - it loses it's actual instance, meaning
+        // instanceof checks and casting would not work.
+        //
+        // Although for now it's only used for ferocity, keep in mind that this is a very fragile operation
+        // and should be generally avoided.
+        
+        return new DamageSourceImpl(
+                this.getIdentity(),
+                this.getSource(),
+                this.getDamageType(),
+                this.getElementType(),
+                this.getDamageComponents(),
+                this.getDamageFlags(),
+                this.getDamage(),
+                this.getElementUnits(),
+                this.getCooldownKey(),
+                this.getCooldown()
+        );
+    }
+    
+    @Override
     public boolean isFlagged(@NotNull DamageFlag damageFlag) {
         return damageFlags.contains(damageFlag);
     }
     
     @Override
-    public boolean equals(@Nullable Object object) {
+    public final int hashCode() {
+        return Objects.hashCode(this.identity);
+    }
+    
+    @Override
+    public final boolean equals(@Nullable Object object) {
         if (object == null || this.getClass() != object.getClass()) {
             return false;
         }
         
         final DamageSourceImpl that = (DamageSourceImpl) object;
         return Objects.equals(this.identity, that.identity);
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.identity);
     }
     
 }

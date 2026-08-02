@@ -24,6 +24,20 @@ public interface MongoCodec<T, D> {
     @Nullable
     T deserialize(@Nullable D d);
     
+    default @Nullable T deserializeObject(@Nullable Object object) {
+        if (object == null) {
+            return null;
+        }
+        
+        final Class<D> clazz = this.getDatabaseObjectClass();
+        
+        if (!clazz.isInstance(object)) {
+            return null;
+        }
+        
+        return deserialize(clazz.cast(object));
+    }
+    
     @NotNull
     default Optional<T> read(@NotNull Document document, @NotNull String key) {
         final D d = document.get(key, getDatabaseObjectClass());

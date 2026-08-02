@@ -71,7 +71,7 @@ public class StatusEffectImpl implements StatusEffect {
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
     }
     
 }

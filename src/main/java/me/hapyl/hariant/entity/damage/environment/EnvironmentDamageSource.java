@@ -3,84 +3,25 @@ package me.hapyl.hariant.entity.damage.environment;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.Capitalizable;
 import me.hapyl.hariant.element.ElementType;
-import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class EnvironmentDamageSource implements DamageSource {
+public class EnvironmentDamageSource extends DamageSourceImpl {
     
     private static final Key COOLDOWN_KEY = Key.ofString("environment_cooldown");
-    
-    private final DamageSourceIdentity identity;
-    private final ElementType elementType;
-    private final double damage;
+    private static final int COOLDOWN = 10;
     
     EnvironmentDamageSource(@NotNull DamageSourceIdentity identity, @NotNull ElementType elementType, double damage) {
-        this.identity = identity;
-        this.elementType = elementType;
-        this.damage = damage;
+        super(identity, null, DamageType.ENVIRONMENT, elementType, DamageComponent.ofEnvironmentDamage(), Set.of(), damage, 0, COOLDOWN_KEY, COOLDOWN);
     }
     
     EnvironmentDamageSource(@NotNull org.bukkit.damage.DamageType damageType, @NotNull DeathMessage deathMessage, @NotNull ElementType elementType, double damage) {
         this(createIdentity(damageType, deathMessage), elementType, damage);
-    }
-    
-    @NotNull
-    @Override
-    public DamageSourceIdentity getIdentity() {
-        return identity;
-    }
-    
-    @Nullable
-    @Override
-    public HariantEntity getSource() {
-        return null;
-    }
-    
-    @NotNull
-    @Override
-    public ElementType getElementType() {
-        return elementType;
-    }
-    
-    @NotNull
-    @Override
-    public Key getCooldownKey() {
-        return COOLDOWN_KEY;
-    }
-    
-    @Override
-    public int getCooldown() {
-        return 10;
-    }
-    
-    @NotNull
-    @Override
-    public DamageType getDamageType() {
-        return DamageType.ENVIRONMENT;
-    }
-    
-    @NotNull
-    @Override
-    public List<? extends DamageComponent> getDamageComponents() {
-        return DamageComponent.ofEnvironmentDamage();
-    }
-    
-    @Override
-    public @NotNull Set<? extends DamageFlag> getDamageFlags() {
-        return Set.of();
-    }
-    
-    @Override
-    public double getDamage() {
-        return damage;
     }
     
     public boolean isCactus() {
@@ -129,10 +70,6 @@ public class EnvironmentDamageSource implements DamageSource {
     
     public boolean isFall() {
         return this instanceof EnvironmentDamageSourceFall;
-    }
-    
-    public <C extends DamageSource> boolean is(@NotNull Class<C> clazz) {
-        return clazz.isInstance(this);
     }
     
     @NotNull

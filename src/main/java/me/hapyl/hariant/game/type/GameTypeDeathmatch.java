@@ -1,12 +1,12 @@
 package me.hapyl.hariant.game.type;
 
+import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
-import me.hapyl.hariant.game.WinResult;
-import me.hapyl.hariant.game.WinType;
+import me.hapyl.hariant.game.Placement;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamData;
@@ -15,16 +15,15 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public final class GameTypeDeathmatch extends GameTypeImpl {
     
     private static final int TOP_TEAMS_LIMIT = 5;
+    private static final Comparator<TeamData> COMPARATOR = (a, b) -> Integer.compare(b.kills, a.kills);
     
     private final int respawnTime = Tick.fromSeconds(3);
     private final int killGoal = 10;
@@ -55,9 +54,7 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
                 components.append(
                         Component.empty()
                                  .append(teamNumber)
-                                 .append(team.getFirstLetterFormatted())
-                                 .appendSpace()
-                                 .append(team.formatPlayerNames())
+                                 .append(team.createPlayersComponentWithFirstLetter())
                                  .appendSpace()
                                  .append(Component.text("(", Colors.DARK_GRAY))
                                  .append(Component.text("⚔ ", Colors.RED))
@@ -72,17 +69,8 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
         }
     }
     
-    @Nullable
     @Override
-    public WinResult checkWinCondition(@NotNull GameInstance gameInstance) {
-        final EnumTeam winningTeam = gameInstance.getTeamData()
-                                                 .stream()
-                                                 .filter(teamData -> teamData.kills >= killGoal)
-                                                 .findFirst()
-                                                 .map(TeamData::getTeam)
-                                                 .orElse(null);
-        
-        return winningTeam != null ? WinResult.create(WinType.WIN_CONDITION_MET, winningTeam) : WinResult.notWon();
+    public void onKill(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
     }
     
     @Override
@@ -95,21 +83,39 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
     }
     
     @Override
-    public void onKill(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
+    public boolean checkWinCondition(@NotNull GameInstance gameInstance) {
+        return gameInstance.getTeamData().stream().anyMatch(teamData -> teamData.kills >= killGoal);
     }
     
     @Override
-    @NotNull
-    public List<EnumTeam> getWiningTeamsWhenTimeLimit(@NotNull GameInstance gameInstance) {
-        return gameInstance.getTeamData()
-                           .stream()
-                           .collect(Collectors.groupingBy(TeamData::getTeam, Collectors.summingInt(TeamData::getKills)))
-                           .entrySet()
-                           .stream()
-                           .max(Map.Entry.comparingByValue())
-                           .map(Map.Entry::getKey)
-                           .stream()
-                           .toList();
+    public @NotNull Map<EnumTeam, Placement> getWinningTeams(@NotNull GameInstance gameInstance) {
+        final List<TeamData> sortedData = gameInstance.getTeamData().stream().filter(TeamData::hasKills).sorted(COMPARATOR).toList();
+        
+        // If there aren't any teams with at least one kill, means there aren't any winners ¯\_(ツ)_/¯
+        if (sortedData.isEmpty()) {
+            return Map.of();
+        }
+        
+        final Map<EnumTeam, Placement> placementMap = Maps.newLinkedHashMap();
+        
+        int bracket = 0;
+        int topKills = sortedData.getFirst().kills;
+        
+        for (TeamData teamData : sortedData) {
+            final int kills = teamData.kills;
+            
+            // If `topKills` is higher than team's kills, means we moved a bracket,
+            // so update `topKills` and increment the bracket
+            if (topKills > kills) {
+                topKills = kills;
+                bracket++;
+            }
+            
+            // Map the team to the bracket, which has a fail-safe for overflow
+            placementMap.put(teamData.getTeam(), Placement.placement(bracket));
+        }
+        
+        return placementMap;
     }
     
 }

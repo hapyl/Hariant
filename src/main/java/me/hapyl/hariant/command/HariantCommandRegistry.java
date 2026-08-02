@@ -1,11 +1,13 @@
 package me.hapyl.hariant.command;
 
+import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.command.ArgumentList;
 import me.hapyl.eterna.module.command.CommandProcessor;
 import me.hapyl.eterna.module.command.SimpleCommand;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.text.Strings;
 import me.hapyl.eterna.module.util.StringList;
 import me.hapyl.eterna.module.util.TypeConverter;
 import me.hapyl.hariant.Colors;
@@ -21,15 +23,22 @@ import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.AssistSource;
-import me.hapyl.hariant.entity.damage.tracker.CombatData;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.mutator.Decay;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.entity.player.combat.CombatData;
+import me.hapyl.hariant.entity.player.combat.CombatTracker;
 import me.hapyl.hariant.entity.shield.Shield;
 import me.hapyl.hariant.entity.shield.ShieldStrength;
 import me.hapyl.hariant.entity.type.HariantEntityDummy;
+import me.hapyl.hariant.experience.Level;
+import me.hapyl.hariant.game.GameInstanceImpl;
+import me.hapyl.hariant.game.Placement;
+import me.hapyl.hariant.game.WinResult;
+import me.hapyl.hariant.game.WinType;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
+import me.hapyl.hariant.game.type.EnumGameType;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -38,13 +47,14 @@ import me.hapyl.hariant.inventory.drop.DropTable;
 import me.hapyl.hariant.lobby.EnumLobbyItem;
 import me.hapyl.hariant.menu.hero.MenuHeroUnlock;
 import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.hariant.profile.notification.NotificationHandler;
+import me.hapyl.hariant.reward.Reward;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentRegistry;
 import me.hapyl.hariant.task.HariantTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamData;
-import me.hapyl.hariant.util.ComponentShine;
 import me.hapyl.hariant.util.RiptideFx;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -60,6 +70,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -90,6 +101,9 @@ public final class HariantCommandRegistry {
         register("dumpItem", HariantCommandDumpItem::new);
         register("skipDialog", HariantCommandSkipDialog::new);
         register("ready", HariantCommandReady::new);
+        register("exp", HariantCommandExperience::new);
+        register("aggregateStatistic", HariantCommandAggregateStatistic::new);
+        register("openMenu", HariantCommandOpenMenu::new);
         
         register("showAttributes", context -> {
             final HariantPlayer player = context.getHariantPlayer();
@@ -350,9 +364,28 @@ public final class HariantCommandRegistry {
         
         register("showDamageFeedback", context -> {
             final HariantPlayer player = context.getHariantPlayer();
+            final int death = context.argument(0).toInt(-1);
             
-            player.sendMessage(Component.text("Total DMG Dealt [HOVER]").hoverEvent(player.getCombatTracker().createHoverEvent(CombatData.Type.OUTGOING)));
-            player.sendMessage(Component.text("Total DMG Taken [HOVER]").hoverEvent(player.getCombatTracker().createHoverEvent(CombatData.Type.INCOMING)));
+            final CombatTracker combatTracker = player.getCombatTracker();
+            
+            final HoverEvent<?> hoverOutgoing = death == -1 ? combatTracker.createHoverEvent(CombatData.Type.OUTGOING) : combatTracker.createHoverEvent(CombatData.Type.OUTGOING, death);
+            final HoverEvent<?> hoverIncoming = death == -1 ? combatTracker.createHoverEvent(CombatData.Type.INCOMING) : combatTracker.createHoverEvent(CombatData.Type.INCOMING, death);
+            
+            player.messageSuccess(Component.text("Showing damage feedback for the %s death:".formatted(death == -1 ? "latest" : Strings.stNdTh(death))));
+            
+            player.messageInfo(
+                    Component.empty()
+                             .hoverEvent(hoverOutgoing)
+                             .append(Component.text("Outgoing DMG"))
+                             .append(Component.text(" [HOVER]", Colors.GOLD, TextDecoration.BOLD))
+            );
+            
+            player.messageInfo(
+                    Component.empty()
+                             .hoverEvent(hoverIncoming)
+                             .append(Component.text("Incoming DMG"))
+                             .append(Component.text(" [HOVER]", Colors.GOLD, TextDecoration.BOLD))
+            );
         });
         
         register("googleanim", context -> {
@@ -583,15 +616,6 @@ public final class HariantCommandRegistry {
             new JudgmentCutExplosion(context.getPlayer(), context.getPlayer().getLocation()).runTaskTimer(plugin, 0, 1);
         });
         
-        register("test_component_shine", (Function<String, SimpleCommand>) name -> new HariantPlayerCommand(name, PlayerRank.ADMIN) {
-            @Override
-            public void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
-                final String string = args.joinString(0);
-                
-                ComponentShine.builder(string).build().display(player, Component.empty(), 2);
-            }
-        });
-        
         register("togglewasd", context -> {
             class Holder extends HariantTask {
                 private static Holder holder = null;
@@ -674,7 +698,7 @@ public final class HariantCommandRegistry {
                 
                 if (Hariant.entityExists(profile.getUuid())) {
                     Hariant.destroyEntity(profile.getUuid());
-                    EnumLobbyItem.clearInventoryAndGiveAllItems(player);
+                    EnumLobbyItem.clearInventoryGiveAllItems(profile);
                     
                     profile.messageSuccess(Component.text("Successfully deleted player instance!"));
                     return;
@@ -710,6 +734,70 @@ public final class HariantCommandRegistry {
                 return StringList.ofRegistryKeys(HeroRegistry.getRegistry());
             }
         });
+        
+        register("dumpexp", context -> {
+            final Player player = context.getPlayer();
+            
+            HariantLogger.success(player, Component.text("Dumping level info:"));
+            
+            Level.streamLevels().forEach(level -> {
+                HariantLogger.info(
+                        player,
+                        Component.empty()
+                                 .append(Component.text("Level: %s, ".formatted(level.getLevel()), level.getStyle()))
+                                 .append(Component.text("Experience: %s".formatted(level.getExperience()), Colors.AQUA))
+                                 .appendSpace()
+                                 .append(Component.text("(Hover for Rewards)", Colors.YELLOW))
+                                 .hoverEvent(HoverEvent.showText(
+                                         level.getRewards().stream()
+                                              .map(Reward::getName)
+                                              .collect(Component.toComponent(Component.newline()))
+                                 ))
+                );
+            });
+        });
+        
+        register("syncStatistics", context -> {
+            final HariantPlayer player = context.getHariantPlayer();
+            
+            player.getStatistics().syncToDatabase();
+            player.messageSuccess(Component.text("Done!"));
+        });
+        
+        register("triggerOnDestroyAndOnFinalizeOnFreshGameInstance", context -> {
+            class Generator {
+                static Map<EnumTeam, Placement> generatePlacementMap(@Nullable EnumTeam team) {
+                    final Map<EnumTeam, Placement> placementMap = Maps.newEnumMap(EnumTeam.class);
+                    
+                    if (team != null) {
+                        placementMap.put(team, Placement.FIRST_PLACE);
+                    }
+                    
+                    return placementMap;
+                }
+            }
+            
+            final HariantPlayer player = context.getHariantPlayer();
+            final GameInstanceImpl gameInstance = new GameInstanceImpl(EnumGameType.DEATHMATCH, EnumBattleground.ARENA);
+            
+            final WinType winType = Objects.requireNonNullElse(context.argument(0).toEnum(WinType.class), WinType.TIME_LIMIT);
+            final boolean winnerType = context.argument(1).toBoolean();
+            
+            final List<HariantPlayer> players = List.of(player);
+            final WinResult winResult = WinResult.create(winType, Generator.generatePlacementMap(winnerType ? context.getProfile().getTeam() : null));
+            
+            gameInstance.onDestroy(players, winResult);
+            gameInstance.onFinalize(players, winResult);
+            
+            Hariant.destroyEntity(player.getUuid());
+            EnumLobbyItem.clearInventoryGiveAllItems(player.getProfile());
+        });
+        
+        register("notification", context -> {
+            NotificationHandler.getNotificationsNotify(context.getProfile());
+        });
+        
+        // If this is ever 2000 lines of code, don't add another fucking command and either refactor or delete commands that you haven't used for 10 years
     }
     
     public void register(@NotNull String command, @NotNull Consumer<CommandContext> context) {

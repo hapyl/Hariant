@@ -29,7 +29,7 @@ public interface StatusEffect extends Effect, Named, Described, DamageSourceIden
     void onRemove(@NotNull HariantEntity entity, @NotNull HariantEntity applier);
     
     @Override
-    void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick);
+    void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration);
     
     @Override
     @NotNull

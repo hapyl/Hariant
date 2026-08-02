@@ -13,9 +13,9 @@ import java.util.function.Function;
 @UtilityClass
 public final class MongoCodecs {
     
-    private static final MongoCodec<UUID, String> UUID = createCodec(String.class, Object::toString, BukkitUtils::getUuidFromString);
-    private static final MongoCodec<Key, String> KEY = createCodec(String.class, Key::getKey, Key::ofStringOrNull);
-    private static final MongoCodec<Timestamp, Long> TIMESTAMP = createCodec(Long.class, Timestamp::getTimestamp, Timestamp::ofEpoch);
+    private static final MongoCodec<UUID, String> UUID = create(String.class, Object::toString, BukkitUtils::getUuidFromString);
+    private static final MongoCodec<Key, String> KEY = create(String.class, Key::getKey, Key::ofStringOrNull);
+    private static final MongoCodec<Timestamp, Long> TIMESTAMP = create(Long.class, Timestamp::getTimestamp, Timestamp::ofEpoch);
     
     private MongoCodecs() {
     }
@@ -36,8 +36,7 @@ public final class MongoCodecs {
         return new MongoCodecEnum<>(enumClass);
     }
     
-    @NotNull
-    private static <T, D> MongoCodec<T, D> createCodec(@NotNull Class<D> codecClass, @NotNull Function<@NotNull T, @NotNull D> serializeFn, @NotNull Function<@NotNull D, @Nullable T> deserializeFn) {
+    public static @NotNull <T, D> MongoCodec<T, D> create(@NotNull Class<D> codecClass, @NotNull Function<@NotNull T, @NotNull D> serializeFn, @NotNull Function<@NotNull D, @Nullable T> deserializeFn) {
         return new MongoCodec<>() {
             @NotNull
             @Override

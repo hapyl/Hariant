@@ -1,4 +1,4 @@
-package me.hapyl.hariant.entity.damage.tracker;
+package me.hapyl.hariant.entity.player.combat;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.text.Capitalizable;
@@ -84,7 +84,7 @@ public class CombatData implements DeathComponent {
         private final Component component;
         
         Type() {
-            this.component = Component.text("Damage %s".formatted(Capitalizable.capitalize(this)));
+            this.component = Component.text("%s DMG".formatted(Capitalizable.capitalize(this)));
         }
         
         @Override

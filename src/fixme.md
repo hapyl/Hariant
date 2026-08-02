@@ -5,25 +5,17 @@
 - Implement exp
 - Add inventory
 - Cannot see friendly invisibility
-- Add fall DMG resistance effect
 - Add fx to sakura healing
 - Achievement families
 - Clear vanilla effects on game start
-- Cycle arrow is a little offset
-- Next Hero -> Zealot
-- Invisibility duration
-- Do something with damage display with shields
-- ~~Effect event -> Per-Effect events~~
 - Hellburn should really NOT be effect
 - Nyx missing "Wither" talent fx
 - Inferno ultimate change
 - Add animation to ULTIMATE CHARGED
+- Tablist
+- Notifications
 
-- ~~Reset entity on target~~
-- ~~Ferocity deals double damage to demons~~
-- ~~Shark's a little too strong~~
-
-[IDEAS]
+  [IDEAS]
 
 - Maybe change damage report to use team color bars
 
@@ -31,6 +23,15 @@
 
 # FIXED
 
+- ~~Add fall DMG resistance effect~~
+- ~~Cycle arrow is a little offset~~
+- ~~Invisibility duration~~
+- ~~Next Hero -> Zealot~~
+- ~~Do something with damage display with shields~~
+- ~~Effect event -> Per-Effect events~~
+- ~~Reset entity on target~~
+- ~~Ferocity deals double damage to demons~~
+- ~~Shark's a little too strong~~
 - ~~Change how Effect RES works~~
 - ~~Map features description is wrong~~
 - ~~Add /ready~~
@@ -54,9 +55,9 @@
 - ~~Bees DONT FUCKING DESPAWN~~
 - ~~Add artifact customizer to Mr. Nerd~~
 - ~~Make the drops look better~~
-    + ~~Hoverable drops~~
-    + ~~Notification for rare drops~~
-    + ~~Split dropping and notifications.~~
+    - ~~Hoverable drops~~
+    - ~~Notification for rare drops~~
+    - ~~Split dropping and notifications.~~
 - ~~Nerf alchemist~~
 - ~~Blast Knight:~~
     - ~~Regen energy when teammate is hit~~
@@ -71,7 +72,6 @@
 - ~~Duplicate message is wrong~~
 - ~~Can duplicate hero if switched during countdown~~
 - ~~Next hero - Blast Knight~~
-
 - ~~Start countdown sound pitch~~
 - ~~Add more slots to deathmatch scoreboard~~
 - ~~You can die after death~~

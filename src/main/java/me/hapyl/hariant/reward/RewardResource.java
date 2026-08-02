@@ -1,55 +1,56 @@
 package me.hapyl.hariant.reward;
 
-import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.inventory.HariantInventory;
+import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.inventory.adder.Adder;
+import me.hapyl.hariant.inventory.item.AbstractItem;
 import me.hapyl.hariant.inventory.item.Resource;
 import me.hapyl.hariant.profile.PlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-
 public class RewardResource implements Reward {
+    
+    private static final Component SEPARATOR = Component.text(" × ", Colors.DARK_GRAY);
     
     private final Key key;
     private final Component name;
+    private final Resource resource;
+    private final int amount;
     
-    private final Map<Resource, Integer> resources;
-    
-    public RewardResource(@NotNull Key key, @NotNull Component name) {
+    RewardResource(@NotNull Key key, @NotNull Resource resource, int amount) {
         this.key = key;
-        this.name = name;
-        this.resources = Maps.newHashMap();
+        this.name = createName(resource, amount);
+        this.resource = resource;
+        this.amount = amount;
     }
     
-    @NotNull
-    public RewardResource set(@NotNull Resource resource, int amount) {
-        this.resources.put(resource, amount);
-        return this;
-    }
-    
-    public long get(@NotNull Resource resource) {
-        return this.resources.getOrDefault(resource, 0);
-    }
-    
-    @NotNull
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return key;
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return name;
     }
     
     @Override
-    public void reward(@NotNull PlayerProfile profile) {
-        final HariantInventory inventory = profile.getDatabase().inventory;
-        
-        resources.forEach(inventory::addResource);
+    public Adder<? extends AbstractItem, ?> reward(@NotNull PlayerProfile profile) {
+        return profile.getDatabase().inventory.adderOfResource(resource, amount);
+    }
+    
+    @Override
+    public int priority() {
+        return resource.getRarity().ordinal();
+    }
+    
+    private static @NotNull Component createName(@NotNull Resource resource, int amount) {
+        return amount == 1 ? resource.getNameStyledWithRarity()
+                           : Component.empty()
+                                      .append(Component.text(amount, Colors.NUMBER))
+                                      .append(SEPARATOR)
+                                      .append(resource.getNameStyledWithRarity());
     }
     
 }

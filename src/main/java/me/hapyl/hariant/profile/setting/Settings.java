@@ -6,10 +6,13 @@ import me.hapyl.eterna.module.util.Compute;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.dialog.DialogSpeed;
 import me.hapyl.hariant.profile.AutoReady;
+import me.hapyl.hariant.profile.notification.AllowedNotifications;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Material;
+import org.bukkit.block.data.type.TestBlock;
+import org.bukkit.inventory.meta.BlockDataMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -25,6 +28,7 @@ public final class Settings {
     
     public static final Setting<DialogSpeed> DIALOG_SPEED;
     public static final Setting<AutoReady> AUTO_READY;
+    public static final Setting<AllowedNotifications> NOTIFICATIONS;
     
     private static final Map<SettingCategory, List<Setting<?>>> SETTINGS;
     
@@ -98,6 +102,20 @@ public final class Settings {
                 Icon.ofMaterial(Material.GOLD_INGOT),
                 SettingCategory.CHAT,
                 true
+        );
+        
+        NOTIFICATIONS = ofEnum(
+                Key.ofString("allow_notifications"),
+                Component.text("Allow Notifications"),
+                Component.text("Defines what type of notifications you will receive."),
+                Icon.ofMaterial(Material.TEST_BLOCK, builder -> builder.editMeta(BlockDataMeta.class, meta -> {
+                    if (meta.getBlockData(Material.TEST_BLOCK) instanceof TestBlock testBlock) {
+                        testBlock.setMode(TestBlock.Mode.LOG);
+                        meta.setBlockData(testBlock);
+                    }
+                })),
+                SettingCategory.QUALITY_OF_LIFE,
+                AllowedNotifications.ALL
         );
     }
     

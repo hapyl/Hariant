@@ -66,6 +66,11 @@ public class HariantEntityDummy extends HariantDisplayEntity {
     
     @Override
     public void onDamageTaken(@NotNull DamageInstance damageInstance, @Nullable HariantEntity attacker) {
+        // Ignore lethal damage
+        if (damageInstance.isLethal()) {
+            return;
+        }
+        
         this.damagePerSecond.increment(damageInstance);
         
         // Fx

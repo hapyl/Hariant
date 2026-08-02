@@ -21,6 +21,7 @@ public enum StatusEffectType implements StatusEffect {
     RESPAWN_RESISTANCE(new StatusEffectRespawnResistance()),
     HELLBURN(new StatusEffectHellburn()),
     STUNNED(new StatusEffectStunned()),
+    FALL_DAMAGE_RESISTANCE(new StatusEffectFallDamageResistance()),
     
     ;
     
@@ -71,8 +72,8 @@ public enum StatusEffectType implements StatusEffect {
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
-        statusEffect.onTick(entity, applier, tick);
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
+        statusEffect.onTick(entity, applier, tick, duration);
     }
     
 }

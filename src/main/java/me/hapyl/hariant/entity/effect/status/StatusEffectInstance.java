@@ -2,13 +2,16 @@ package me.hapyl.hariant.entity.effect.status;
 
 import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.eterna.module.util.Ticking;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.util.TickDuration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class StatusEffectInstance implements Ticking, TickDuration, Removable {
+public class StatusEffectInstance implements Ticking, TickDuration, Removable, ComponentLike {
     
     private final StatusEffectType effect;
     private final HariantEntity entity;
@@ -60,7 +63,7 @@ public class StatusEffectInstance implements Ticking, TickDuration, Removable {
             this.tick--;
         }
         
-        this.effect.onTick(entity, applier, tick);
+        this.effect.onTick(entity, applier, tick, duration);
     }
     
     @Override
@@ -81,6 +84,14 @@ public class StatusEffectInstance implements Ticking, TickDuration, Removable {
     @Override
     public void remove() {
         this.effect.onRemove(entity, applier);
+    }
+    
+    @Override
+    public @NotNull Component asComponent() {
+        return Component.empty()
+                        .append(effect.getName().style(effect.getEffectType().getStyle()))
+                        .appendSpace()
+                        .append(this.currentTickFormatted().color(Colors.WHITE));
     }
     
 }

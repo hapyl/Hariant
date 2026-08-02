@@ -78,10 +78,8 @@ public final class TalentZealotry extends TalentRechargeable implements Listener
             return;
         }
         
-        ev.setDamageSource(builder -> {
-            // Change element type to aether
-            builder.elementType(ElementType.AETHER);
-        });
+        // Change element type to aether
+        ev.getDamageSource().setElementType(ElementType.AETHER);
         
         // Ignore N% of enemy DEF
         ev.getEntity().addModifier(

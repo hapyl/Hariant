@@ -1,5 +1,16 @@
 package me.hapyl.hariant.statistics;
 
-public class Statistics {
-    // TODO @Feb 25, 2026 (xanyjl) -> IMPORTANT!
+import me.hapyl.hariant.talent.Talent;
+import org.jetbrains.annotations.NotNull;
+
+public interface Statistics {
+    
+    void incrementStatistic(@NotNull Statistic statistic, double value);
+    
+    void incrementTalentUsage(@NotNull Talent talent);
+    
+    double getStatistic(@NotNull Statistic statistic);
+    
+    int getTalentUsage(@NotNull Talent talent);
+    
 }

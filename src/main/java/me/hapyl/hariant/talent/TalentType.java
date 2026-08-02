@@ -3,11 +3,11 @@ package me.hapyl.hariant.talent;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.text.SmallCaps;
-import me.hapyl.hariant.entity.SmallCapsComponent;
+import me.hapyl.hariant.entity.SmallCapsLike;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public enum TalentType implements Named, Described, SmallCapsComponent {
+public enum TalentType implements Named, Described, SmallCapsLike {
     
     DAMAGE("Damage", "Deals damage to enemies."),
     ENHANCE("Enhance", "Enhances oneselves for the battle."),

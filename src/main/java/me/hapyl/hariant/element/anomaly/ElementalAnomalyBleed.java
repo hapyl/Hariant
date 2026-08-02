@@ -147,7 +147,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
             if (tick % bleedPeriod == 0) {
                 InternalTasks.now(() -> entity.damage(damageSource));
             }

@@ -14,8 +14,8 @@ import java.util.List;
 
 public abstract class ObjectCycle<E extends Named> implements ItemCreator {
     
-    private static final Component COMPONENT_POINTER_CURRENT = Component.text(" ➥ ", Colors.GREEN);
-    private static final Component COMPONENT_POINTER = Component.text("    ");
+    public static final Component COMPONENT_POINTER_CURRENT = Component.text(" ➢ ", Colors.GREEN);
+    public static final Component COMPONENT_POINTER = Component.text("    ");
     
     private final List<? extends E> values;
     private int pointer;

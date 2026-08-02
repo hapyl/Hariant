@@ -12,6 +12,7 @@ import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.game.WinResult;
 import me.hapyl.hariant.game.WinType;
 import me.hapyl.hariant.hero.Hero;
@@ -28,10 +29,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class HariantCommandCreate extends HariantPlayerCommand {
@@ -85,7 +83,7 @@ public final class HariantCommandCreate extends HariantPlayerCommand {
                     Hariant.destroyEntity(player.getUniqueId());
                     HariantLogger.success(player, Component.text("Successfully deleted player instance!", Colors.RED));
                     
-                    EnumLobbyItem.clearInventoryAndGiveAllItems(player);
+                    EnumLobbyItem.clearInventoryGiveAllItems(existingPlayer.getProfile());
                 }
             }
         },
@@ -93,9 +91,16 @@ public final class HariantCommandCreate extends HariantPlayerCommand {
         GAME_INSTANCE {
             @Override
             public void execute(@NotNull Player player, @NotNull ArgumentList args, @NotNull PlayerRank playerRank) {
-                if (Hariant.isGameInProgress()) {
-                    Hariant.endCurrentGameInstance(WinResult.create(WinType.WIN_CONDITION_MET, List.of()));
-                    HariantLogger.success(player, Component.text("Ended current game instance!"));
+                final GameInstance gameInstance = Hariant.getCurrentGameInstanceOrNull();
+                
+                if (gameInstance != null) {
+                    if (Hariant.endCurrentGameInstance(WinResult.create(WinType.COMMAND, gameInstance.getType().getWinningTeams(gameInstance)))) {
+                        HariantLogger.success(player, Component.text("Ended current game instance!"));
+                    }
+                    else {
+                        HariantLogger.error(player, Component.text("Cannot end game instance right now!"));
+                    }
+                    
                 }
                 else {
                     Hariant.startNewGameInstance();

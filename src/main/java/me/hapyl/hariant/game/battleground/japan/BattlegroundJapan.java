@@ -9,6 +9,7 @@ import me.hapyl.hariant.game.battleground.Battleground;
 import me.hapyl.hariant.game.battleground.BattlegroundImpl;
 import me.hapyl.hariant.game.battleground.feature.BattlegroundFeatureImpl;
 import me.hapyl.hariant.game.booster.Booster;
+import me.hapyl.hariant.inventory.drop.CommonDroppable;
 import me.hapyl.hariant.inventory.drop.DropTable;
 import me.hapyl.hariant.inventory.drop.Droppable;
 import me.hapyl.hariant.inventory.item.ItemRegistry;
@@ -73,12 +74,12 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
         DropTableJapan() {
             super(
                     List.of(
-                            Droppable.ofCatCoins(),
+                            CommonDroppable.CAT_COINS,
+                            CommonDroppable.ARTIFACT_ARTIFICER,
+                            CommonDroppable.HERO_RECRUIT_VOUCHER,
                             Droppable.ofItem(ItemRegistry.ARTIFACT_MAGIC_CODEX, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_SHATTERED_SOUL, 50),
-                            Droppable.ofItem(ItemRegistry.ARTIFACT_WHOOPEE_CUSHION, 50),
-                            Droppable.ofArtifactArtificer(),
-                            Droppable.ofHeroRecruitVoucher()
+                            Droppable.ofItem(ItemRegistry.ARTIFACT_WHOOPEE_CUSHION, 50)
                     ),
                     Battleground.DEFAULT_DROP_TABLE_AMOUNT
             );

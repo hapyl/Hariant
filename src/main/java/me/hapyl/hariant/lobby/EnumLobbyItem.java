@@ -1,6 +1,7 @@
 package me.hapyl.hariant.lobby;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.hariant.profile.PlayerProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
@@ -38,8 +39,8 @@ public enum EnumLobbyItem implements LobbyItem {
     
     @NotNull
     @Override
-    public ItemBuilder createBuilder(@NotNull Player player) {
-        return lobbyItem.createBuilder(player);
+    public ItemBuilder createBuilder(@NotNull PlayerProfile profile) {
+        return lobbyItem.createBuilder(profile);
     }
     
     @Override
@@ -48,16 +49,16 @@ public enum EnumLobbyItem implements LobbyItem {
     }
     
     @Override
-    public void give(@NotNull Player player) {
-        lobbyItem.give(player);
+    public void give(@NotNull PlayerProfile profile) {
+        lobbyItem.give(profile);
     }
     
-    public static void clearInventoryAndGiveAllItems(@NotNull Player player) {
-        final PlayerInventory inventory = player.getInventory();
+    public static void clearInventoryGiveAllItems(@NotNull PlayerProfile profile) {
+        final PlayerInventory inventory = profile.getPlayer().getInventory();
         inventory.clear();
         
         for (EnumLobbyItem lobbyItem : EnumLobbyItem.values()) {
-            lobbyItem.give(player);
+            lobbyItem.give(profile);
         }
     }
     

@@ -17,7 +17,7 @@ public interface StatusEffectHandler {
     
     void removeEffect(@NotNull StatusEffectType effect);
     
-    void resetEffects();
+    int clearEffects();
     
     boolean hasEffect(@NotNull StatusEffectType effect);
     

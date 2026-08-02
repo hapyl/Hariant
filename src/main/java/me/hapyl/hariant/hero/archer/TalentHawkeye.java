@@ -15,7 +15,6 @@ import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.BaseChance;
-import me.hapyl.hariant.util.CommonComponents;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -36,12 +35,11 @@ import java.util.Comparator;
 
 public final class TalentHawkeye extends TalentPassive implements Listener {
     
-    @NotNull
-    public static final Component HAWKEYE_ARROW = Component.text("Hawkeye Arrow", TextColor.color(0xFFE600));
+    public static final @NotNull Component HAWKEYE_ARROW = Component.text("Hawkeye Arrow", TextColor.color(0xFFE600));
     
-    @DisplayField private final BaseChance homingChance = BaseChance.baseChance(20);
-    @DisplayField private final Decimal homingRadius = Decimal.ofValue(6);
-    @DisplayField private final Decimal homingSmoothingFactor = Decimal.ofPercentage(70);
+    private final @DisplayField BaseChance homingChance = BaseChance.baseChance(20);
+    private final @DisplayField Decimal homingRadius = Decimal.ofValue(6);
+    private final @DisplayField Decimal homingSmoothingFactor = Decimal.ofPercentage(70);
     
     public TalentHawkeye(@NotNull Key key) {
         super(key, Component.text("Hawkeye"), Icon.ofMaterial(Material.ENDER_EYE));
@@ -54,8 +52,10 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
                          .append(homingChance)
                          .append(Component.text(" chance to become a "))
                          .append(HAWKEYE_ARROW)
-                         .append(Component.text(", that homes at nearby "))
-                         .append(CommonComponents.ENEMY.textPlural())
+                         .append(Component.text(" that deals "))
+                         .append(ElementType.ELECTRIC.asComponentDamage())
+                         .append(Component.text(" and homes at nearby "))
+                         .append(Component.text("enemies", Colors.RED))
                          .append(Component.text("."))
         
         );
@@ -83,7 +83,7 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
         }
         
         // Change the element type to ELECTRIC
-        projectile.setDamageSource(projectile.getDamageSource().toBuilder().elementType(ElementType.ELECTRIC).build());
+        damageSource.setElementType(ElementType.ELECTRIC);
         
         player.delegate(new Hawkeye(player, projectile), DelegateType.INTERRUPTABLE);
         
