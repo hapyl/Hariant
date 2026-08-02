@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Projectiles are VERY annoying to deal with, since we have to store the damage source on them,
@@ -61,16 +62,14 @@ public final class ProjectileHandler implements Listener {
             return;
         }
         
-        final DamageSource.Builder damageSourceBuilder = rangedAttack.createDamageSource(entity);
+        final DamageSource damageSource = rangedAttack.createDamageSource(entity);
         
         // If the project is an arrow, and it's fully charged (critical), add `FORCE_CRITICAL` tag
         if (projectile instanceof Arrow arrow && arrow.isCritical()) {
-            damageSourceBuilder.damageFlags(DamageFlag.FORCE_CRITICAL);
+            damageSource.setDamageFlags(Set.of(DamageFlag.FORCE_CRITICAL));
         }
         
         // Build damage source, create projectile and call entity `onShoot`
-        final DamageSource damageSource = damageSourceBuilder.build();
-        
         createProjectile(projectile, damageSource);
         
         entity.onShoot(damageSource);

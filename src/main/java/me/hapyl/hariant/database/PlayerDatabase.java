@@ -11,11 +11,14 @@ import me.hapyl.hariant.database.problem.*;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.database.serialize.MongoSerializable;
 import me.hapyl.hariant.dialog.DialogDatabaseEntry;
+import me.hapyl.hariant.experience.LevelEntry;
 import me.hapyl.hariant.hero.HeroDirectory;
 import me.hapyl.hariant.inventory.HariantInventory;
-import me.hapyl.hariant.experience.LevelEntry;
+import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.setting.SettingEntry;
+import me.hapyl.hariant.reward.RewardsEntry;
 import me.hapyl.hariant.security.KickReason;
+import me.hapyl.hariant.statistics.StatisticEntry;
 import me.hapyl.hariant.task.InternalTasks;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -25,11 +28,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-public sealed class PlayerDatabase permits PlayerDatabaseView {
+public final class PlayerDatabase {
     
     // *-* Public Entries *-* //
     
@@ -39,19 +41,23 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
     public final LevelEntry level;
     public final DialogDatabaseEntry dialog;
     public final AchievementEntry achievements;
+    public final RewardsEntry rewards;
+    public final StatisticEntry statistics;
     
     // *-* Private Fields *-* //
     
     private final Database database;
+    private final PlayerProfile profile;
     private final UUID uuid;
     private final Bson filter;
     
     private final Document root;
     private final List<PlayerDatabaseEntry> entries;
     
-    public PlayerDatabase(@NotNull Database database, @NotNull UUID uuid) {
+    public PlayerDatabase(@NotNull Database database, @NotNull PlayerProfile profile) {
         this.database = database;
-        this.uuid = uuid;
+        this.profile = profile;
+        this.uuid = profile.getUuid();
         this.filter = new Document("_id", uuid.toString());
         
         // Load `root` document
@@ -86,6 +92,8 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
         this.level = deserialize("level", LevelEntry.class, problemReporter);
         this.dialog = deserialize("dialog", DialogDatabaseEntry.class, problemReporter);
         this.achievements = deserialize("achievements", AchievementEntry.class, problemReporter);
+        this.rewards = deserialize("rewards", RewardsEntry.class, problemReporter);
+        this.statistics = deserialize("statistics", StatisticEntry.class, problemReporter);
         
         // Handle problems
         problemReporter.handle(problem -> {
@@ -98,39 +106,33 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
             
             // `SEVERE` problems throw error, and if player is online, kicks them
             else if (problemType == ProblemType.SEVERE) {
-                // If the player is online, kick them
-                this.getPlayer().ifPresent(player -> {
-                    Hariant.getSecurityManager().kick(
-                            player,
-                            KickReason.create(
-                                    uuid,
-                                    "There was an error loading your database, try logging again. If the issue persists, contact support.",
-                                    problem.toString()
-                            )
-                    );
-                });
+                Hariant.getSecurityManager().kick(
+                        profile.getPlayer(),
+                        KickReason.create(
+                                uuid,
+                                "There was an error loading your database, try logging again. If the issue persists, contact support.",
+                                problem.toString()
+                        )
+                );
                 
                 throw new RuntimeException(problem.toString());
             }
         });
     }
     
-    @NotNull
-    public Document getRoot() {
+    public @NotNull Document getRoot() {
         return root;
     }
     
-    /**
-     * Gets an <b>online</b> player instance for whom this database belongs to.
-     *
-     * @return a player wrapped in an optional, or an empty optional.
-     */
-    public @NotNull Optional<Player> getPlayer() {
-        return Optional.ofNullable(Bukkit.getPlayer(uuid));
+    public @NotNull PlayerProfile getProfile() {
+        return profile;
     }
     
-    @NotNull
-    public PlayerRank getRank() {
+    public @NotNull Player getPlayer() {
+        return profile.getPlayer();
+    }
+    
+    public @NotNull PlayerRank getRank() {
         return Enums.byName(PlayerRank.class, root.get("player_rank", "default"), PlayerRank.DEFAULT);
     }
     
@@ -138,8 +140,7 @@ public sealed class PlayerDatabase permits PlayerDatabaseView {
         root.put("player_rank", rank.name().toLowerCase());
     }
     
-    @NotNull
-    public UUID getUuid() {
+    public @NotNull UUID getUuid() {
         return uuid;
     }
     

@@ -3,6 +3,7 @@ package me.hapyl.hariant.entity.damage;
 import me.hapyl.eterna.module.annotate.SelfReturn;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Buildable;
+import me.hapyl.eterna.module.util.Copyable;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -16,59 +17,50 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Set;
 
-public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSource {
+public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSource, Copyable {
     
     @NotNull DamageSourceIdentity getIdentity();
     
     @Override
     @NotNull ElementType getElementType();
     
+    void setElementType(@NotNull ElementType elementType);
+    
     @Override
     @Nullable HariantEntity getSource();
     
+    void setSource(@Nullable HariantEntity source);
+    
     @Range(from = 0, to = Integer.MAX_VALUE)
     @Override
-    default double getElementUnits() {
-        return 0;
-    }
+    double getElementUnits();
     
-    default @NotNull Key getCooldownKey() {
-        return Key.empty();
-    }
+    void setElementUnits(double units);
+    
+    @NotNull Key getCooldownKey();
     
     @Override
-    default int getCooldown() {
-        return 0;
-    }
+    int getCooldown();
+    
+    void setCooldown(@NotNull Key key, int cooldown);
     
     @NotNull DamageType getDamageType();
     
+    void setDamageType(@NotNull DamageType damageType);
+    
     @NotNull List<? extends DamageComponent> getDamageComponents();
+    
+    void setDamageComponents(@NotNull List<? extends DamageComponent> damageComponents);
     
     @Unmodifiable
     @NotNull Set<? extends DamageFlag> getDamageFlags();
     
+    void setDamageFlags(@NotNull Set<? extends DamageFlag> damageFlags);
+    
     double getDamage();
     
-    default boolean compareIdentity(@NotNull DamageSourceIdentity identity) {
-        return this.getIdentity().equals(identity);
-    }
-    
-    default @NotNull Builder toBuilder(final double newDamage) {
-        final Builder builder = new Builder(this.getIdentity(), newDamage);
-        builder.source = this.getSource();
-        builder.damageType = this.getDamageType();
-        builder.elementType = this.getElementType();
-        builder.damageComponents = this.getDamageComponents();
-        builder.damageFlags = this.getDamageFlags();
-        builder.cooldownKey = this.getCooldownKey();
-        builder.cooldown = this.getCooldown();
-        return builder;
-    }
-    
-    default @NotNull Builder toBuilder() {
-        return toBuilder(this.getDamage());
-    }
+    @Override
+    @NotNull DamageSource createCopy();
     
     default void startCooldownIfExists(@NotNull HariantEntity hariantEntity) {
         if (hasCooldown()) {
@@ -94,92 +86,60 @@ public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSou
         return new Builder(identity, 1);
     }
     
-    @NotNull
-    static Builder common(@NotNull DamageSourceIdentity identity, final double damage) {
-        return new Builder(identity, damage).components(DamageComponent.ofCommon());
-    }
-    
     class Builder implements Buildable<DamageSource> {
         
-        private final @NotNull DamageSourceIdentity identity;
-        private final double damage;
-        
-        private @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents;
-        private @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags;
-        
-        private @Nullable HariantEntity source;
-        private @NotNull ElementType elementType;
-        private @NotNull DamageType damageType;
-        
-        private double elementUnits;
-        
-        private @NotNull Key cooldownKey;
-        private int cooldown;
+        private final DamageSource damageSource;
         
         Builder(@NotNull DamageSourceIdentity identity, final double damage) {
-            this.identity = identity;
-            this.damage = damage;
-            this.damageComponents = List.of();
-            this.damageFlags = Set.of();
-            this.source = null;
-            this.elementType = ElementType.PHYSICAL;
-            this.damageType = DamageType.MELEE;
-            this.cooldownKey = Key.empty();
-            this.cooldown = 0;
+            this.damageSource = new DamageSourceImpl(identity, damage);
         }
         
         @SelfReturn
-        public Builder source(@Nullable HariantEntity attacker) {
-            this.source = attacker;
+        public Builder source(@Nullable HariantEntity source) {
+            this.damageSource.setSource(source);
             return this;
         }
         
         @SelfReturn
         public Builder damageType(@NotNull DamageType damageType) {
-            this.damageType = damageType;
+            this.damageSource.setDamageType(damageType);
             return this;
         }
         
         @SelfReturn
         public Builder elementType(@NotNull ElementType elementType) {
-            this.elementType = elementType;
+            this.damageSource.setElementType(elementType);
             return this;
         }
         
         @SelfReturn
         public Builder components(@NotNull List<? extends DamageComponent> components) {
-            this.damageComponents = components;
+            this.damageSource.setDamageComponents(components);
             return this;
         }
         
         @SelfReturn
         public Builder damageFlags(@NotNull DamageFlag... flags) {
-            this.damageFlags = Set.of(flags);
+            this.damageSource.setDamageFlags(Set.of(flags));
             return this;
         }
         
         @SelfReturn
         public Builder elementalUnits(double units) {
-            this.elementUnits = units;
+            this.damageSource.setElementUnits(units);
             return this;
         }
         
         @SelfReturn
         public Builder cooldown(@NotNull Key cooldownKey, int cooldown) {
-            this.cooldownKey = cooldownKey;
-            this.cooldown = cooldown;
+            this.damageSource.setCooldown(cooldownKey, cooldown);
             return this;
-        }
-        
-        @SelfReturn
-        public Builder cooldownSeconds(@NotNull Key cooldownKey, float cooldownSeconds) {
-            return cooldown(cooldownKey, (int) (cooldownSeconds * 20));
         }
         
         @NotNull
         @Override
         public DamageSource build() {
-            return new DamageSourceImpl(identity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, cooldownKey, cooldown);
+            return damageSource;
         }
     }
     

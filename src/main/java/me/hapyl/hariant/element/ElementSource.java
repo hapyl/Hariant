@@ -20,4 +20,5 @@ public interface ElementSource {
     static ElementSource create(@NotNull ElementType elementType, @Nullable HariantEntity source, double units) {
         return new ElementSourceImpl(elementType, source, units);
     }
+    
 }

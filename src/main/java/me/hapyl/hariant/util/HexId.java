@@ -14,6 +14,7 @@ public final class HexId implements Comparable<HexId> {
     };
     
     private static final Random RANDOM = new SecureRandom();
+    
     private static final int ID_LENGTH = 8;
     private static final char STRING_CHAR = '#';
     
@@ -33,8 +34,7 @@ public final class HexId implements Comparable<HexId> {
         return Arrays.compare(this.value, that.value);
     }
     
-    @NotNull
-    public static HexId ofRandom() {
+    public static @NotNull HexId ofRandom() {
         final char[] value = new char[ID_LENGTH];
         
         for (int i = 0; i < ID_LENGTH; i++) {
@@ -44,8 +44,7 @@ public final class HexId implements Comparable<HexId> {
         return new HexId(value);
     }
     
-    @NotNull
-    public static HexId ofString(@NotNull String value) {
+    public static @NotNull HexId ofString(@NotNull String value) {
         if (value.charAt(0) != STRING_CHAR) {
             throw new IllegalArgumentException("HexId must start with `%s`!".formatted(STRING_CHAR));
         }

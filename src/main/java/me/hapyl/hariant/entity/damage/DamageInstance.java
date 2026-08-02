@@ -1,5 +1,6 @@
 package me.hapyl.hariant.entity.damage;
 
+import me.hapyl.eterna.module.util.Copyable;
 import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
@@ -13,14 +14,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public final class DamageInstance {
+public final class DamageInstance implements MutatesDamage, Copyable {
     
     private final @NotNull DamageReport damageReport;
+    private final @NotNull DamageSource damageSource;
     
     private final @NotNull HariantEntity entity;
     private final @Nullable HariantEntity attacker;
     
-    private @NotNull DamageSource damageSource;
     private double damage;
     
     private boolean critical;
@@ -67,6 +68,7 @@ public final class DamageInstance {
         return damage;
     }
     
+    @Override
     public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final double value) {
         final double damageBeforeMutation = damage;
         final double damageAfterMutation = mutator.mutate(damage, value);
@@ -75,6 +77,7 @@ public final class DamageInstance {
         this.damageReport.report(identity, mutator, value, damageBeforeMutation, damageAfterMutation);
     }
     
+    @Override
     public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final Decimal value) {
         this.mutateDamage(identity, mutator, value.doubleValue());
     }
@@ -96,6 +99,22 @@ public final class DamageInstance {
         this.lethal = true;
     }
     
+    @Override
+    public @NotNull DamageInstance createCopy() {
+        final DamageInstance copy = new DamageInstance(
+                this.entity,
+                this.damageSource.createCopy(),
+                newInstance -> DamageReport.copyOf(newInstance, this.damageReport)
+        );
+        
+        copy.damage = this.damage;
+        copy.critical = this.critical;
+        copy.shielded = this.shielded;
+        copy.lethal = this.lethal;
+        
+        return copy;
+    }
+    
     private void calculateDamage() {
         // Snapshot attributes so we can modify them in the event without mutating the actual entity attributes
         final AttributesInstanceSnapshot snapshotEntity = AttributesInstanceSnapshot.snapshot(entity);
@@ -105,7 +124,7 @@ public final class DamageInstance {
         final HariantDamageCalculationsEvent event = new HariantDamageCalculationsEvent(damageSource, snapshotEntity, snapshotAttacker);
         event.callEvent();
         
-        this.damageSource = event.getDamageSource();
+        // Honestly I don't know why we're getting the damage here, you cannot modify the damage in the source, should you?
         this.damage = damageSource.getDamage();
         
         // Apply components
@@ -116,21 +135,6 @@ public final class DamageInstance {
             this.damage *= multiplier;
             this.damageReport.report(component, DamageMutator.multiply(), multiplier, damageBeforeMultiplier, damage);
         }
-    }
-    
-    public static @NotNull DamageInstance copyOf(@NotNull DamageInstance damageInstance, @NotNull Mutator mutator) {
-        final DamageInstance copy = new DamageInstance(
-                damageInstance.entity,
-                mutator.mutate(damageInstance.damageSource.toBuilder()).build(),
-                newInstance -> DamageReport.copyOf(newInstance, damageInstance.damageReport)
-        );
-        
-        copy.damage = damageInstance.damage;
-        copy.critical = damageInstance.critical;
-        copy.shielded = damageInstance.shielded;
-        copy.lethal = damageInstance.lethal;
-        
-        return copy;
     }
     
     public interface Mutator {

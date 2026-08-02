@@ -17,13 +17,15 @@ import java.util.Map;
 
 public class ComponentShine {
     
+    private static final int DEFAULT_STAY = 5;
+    
     private final Map<? extends Integer, ? extends Component> frames;
     
     private ComponentShine(@NotNull Map<? extends Integer, ? extends Component> frames) {
         this.frames = frames;
     }
     
-    public void display(@NotNull Audience audience, @NotNull Component subtitle, int period) {
+    public void display(@NotNull Audience audience, @NotNull Component subtitle, int period, int stay) {
         new HariantTickingTask(Scheduler.ofTimer(period)) {
             private final int duration = frames.size() - 1;
             private final int wait = Math.clamp(duration, 5, 20);
@@ -35,17 +37,17 @@ public class ComponentShine {
                     return;
                 }
                 
-                audience.showTitle(Title.title(frames.get(tick), subtitle, 0, 5, wait));
+                audience.showTitle(Title.title(frames.get(tick), subtitle, 0, stay, wait));
             }
         };
     }
     
     public void display(@NotNull Audience audience, @NotNull Component subtitle) {
-        this.display(audience, subtitle, 1);
+        this.display(audience, subtitle, 1, DEFAULT_STAY);
     }
     
     public void display(@NotNull Audience audience) {
-        this.display(audience, Component.empty(), 1);
+        this.display(audience, Component.empty(), 1, DEFAULT_STAY);
     }
     
     public static @NotNull Builder builder(@NotNull String string) {

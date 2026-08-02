@@ -3,6 +3,7 @@ package me.hapyl.hariant.database;
 import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializable;
 import me.hapyl.hariant.database.serialize.MongoSerializableConstructor;
+import me.hapyl.hariant.profile.PlayerProfile;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,6 +47,10 @@ public abstract class PlayerDatabaseEntry implements MongoSerializable {
     @NotNull
     public String getParent() {
         return parent;
+    }
+    
+    public @NotNull PlayerProfile getProfile() {
+        return database.getProfile();
     }
     
 }

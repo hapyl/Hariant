@@ -72,7 +72,7 @@ public final class ArtifactSetSearingInferno extends ArtifactSet implements List
             return;
         }
         
-        if (!damageSource.compareIdentity(ElementalAnomalyBurn.DAMAGE_SOURCE_IDENTITY)) {
+        if (!(damageSource instanceof ElementalAnomalyBurn.ElementalAnomalyBurnDamageSource)) {
             return;
         }
         

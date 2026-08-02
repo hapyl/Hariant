@@ -1,23 +1,23 @@
 package me.hapyl.hariant.util;
 
+import me.hapyl.hariant.Hariant;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 public final class Timestamp implements ComponentLike, Comparable<Timestamp> {
     
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss z").withZone(Hariant.TIME_ZONE);
     
     private final long timestamp;
     private final Component component;
     
     private Timestamp(long timestamp) {
         this.timestamp = timestamp;
-        this.component = Component.text(Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.UTC).format(FORMATTER));
+        this.component = Component.text(Instant.ofEpochMilli(timestamp).atZone(Hariant.TIME_ZONE).format(FORMATTER));
     }
     
     public long getTimestamp() {

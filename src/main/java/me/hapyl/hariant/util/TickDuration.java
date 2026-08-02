@@ -24,7 +24,9 @@ public interface TickDuration {
     
     @NotNull
     default Component currentTickFormatted() {
-        return Component.text(Tick.format(this.currentTick()));
+        return this.isIndefinite()
+               ? HariantConstants.CHARACTER_INFINITY
+               : Component.text(Tick.format(this.currentTick()));
     }
     
     @NotNull

@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.component.ComponentStyler;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
@@ -13,6 +14,7 @@ import me.hapyl.hariant.task.executor.Executable;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
@@ -82,10 +84,12 @@ public abstract class TalentUltimateOvercharge extends TalentUltimate {
             
             // If fully overcharged, tell just that
             if (percent >= 1.0) {
+                final TextColor color = Hariant.currentTickMod20() ? Colors.ULTIMATE_OVERCHARGE : Colors.ULTIMATE_OVERCHARGE_SECONDARY;
+                
                 return Component.empty()
                                 .append(OVERCHARGE_PREFIX_AND_SUFFIX_COMPONENT)
                                 .appendSpace()
-                                .append(Component.text("OVERCHARGED", Colors.ULTIMATE_OVERCHARGE, TextDecoration.BOLD))
+                                .append(Component.text("OVERCHARGED", color, TextDecoration.BOLD))
                                 .appendSpace()
                                 .append(OVERCHARGE_PREFIX_AND_SUFFIX_COMPONENT);
             }

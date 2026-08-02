@@ -41,7 +41,7 @@ public class EffectImpl implements Effect {
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
     }
     
 }

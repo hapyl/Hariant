@@ -79,9 +79,14 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     }
     
     @Override
-    public void resetEffects() {
+    public int clearEffects() {
+        final int size = effectMap.size();
+        
+        // FIXME (xanyjl @ Thursday, July 30) -> Should this call removal event, or maybe another event?
         effectMap.values().forEach(StatusEffectInstance::remove);
         effectMap.clear();
+        
+        return size;
     }
     
     @Override

@@ -7,7 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 
-public class PlayerUIFormatterSpectatorImpl implements PlayerUIFormatter {
+public class PlayerUIFormatterSpectatorImpl extends PlayerUIFormatterLobbyImpl {
     
     PlayerUIFormatterSpectatorImpl() {
     }
@@ -16,8 +16,11 @@ public class PlayerUIFormatterSpectatorImpl implements PlayerUIFormatter {
     public void formatScoreboard(@NotNull PlayerProfile profile, @NotNull ComponentList components) {
         components.append(Component.text("SPECTATOR", Colors.GOLD, TextDecoration.BOLD));
         
-        // TODO @Feb 25, 2026 (xanyjl) -> Show teams
+        components.append(Component.text(" Yeah, there isn't really", Colors.GRAY));
+        components.append(Component.text(" much here because spectator", Colors.GRAY));
+        components.append(Component.text(" isn't quite implemented yet.", Colors.GRAY));
         
+        // TODO @Feb 25, 2026 (xanyjl) -> Show teams
     }
     
 }

@@ -86,6 +86,12 @@ public final class TalentAbyssalBottle extends Talent implements MenuHeroTalents
         return Response.await();
     }
     
+    @Override
+    public boolean incrementsStatistics() {
+        // The talent itself is really a "toggle" so just skip the statistics for it
+        return false;
+    }
+    
     @Nullable
     public TalentAlchemistPotion getAlchemistPotion(int slot) {
         return alchemistPotionsMapped.get(slot);

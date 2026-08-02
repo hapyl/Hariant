@@ -12,9 +12,11 @@ import me.hapyl.hariant.weapon.NormalAttackRanged;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Set;
+
 public class NormalAttack extends AttributeScalingSingle implements DamageSourceCreator {
     
-    private static final DamageSourceIdentity DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(Key.ofString("normal_attack"), Component.text("Normal Attack"), DeathMessage.DEFAULT);
+    private static final DamageSourceIdentity DEFAULT_DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(Key.ofString("normal_attack"), Component.text("Normal Attack"), DeathMessage.DEFAULT);
     
     protected final ElementType elementType;
     protected final int attackCooldown;
@@ -35,14 +37,13 @@ public class NormalAttack extends AttributeScalingSingle implements DamageSource
         return elementType;
     }
     
-    @NotNull
+    public @NotNull DamageSourceIdentity getDamageSourceIdentity() {
+        return DEFAULT_DAMAGE_SOURCE_IDENTITY;
+    }
+    
     @Override
-    public DamageSource.Builder createDamageSource(@NotNull HariantEntity attacker) {
-        // DamageType default to Melee, so no need to explicitly set it
-        return DamageSource.builder(DAMAGE_SOURCE_IDENTITY, getScaledValue(attacker))
-                           .elementType(elementType)
-                           .source(attacker)
-                           .components(DamageComponent.ofCommon());
+    public @NotNull DamageSource createDamageSource(@NotNull HariantEntity attacker) {
+        return new DamageSourceImpl(this.getDamageSourceIdentity(), attacker, DamageType.MELEE, elementType, DamageComponent.ofCommon(), Set.of(), this.getScaledValue(attacker), 0);
     }
     
     @NotNull

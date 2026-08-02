@@ -3,7 +3,6 @@ package me.hapyl.hariant.game;
 import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.entity.Lifecycle;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.battleground.Battleground;
 import me.hapyl.hariant.game.type.GameType;
@@ -16,7 +15,9 @@ import me.hapyl.hariant.util.HexId;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-public interface GameInstance extends Lifecycle, Ticking, PlayerUIFormatter, PlayerCallback {
+import java.util.List;
+
+public interface GameInstance extends Ticking, PlayerUIFormatter, PlayerCallback {
     
     @NotNull
     GameInstanceState getState();
@@ -38,11 +39,11 @@ public interface GameInstance extends Lifecycle, Ticking, PlayerUIFormatter, Pla
     @NotNull
     HexId getId();
     
-    @Override
-    void onCreate();
+    void onCreate(@NotNull Iterable<? extends HariantPlayer> players);
     
-    @Override
-    void onDestroy();
+    void onDestroy(@NotNull Iterable<? extends HariantPlayer> players, @NotNull WinResult result);
+    
+    void onFinalize(@NotNull List<? extends HariantPlayer> players, @NotNull WinResult result);
     
     @Override
     void tick();
@@ -62,5 +63,4 @@ public interface GameInstance extends Lifecycle, Ticking, PlayerUIFormatter, Pla
     default boolean endIfWinConditionMet() {
         return Hariant.endCurrentGameInstanceIfWinConditionMet();
     }
-    
 }

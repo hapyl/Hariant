@@ -1,6 +1,7 @@
 package me.hapyl.hariant.game.battleground;
 
 import me.hapyl.eterna.module.math.Tick;
+import me.hapyl.hariant.inventory.drop.CommonDroppable;
 import me.hapyl.hariant.inventory.drop.DropTable;
 import me.hapyl.hariant.inventory.drop.Droppable;
 import me.hapyl.hariant.inventory.item.ItemRegistry;
@@ -33,12 +34,12 @@ public final class BattlegroundArena extends BattlegroundImpl {
         DropTableArena() {
             super(
                     List.of(
-                            Droppable.ofCatCoins(),
+                            CommonDroppable.CAT_COINS,
+                            CommonDroppable.ARTIFACT_ARTIFICER,
+                            CommonDroppable.HERO_RECRUIT_VOUCHER,
                             Droppable.ofItem(ItemRegistry.ARTIFACT_UNSTABLE_LIGHTNING_GEM, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_BLOODY_ROSE, 50),
-                            Droppable.ofItem(ItemRegistry.ARTIFACT_PHILOSOPHERS_STONE, 50),
-                            Droppable.ofArtifactArtificer(),
-                            Droppable.ofHeroRecruitVoucher()
+                            Droppable.ofItem(ItemRegistry.ARTIFACT_PHILOSOPHERS_STONE, 50)
                     ),
                     Battleground.DEFAULT_DROP_TABLE_AMOUNT
             );

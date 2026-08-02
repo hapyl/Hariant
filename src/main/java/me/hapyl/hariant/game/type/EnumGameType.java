@@ -3,14 +3,13 @@ package me.hapyl.hariant.game.type;
 import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
-import me.hapyl.hariant.game.WinResult;
+import me.hapyl.hariant.game.Placement;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Map;
 
 public enum EnumGameType implements GameType {
     
@@ -22,12 +21,6 @@ public enum EnumGameType implements GameType {
     
     EnumGameType(@NotNull GameTypeImpl gameType) {
         this.gameType = gameType;
-    }
-    
-    @Nullable
-    @Override
-    public WinResult checkWinCondition(@NotNull GameInstance gameInstance) {
-        return gameType.checkWinCondition(gameInstance);
     }
     
     @NotNull
@@ -73,7 +66,13 @@ public enum EnumGameType implements GameType {
     }
     
     @Override
-    public @NotNull List<EnumTeam> getWiningTeamsWhenTimeLimit(@NotNull GameInstance gameInstance) {
-        return gameType.getWiningTeamsWhenTimeLimit(gameInstance);
+    public boolean checkWinCondition(@NotNull GameInstance gameInstance) {
+        return gameType.checkWinCondition(gameInstance);
     }
+    
+    @Override
+    public @NotNull Map<EnumTeam, Placement> getWinningTeams(@NotNull GameInstance gameInstance) {
+        return gameType.getWinningTeams(gameInstance);
+    }
+    
 }

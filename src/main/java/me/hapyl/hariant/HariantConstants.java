@@ -61,6 +61,11 @@ public interface HariantConstants {
     Component GENERIC_ULTIMATE_PREFIX = Component.text("※");
     
     /**
+     * Defines the minimum player level.
+     */
+    int MIN_LEVEL = 1;
+    
+    /**
      * Defines the maximum player level.
      */
     int MAX_LEVEL = 50;
@@ -78,7 +83,7 @@ public interface HariantConstants {
     /**
      * Defines the average minecraft nickname length.
      */
-    int AVERAGE_NICKNAME_LENGTH = 9;
+    @Deprecated int AVERAGE_NICKNAME_LENGTH = 9;
     
     /**
      * Defines the melee knockback strength.
@@ -219,6 +224,11 @@ public interface HariantConstants {
      * Defines the duration of effect resistance, in ticks.
      */
     int EFFECT_RESISTANCE_DURATION = 20;
+    
+    /**
+     * Defines the character used for indefinite duration/cooldown.
+     */
+    @NotNull Component CHARACTER_INFINITY = Component.text("∞");
     
     private static @NotNull ComponentStyler createStylerWithPadding(int padding) {
         return ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(padding).build();

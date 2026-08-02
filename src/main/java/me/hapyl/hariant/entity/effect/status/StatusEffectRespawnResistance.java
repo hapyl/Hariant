@@ -18,7 +18,7 @@ public class StatusEffectRespawnResistance extends StatusEffectImpl {
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
         entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.ENCHANTED_HIT, 2, 0.2, 0.6, 0.2, 0.15f);
     }
 }

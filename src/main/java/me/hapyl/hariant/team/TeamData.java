@@ -2,7 +2,7 @@ package me.hapyl.hariant.team;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TeamData implements Comparable<TeamData> {
+public final class TeamData implements Comparable<TeamData> {
     
     private final EnumTeam team;
     
@@ -11,6 +11,14 @@ public class TeamData implements Comparable<TeamData> {
     
     TeamData(@NotNull EnumTeam team) {
         this.team = team;
+    }
+    
+    public int getKills() {
+        return kills;
+    }
+    
+    public int getDeaths() {
+        return deaths;
     }
     
     @NotNull
@@ -23,12 +31,12 @@ public class TeamData implements Comparable<TeamData> {
         return Integer.compare(this.kills, that.kills);
     }
     
-    public int getKills() {
-        return kills;
+    public boolean hasKills() {
+        return kills > 0;
     }
     
-    public int getDeaths() {
-        return deaths;
+    public boolean hasDeaths() {
+        return deaths > 0;
     }
     
 }

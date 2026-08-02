@@ -4,14 +4,13 @@ import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
-import me.hapyl.hariant.game.WinResult;
+import me.hapyl.hariant.game.Placement;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Map;
 
 @AutoRegisteredListener
 public class GameTypeImpl implements GameType {
@@ -29,12 +28,6 @@ public class GameTypeImpl implements GameType {
         this.allowDuplicateHeroes = allowDuplicateHeroes;
         
         AutoRegisteredListener.Registry.register(this);
-    }
-    
-    @Nullable
-    @Override
-    public WinResult checkWinCondition(@NotNull GameInstance gameInstance) {
-        return WinResult.notWon();
     }
     
     @NotNull
@@ -77,8 +70,13 @@ public class GameTypeImpl implements GameType {
     }
     
     @Override
-    public @NotNull List<EnumTeam> getWiningTeamsWhenTimeLimit(@NotNull GameInstance gameInstance) {
-        return List.of();
+    public boolean checkWinCondition(@NotNull GameInstance gameInstance) {
+        return false;
+    }
+    
+    @Override
+    public @NotNull Map<EnumTeam, Placement> getWinningTeams(@NotNull GameInstance gameInstance) {
+        return Map.of();
     }
     
 }

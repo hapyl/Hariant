@@ -106,7 +106,7 @@ public class AttributeModifier
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
     }
     
     @NotNull
@@ -126,7 +126,7 @@ public class AttributeModifier
             this.tick--;
         }
         
-        this.onTick(entity, applier, tick);
+        this.onTick(entity, applier, tick, duration);
     }
     
     @Override

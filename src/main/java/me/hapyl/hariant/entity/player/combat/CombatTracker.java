@@ -1,12 +1,15 @@
-package me.hapyl.hariant.entity.damage.tracker;
+package me.hapyl.hariant.entity.player.combat;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
-import me.hapyl.eterna.module.util.Streamable;
+import com.google.common.collect.Table;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.AssistSource;
+import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.util.Resettable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -19,9 +22,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public final class CombatTracker implements Resettable, Streamable<CombatData> {
+public class CombatTracker implements Resettable {
     
-    private static final int NUMBER_OF_DISPLAY_BARS = 20;
+    private static final int NUMBER_OF_DISPLAY_BARS = 25;
     
     private static final Component BAR_COMPONENT_FILLED = Component.text("|");
     private static final Component BAR_COMPONENT_EMPTY = Component.text("|", Colors.DARK_GRAY);
@@ -29,27 +32,31 @@ public final class CombatTracker implements Resettable, Streamable<CombatData> {
     private static final Style BAR_STYLE_NORMAL = Style.style(Colors.GREEN);
     private static final Style BAR_STYLE_LETHAL = Style.style(Colors.RED);
     
-    private final HariantEntity entity;
-    private final Map<HariantEntity, CombatData> combatDataMap;
+    private final HariantPlayer player;
+    private final Table<HariantEntity, Integer, CombatData> combatDataTable;
     
-    public CombatTracker(@NotNull HariantEntity entity) {
-        this.entity = entity;
-        this.combatDataMap = Maps.newHashMap();
+    private int deathCount;
+    
+    public CombatTracker(@NotNull HariantPlayer player) {
+        this.player = player;
+        this.combatDataTable = HashBasedTable.create();
     }
     
-    public void incrementDamage(@NotNull CombatData.Type type, @NotNull HariantEntity entity, @NotNull DamageSourceIdentity identity, final double damage, final boolean isLethal) {
-        final CombatData combatData = this.getOrComputeData(entity);
+    public void incrementDamage(@NotNull CombatData.Type type, @NotNull HariantEntity entity, @NotNull DamageInstance damageInstance) {
+        final DamageSourceIdentity damageSourceIdentity = damageInstance.getDamageSource().getIdentity();
+        
+        final CombatData combatData = this.getCombatDataForCurrentDeath(entity);
         final Map<? super DamageSourceIdentity, Damage> damageMap = combatData.getDamageMap(type);
         
-        damageMap.compute(identity, (_key, _damage) -> {
+        damageMap.compute(damageSourceIdentity, (_, _damage) -> {
             // Compute damage dealt
-            _damage = Objects.requireNonNullElseGet(_damage, () -> new Damage(identity));
-            _damage.damage += damage;
+            _damage = Objects.requireNonNullElseGet(_damage, () -> new Damage(damageSourceIdentity));
+            _damage.damage += damageInstance.getDamage();
             _damage.totalHits++;
             
             // If the damage was lethal, mark it
-            if (isLethal) {
-                _damage.isLethal = true;
+            if (damageInstance.isLethal()) {
+                _damage.lethalHits++;
             }
             
             return _damage;
@@ -57,45 +64,42 @@ public final class CombatTracker implements Resettable, Streamable<CombatData> {
     }
     
     public void assist(@NotNull AssistSource assistSource) {
-        this.getOrComputeData(assistSource.source()).assist(assistSource);
+        this.getCombatDataForCurrentDeath(assistSource.source()).assist(assistSource);
     }
     
     @NotNull
     public Stream<? extends HariantEntity> assistingEntities() {
-        final double maxHealth = entity.getMaxHealth();
+        final double maxHealth = player.getMaxHealth();
         final double damageThreshold = maxHealth * HariantConstants.ASSIST_DAMAGE_THRESHOLD_PERCENTAGE;
         
-        return combatDataMap.values().stream()
-                            .filter(data -> {
-                                // Assist Rules:
-                                //  1. If damage taken is higher than n% of entity's max health
-                                //  2. If assisted in the last nL
-                                
-                                if (data.totalDamage(CombatData.Type.INCOMING) >= damageThreshold) {
-                                    return true;
-                                }
-                                else {
-                                    final Assist assist = data.getAssist();
-                                    
-                                    return assist != null && assist.millisSinceLastAssist() < HariantConstants.ASSIST_DURATION_MILLIS;
-                                }
-                            })
-                            .map(CombatData::getEntity);
+        return combatDataTable.column(deathCount)
+                              .values()
+                              .stream()
+                              .filter(data -> {
+                                  // Assist Rules:
+                                  //  1. If damage taken is higher than n% of entity's max health
+                                  //  2. If assisted in the last nL
+                                  
+                                  if (data.totalDamage(CombatData.Type.INCOMING) >= damageThreshold) {
+                                      return true;
+                                  }
+                                  else {
+                                      final Assist assist = data.getAssist();
+                                      
+                                      return assist != null && assist.millisSinceLastAssist() < HariantConstants.ASSIST_DURATION_MILLIS;
+                                  }
+                              })
+                              .map(CombatData::getEntity);
     }
     
     @Override
     public void reset() {
-        this.combatDataMap.clear();
+        this.deathCount++;
     }
     
-    @NotNull
-    @Override
-    public Stream<CombatData> stream() {
-        return combatDataMap.values().stream();
-    }
-    
-    public @NotNull HoverEvent<? extends Component> createHoverEvent(@NotNull CombatData.Type type) {
-        // Group combat data
+    public @NotNull HoverEvent<? extends Component> createHoverEvent(@NotNull CombatData.Type type, int deathCount) {
+        final Map<HariantEntity, CombatData> combatDataMap = combatDataTable.column(deathCount);
+        
         final List<Entry> entries = combatDataMap.entrySet()
                                                  .stream()
                                                  .flatMap(entry -> {
@@ -135,13 +139,13 @@ public final class CombatTracker implements Resettable, Streamable<CombatData> {
                     Component.empty()
                              .append(entity.asHeadComponent())
                              .appendSpace()
-                             .append(createProgress(percentageOfTotalDamageDealt, damage.isLethal ? BAR_STYLE_LETHAL : BAR_STYLE_NORMAL))
+                             .append(createProgress(percentageOfTotalDamageDealt, damage.lethalHits > 0 ? BAR_STYLE_LETHAL : BAR_STYLE_NORMAL))
                              .appendSpace()
                              .append(Component.text("%,.0f".formatted(damage.damage), Colors.RED))
                              .appendSpace()
                              .append(Component.text("x%s".formatted(damage.totalHits), Colors.DARK_GRAY))
                              .appendSpace()
-                             .append(damage.identity.getName().color(Colors.GRAY))
+                             .append(damage.getIdentity().getName().color(Colors.GRAY))
             );
         }
         
@@ -154,12 +158,32 @@ public final class CombatTracker implements Resettable, Streamable<CombatData> {
                          .append(Component.text("%,.0f".formatted(totalDamage), Colors.RED))
         );
         
-        return HoverEvent.showText(builder.build());
+        return HoverEvent.showText(builder);
     }
     
-    @NotNull
-    private CombatData getOrComputeData(@NotNull HariantEntity entity) {
-        return combatDataMap.computeIfAbsent(entity, CombatData::new);
+    public @NotNull HoverEvent<? extends Component> createHoverEvent(@NotNull CombatData.Type type) {
+        return this.createHoverEvent(type, deathCount);
+    }
+    
+    public @NotNull CombatData getCombatDataFor(@NotNull HariantEntity entity, int death) {
+        return combatDataTable.row(entity).computeIfAbsent(death, _ -> new CombatData(entity));
+    }
+    
+    public @NotNull CombatData getCombatDataForCurrentDeath(@NotNull HariantEntity entity) {
+        return this.getCombatDataFor(entity, deathCount);
+    }
+    
+    public @NotNull Map<? extends DamageSourceIdentity, ? extends Damage> calculateTotalDamage(@NotNull CombatData.Type type) {
+        final Map<DamageSourceIdentity, Damage> totalDamage = Maps.newHashMap();
+        
+        for (CombatData combatData : combatDataTable.values()) {
+            combatData.getDamageMap(type).forEach((damageSourceIdentity, damage) -> {
+                // Not using merge here because we need a fresh `Damage` instance
+                totalDamage.computeIfAbsent(damageSourceIdentity, Damage::new).sum(damage);
+            });
+        }
+        
+        return totalDamage;
     }
     
     private static @NotNull Component createProgress(double percent, @NotNull Style style) {

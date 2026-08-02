@@ -51,4 +51,9 @@ public final class DamageSourceIdentityImpl implements DamageSourceIdentity {
         return Objects.equals(this.key, that.key);
     }
     
+    @Override
+    public String toString() {
+        return key.toString();
+    }
+    
 }

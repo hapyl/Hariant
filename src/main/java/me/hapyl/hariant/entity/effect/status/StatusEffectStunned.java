@@ -40,7 +40,7 @@ public class StatusEffectStunned extends StatusEffectImpl implements Listener {
     }
     
     @Override
-    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
         entity.sendTitleSubtitle(TITLE, Component.text(Tick.format(tick), Colors.AQUA), 0, 10, 0);
         
         // Birds fx

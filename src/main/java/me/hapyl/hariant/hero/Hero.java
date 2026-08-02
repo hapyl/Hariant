@@ -1,12 +1,10 @@
 package me.hapyl.hariant.hero;
 
-import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
-import me.hapyl.eterna.module.text.SmallCaps;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
@@ -17,7 +15,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.debug.DebugListener;
 import me.hapyl.hariant.entity.HeadComponent;
-import me.hapyl.hariant.entity.SmallCapsComponent;
+import me.hapyl.hariant.entity.SmallCapsLike;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.player.LifecyclePlayer;
 import me.hapyl.hariant.handler.HariantEventHandler;
@@ -50,7 +48,7 @@ public abstract class Hero
         implements
         Keyed, Named, Described, Attributable,
         HariantEventHandler, ComponentLike, HeadComponent,
-        SmallCapsComponent, ActionbarSupplier, ItemCreator, DebugListener,
+        SmallCapsLike, ActionbarSupplier, ItemCreator, DebugListener,
         Registrable, LifecyclePlayer {
     
     private final Key key;
@@ -71,10 +69,10 @@ public abstract class Hero
         this.name = name;
         this.description = Described.defaultValue();
         this.attributes = attributes;
-        this.profile = new HeroProfile(this);
-        this.equipment = new HeroEquipment();
         this.weapon = weapon;
-        this.smallCaps = Component.text(SmallCaps.format(Components.toString(name)));
+        this.smallCaps = SmallCapsLike.asSmallCaps(name);
+        this.profile = new HeroProfile(this);
+        this.equipment = new HeroEquipment(this);
         
         this.talentsMapped = Map.of(
                 TalentIndex.TALENT_1, this.getFirstTalent(),
@@ -100,7 +98,7 @@ public abstract class Hero
     @Override
     @NotNull
     public ItemBuilder createBuilder() {
-        final ItemBuilder builder = ItemBuilder.playerHead(equipment.getHeadTexture());
+        final ItemBuilder builder = ItemBuilder.playerHead(equipment.getCachedHeadTexture().textureUrl());
         builder.setName(name);
         builder.addLore();
         

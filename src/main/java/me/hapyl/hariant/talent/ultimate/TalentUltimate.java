@@ -94,7 +94,12 @@ public abstract class TalentUltimate extends Talent implements Duration {
     public @NotNull Component getComponent(@NotNull HariantPlayer player, double ultimateResource) {
         final double percent = ultimateResource / this.getMinimumCost();
         
-        return Component.text(percent >= 1.0 ? "CHARGED!" : "%,.0f%%".formatted(percent * 100), this.ultimateResourceType.getStyle().decorate(TextDecoration.BOLD));
+        if (percent >= 1.0) {
+            return Component.text("CHARGED!", ultimateResourceType.getStyleOrSecondaryStyleBasedOnCurrentTick().decorate(TextDecoration.BOLD));
+        }
+        else {
+            return Component.text("%,.0f%%".formatted(percent * 100), ultimateResourceType.getStyle().decorate(TextDecoration.BOLD));
+        }
     }
     
     @NotNull

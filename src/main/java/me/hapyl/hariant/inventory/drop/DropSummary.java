@@ -3,7 +3,9 @@ package me.hapyl.hariant.inventory.drop;
 import com.google.common.collect.Lists;
 import io.papermc.paper.registry.keys.SoundEventKeys;
 import me.hapyl.eterna.module.annotate.SelfReturn;
+import me.hapyl.eterna.module.util.Streamable;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.inventory.item.Resource;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -18,7 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class DropSummary {
+public final class DropSummary implements Streamable<DropResult> {
     
     private static final Component PREFIX_BULLET = Component.text(" + ", Colors.GREEN);
     private static final DropTier RARE_DROP_THRESHOLD = DropTier.VERY_RARE;
@@ -47,7 +49,7 @@ public final class DropSummary {
     }
     
     public void showSummary(@NotNull Audience audience) {
-        final List<? extends Entry> summary = createSummary();
+        final Stream<? extends Entry> summary = this.createSummary();
         
         audience.sendMessage(Component.text("LOOT!", Colors.ORANGE, TextDecoration.BOLD));
         
@@ -69,7 +71,19 @@ public final class DropSummary {
                     .collect(Collectors.joining(", ", "[", "]"));
     }
     
-    private @NotNull List<? extends Entry> createSummary() {
+    @Override
+    public @NotNull Stream<DropResult> stream() {
+        return drops.stream();
+    }
+    
+    public long sumOfResource(@NotNull Resource resource) {
+        return drops.stream()
+                    .filter(dropResult -> resource.equals(dropResult.getDrop()))
+                    .mapToInt(DropResult::getAmount)
+                    .sum();
+    }
+    
+    public @NotNull Stream<? extends Entry> createSummary() {
         return Stream.concat(
                 // Sum up multi-drops to a single entry
                 drops.stream()
@@ -85,14 +99,18 @@ public final class DropSummary {
                 drops.stream()
                      .filter(drop -> drop.getAmount() == 1)
                      .map(drop -> new Entry(drop, 1))
-        ).sorted(COMPARATOR).toList();
+        ).sorted(COMPARATOR);
     }
     
     public static @NotNull DropSummary create() {
         return new DropSummary();
     }
     
-    private record Entry(@NotNull DropResult dropResult, int totalAmount) implements ComponentLike {
+    public record Entry(@NotNull DropResult dropResult, int totalAmount) implements ComponentLike {
+        
+        public @NotNull Drop getDrop() {
+            return dropResult.getDrop();
+        }
         
         public double getChance() {
             return dropResult.getChance();
@@ -116,9 +134,8 @@ public final class DropSummary {
             final DropTier dropTier = dropResult.getDropTier();
             
             if (dropTier.isOrHigher(RARE_DROP_THRESHOLD)) {
-                builder.append(Component.text(" (", Colors.DARK_GRAY));
-                builder.append(dropTier.getName().style(dropTier.getStyle()));
-                builder.append(Component.text(")", Colors.DARK_GRAY));
+                builder.appendSpace();
+                builder.append(dropTier.getName().style(dropTier.getStyle()).decorate(TextDecoration.BOLD));
             }
             
             return builder.build();

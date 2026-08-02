@@ -5,6 +5,7 @@ import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.player.dialog.Dialog;
 import me.hapyl.eterna.module.player.dialog.DialogEndType;
 import me.hapyl.eterna.module.player.dialog.DialogInstance;
+import me.hapyl.eterna.module.player.tablist.EntryTexture;
 import me.hapyl.eterna.module.reflect.glowing.Glowing;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.eterna.module.util.Ticking;
@@ -23,13 +24,14 @@ import me.hapyl.hariant.game.battleground.Battleground;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
-import me.hapyl.hariant.inventory.drop.DropSummary;
 import me.hapyl.hariant.lobby.EnumLobbyItem;
 import me.hapyl.hariant.profile.message.MessageChannel;
+import me.hapyl.hariant.profile.notification.NotificationHandler;
 import me.hapyl.hariant.profile.setting.Setting;
 import me.hapyl.hariant.profile.setting.SettingRetriever;
 import me.hapyl.hariant.profile.setting.Settings;
 import me.hapyl.hariant.profile.ui.PlayerUI;
+import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamEntry;
 import me.hapyl.hariant.team.TeamEntryProvider;
@@ -60,7 +62,6 @@ public final class PlayerProfile
         ForwardingAudience.Single, GameInstanceHandler, HeadComponent, SettingRetriever,
         NameFormatter, HariantLogger.Sender {
     
-    private static final int TICK_MODULO_UI = 5;
     private static final char PING_CHAR = '@';
     
     private static final FormatRules DEFAULT_NAME_FORMAT = FormatRules.create(true, false, true, true, false);
@@ -75,15 +76,16 @@ public final class PlayerProfile
     private final PlayerDatabase database;
     
     private final PlayerUI playerUI;
-    private int tick;
     
     private boolean spectator;
     private boolean ready;
+    
     private @Nullable ScheduleAutoReady scheduleAutoReady;
+    private @Nullable EntryTexture entryTexture;
     
     public PlayerProfile(@NotNull Player player) {
         this.player = player;
-        this.database = new PlayerDatabase(Hariant.getPlugin().getDatabase(), player.getUniqueId());
+        this.database = new PlayerDatabase(Hariant.getPlugin().getDatabase(), this);
         this.playerUI = new PlayerUI(this);
     }
     
@@ -98,7 +100,7 @@ public final class PlayerProfile
     public void setReady0(boolean ready, boolean triggerUpdate) {
         this.ready = ready;
         
-        EnumLobbyItem.READY.give(player);
+        EnumLobbyItem.READY.give(this);
         
         if (triggerUpdate) {
             Hariant.onPlayerReady(this);
@@ -220,6 +222,9 @@ public final class PlayerProfile
         
         // Schedule auto-ready
         this.scheduleAutoReady(new ScheduleAutoReady(this, AutoReady.ALWAYS_EXCEPT_ON_JOIN, AUTO_READY_DELAY_ON_JOIN));
+        
+        // Update vanilla experience
+        database.level.onExperienceChanged(this);
     }
     
     @Override
@@ -274,12 +279,8 @@ public final class PlayerProfile
     
     @Override
     public void tick() {
-        tick++;
-        
-        // Reduce ui updates
-        if (tick % TICK_MODULO_UI == 0) {
-            playerUI.tick();
-        }
+        // Tick player UI
+        playerUI.tick();
     }
     
     @NotNull
@@ -370,13 +371,19 @@ public final class PlayerProfile
         // Show player to all other players
         Hariant.showBukkitEntity(player);
         
-        // Generate loot
-        final DropSummary dropSummary = gameInstance.getBattleground().getDropTable().generateLoot(this);
-        
-        dropSummary.showSummary(this);
-        
         // Schedule auto ready
         this.scheduleAutoReady(new ScheduleAutoReady(this, null, AUTO_READY_DELAY));
+        
+        // Schedule notification
+        InternalTasks.later(() -> {
+            if (this.isOnline()) {
+                NotificationHandler.getNotificationsNotify(this);
+            }
+        }, AUTO_READY_DELAY);
+    }
+    
+    public boolean isOnline() {
+        return player.isOnline();
     }
     
     public void teleportToSpawnAndGiveLobbyItems() {
@@ -384,7 +391,7 @@ public final class PlayerProfile
         player.teleport(EnumBattleground.SPAWN.getSpawnLocations().getFirst().getCenteredLocation());
         
         // Give lobby items
-        EnumLobbyItem.clearInventoryAndGiveAllItems(player);
+        EnumLobbyItem.clearInventoryGiveAllItems(this);
     }
     
     @NotNull
@@ -428,6 +435,23 @@ public final class PlayerProfile
     @Override
     public <I> void setSetting(@NotNull Setting<I> setting, @NotNull I value) {
         database.settings.setValue(setting, value);
+    }
+    
+    public boolean isVisibleTo(@NotNull PlayerProfile profile) {
+        // TODO (xanyjl @ Wednesday, July 29) -> Impl hidden
+        return true;
+    }
+    
+    public int getLevel() {
+        return database.level.getLevel();
+    }
+    
+    public @NotNull EntryTexture asEntryTexture() {
+        if (entryTexture == null) {
+            entryTexture = EntryTexture.of(player);
+        }
+        
+        return entryTexture;
     }
     
     private void scheduleAutoReady(@NotNull ScheduleAutoReady scheduleAutoReady) {

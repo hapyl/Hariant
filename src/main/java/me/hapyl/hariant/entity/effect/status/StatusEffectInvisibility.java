@@ -8,7 +8,11 @@ import me.hapyl.hariant.entity.StreamRules;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.util.ComponentProgress;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,6 +20,9 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 public class StatusEffectInvisibility extends StatusEffectImpl implements Listener {
+    
+    private final Style STYLE = Style.style(TextColor.color(0x9EA5BB));
+    
     StatusEffectInvisibility() {
         super(Key.ofString("effect_invisibility"), Component.text("Invisibility"), EffectType.BUFF);
         
@@ -44,6 +51,16 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
         if (entity.hasEffect(StatusEffectType.INVISIBILITY)) {
             this.loseInvisibility(entity, "took");
         }
+    }
+    
+    @Override
+    public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
+        // Show the invisibility duration
+        entity.showTitle(Title.title(
+                ComponentProgress.create("ɪɴᴠɪꜱɪʙʟᴇ", STYLE, (double) tick / duration),
+                Component.empty(),
+                0, 5, 2
+        ));
     }
     
     @Override

@@ -13,29 +13,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public class HariantDamageEvent extends HariantEvent implements Cancellable, DamageFlagged {
+public class HariantDamageEvent extends HariantEvent implements Cancellable, DamageFlagged, MutatesDamage {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
     private final DamageInstance damageInstance;
-    
-    private boolean cancel;
-    private boolean startCooldownIfCancelled;
+    private Cancel cancel;
     
     public HariantDamageEvent(@NotNull DamageInstance damageInstance) {
         this.damageInstance = damageInstance;
     }
     
-    /**
-     * Gets the {@link DamageSource} of the event.
-     *
-     * <p>
-     * Note that {@link HariantDamageCalculationsEvent} may modify the damage source instance, therefore you should not do a {@code instanceof} check,
-     * since it may fail if the damage source was modified, instead you should use {@link DamageSource#compareIdentity(DamageSourceIdentity)}.
-     * </p>
-     *
-     * @return the current damage source of the event.
-     */
     public @NotNull DamageSource getDamageSource() {
         return damageInstance.getDamageSource();
     }
@@ -74,31 +62,36 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
         return damageInstance.getDamage();
     }
     
+    @Override
     public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final double value) {
         damageInstance.mutateDamage(identity, mutator, value);
     }
     
+    @Override
     public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final Decimal value) {
         damageInstance.mutateDamage(identity, mutator, value);
     }
     
     @Override
     public boolean isCancelled() {
+        return cancel != null && cancel.cancel;
+    }
+    
+    /**
+     * @deprecated {@link #setCancel(Cancel)}
+     */
+    @Override
+    @Deprecated
+    public void setCancelled(boolean cancel) {
+        this.cancel = cancel ? Cancel.TRUE : Cancel.FALSE;
+    }
+    
+    public @Nullable Cancel getCancel() {
         return cancel;
     }
     
-    @Override
-    public void setCancelled(boolean cancel) {
+    public void setCancel(@NotNull Cancel cancel) {
         this.cancel = cancel;
-    }
-    
-    public void setCancelled(boolean cancel, boolean startCooldownIfCancelled) {
-        this.cancel = cancel;
-        this.startCooldownIfCancelled = startCooldownIfCancelled;
-    }
-    
-    public boolean isStartCooldownIfCancelled() {
-        return startCooldownIfCancelled;
     }
     
     @Override
@@ -109,6 +102,39 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
     @NotNull
     public static HandlerList getHandlerList() {
         return HANDLER_LIST;
+    }
+    
+    public static @NotNull Cancel cancel(boolean startsCooldown, boolean broadcastsImmunity) {
+        return new Cancel(true, startsCooldown, broadcastsImmunity);
+    }
+    
+    public static final class Cancel {
+        
+        public static final Cancel FALSE = new Cancel(false, false, false);
+        public static final Cancel TRUE = new Cancel(true, true, true);
+        
+        private final boolean cancel;
+        private final boolean startsCooldown;
+        private final boolean broadcastsImmunity;
+        
+        Cancel(boolean cancel, boolean startsCooldown, boolean broadcastsImmunity) {
+            this.cancel = cancel;
+            this.startsCooldown = startsCooldown;
+            this.broadcastsImmunity = broadcastsImmunity;
+        }
+        
+        public boolean cancel() {
+            return cancel;
+        }
+        
+        public boolean startsCooldown() {
+            return startsCooldown;
+        }
+        
+        public boolean broadcastsImmunity() {
+            return broadcastsImmunity;
+        }
+        
     }
     
 }

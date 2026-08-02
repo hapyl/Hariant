@@ -21,45 +21,42 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
-// #norender
 public class HeroEquipment implements HeadComponent {
     
-    private static final String BASE_64_PATTERN = "{\"textures\" : {\"SKIN\" : {\"url\" : \"https://textures.minecraft.net/texture/%s\"}}}";
+    private static final String BASE_64_PATTERN = "{\"textures\": {\"SKIN\": {\"url\": \"https://textures.minecraft.net/texture/%s\"}}}";
     
     private static final int INDEX_HELMET = 0;
     private static final int INDEX_CHEST_PLATE = 1;
     private static final int INDEX_LEGGINGS = 2;
     private static final int INDEX_BOOTS = 3;
     
+    private final Hero hero;
     private final ItemStack[] equipment;
     
-    private String headTexture;
-    private Component headComponent;
+    private CachedHeadTexture cachedHeadTexture;
     
-    public HeroEquipment() {
-        this.equipment = new ItemStack[] {
-                ItemStacks.empty(),
-                ItemStacks.empty(),
-                ItemStacks.empty(),
-                ItemStacks.empty()
-        };
+    public HeroEquipment(@NotNull Hero hero) {
+        this.hero = hero;
+        this.equipment = new ItemStack[] { ItemStacks.empty(), ItemStacks.empty(), ItemStacks.empty(), ItemStacks.empty() };
     }
     
-    @NotNull
-    public String getHeadTexture() {
-        return Objects.requireNonNull(headTexture, "Head texture not set!");
+    public @NotNull Hero getHero() {
+        return hero;
+    }
+    
+    public @NotNull CachedHeadTexture getCachedHeadTexture() {
+        return Objects.requireNonNull(cachedHeadTexture, "Head texture isn't set for %s!".formatted(hero.getClass().getSimpleName()));
     }
     
     public void setHeadTexture(@NotNull String texture) {
         this.equipment[INDEX_HELMET] = ItemBuilder.playerHead(texture).setHideTooltip(true).asIcon();
-        this.headTexture = texture;
-        this.headComponent = encodeTexture(texture);
+        this.cachedHeadTexture = CachedHeadTexture.create(texture);
     }
     
     @NotNull
     @Override
     public Component asHeadComponent() {
-        return Objects.requireNonNull(headComponent, "Head texture not set!");
+        return this.getCachedHeadTexture().headComponent;
     }
     
     @NotNull
@@ -161,17 +158,6 @@ public class HeroEquipment implements HeadComponent {
     }
     
     @NotNull
-    private static Component encodeTexture(@NotNull String texture) {
-        final String base64 = Base64.getEncoder().encodeToString(BASE_64_PATTERN.formatted(texture).getBytes(StandardCharsets.UTF_8));
-        
-        return Component.object(
-                ObjectContents.playerHead()
-                              .profileProperty(PlayerHeadObjectContents.property("textures", base64, ""))
-                              .build()
-        ).color(Colors.WHITE);
-    }
-    
-    @NotNull
     private static ItemStack createItem(@NotNull Material material, @Nullable Color dyeColor, @Nullable TrimPattern trimPattern, @Nullable TrimMaterial trimMaterial) {
         final ItemBuilder builder = new ItemBuilder(material);
         
@@ -184,6 +170,20 @@ public class HeroEquipment implements HeadComponent {
         }
         
         return builder.setHideTooltip(true).asItemStack();
+    }
+    
+    public record CachedHeadTexture(@NotNull String textureUrl, @NotNull String base64, @NotNull Component headComponent) {
+        
+        public static @NotNull CachedHeadTexture create(@NotNull String textureUrl) {
+            final String base64 = Base64.getEncoder().encodeToString(BASE_64_PATTERN.formatted(textureUrl).getBytes(StandardCharsets.UTF_8));
+            
+            return new CachedHeadTexture(
+                    textureUrl,
+                    base64,
+                    Component.object(ObjectContents.playerHead().profileProperty(PlayerHeadObjectContents.property("textures", base64, "")).build()).color(Colors.WHITE)
+            );
+        }
+        
     }
     
 }

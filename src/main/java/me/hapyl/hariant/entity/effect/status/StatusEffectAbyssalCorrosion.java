@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
     
     StatusEffectAbyssalCorrosion(int level) {
-        super(Key.ofString("effect_abyssal_corrosion_level_" + level), Component.text("Abyssal Corrosion (Level %s)"), EffectType.DEBUFF);
+        super(Key.ofString("effect_abyssal_corrosion_level_" + level), Component.text("Abyssal Corrosion (Level %s)".formatted(level)), EffectType.DEBUFF);
     }
     
     public static class Level1 extends StatusEffectAbyssalCorrosion {
@@ -23,7 +23,7 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
             // Add poison effect to make hearts go green
             entity.addVanillaEffect(PotionEffectType.POISON, 0, 2);
         }
@@ -45,7 +45,7 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
             if (entity.localTicks() % DAMAGE_PERIOD != 0) {
                 return;
             }
@@ -65,7 +65,7 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
         }
         
         @Override
-        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick) {
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
             entity.addVanillaEffect(PotionEffectType.NAUSEA, 1, 5);
         }
     }

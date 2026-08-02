@@ -38,6 +38,10 @@ public class Response {
         return this.status == Status.ERROR;
     }
     
+    public boolean countsStatistics() {
+        return status == Status.OK || status == Status.AWAIT;
+    }
+    
     public static @NotNull Response ok() {
         return OK;
     }

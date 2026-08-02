@@ -28,8 +28,8 @@ public final class LobbyItemReady extends LobbyItemImpl {
     }
     
     @Override
-    public @NotNull ItemBuilder createBuilder(@NotNull Player player) {
-        return super.createBuilder(player)
-                    .setType(Hariant.getPlayerProfile(player).isReady() ? MATERIAL_READY : MATERIAL_NOT_READY);
+    public @NotNull ItemBuilder createBuilder(@NotNull PlayerProfile profile) {
+        return super.createBuilder(profile).setType(profile.isReady() ? MATERIAL_READY : MATERIAL_NOT_READY);
     }
+    
 }

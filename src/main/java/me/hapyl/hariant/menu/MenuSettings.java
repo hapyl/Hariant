@@ -67,6 +67,7 @@ public class MenuSettings extends Menu {
             
             if (isCurrentCategory) {
                 builder.addLore(Component.text("Currently selected!", Colors.ERROR));
+                builder.glow();
                 
                 setItem(
                         slot,
@@ -76,7 +77,8 @@ public class MenuSettings extends Menu {
                                             HariantLogger.error(player, Component.text("Already selected!"));
                                             HariantLogger.sound(player, Sound.ENTITY_VILLAGER_NO, 1.0f);
                                         })
-                                        .build());
+                                        .build()
+                );
             }
             else {
                 builder.addLore(ButtonComponents.left("select"));

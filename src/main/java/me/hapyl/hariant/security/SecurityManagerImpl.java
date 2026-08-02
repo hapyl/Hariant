@@ -2,7 +2,7 @@ package me.hapyl.hariant.security;
 
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.database.DatabaseCollection;
-import me.hapyl.hariant.database.async.SecurityDatabaseAsyncCollection;
+import me.hapyl.hariant.database.async.DatabaseAsyncCollectionSecurity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,12 +10,12 @@ import java.util.Objects;
 
 public class SecurityManagerImpl implements SecurityManager {
     
-    private final SecurityDatabaseAsyncCollection databaseEntry;
+    private final DatabaseAsyncCollectionSecurity databaseEntry;
     
     public SecurityManagerImpl(@NotNull Hariant hariant) {
         Objects.requireNonNull(hariant);
         
-        this.databaseEntry = new SecurityDatabaseAsyncCollection(Hariant.getPlugin().getDatabase(), DatabaseCollection.SECURITY);
+        this.databaseEntry = new DatabaseAsyncCollectionSecurity(Hariant.getPlugin().getDatabase(), DatabaseCollection.SECURITY);
     }
     
     @Override

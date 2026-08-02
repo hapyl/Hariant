@@ -8,9 +8,9 @@ import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.achievement.*;
 import me.hapyl.hariant.inventory.item.ResourceRegistry;
-import me.hapyl.hariant.menu.Menu;
 import me.hapyl.hariant.menu.MenuPage;
 import me.hapyl.hariant.menu.MenuPlayerProfile;
+import me.hapyl.hariant.menu.MenuReturn;
 import me.hapyl.hariant.util.Timestamp;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -67,14 +67,13 @@ public class MenuAchievement extends MenuPage<Achievement> {
         this.openMenu();
     }
     
-    @Override
-    public @NotNull Component returnMenuName() {
-        return Component.text("Player Profile");
+    public MenuAchievement(@NotNull Player player) {
+        this(player, AchievementCategory.GAMEPLAY);
     }
     
     @Override
-    public @NotNull Menu returnMenu(@NotNull Player player) {
-        return new MenuPlayerProfile(player);
+    public @NotNull MenuReturn menuReturn() {
+        return MenuReturn.create(Component.text("Player Profile"), () -> new MenuPlayerProfile(player));
     }
     
     @Override
@@ -101,7 +100,7 @@ public class MenuAchievement extends MenuPage<Achievement> {
                 }
                 else {
                     builder.addLore(Component.text("COMPLETED!", Colors.GREEN, TextDecoration.BOLD));
-                    builder.addLore(Component.space().append(completedAt.asComponent().color(Colors.GRAY)));
+                    builder.addLore(Component.space().append(completedAt.asComponent().color(Colors.DARK_GRAY)));
                 }
             }
             // Show progress

@@ -5,9 +5,9 @@ import me.hapyl.hariant.database.DatabaseCollection;
 import me.hapyl.hariant.security.Punishment;
 import org.jetbrains.annotations.NotNull;
 
-public class SecurityDatabaseAsyncCollection extends DatabaseAsyncCollection {
+public class DatabaseAsyncCollectionSecurity extends DatabaseAsyncCollection {
     
-    public SecurityDatabaseAsyncCollection(@NotNull Database database, @NotNull DatabaseCollection collection) {
+    public DatabaseAsyncCollectionSecurity(@NotNull Database database, @NotNull DatabaseCollection collection) {
         super(database, collection);
     }
     

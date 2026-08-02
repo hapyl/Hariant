@@ -134,13 +134,19 @@ public class HeroInferno extends Hero implements Listener {
             super(ElementType.FIRE, AttributeType.ATTACK, 52, 10);
         }
         
-        @NotNull
         @Override
-        public DamageSource.Builder createDamageSource(@NotNull HariantEntity attacker) {
-            return DamageSource.builder(DAMAGE_SOURCE_IDENTITY, getScaledValue(attacker))
-                               .elementType(elementType)
-                               .source(attacker)
-                               .components(DamageComponent.ofTrueDamage());
+        public @NotNull DamageSourceIdentity getDamageSourceIdentity() {
+            return DAMAGE_SOURCE_IDENTITY;
+        }
+        
+        @Override
+        public @NotNull DamageSource createDamageSource(@NotNull HariantEntity attacker) {
+            final DamageSource damageSource = super.createDamageSource(attacker);
+            
+            // Inferno always deals True Damage, so set the components
+            damageSource.setDamageComponents(DamageComponent.ofTrueDamage());
+            
+            return damageSource;
         }
     }
     

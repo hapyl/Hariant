@@ -11,6 +11,8 @@ public interface Adder<I extends AbstractItem, R> {
     
     @NotNull Adder<I, R> onError(@NotNull Consumer<AdderError> errorConsumer);
     
+    boolean isSuccess();
+    
     static <I extends AbstractItem, R> @NotNull Adder<I, R> ofResult(@NotNull R result) {
         return new AdderImpl<>(result, null);
     }

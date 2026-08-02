@@ -1,4 +1,4 @@
-package me.hapyl.hariant.entity.damage.tracker;
+package me.hapyl.hariant.entity.player.combat;
 
 import me.hapyl.hariant.entity.damage.AssistSource;
 import org.jetbrains.annotations.NotNull;

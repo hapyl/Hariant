@@ -2,19 +2,55 @@ package me.hapyl.hariant.achievement;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.command.HariantCommandOpenMenu;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseEntry;
 import me.hapyl.hariant.database.problem.Problem;
 import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializableConstructor;
+import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.hariant.profile.notification.Notification;
+import me.hapyl.hariant.profile.notification.NotificationListener;
+import me.hapyl.hariant.profile.notification.NotificationType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
 
 public final class AchievementEntry extends PlayerDatabaseEntry {
+    
+    public static final NotificationListener NOTIFICATION_LISTENER = new NotificationListener() {
+        private final Notification notification = new Notification() {
+            @Override
+            public @NotNull Component getName() {
+                return Component.text("Unclaimed Achievement Rewards");
+            }
+            
+            @Override
+            public @NotNull NotificationType getNotificationType() {
+                return NotificationType.NORMAL;
+            }
+            
+            @Override
+            public @NotNull ClickEvent<?> clickEvent() {
+                return HariantCommandOpenMenu.Menus.ACHIEVEMENTS.createClickEvent();
+            }
+        };
+        
+        @Override
+        public @Nullable Notification listen(@NotNull PlayerProfile profile) {
+            if (profile.getDatabase().achievements.countUnclaimedRewards() > 0) {
+                return notification;
+            }
+            
+            return null;
+        }
+    };
     
     private final Map<Key, AchievementProgress> achievementProgressMap;
     
@@ -68,12 +104,10 @@ public final class AchievementEntry extends PlayerDatabaseEntry {
     
     public @NotNull AchievementProgress progress(@NotNull Achievement achievement, double progress) {
         final AchievementProgress achievementProgress = this.getOrCreateProgress(achievement);
-        final Player player = database.getPlayer().orElse(null);
+        final Player player = database.getProfile().getPlayer();
         
         // Only progress achievements for online players
-        if (player != null) {
-            achievementProgress.incrementProgress(player, progress);
-        }
+        achievementProgress.incrementProgress(player, progress);
         
         return achievementProgress;
     }

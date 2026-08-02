@@ -1,32 +1,30 @@
 package me.hapyl.hariant.profile.ui;
 
 import me.hapyl.eterna.module.component.ComponentList;
-import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.player.ScoreboardBuilder;
-import me.hapyl.eterna.module.player.tablist.Tablist;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.instance.AttributesInstance;
-import me.hapyl.hariant.attribute.modifier.AttributeModifier;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
-import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.game.GameInstance;
+import me.hapyl.hariant.lobby.LobbyItemPlayerProfile;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.VanillaTeamManager;
+import me.hapyl.hariant.profile.notification.NotificationHandler;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public final class PlayerUI implements Ticking {
+    
+    private static final PlayerUIFormatter FORMATTER_LOBBY = new PlayerUIFormatterLobbyImpl();
+    private static final PlayerUIFormatter FORMATTER_SPECTATOR = new PlayerUIFormatterSpectatorImpl();
+    
+    private static final int UPDATE_TIME_FAST = 5;
+    private static final int UPDATE_TIME_SLOW = 20;
     
     private final PlayerProfile profile;
     
@@ -34,7 +32,9 @@ public final class PlayerUI implements Ticking {
     private final VanillaTeamManager vanillaTeamManager;
     private final ScoreboardBuilder scoreboardBuilder;
     
-    private final Tablist tablist;
+    private final PlayerTablist tablist;
+    private int tick;
+    private boolean updateNotifications;
     
     public PlayerUI(@NotNull PlayerProfile profile) {
         this.profile = profile;
@@ -42,31 +42,56 @@ public final class PlayerUI implements Ticking {
         this.vanillaTeamManager = new VanillaTeamManager(scoreboard, profile);
         this.scoreboardBuilder = new ScoreboardBuilder(scoreboard, profile.getPlayer(), Hariant.GAME_NAME);
         
-        this.tablist = null;
-        // this.tablist = new Tablist(profile.getPlayer());
-        // this.tablist.show();
+        this.tablist = new PlayerTablist(profile);
+        this.tablist.show();
     }
     
     @Override
     public void tick() {
-        final HariantPlayer player = Hariant.getEntity(profile.getPlayer(), HariantPlayer.class).orElse(null);
-        
-        // TODO @Feb 12, 2026 (xanyjl) -> This needs to be automated
-        if (player != null && player.shouldTick()) {
-            player.tickActionbar();
+        // Tick important ui elements
+        if (tick % UPDATE_TIME_FAST == 0) {
+            profile.getHariantPlayer().ifPresent(HariantPlayer::tickActionbar);
             
-            // Debug tablist for modifiers
-            this.debugModifiersToTablistFooter(player);
+            // Tick vanilla team manager
+            vanillaTeamManager.tick();
         }
+        
+        // Tick less important ui elements
+        if (tick % UPDATE_TIME_SLOW == 0) {
+            final PlayerUIFormatter formatter = this.formatter();
+            
+            this.updateScoreboard(formatter);
+            this.updateTablist(formatter);
+            this.updateNotifications(formatter);
+        }
+        
+        tick++;
+    }
+    
+    private void updateNotifications(@NotNull PlayerUIFormatter formatter) {
+        // Only call updates if entity does not exist for the player
+        if (Hariant.entityExists(profile.getUuid())) {
+            return;
+        }
+        
+        
+        
+        final int numberOfNotifications = NotificationHandler.getNotifications(profile).sizeFiltered();
+        
+        // If player has notifications, blink the player head
+        if (numberOfNotifications > 0) {
+            updateNotifications = true;
+            LobbyItemPlayerProfile.give(profile, Hariant.currentTickMod20() ? numberOfNotifications : 0);
+        }
+        // Otherwise, update the item once
         else {
-            profile.getPlayer().sendPlayerListFooter(Component.empty());
+            if (updateNotifications) {
+                updateNotifications = false;
+                LobbyItemPlayerProfile.give(profile, 0);
+            }
         }
         
-        // Tick vanilla team manager
-        this.vanillaTeamManager.tick();
         
-        this.updateScoreboard();
-        this.updateTablist();
     }
     
     @NotNull
@@ -74,102 +99,30 @@ public final class PlayerUI implements Ticking {
         return vanillaTeamManager;
     }
     
-    private void debugModifiersToTablistFooter(@NotNull HariantPlayer player) {
-        final TextComponent.Builder builder = Component.text();
-        final AttributesInstance attributes = player.getAttributes();
-        final List<? extends AttributeModifier> modifiers = attributes.getModifiers();
-        
-        // Attributes
-        builder.appendNewline();
-        builder.append(Component.text("ATTRIBUTES", Colors.GOLD, TextDecoration.BOLD));
-        builder.appendNewline();
-        
-        for (AttributeType attributeType : AttributeType.values()) {
-            builder.append(
-                    Component.empty()
-                             .append(attributeType)
-                             .appendSpace()
-                             .append(attributeType.format(attributes.get(attributeType)))
-            );
-            builder.appendNewline();
-        }
-        
-        builder.appendNewline();
-        
-        // Modifiers
-        builder.append(Component.text("MODIFIERS", Colors.GOLD, TextDecoration.BOLD));
-        builder.appendNewline();
-        
-        if (modifiers.isEmpty()) {
-            builder.append(Component.text("None!", Colors.DARK_GRAY));
-        }
-        else {
-            for (int i = 0; i < modifiers.size(); i++) {
-                if (i != 0) {
-                    builder.appendNewline();
-                }
-                
-                final AttributeModifier modifier = modifiers.get(i);
-                final HariantEntity applier = modifier.getApplier();
-                
-                builder.append(modifier.getName().color(Colors.YELLOW));
-                builder.append(Component.text(" from %s".formatted(applier.equals(player) ? "self" : applier.toString()), Colors.DARK_GRAY));
-                
-                builder.appendNewline();
-                
-                // Append duration
-                final int durationTimeLeft = modifier.currentTick();
-                
-                builder.append(Component.text(Tick.format(durationTimeLeft), Colors.GRAY));
-                builder.appendNewline();
-                
-                // Append modifiers
-                modifier.stream().forEach(entry -> {
-                    final AttributeType attributeType = entry.attributeType();
-                    final AttributeModifierType modifierType = entry.modifierType();
-                    
-                    final double value = entry.value();
-                    final boolean isBuff = value > 0;
-                    
-                    final TextColor valueColor = isBuff ? Colors.GREEN : Colors.RED;
-                    
-                    builder.append(
-                            Component.empty()
-                                     .append(attributeType)
-                                     .appendSpace()
-                                     .append(isBuff ? Component.text("+", valueColor) : Component.text("-", valueColor))
-                                     .append(modifierType.format(attributeType, Math.abs(value)).color(valueColor))
-                                     .appendSpace()
-                                     .append(Component.text("(%s)".formatted(modifierType), Colors.DARK_GRAY))
-                    );
-                    builder.appendNewline();
-                });
-            }
-        }
-        
-        player.getHandle().sendPlayerListFooter(builder);
-    }
-    
-    @NotNull
-    public PlayerUIFormatter formatter() {
+    public @NotNull PlayerUIFormatter formatter() {
         if (profile.isSpectator()) {
-            return PlayerUIFormatter.SPECTATOR;
+            return FORMATTER_SPECTATOR;
+        }
+        else if (Hariant.getCurrentGameInstanceOrNull() instanceof GameInstance gameInstance) {
+            return gameInstance;
         }
         
-        return Hariant.getCurrentGameInstance().map(PlayerUIFormatter.class::cast).orElse(PlayerUIFormatter.LOBBY);
+        return FORMATTER_LOBBY;
     }
     
-    private void updateScoreboard() {
+    private void updateScoreboard(@NotNull PlayerUIFormatter formatter) {
         final ComponentList components = ComponentList.empty();
         components.append(Component.text(this.getTodayFormatted(), Colors.DARK_GRAY));
         components.append(Component.empty());
         
-        this.formatter().formatScoreboard(profile, components);
+        // Pass to the formatter
+        formatter.formatScoreboard(profile, components);
         
         scoreboardBuilder.setLines(components);
     }
     
-    private void updateTablist() {
+    private void updateTablist(@NotNull PlayerUIFormatter formatter) {
+        tablist.update(formatter);
     }
     
     @NotNull
