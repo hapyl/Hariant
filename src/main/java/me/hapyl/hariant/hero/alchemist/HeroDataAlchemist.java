@@ -4,6 +4,8 @@ import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.RomanNumber;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
+import me.hapyl.hariant.achievement.AchievementUniqueIdCounter;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
@@ -28,10 +30,12 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements Action
             DeathMessage.createWithDefaultKiller("{player} was contaminated by the Abyss")
     );
     
-    @NotNull private State state;
+    public final AchievementUniqueIdCounter reactionsTriggered;
     
-    @Nullable private AlchemistPotionInstance potionInstance;
-    @Nullable private HariantEntityAlchemicalCauldron alchemicalCauldron;
+    private @NotNull State state;
+    
+    private @Nullable AlchemistPotionInstance potionInstance;
+    private @Nullable HariantEntityAlchemicalCauldron alchemicalCauldron;
     
     private double abyssalCorrosion;
     private int alchemicalMadness;
@@ -40,10 +44,10 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements Action
         super(hero, player);
         
         this.state = State.NORMAL;
+        this.reactionsTriggered = AchievementRegistry.ALCHEMIST_SPECIAL_DELIVERY.createUniqueIdCounter(player.getProfile());
     }
     
-    @Nullable
-    public HariantEntityAlchemicalCauldron getAlchemicalCauldron() {
+    public @Nullable HariantEntityAlchemicalCauldron getAlchemicalCauldron() {
         return alchemicalCauldron;
     }
     
@@ -77,6 +81,9 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements Action
             // If corrosion is higher than or equals to maximum, just die
             if (abyssalCorrosion >= TalentRegistry.ABYSSAL_CORROSION.maximumCorrosion.doubleValue()) {
                 player.die(DamageSource.death(OVERDOSE).build());
+                
+                // Trigger achievement
+                AchievementRegistry.ALCHEMIST_I_THINK_I_DRANK_TOO_MUCH.progress(player.getProfile());
                 return;
             }
             

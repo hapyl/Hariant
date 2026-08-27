@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.nyx;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
@@ -32,21 +33,21 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentReverberation extends TalentPassive implements Listener {
     
-    @DisplayField public final AttributeScaling roseDamage = AttributeScaling.create(AttributeType.ATTACK, 50);
+    public final @DisplayField AttributeScaling roseDamage = AttributeScaling.create(AttributeType.ATTACK, 50);
     
-    @DisplayField public final Decimal roseBloomDelay = Decimal.ofSeconds(0.8f);
-    @DisplayField public final Decimal roseExplosionRadius = Decimal.ofValue(1.2);
-    @DisplayField public final Decimal roseElementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 250);
+    public final @DisplayField Decimal roseBloomDelay = Decimal.ofSeconds(0.8f);
+    public final @DisplayField Decimal roseExplosionRadius = Decimal.ofValue(1.2);
+    public final @DisplayField Decimal roseElementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 250);
     
-    @DisplayField private final Decimal voidShieldCapacityOfNyxMaxHealth = Decimal.ofPercentage(10);
-    @DisplayField private final Decimal voidShieldHealingOfNyxMaxHealth = Decimal.ofPercentage(10);
-    @DisplayField private final Decimal voidShieldAetherStrength = Decimal.ofPercentage(250);
-    @DisplayField private final Decimal voidShieldDuration = Decimal.ofSeconds(6);
+    private final @DisplayField Decimal voidShieldCapacityOfNyxMaxHealth = Decimal.ofPercentage(10);
+    private final @DisplayField Decimal voidShieldHealingOfNyxMaxHealth = Decimal.ofPercentage(10);
+    private final @DisplayField Decimal voidShieldAetherStrength = Decimal.ofPercentage(250);
+    private final @DisplayField Decimal voidShieldDuration = Decimal.ofSeconds(6);
     
-    @DisplayField private final Decimal effectResistanceIncrease = Decimal.ofAttribute(AttributeType.EFFECT_RESISTANCE, 25);
-    @DisplayField private final Decimal effectResistanceDuration = Decimal.ofSeconds(6);
+    private final @DisplayField Decimal effectResistanceIncrease = Decimal.ofAttribute(AttributeType.EFFECT_RESISTANCE, 25);
+    private final @DisplayField Decimal effectResistanceDuration = Decimal.ofSeconds(6);
     
-    @DisplayField private final Decimal teammateRadius = Decimal.ofValue(12);
+    private final @DisplayField Decimal teammateRadius = Decimal.ofValue(12);
     
     private final ShieldStrength shieldStrength = ShieldStrength.builder()
                                                                 .ofElement(ElementType.AETHER, voidShieldAetherStrength.doubleValue())
@@ -132,6 +133,11 @@ public final class TalentReverberation extends TalentPassive implements Listener
         
         // Create shield
         attacker.setShield(new VoidShield(attacker, nyx, nyx.getMaxHealth() * voidShieldCapacityOfNyxMaxHealth.doubleValue()));
+        
+        // Achievement
+        if (!attacker.equals(nyx)) {
+            AchievementRegistry.NYX_RIPPLE_EFFECT.progress(nyx.getProfile());
+        }
     }
     
     public void createRose(@NotNull HariantPlayer player, @NotNull Location location) {

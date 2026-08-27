@@ -36,6 +36,8 @@ public final class WeaponSoulEaterUltimate extends WeaponRangeProjectile {
     
     public static class WeaponRangeProjectileTypeRestlessSoul extends WeaponRangeProjectileTypeRayCast {
         
+        public static final Component NAME = Component.text("Restless Soul");
+        
         public static final Component DESCRIPTION = Component.empty()
                                                              .append(Component.text("A stabilized, more powerful version of a "))
                                                              .append(Component.text("soul", Colors.SOUL))
@@ -45,12 +47,12 @@ public final class WeaponSoulEaterUltimate extends WeaponRangeProjectile {
         
         private static final DamageSourceIdentity DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(
                 Key.ofString("restless_soul"),
-                Component.text("Restless Soul"),
+                NAME,
                 DeathMessage.create("{player}'s soul was stormed [by {killer}]")
         );
         
         WeaponRangeProjectileTypeRestlessSoul() {
-            super(Component.text("Restless Soul"), DESCRIPTION);
+            super(NAME, DESCRIPTION);
             
             this.damageSourceIdentity = DAMAGE_SOURCE_IDENTITY;
         }

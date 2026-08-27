@@ -1,6 +1,7 @@
 package me.hapyl.hariant.command;
 
 import me.hapyl.eterna.module.command.ArgumentList;
+import me.hapyl.eterna.module.command.completer.CompleterMethod;
 import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.util.StringList;
 import me.hapyl.hariant.Colors;
@@ -48,6 +49,11 @@ public final class HariantCommandAchievement extends HariantPlayerCommand {
         final PlayerDatabase database = Hariant.getPlayerDatabase(target);
         
         operation.execute(player, target, achievement, database.achievements, args.copyOfRange(3, args.length));
+    }
+    
+    @Override
+    public @NotNull CompleterMethod completerMethod() {
+        return CompleterMethod.CONTAINS;
     }
     
     @Override

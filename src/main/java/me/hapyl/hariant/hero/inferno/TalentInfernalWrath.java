@@ -1,23 +1,24 @@
 package me.hapyl.hariant.hero.inferno;
 
 import com.google.common.collect.Lists;
+import io.papermc.paper.math.Rotations;
+import me.hapyl.eterna.module.entity.Entities;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.location.LocationHelper;
-import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySourceImpl;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
-import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.*;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
@@ -33,26 +34,33 @@ import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.*;
-import org.bukkit.entity.ArmorStand;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.EulerAngle;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class TalentInfernalWrath extends TalentUltimate {
     
-    private static final int NUMBER_OF_FX_ARMOR_STANDS = 10;
     private static final ItemStack MAGMA_TEXTURE = ItemBuilder.playerHead("721d0930bd61fea4cb9027b00e94e13d62029c524ea0b3260c747457ba1bcfa1").asItemStack();
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 66);
+    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 153.6);
     
-    @DisplayField private final Decimal radius = Decimal.ofValue(6);
-    @DisplayField private final Decimal castingTime = Decimal.ofSeconds(2.5f);
+    private final @DisplayField Decimal radius = Decimal.ofValue(15);
+    private final @DisplayField Decimal castingTime = Decimal.ofSeconds(0.75f);
+    private final @DisplayField Decimal coneAngle = Decimal.ofAngle(75);
+    
+    private final double halfAngleRadians = Math.toRadians(coneAngle.doubleValue() * 0.5);
+    private final double halfAngleRadiansCos = Math.cos(halfAngleRadians);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             this,
@@ -62,24 +70,23 @@ public class TalentInfernalWrath extends TalentUltimate {
     public TalentInfernalWrath(@NotNull Key key) {
         super(key, Component.text("Infernal Wrath"), Icon.ofMaterial(Material.MAGMA_BLOCK), UltimateResourceType.ENERGY, 60);
         
+        setDurationSeconds(3);
         setTalentType(TalentType.IMPAIR);
         
         setDescription(
                 Component.empty()
                          .append(Component.text("Unleash the infernal wrath by summoning a "))
-                         .append(Component.text("ring of magma", Colors.RED))
-                         .append(Component.text(" that orbits around you."))
+                         .append(Component.text("cone of magma", Colors.RED))
+                         .append(Component.text(" in front of you."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("After "))
-                         .append(castingTime)
-                         .append(Component.text(", the ring explodes violently, dealing "))
+                         .append(Component.text("After a short casting time, the magma "))
+                         .append(Component.text("explodes", Colors.RED))
+                         .append(Component.text(", dealing "))
                          .append(ElementType.FIRE.asComponentDamage())
-                         .append(Component.text(" to nearby "))
-                         .append(Component.text("enemies", Colors.RED))
-                         .append(Component.text(" and "))
+                         .append(Component.text(" to enemies within it and "))
                          .append(Component.text("forcefully", Style.style(TextDecoration.UNDERLINED)))
-                         .append(Component.text(" triggers one instance of "))
+                         .append(Component.text(" triggering one instance of "))
                          .append(ElementalAnomalyType.BURN)
                          .append(Component.text("."))
         );
@@ -87,7 +94,7 @@ public class TalentInfernalWrath extends TalentUltimate {
     
     @Override
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
-        return Executable.delegate(new InfernalWrath(player));
+        return Executable.execute(new InfernalWrath(player));
     }
     
     @Override
@@ -97,137 +104,209 @@ public class TalentInfernalWrath extends TalentUltimate {
     
     public class InfernalWrath extends HariantTickingTask implements EntityCollector {
         
+        private static final double[] EDGE_OFFSET = { 1, -1 };
+        private static final double VERY_CLOSE = 1.0E-6;
+        
         private final HariantPlayer player;
+        
+        private final Location origin;
+        private final Vector direction;
         private final DamageSource damageSource;
-        private final List<ArmorStand> armorStands;
         
-        private final double radius = TalentInfernalWrath.this.radius.doubleValue();
-        private final int castingTime = TalentInfernalWrath.this.castingTime.intValue();
+        private final List<FxEntity> fxEntities;
+        private final int batchSize;
         
-        public InfernalWrath(@NotNull HariantPlayer player) {
+        InfernalWrath(@NotNull HariantPlayer player) {
             super(Scheduler.ofTimer());
             
             this.player = player;
-            this.damageSource = DamageSource.builder(damageSourceIdentity, damage.getScaledValue(player))
-                                            .source(player)
-                                            .damageType(DamageType.ULTIMATE)
-                                            .elementType(ElementType.FIRE)
-                                            .components(DamageComponent.ofTrueDamage())
-                                            .build();
-            this.armorStands = Lists.newArrayList();
-            
-            // Create armor stands
-            final Location location = getLocation();
-            
-            for (int i = 0; i < NUMBER_OF_FX_ARMOR_STANDS; i++) {
-                this.armorStands.add(createFxArmorStand(location));
-            }
+            this.origin = player.getLocation();
+            this.direction = player.getEyeLocation().getDirection().setY(0).normalize();
+            this.damageSource = new InfernalWrathDamageSource(player);
+            this.fxEntities = generateFxEntities();
+            this.batchSize = fxEntities.size() / castingTime.intValue();
         }
         
         @Override
         public void run(int tick) {
-            final Location location = getLocation();
-            
-            // If casting is finished, unleash the wrath
-            if (tick >= castingTime) {
-                // Deal damage and apply burning
-                collectNearbyEntities().forEach(entity -> {
-                    entity.damage(damageSource);
-                    entity.triggerAnomaly(ElementalAnomalyType.BURN, player);
+            // Create entities during casting time
+            if (tick <= castingTime.intValue()) {
+                // If we hit casting time, create arch right away
+                if (tick == castingTime.intValue()) {
+                    this.createArch();
+                }
+                // Otherwise create edges in batches
+                else {
+                    final int from = tick * batchSize;
+                    final int to = Math.min(from + batchSize, fxEntities.size());
+                    
+                    // Spawn the entities in batches
+                    for (int i = from; i < to; i++) {
+                        fxEntities.get(i).spawn();
+                    }
+                    
+                    // Fx
+                    final double progress = tick / castingTime.doubleValue();
+                    
+                    player.playWorldSound(origin, Sound.ITEM_FLINTANDSTEEL_USE, (float) (0.5f + progress));
+                }
+            }
+            // Otherwise tick entities
+            else if (tick <= getDuration()) {
+                // Warn entities
+                if (modulo(2)) {
+                    this.collectEntities().forEach(entity -> entity.showWarning(WarningType.DANGER, 3));
+                    
+                    // Fx
+                    fxEntities.forEach(entity -> player.spawnWorldParticle(entity.location, Particle.FLAME, 1, 0.05, 0.05, 0.05, 0.1f));
+                    
+                    // Sfx
+                    final double progress = (double) tick / getDuration();
+                    
+                    player.playWorldSound(origin, Sound.ENTITY_BLAZE_HURT, (float) (0.5f + progress));
+                }
+                
+            }
+            // Explode
+            else {
+                this.collectEntities().forEach(entity -> {
+                    // Deal damage, and if entity has survived, trigger BURN
+                    if (entity.damage(damageSource) == DamageResult.OK) {
+                        entity.triggerAnomaly(new InfernalWrathAnomalySource(player));
+                    }
                 });
                 
                 // Fx
-                iterateArmorStands((armorStand, index) -> {
-                    final int linkIndex = index + 1 < armorStands.size() ? index + 1 : 0;
-                    final ArmorStand linkArmorStand = armorStands.get(linkIndex);
-                    
-                    Geometry.drawLine(armorStand.getLocation(), linkArmorStand.getLocation(), 0.4, player.drawableOf(Particle.LAVA, 1, 0.1, 0.3, 0.1, 0.5f));
-                });
+                fxEntities.forEach(entity -> player.spawnWorldParticle(entity.location, Particle.LAVA, 2, 0.1, 0.1, 0.1, 0.15f));
                 
-                player.playWorldSound(location, Sound.ITEM_FIRECHARGE_USE, 0.5f);
-                player.playWorldSound(location, Sound.ENTITY_WITHER_HURT, 0.5f);
-                player.playWorldSound(location, Sound.ENTITY_WITHER_HURT, 0.0f);
+                player.playWorldSound(origin, Sound.ENTITY_BLAZE_DEATH, 0.0f);
                 
-                // Keep cancel last because it removes the armor stands
                 this.cancel();
             }
-            // Otherwise orbit around the player
-            else {
-                final double spread = Math.PI * 2 / Math.max(1, armorStands.size());
-                final double radians = Math.toRadians(tick) * 18;
-                
-                final double progress = (double) tick / TalentInfernalWrath.this.castingTime.doubleValue();
-                final double radius = TalentInfernalWrath.this.radius.doubleValue() * progress;
-                
-                iterateArmorStands((armorStand, index) -> {
-                    final double radiansOffset = radians + index * spread;
-                    
-                    final double x = Math.sin(radiansOffset) * radius;
-                    final double y = Math.sin(Math.PI * 4 * radians + index * spread) * 0.2 - progress * 1.5;
-                    final double z = Math.cos(radiansOffset) * radius;
-                    
-                    LocationHelper.offset(location, x, y, z, () -> {
-                        armorStand.teleport(location);
-                        
-                        // Particle fx
-                        LocationHelper.offset(location, 0, 1, 0, () -> player.spawnWorldParticle(location, Particle.SMOKE, 1, 0.1, 0.1, 0.1, 0.05f));
-                    });
-                });
-                
-                if (modulo(2)) {
-                    player.playWorldSound(location, Sound.BLOCK_LAVA_POP, (float) (1.0f + 1.0f * progress));
-                    player.playWorldSound(location, Sound.ITEM_FIRECHARGE_USE, (float) (0.75f + 1.25f * progress));
-                }
-                // Warn entities in range
-                else if (modulo(5)) {
-                    collectNearbyEntities().forEach(entity -> entity.showWarning(WarningType.DANGER, 10));
-                }
+        }
+        
+        public @NotNull Stream<? extends HariantEntity> collectEntities() {
+            return this.collectNearbyEntities(radius).filter(this::isInCone);
+        }
+        
+        private boolean isInCone(@NotNull HariantEntity entity) {
+            if (!player.canAffect(entity)) {
+                return false;
             }
+            
+            final double dx = entity.x() - origin.x();
+            final double dz = entity.z() - origin.z();
+            final double distance = Math.sqrt(dx * dx + dz * dz);
+            
+            if (distance < VERY_CLOSE) {
+                return true;
+            }
+            
+            final double dot = (direction.getX() * dx + direction.getZ() * dz) / distance;
+            return dot >= halfAngleRadiansCos;
         }
         
         @Override
         public void onCancel() {
-            super.onCancel();
-            
-            armorStands.forEach(Entity::remove);
-            armorStands.clear();
-        }
-        
-        @NotNull
-        @Override
-        public Location getLocation() {
-            return player.getEyeLocation().add(0, 0.25, 0);
+            fxEntities.forEach(FxEntity::remove);
+            fxEntities.clear();
         }
         
         @Override
-        public @NotNull Color outlineColor() {
-            return Color.RED;
+        public @NotNull Location getLocation() {
+            return origin;
         }
         
-        @NotNull
-        private Stream<HariantEntity> collectNearbyEntities() {
-            return collectNearbyEntities(radius).filter(player::canAffect);
-        }
-        
-        private void iterateArmorStands(@NotNull BiConsumer<ArmorStand, Integer> consumer) {
-            int index = 0;
+        private @NotNull List<FxEntity> generateFxEntities() {
+            final List<FxEntity> entities = Lists.newArrayList();
             
-            for (final ArmorStand armorStand : armorStands) {
-                consumer.accept(armorStand, index++);
+            // Create edges
+            for (double d = 0; d <= radius.doubleValue(); d += 0.5) {
+                for (double edge : EDGE_OFFSET) {
+                    final Vector edgeVector = direction.clone().rotateAroundY(halfAngleRadians * edge);
+                    
+                    final double x = edgeVector.getX() * d;
+                    final double z = edgeVector.getZ() * d;
+                    
+                    entities.add(new FxEntity(anchorLocation(origin, x, z)));
+                }
+            }
+            
+            return entities;
+        }
+        
+        private void createArch() {
+            final int steps = (int) (coneAngle.doubleValue() / 2);
+            
+            for (int i = 0; i <= steps; i++) {
+                final double angle = -halfAngleRadians + (2 * halfAngleRadians * i / steps);
+                final Vector arc = direction.clone().rotateAroundY(angle);
+                
+                final double x = arc.getX() * radius.doubleValue();
+                final double z = arc.getZ() * radius.doubleValue();
+                
+                final FxEntity fxEntity = new FxEntity(anchorLocation(origin, x, z));
+                fxEntity.spawn();
+                
+                fxEntities.add(fxEntity);
             }
         }
         
-        @NotNull
-        public static ArmorStand createFxArmorStand(@NotNull Location location) {
-            return location.getWorld().spawn(location, ArmorStand.class, self -> {
-                self.getEquipment().setHelmet(MAGMA_TEXTURE);
-                self.setSmall(true);
-                self.setInvisible(true);
+        private static @NotNull Location anchorLocation(@NotNull Location origin, double x, double z) {
+            return LocationHelper.anchor(LocationHelper.copyOf(origin).add(x, 0, z));
+        }
+        
+    }
+    
+    public static class FxEntity implements Removable {
+        
+        private static final Random RANDOM = Hariant.getRandom();
+        
+        private final Location location;
+        private @Nullable Entity entity;
+        
+        FxEntity(@NotNull Location location) {
+            this.location = location;
+        }
+        
+        public void spawn() {
+            if (this.entity != null) {
+                throw new IllegalStateException("Duplicate fx entity spawn");
+            }
+            
+            this.entity = Entities.ARMOR_STAND.spawn(LocationHelper.copyOf(location).subtract(0, 0.5, 0), self -> {
+                self.setMarker(true);
                 self.setSilent(true);
-                self.setGravity(false);
-                self.setHeadPose(new EulerAngle(Math.toRadians(45d), 0d, 0d));
+                self.setSmall(true);
+                self.setVisible(false);
+                
+                // Rotate the head randomly
+                self.setHeadRotations(Rotations.ofDegrees(RANDOM.nextDouble() * 90, RANDOM.nextDouble() * 45, RANDOM.nextDouble() * 90));
+                self.getEquipment().setHelmet(MAGMA_TEXTURE);
             });
         }
+        
+        @Override
+        public void remove() {
+            if (entity != null) {
+                entity.remove();
+            }
+        }
+        
+    }
+    
+    public class InfernalWrathDamageSource extends DamageSourceImpl {
+        InfernalWrathDamageSource(@NotNull HariantEntity source) {
+            super(damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.FIRE, DamageComponents.ofTrueDamage(), Set.of(), damage.getScaledValue(source), 0);
+        }
+    }
+    
+    public static class InfernalWrathAnomalySource extends ElementalAnomalySourceImpl {
+        
+        InfernalWrathAnomalySource(@Nullable HariantEntity source) {
+            super(ElementalAnomalyType.BURN, source);
+        }
+        
     }
     
 }

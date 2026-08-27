@@ -9,11 +9,8 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.*;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -34,17 +31,18 @@ import java.util.Set;
 
 public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements Listener {
     
-    @DisplayField private final Decimal fireResistanceReduction = Decimal.ofAttribute(AttributeType.FIRE_RESISTANCE, 20);
-    @DisplayField private final Decimal fireResistanceReductionDuration = Decimal.ofSeconds(6);
+    public static final Key HELLFIRE_AURA_MODIFIER_KEY = Key.ofString("hellfire_aura");
+    public static final Component HELLFIRE_AURA_NAME = Component.text("Hellfire Aura");
     
-    @DisplayField private final Decimal hellfireAuraRadius = Decimal.ofValue(3);
+    private final @DisplayField Decimal fireResistanceReduction = Decimal.ofAttribute(AttributeType.FIRE_RESISTANCE, 20);
+    private final @DisplayField Decimal fireResistanceReductionDuration = Decimal.ofSeconds(6);
     
-    @DisplayField private final Decimal repeatWindow = Decimal.ofSeconds(5);
-    @DisplayField private final Decimal repeatMultiplier = Decimal.ofPercentage(30);
-    @DisplayField private final Decimal repeatRadius = Decimal.ofValue(3);
+    private final @DisplayField Decimal hellfireAuraRadius = Decimal.ofValue(3);
     
-    private final Key hellfireAuraKey = Key.ofString("hellfire_aura");
-    private final Component hellfireAuraName = Component.text("Hellfire Aura");
+    private final @DisplayField Decimal repeatWindow = Decimal.ofSeconds(5);
+    private final @DisplayField Decimal repeatMultiplier = Decimal.ofPercentage(30);
+    private final @DisplayField Decimal repeatRadius = Decimal.ofValue(3);
+    
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             Key.ofString("repeat"),
@@ -68,7 +66,7 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
     @Override
     public Component describeAbility() {
         return Component.empty()
-                        .append(Component.text("Radiates an hellfire aura that reduces "))
+                        .append(Component.text("Radiates a hellfire aura that reduces "))
                         .append(AttributeType.FIRE_RESISTANCE)
                         .append(Component.text(" of nearby "))
                         .append(Component.text("enemies", Colors.RED))
@@ -147,13 +145,7 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
                                              .sum();
             
             if (damage > 0) {
-                final DamageSource damageSource = DamageSource.builder(damageSourceIdentity, damage * repeatMultiplier.doubleValue())
-                                                              .source(player)
-                                                              .elementType(ElementType.FIRE)
-                                                              .damageType(DamageType.TALENT)
-                                                              .components(DamageComponent.ofTrueDamage())
-                                                              .build();
-                
+                final DamageSource damageSource = new DamageSourceRepeat(player, damage * repeatMultiplier.doubleValue());
                 final Location location = player.getLocationInFrontFromEyes(2.5);
                 
                 player.collectNearbyEntities(location, repeatRadius)
@@ -204,9 +196,15 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
     
     public class HellfireAuraAttributeModifier extends AttributeModifier {
         HellfireAuraAttributeModifier(@NotNull HariantEntity applier) {
-            super(hellfireAuraKey, hellfireAuraName, applier, fireResistanceReductionDuration.intValue());
+            super(HELLFIRE_AURA_MODIFIER_KEY, HELLFIRE_AURA_NAME, applier, fireResistanceReductionDuration.intValue());
             
             of(AttributeType.FIRE_RESISTANCE, AttributeModifierType.FLAT, -fireResistanceReduction.doubleValue());
+        }
+    }
+    
+    public class DamageSourceRepeat extends DamageSourceImpl {
+        DamageSourceRepeat(@NotNull HariantPlayer source, double damage) {
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.FIRE, DamageComponents.ofTrueDamage(), Set.of(), damage, 0);
         }
     }
     

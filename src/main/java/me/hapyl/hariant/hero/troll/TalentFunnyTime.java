@@ -33,7 +33,7 @@ public class TalentFunnyTime extends TalentUltimate {
         super(key, Component.text("Prank Time"), Icon.ofMaterial(Material.CLOCK), UltimateResourceType.ENERGY, 50);
         
         setTalentType(TalentType.IMPAIR);
-        setDurationSeconds(10);
+        setDurationSeconds(5);
         
         setDescription(
                 Component.empty()

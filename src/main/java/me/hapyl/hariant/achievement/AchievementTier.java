@@ -11,7 +11,7 @@ public enum AchievementTier implements RewardsRubies, Icon {
     TIER_1(5, Material.BRICK),
     TIER_2(10, Material.IRON_INGOT),
     TIER_3(20, Material.GOLD_INGOT),
-    TIER_4(50, Material.RESIN_BRICK);
+    TIER_4(50, Material.NETHERITE_INGOT);
     
     private final int rubyReward;
     private final Material material;

@@ -12,6 +12,7 @@ import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.rank.FormatRules;
 import me.hapyl.hariant.database.rank.PlayerRank;
@@ -20,6 +21,8 @@ import me.hapyl.hariant.entity.Lifecycle;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.game.GameInstanceHandler;
+import me.hapyl.hariant.game.Placement;
+import me.hapyl.hariant.game.WinResult;
 import me.hapyl.hariant.game.battleground.Battleground;
 import me.hapyl.hariant.game.battleground.EnumBattleground;
 import me.hapyl.hariant.hero.Hero;
@@ -355,7 +358,7 @@ public final class PlayerProfile
     }
     
     @Override
-    public void handlerInstanceDestroyed(@NotNull GameInstance gameInstance) {
+    public void handlerInstanceDestroyed(@NotNull GameInstance gameInstance, @NotNull WinResult winResult) {
         this.playerUI.getVanillaTeamManager().setStateForAllProfiles(true);
         
         // Stop glowing for all players
@@ -380,6 +383,13 @@ public final class PlayerProfile
                 NotificationHandler.getNotificationsNotify(this);
             }
         }, AUTO_READY_DELAY);
+        
+        // Trigger achievements
+        AchievementRegistry.FIRST_GAME.progress(this);
+        
+        if (winResult.getPlacement(this) == Placement.FIRST_PLACE) {
+            AchievementRegistry.CHAMPION_4.progressFamily(this);
+        }
     }
     
     public boolean isOnline() {

@@ -69,7 +69,6 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentPanicRoll PANIC_ROLL;
     public static final TalentRepulsor REPULSOR;
     public static final TalentLastLaugh LAST_LAUGH;
-    public static final TalentStickySituation STICKY_SITUATION;
     public static final TalentFunnyTime FUNNY_TIME;
     
     /**
@@ -153,7 +152,6 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         PANIC_ROLL = REGISTRY.register("panic_roll", TalentPanicRoll::new);
         REPULSOR = REGISTRY.register("repulsor", TalentRepulsor::new);
         LAST_LAUGH = REGISTRY.register("last_laugh", TalentLastLaugh::new);
-        STICKY_SITUATION = REGISTRY.register("sticky_situation", TalentStickySituation::new);
         FUNNY_TIME = REGISTRY.register("funny_time", TalentFunnyTime::new);
         
         FIRE_PIT = REGISTRY.register("fire_pit", TalentFirePit::new);

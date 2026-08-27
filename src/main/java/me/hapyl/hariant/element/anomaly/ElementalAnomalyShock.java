@@ -4,13 +4,11 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.*;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.term.EnumTerminology;
@@ -23,11 +21,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
+import java.util.Set;
 
 public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
     
-    private final @DisplayField Decimal energyDrainOfMaxEnergy = Decimal.ofPercentage(30);
-    private final @DisplayField Decimal energyPlayerTransferPercentOfDrainedEnergy = Decimal.ofPercentage(50);
+    private final Decimal energyDrainOfMaxEnergy = Decimal.ofPercentage(30);
+    private final Decimal energyPlayerTransferPercentOfDrainedEnergy = Decimal.ofPercentage(50);
     
     private final double explosionRadius = 3;
     private final double baseDamage = 30;
@@ -64,17 +63,14 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @Nullable HariantEntity source) {
+    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
+        final HariantEntity source = anomalySource.getSource();
         final Iterator<HariantEntity> iterator = entity.collectNearbyEntities(explosionRadius)
                                                        .filter(_entity -> source == null || source.canAffect(_entity))
                                                        .iterator();
         
         final double damage = calculateDamage(source);
-        final DamageSource damageSource = DamageSource.builder(damageSourceIdentity, damage)
-                                                      .source(source)
-                                                      .elementType(ElementType.ELECTRIC)
-                                                      .damageType(DamageType.ANOMALY)
-                                                      .build();
+        final DamageSource damageSource = new ShockDamageSource(source, damage);
         
         double totalEnergyDrained = 0;
         
@@ -105,7 +101,7 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
         }
         
         // Transfer energy if the source is a player
-        if (totalEnergyDrained > 0 && source instanceof HariantPlayer player && player.getHero().getUltimateTalent().getUltimateResourceType() == UltimateResourceType.ENERGY) {
+        if (totalEnergyDrained > 0 && anomalySource instanceof HariantPlayer player && player.getHero().getUltimateTalent().getUltimateResourceType() == UltimateResourceType.ENERGY) {
             player.incrementUltimateResource(totalEnergyDrained * energyPlayerTransferPercentOfDrainedEnergy.doubleValue());
             
             // Fx
@@ -115,7 +111,7 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
         // Fx
         final Location location = entity.getMidpointLocation();
         
-        entity.spawnWorldParticle(location, Particle.WAX_ON, 50, 0, 0, 0, 100f);
+        entity.spawnWorldParticle(location, Particle.WAX_ON, 50, 0, 0, 0, 0.75f);
         entity.playWorldSound(location, Sound.ENTITY_COPPER_GOLEM_DEATH, 1.25f);
     }
     
@@ -134,6 +130,14 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
         final double elementalMastery = attributes.get(AttributeType.ELEMENTAL_MASTERY);
         
         return baseDamage * (1 + (attack / 500 + elementalMastery / 1000));
+    }
+    
+    private class ShockDamageSource extends DamageSourceImpl {
+        
+        ShockDamageSource(@Nullable HariantEntity source, double damage) {
+            super(damageSourceIdentity, source, DamageType.ANOMALY, ElementType.ELECTRIC, DamageComponents.ofAnomaly(), Set.of(), damage, 0);
+        }
+        
     }
     
 }

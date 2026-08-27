@@ -7,6 +7,7 @@ import me.hapyl.eterna.module.block.display.DisplayPart;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementMageSoulHarvested;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
@@ -18,7 +19,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
@@ -29,6 +30,7 @@ import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
+import me.hapyl.hariant.util.Counter;
 import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
@@ -183,10 +185,11 @@ public final class TalentSoulFog extends Talent {
                                                           .source(player)
                                                           .damageType(DamageType.TALENT)
                                                           .elementType(ElementType.AETHER)
-                                                          .components(DamageComponent.ofCommon())
+                                                          .components(DamageComponents.ofCommon())
                                                           .build();
             
             final ElementSource elementSource = ElementSource.create(ElementType.AETHER, player, soulFogExplosionAetherAnomalyApplication.doubleValue());
+            final Counter numberOfEnemiesHit = Counter.counter();
             
             player.collectNearbyEntities(location, soulFogExplosionRadius)
                   .filter(player::canAffect)
@@ -196,11 +199,16 @@ public final class TalentSoulFog extends Talent {
                       
                       // Increment souls
                       player.getHeroData(HeroRegistry.MAGE, HeroDataMage::new).incrementSouls(soulFogExplosionSoulGenerationPerEnemyHit.intValue());
+                      
+                      numberOfEnemiesHit.increment();
                   });
             
             // Fx
             player.playWorldSound(location, Sound.ENTITY_WARDEN_SONIC_BOOM, 1.25f);
             player.spawnWorldParticle(location, Particle.EXPLOSION_EMITTER, 1, 0);
+            
+            // Achievement
+            AchievementMageSoulHarvested.progress(player.getProfile(), numberOfEnemiesHit);
         }
     }
     

@@ -2,21 +2,21 @@ package me.hapyl.hariant.entity.mutator;
 
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.HealthStyle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 
-public interface HealthMutator extends Named {
+public interface HealthMutator extends Named, HealthStyle {
     
-    @NotNull
     @Override
-    Component getName();
+    @NotNull Component getName();
     
-    @NotNull
-    Style getHealthStyle();
+    @Override
+    @NotNull Style getHealthStyle();
     
-    @NotNull
-    Style getHeartStyle();
+    @Override
+    @NotNull Style getHeartStyle();
     
     double mutate(double health);
     

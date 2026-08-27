@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
+import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.util.ComponentShine;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -12,6 +13,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @AutoRegisteredListener
 public class AchievementImpl implements Achievement {
@@ -25,20 +27,22 @@ public class AchievementImpl implements Achievement {
     private final Key key;
     private final double goal;
     
-    private @NotNull Component name;
-    private @NotNull Component description;
+    private final Component name;
+    private final Component description;
     
     private @NotNull AchievementCategory category;
     private @NotNull AchievementTier tier;
     
+    private @Nullable Achievement parent;
+    
     private boolean hidden;
     
-    public AchievementImpl(@NotNull Key key, final double goal) {
+    public AchievementImpl(@NotNull Key key, final double goal, @NotNull Component name, @NotNull Component description) {
         this.key = key;
         this.goal = goal;
-        this.name = Component.text("Unnamed Achievement");
-        this.description = Component.text("???");
-        this.category = AchievementCategory.GAMEPLAY;
+        this.name = name;
+        this.description = description;
+        this.category = AchievementCategory.GENESIS;
         this.tier = AchievementTier.TIER_1;
         this.hidden = false;
         
@@ -56,11 +60,6 @@ public class AchievementImpl implements Achievement {
     }
     
     @Override
-    public void setName(@NotNull Component name) {
-        this.name = name;
-    }
-    
-    @Override
     public @NotNull Component getDescription() {
         return description;
     }
@@ -75,11 +74,6 @@ public class AchievementImpl implements Achievement {
         builder.addWrappedLore(description);
         
         return builder;
-    }
-    
-    @Override
-    public void setDescription(@NotNull Component description) {
-        this.description = description;
     }
     
     @Override
@@ -101,8 +95,13 @@ public class AchievementImpl implements Achievement {
         return tier;
     }
     
-    public void setTier(@NotNull AchievementTier tier) {
-        this.tier = tier;
+    @Override
+    public @Nullable Achievement getParent() {
+        return parent;
+    }
+    
+    public void setParent(@Nullable Achievement parent) {
+        this.parent = parent;
     }
     
     @Override
@@ -140,6 +139,27 @@ public class AchievementImpl implements Achievement {
     
     @Override
     public void onRewardsClaimed(@NotNull Player player, @NotNull AchievementProgress achievementProgress) {
+    }
+    
+    @Override
+    public final @NotNull AchievementUniqueIdCounter createUniqueIdCounter(@NotNull PlayerProfile profile) {
+        return new AchievementUniqueIdCounter(this, profile, uniqueIdCounterValue());
+    }
+    
+    @Override
+    public int uniqueIdCounterValue() {
+        // Default to throwing illegal state exception to prevent creating counters for unsupported achievements; supported achievements
+        // must override this method and return the expected counter value
+        throw new IllegalStateException("Achievement %s does not support unique id counter!".formatted(this));
+    }
+    
+    public void setTier(@NotNull AchievementTier tier) {
+        this.tier = tier;
+    }
+    
+    @Override
+    public String toString() {
+        return key.toString();
     }
     
 }

@@ -13,7 +13,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -113,7 +113,7 @@ public final class TalentFlowerEscape extends Talent {
                     source,
                     DamageType.TALENT,
                     ElementType.PHYSICAL,
-                    DamageComponent.ofCommon(),
+                    DamageComponents.ofCommon(),
                     Set.of(),
                     isPulse ? flowerPulseDamage.getScaledValue(source) : flowerExplosionDamage.getScaledValue(source),
                     isPulse ? elementalApplicationPulse.doubleValue() : elementalApplicationExplosion.doubleValue()

@@ -52,7 +52,7 @@ public class MenuLevelling extends Menu {
     
     @Override
     public @NotNull MenuReturn menuReturn() {
-        return MenuReturn.create(Component.text("Player Profile"), () -> new MenuPlayerProfile(player));
+        return MenuReturn.create(Component.text("Player Profile"), MenuPlayerProfile::new);
     }
     
     @Override

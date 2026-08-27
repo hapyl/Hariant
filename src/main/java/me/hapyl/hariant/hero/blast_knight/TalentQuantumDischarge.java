@@ -3,16 +3,20 @@ package me.hapyl.hariant.hero.blast_knight;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.attribute.*;
+import me.hapyl.hariant.achievement.AchievementRegistry;
+import me.hapyl.hariant.attribute.AttributeScaling;
+import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.*;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
+import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
+import me.hapyl.hariant.talent.TalentRegistry;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
@@ -101,7 +105,16 @@ public final class TalentQuantumDischarge extends Talent {
         final double elementalApplication = elementalApplicationPerQuantumEnergyConsumer.doubleValue() * quantumEnergy;
         final int delay = delayPerQuantumEnergyConsumed.intValue() * quantumEnergy;
         
-        new QuantumDischarge(player, damage, elementalApplication, delay);
+        player.delegate(
+                new QuantumDischarge(player, damage, elementalApplication, delay),
+                DelegateType.INTERRUPTABLE
+        );
+        
+        // Achievement
+        if (quantumEnergy == TalentRegistry.QUANTUM_SHIELD.getMaximumQuantumEnergy().intValue()) {
+            AchievementRegistry.BLAST_KNIGHT_FULL_RESERVES.progress(player.getProfile());
+        }
+        
         return Response.ok();
     }
     
@@ -217,7 +230,7 @@ public final class TalentQuantumDischarge extends Talent {
     private class NovaExplosionDamageSource extends DamageSourceImpl {
         
         NovaExplosionDamageSource(@Nullable HariantEntity source, double damage, double elementalApplication) {
-            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damage, elementalApplication);
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damage, elementalApplication);
         }
         
     }

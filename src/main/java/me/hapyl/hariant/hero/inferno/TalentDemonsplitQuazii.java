@@ -10,6 +10,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementInfernoRottenToTheCore;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.mutator.Decay;
@@ -119,6 +120,9 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
                                  .append(Component.text(" healed for %.0f!".formatted(healing), Colors.GREEN))
                 );
             }
+            
+            // Achievement
+            AchievementInfernoRottenToTheCore.progress(player, quaziiBeam.totalDecay);
         }
         
         @Override
@@ -144,6 +148,7 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
         private final Set<HariantPlayer> hitPlayers;
         
         private int tick;
+        private double totalDecay;
         
         QuaziiBeam(@NotNull HariantPlayer player, @NotNull Location location) {
             this.player = player;
@@ -209,16 +214,21 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
                 LocationHelper.offset(from, x, y, z, () -> {
                     player.collectNearbyEntities(from, beamRadius)
                           .filter(player::canAffect)
-                          .filter(HariantPlayer.class::isInstance)
-                          .map(HariantPlayer.class::cast)
                           .forEach(entity -> {
                               final double maxHealth = entity.getMaxHealth();
                               final double decay = maxHealth * decayWorthOfMaxHealth.doubleValue();
                               
-                              entity.addHealthMutator(Decay.create(decay, decayDuration));
+                              // If mutator successfully applied, increment total decay amount
+                              if (entity.addHealthMutator(new QuaziiDecay(decay, decayDuration.intValue()))) {
+                                  totalDecay += decay;
+                              }
                               
-                              // Mark as hit with the beam
-                              hitPlayers.add(entity);
+                              // Count total decay
+                              
+                              // If entity is a player, mark them as hit
+                              if (entity instanceof HariantPlayer entityPlayer) {
+                                  hitPlayers.add(entityPlayer);
+                              }
                           });
                 });
             }
@@ -238,6 +248,12 @@ public final class TalentDemonsplitQuazii extends TalentDemonsplit {
             return entity;
         }
         
+    }
+ 
+    public static class QuaziiDecay extends Decay {
+        QuaziiDecay(double amount, int duration) {
+            super(amount, duration);
+        }
     }
     
 }

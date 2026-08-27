@@ -2,21 +2,26 @@ package me.hapyl.hariant.hero.nyx;
 
 import com.google.common.collect.Lists;
 import me.hapyl.eterna.module.util.Removable;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class HeroDataNyx extends HeroData<HeroNyx> {
     
     private final List<TalentDualVerdict.Droplet> droplets;
+    private final Set<TalentDualVerdict.DropletTickResult> pickedUpDroplets;
     
     public HeroDataNyx(@NotNull HeroNyx hero, @NotNull HariantPlayer player) {
         super(hero, player);
         
         this.droplets = Lists.newArrayList();
+        this.pickedUpDroplets = EnumSet.noneOf(TalentDualVerdict.DropletTickResult.class);
     }
     
     public void createDroplet(@NotNull TalentDualVerdict.Droplet droplet) {
@@ -37,9 +42,20 @@ public class HeroDataNyx extends HeroData<HeroNyx> {
             final TalentDualVerdict.Droplet droplet = iterator.next();
             
             // Remove droplet if collision successful
-            if (droplet.tick()) {
-                droplet.remove();
-                iterator.remove();
+            final TalentDualVerdict.DropletTickResult tickResult = droplet.tick();
+            
+            if (tickResult == TalentDualVerdict.DropletTickResult.NONE) {
+                continue;
+            }
+            
+            droplet.remove();
+            iterator.remove();
+            
+            // Achievement
+            pickedUpDroplets.add(tickResult);
+            
+            if (pickedUpDroplets.contains(TalentDualVerdict.DropletTickResult.HARMONY) && pickedUpDroplets.contains(TalentDualVerdict.DropletTickResult.DISCORD)) {
+                AchievementRegistry.NYX_DOUBLE_DUTY.progress(player.getProfile());
             }
         }
     }
@@ -47,5 +63,7 @@ public class HeroDataNyx extends HeroData<HeroNyx> {
     public void removeDroplets() {
         droplets.forEach(Removable::remove);
         droplets.clear();
+        pickedUpDroplets.clear();
     }
+    
 }

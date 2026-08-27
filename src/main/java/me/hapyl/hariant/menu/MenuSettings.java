@@ -50,7 +50,7 @@ public class MenuSettings extends Menu {
     
     @Override
     public @Nullable MenuReturn menuReturn() {
-        return MenuReturn.create(Component.text("Your Profile"), () -> new MenuPlayerProfile(player));
+        return MenuReturn.create(Component.text("Your Profile"), MenuPlayerProfile::new);
     }
     
     @Override
@@ -108,16 +108,7 @@ public class MenuSettings extends Menu {
                     return;
                 }
                 
-                final Setting<?> setting = settings.get(i);
-                final int[] slots = SETTING_SLOTS[i];
-                
-                final ItemStack settingIcon = setting.menuFormat(settingEntry, setting.createBuilder()).asIcon();
-                final ItemStack settingButton = setting.menuFormat(settingEntry, setting.menuButton(settingEntry)).asIcon();
-                
-                final PlayerMenuAction menuAction = (menu, player, clickType, slot, hotbarNumber) -> setting.menuClick(player, settingEntry, MenuSettings.this, clickType);
-                
-                setItem(slots[0], settingIcon, menuAction);
-                setItem(slots[1], settingButton, menuAction);
+                settings.get(i).setMenuItem(this, SETTING_SLOTS[i][0], SETTING_SLOTS[i][1], settingEntry);
             }
         }
     }

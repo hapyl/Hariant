@@ -7,6 +7,7 @@ import me.hapyl.eterna.module.particle.ParticleBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
@@ -40,11 +41,11 @@ public final class TalentChainLightning extends Talent implements Listener {
     private static final Color ARROW_COLOR = Color.fromRGB(Colors.ELEMENT_ELECTRIC.value());
     private static final ParticleBuilder PARTICLE_CHAIN_LIGHTNING = ParticleBuilder.dustColorTransition(Color.fromRGB(240, 213, 79), Color.fromRGB(252, 186, 3), 1);
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 207);
-    @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 200);
+    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 207);
+    private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 200);
     
-    @DisplayField private final Decimal maxChainReaction = Decimal.ofValue(2);
-    @DisplayField private final Decimal maxChainReactionDistance = Decimal.ofValue(6);
+    private final @DisplayField Decimal maxChainReaction = Decimal.ofValue(2);
+    private final @DisplayField Decimal maxChainReactionDistance = Decimal.ofValue(6);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             this,
@@ -106,6 +107,11 @@ public final class TalentChainLightning extends Talent implements Listener {
             }
             
             targetCurrent.playWorldSound(Sound.ENTITY_LIGHTNING_BOLT_THUNDER, player.getRandom().nextFloat(1.25f, 2f));
+        }
+        
+        // Trigger achievement
+        if (targetsSize == (maxChainReaction.intValue() + 1)) {
+            AchievementRegistry.ARCHER_CHAIN_LIGHTNING.progress(player.getProfile());
         }
     }
     

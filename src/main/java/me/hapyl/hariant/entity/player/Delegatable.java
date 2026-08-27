@@ -10,6 +10,6 @@ public interface Delegatable {
     
     void delegate(@NotNull Cancellable cancellable, @NotNull DelegateType delegateType);
     
-    void cancelDelegates(@NotNull Predicate<DelegateCancellable> filter);
+    int cancelDelegates(@NotNull Predicate<DelegateCancellable> filter);
     
 }

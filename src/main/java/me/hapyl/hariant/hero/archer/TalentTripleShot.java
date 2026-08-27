@@ -2,12 +2,18 @@ package me.hapyl.hariant.hero.archer;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
+import me.hapyl.hariant.achievement.UniqueId;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.HariantProjectileHitEvent;
+import me.hapyl.hariant.handler.HariantProjectile;
+import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -21,19 +27,21 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Arrow;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class TalentTripleShot extends Talent {
+public final class TalentTripleShot extends Talent implements Listener {
     
     private final Color arrowColor = Color.fromRGB(Colors.ELEMENT_ELECTRIC.value());
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 135);
+    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 135);
     
-    @DisplayField private final Decimal additionalArrowDamageMultiplier = Decimal.ofPercentage(50);
-    @DisplayField private final Decimal additionalArrowSpread = Decimal.ofValue(5, v -> Component.text(v).append(Component.text("°")).color(TextColor.color(0xFFF854)));
-    @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 100);
+    private final @DisplayField Decimal additionalArrowDamageMultiplier = Decimal.ofPercentage(50);
+    private final @DisplayField Decimal additionalArrowSpread = Decimal.ofValue(5, v -> Component.text(v).append(Component.text("°")).color(TextColor.color(0xFFF854)));
+    private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 100);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             this,
@@ -72,10 +80,14 @@ public final class TalentTripleShot extends Talent {
         final double additionalArrowDamage = damage * this.additionalArrowDamageMultiplier.doubleValue();
         final double spread = Math.PI * Math.toRadians(this.additionalArrowSpread.doubleValue());
         
-        final Arrow middleArrow = createArrow(player, damage, null);
+        // Technically the tick cannot increment unless the execution finishes, but to be 1000% sure,
+        // we're caching the tick the arrows were shot at ¯\_(ツ)_/¯
+        final int localTick = player.localTicks();
         
-        createArrow(player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorLeft(spread)));
-        createArrow(player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorRight(spread)));
+        final Arrow middleArrow = createArrow(localTick, player, damage, null);
+        
+        createArrow(localTick, player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorLeft(spread)));
+        createArrow(localTick, player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorRight(spread)));
         
         // Fx
         player.playWorldSound(Sound.ITEM_CROSSBOW_SHOOT, 0.75f);
@@ -85,11 +97,10 @@ public final class TalentTripleShot extends Talent {
         return Response.ok();
     }
     
-    @NotNull
-    private Arrow createArrow(@NotNull HariantPlayer player, double damage, @Nullable Vector velocity) {
+    private @NotNull Arrow createArrow(int localTick, @NotNull HariantPlayer player, double damage, @Nullable Vector velocity) {
         return player.launchProjectile(
                 Arrow.class,
-                new DamageSourceArcherTalent(damageSourceIdentity, player, damage, elementalApplication.doubleValue()),
+                new DamageSourceTripleShot(localTick, damageSourceIdentity, player, damage, elementalApplication.doubleValue()),
                 self -> {
                     self.setColor(arrowColor);
                     self.setCritical(false);
@@ -99,6 +110,46 @@ public final class TalentTripleShot extends Talent {
                     }
                 }
         );
+    }
+    
+    @EventHandler
+    public void handleHariantProjectileHitEvent(HariantProjectileHitEvent ev) {
+        final HariantProjectile projectile = ev.getProjectile();
+        
+        if (!(projectile.getShooter() instanceof HariantPlayer player)) {
+            return;
+        }
+        
+        if (!(projectile.getDamageSource() instanceof DamageSourceTripleShot damageSource)) {
+            return;
+        }
+        
+        if (ev.getEntity() == null) {
+            return;
+        }
+        
+        if (player.getProfile().getDatabase().achievements.hasCompleted(AchievementRegistry.ARCHER_TRIPLET)) {
+            return;
+        }
+        
+        player.getHeroData(HeroRegistry.ARCHER, HeroDataArcher::new).lastThreeHits.count(damageSource);
+    }
+    
+    public static class DamageSourceTripleShot extends DamageSourceArcherTalent implements UniqueId {
+        
+        private final int shotAtTick;
+        
+        DamageSourceTripleShot(int shotAtTick, @NotNull DamageSourceIdentity identity, @Nullable HariantEntity attacker, double damage, double elementUnits) {
+            super(identity, attacker, damage, elementUnits);
+            
+            this.shotAtTick = shotAtTick;
+        }
+        
+        @Override
+        public int getUniqueId() {
+            return shotAtTick;
+        }
+        
     }
     
 }

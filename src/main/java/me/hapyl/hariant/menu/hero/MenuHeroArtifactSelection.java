@@ -100,7 +100,7 @@ public class MenuHeroArtifactSelection extends MenuPage<ItemArtifactInstance> {
     
     @Override
     public @Nullable MenuReturn menuReturn() {
-        return MenuReturn.create(Component.text("Artifact Equip"), () -> Category.ARTIFACTS.createMenu(player, heroInstance));
+        return MenuReturn.create(Component.text("Artifact Equip"), player -> Category.ARTIFACTS.createMenu(player, heroInstance));
     }
     
     @Override

@@ -19,6 +19,7 @@ import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -104,6 +105,7 @@ public final class HariantCommandRegistry {
         register("exp", HariantCommandExperience::new);
         register("aggregateStatistic", HariantCommandAggregateStatistic::new);
         register("openMenu", HariantCommandOpenMenu::new);
+        register("goto", HariantCommandGoTo::new);
         
         register("showAttributes", context -> {
             final HariantPlayer player = context.getHariantPlayer();
@@ -176,7 +178,7 @@ public final class HariantCommandRegistry {
             final HariantEntity source = argument.equals("-s") ? null : player;
             
             // Trigger anomaly
-            player.triggerAnomaly(elementalAnomaly, source);
+            player.triggerAnomaly(ElementalAnomalySource.create(elementalAnomaly, source));
             
             HariantLogger.success(
                     player,
@@ -794,7 +796,9 @@ public final class HariantCommandRegistry {
         });
         
         register("notification", context -> {
-            NotificationHandler.getNotificationsNotify(context.getProfile());
+            if (NotificationHandler.getNotificationsNotify(context.getProfile()).isEmpty()) {
+                HariantLogger.error(context.getPlayer(), Component.text("No new notifications!"));
+            }
         });
         
         // If this is ever 2000 lines of code, don't add another fucking command and either refactor or delete commands that you haven't used for 10 years

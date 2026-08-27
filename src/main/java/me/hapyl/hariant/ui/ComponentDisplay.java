@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 
-public class ComponentDisplay {
+public class ComponentDisplay implements ComponentDisplayable {
     
     public static final ShadowColor NO_SHADOW = ShadowColor.shadowColor(0, 0, 0, 255);
     
@@ -38,6 +38,7 @@ public class ComponentDisplay {
         this.scale = scale;
     }
     
+    @Override
     public void display(@NotNull @Mutates Location location) {
         // Randomize the location a little
         final Random random = Hariant.getRandom();

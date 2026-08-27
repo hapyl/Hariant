@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public interface MenuReturn {
     
@@ -15,7 +15,7 @@ public interface MenuReturn {
     Menu returnMenu(@NotNull Player player);
     
     @NotNull
-    static MenuReturn create(@NotNull Component name, @NotNull Supplier<Menu> supplier) {
+    static MenuReturn create(@NotNull Component name, @NotNull Function<Player, Menu> supplier) {
         return new MenuReturn() {
             @NotNull
             @Override
@@ -26,7 +26,7 @@ public interface MenuReturn {
             @NotNull
             @Override
             public Menu returnMenu(@NotNull Player player) {
-                return supplier.get();
+                return supplier.apply(player);
             }
         };
     }

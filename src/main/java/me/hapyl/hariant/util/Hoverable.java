@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Hoverable {
     
-    @NotNull
-    HoverEvent<?> createHoverEvent();
+    @NotNull HoverEvent<?> createHoverEvent();
     
 }

@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ArtifactSetSearingInferno extends ArtifactSet implements Listener {
     
     private final ArtifactSetModifier elementalMasteryIncrease = CommonArtifactSetModifiers.ELEMENTAL_MASTERY;
-    private final Decimal burningDamageIncreaseOfElementalMastery = Decimal.ofPercentage(25);
+    private final Decimal burningDamageIncreaseOfElementalMastery = Decimal.ofPercentage(20);
     
     ArtifactSetSearingInferno(@NotNull Key key) {
         super(key, Component.text("Searing Inferno"));

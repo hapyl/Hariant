@@ -3,8 +3,11 @@ package me.hapyl.hariant.entity.damage.environment;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.Capitalizable;
 import me.hapyl.hariant.element.ElementType;
-import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.damage.DamageSourceImpl;
+import me.hapyl.hariant.entity.damage.DamageType;
+import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +20,7 @@ public class EnvironmentDamageSource extends DamageSourceImpl {
     private static final int COOLDOWN = 10;
     
     EnvironmentDamageSource(@NotNull DamageSourceIdentity identity, @NotNull ElementType elementType, double damage) {
-        super(identity, null, DamageType.ENVIRONMENT, elementType, DamageComponent.ofEnvironmentDamage(), Set.of(), damage, 0, COOLDOWN_KEY, COOLDOWN);
+        super(identity, null, DamageType.ENVIRONMENT, elementType, DamageComponents.ofEnvironmentDamage(), Set.of(), damage, 0, COOLDOWN_KEY, COOLDOWN);
     }
     
     EnvironmentDamageSource(@NotNull org.bukkit.damage.DamageType damageType, @NotNull DeathMessage deathMessage, @NotNull ElementType elementType, double damage) {

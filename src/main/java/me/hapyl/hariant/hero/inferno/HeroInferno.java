@@ -11,7 +11,7 @@ import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.*;
 import me.hapyl.hariant.talent.TalentRegistry;
@@ -60,7 +60,7 @@ public class HeroInferno extends Hero implements Listener {
                          .append(Component.text("What is the right hand of the Demon King doing here?"))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("Is it regret, banishment... or perhaps, boredom?"))
+                         .append(Component.text("Is it regret, banishment... or perhaps boredom?"))
         );
         
         setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.ENERGY_RECHARGE, AttributeType.ELEMENTAL_MASTERY, AttributeType.VITALITY, AttributeType.FIRE_DAMAGE_BONUS));
@@ -71,15 +71,13 @@ public class HeroInferno extends Hero implements Listener {
         return TalentRegistry.FIRE_PIT;
     }
     
-    @NotNull
     @Override
-    public TalentDemonsplitQuazii getSecondTalent() {
+    public @NotNull TalentDemonsplitQuazii getSecondTalent() {
         return TalentRegistry.DEMONSPLIT_QUAZII;
     }
     
-    @NotNull
     @Override
-    public TalentDemonsplitTyphoeus getThirdTalent() {
+    public @NotNull TalentDemonsplitTyphoeus getThirdTalent() {
         return TalentRegistry.DEMONSPLIT_TYPHOEUS;
     }
     
@@ -144,7 +142,7 @@ public class HeroInferno extends Hero implements Listener {
             final DamageSource damageSource = super.createDamageSource(attacker);
             
             // Inferno always deals True Damage, so set the components
-            damageSource.setDamageComponents(DamageComponent.ofTrueDamage());
+            damageSource.setDamageComponents(DamageComponents.ofTrueDamage());
             
             return damageSource;
         }

@@ -8,6 +8,7 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifiable;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.event.HariantAttributeUpdateEvent;
 import me.hapyl.hariant.event.effect.HariantAttributeAddEvent;
 import me.hapyl.hariant.event.effect.HariantAttributeRemoveEvent;
 import me.hapyl.hariant.event.effect.HariantEffectEvent;
@@ -89,6 +90,11 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
         return modifiers.containsKey(key);
     }
     
+    @Override
+    public boolean hasModifier(@NotNull Class<? extends AttributeModifier> modifierClass) {
+        return modifiers.values().stream().anyMatch(modifierClass::isInstance);
+    }
+    
     @NotNull
     public List<? extends AttributeModifier> getModifiers() {
         return List.copyOf(modifiers.values());
@@ -162,7 +168,12 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     }
     
     public void updateAttribute(@NotNull AttributeType attributeType) {
-        attributeType.update(entity, get(attributeType));
+        final double value = this.get(attributeType);
+        
+        attributeType.update(entity, value);
+        
+        // Event
+        new HariantAttributeUpdateEvent(entity, attributeType, value).callEvent();
     }
     
     private void removeModifier0(@NotNull AttributeModifier attributeModifier) {

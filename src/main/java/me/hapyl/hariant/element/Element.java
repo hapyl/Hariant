@@ -46,16 +46,16 @@ public interface Element extends Keyed, Prefixed, Named, Styled, ComponentLike, 
     
     @Nullable AttributeType getDefensiveAttribute();
     
-    @NotNull
+    void tickEntity(@NotNull HariantEntity entity);
+    
     @Override
-    default Component asComponent() {
+    default @NotNull Component asComponent() {
         final Style style = this.getStyle();
         
         return Component.empty().append(this.getPrefix().style(style)).appendSpace().append(this.getName().style(style));
     }
     
-    @NotNull
-    default Component asComponentDamage() {
+    default @NotNull Component asComponentDamage() {
         return asComponent().append(Component.text(" DMG", this.getStyle()));
     }
     
@@ -68,7 +68,5 @@ public interface Element extends Keyed, Prefixed, Named, Styled, ComponentLike, 
                         .append(this.getName().style(style))
                         .append(Component.text(" DMG", style));
     }
-    
-    void tickEntity(@NotNull HariantEntity entity);
     
 }

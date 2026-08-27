@@ -26,6 +26,8 @@ public interface Battleground extends Icon, Named, Described, Ticking {
     @Override
     @NotNull Component getDescription();
     
+    @NotNull Size getSize();
+    
     @NotNull List<? extends ImmutableLocation> getSpawnLocations();
     
     @NotNull List<? extends BattlegroundFeature> getFeatures();

@@ -49,19 +49,8 @@ public final class SettingImplEnum<E extends Enum<E> & ComponentLike> extends Se
     
     @NotNull
     @Override
-    public ItemBuilder menuButton(@NotNull SettingEntry settingEntry) {
+    public ItemBuilder createButton(@NotNull SettingEntry settingEntry) {
         return new ItemBuilder(Material.PURPLE_DYE).setName(Component.text("Select Value"));
-    }
-    
-    @Override
-    public void menuClick(@NotNull Player player, @NotNull SettingEntry settingEntry, @NotNull Menu menu, @NotNull ClickType clickType) {
-        final E value = settingEntry.getValue(this);
-        final E newValue = clickType == ClickType.LEFT
-                           ? Enums.getNextValue(enumClass, value)
-                           : Enums.getPreviousValue(enumClass, value);
-        
-        settingEntry.setValue(this, newValue);
-        menu.openMenu();
     }
     
     @NotNull
@@ -94,6 +83,17 @@ public final class SettingImplEnum<E extends Enum<E> & ComponentLike> extends Se
         builder.addLore(ButtonComponents.right("cycle backwards"));
         
         return builder;
+    }
+    
+    @Override
+    public void menuClick(@NotNull Player player, @NotNull SettingEntry settingEntry, @NotNull Menu menu, @NotNull ClickType clickType) {
+        final E value = settingEntry.getValue(this);
+        final E newValue = clickType == ClickType.LEFT
+                           ? Enums.getNextValue(enumClass, value)
+                           : Enums.getPreviousValue(enumClass, value);
+        
+        settingEntry.setValue(this, newValue);
+        menu.openMenu();
     }
     
 }

@@ -45,6 +45,8 @@ public interface AttributeModifiable {
     
     boolean hasModifier(@NotNull Key key);
     
+    boolean hasModifier(@NotNull Class<? extends AttributeModifier> modifierClass);
+    
     @NotNull
     List<? extends AttributeModifier> getModifiers();
     

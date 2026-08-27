@@ -13,7 +13,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileLaunchEvent;
@@ -215,7 +215,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
                                             .elementType(ElementType.ELECTRIC)
                                             .elementalUnits(elementalApplication.doubleValue())
                                             .damageType(DamageType.ULTIMATE)
-                                            .components(DamageComponent.ofCommon())
+                                            .components(DamageComponents.ofCommon())
                                             .build();
         }
         

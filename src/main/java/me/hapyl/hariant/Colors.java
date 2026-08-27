@@ -130,6 +130,8 @@ public final class Colors {
     public static final TextColor SHARK = TextColor.color(0x96B7C0);
     public static final TextColor ALIEN = TextColor.color(0x18C040);
     public static final TextColor EXPERIENCE = TextColor.color(0x1AFF16);
+    public static final TextColor INVULNERABILITY = TextColor.color(0x6A8FD9);
+    
     
     private Colors() {
     }

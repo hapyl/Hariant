@@ -14,13 +14,11 @@ public interface KnockbackSource {
         return HariantConstants.MELEE_KNOCKBACK_STRENGTH;
     }
     
-    @NotNull
-    static KnockbackSource create(@NotNull Coordinates coordinates, final double strength) {
+    static @NotNull KnockbackSource create(@NotNull Coordinates coordinates, final double strength) {
         return create(coordinates.x(), coordinates.z(), strength);
     }
     
-    @NotNull
-    static KnockbackSource create(final double x, final double z, final double strength) {
+    static @NotNull KnockbackSource create(final double x, final double z, final double strength) {
         return new KnockbackSourceImpl(x, z, strength);
     }
     

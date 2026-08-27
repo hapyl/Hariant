@@ -230,7 +230,7 @@ public final class Hariant implements Runnable, Lifecycle {
                         HariantTask.cancelAllTasks();
                         
                         // Destroy players via their profiles
-                        getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(gameInstance));
+                        getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(gameInstance, winResult));
                         
                         // Destroy non-players entities
                         clearEntities();

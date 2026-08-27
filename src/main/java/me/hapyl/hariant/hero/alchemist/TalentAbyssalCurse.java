@@ -97,7 +97,7 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                          .append(Component.text("Other players can also transfer the curse.", Colors.DARK_GRAY))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("After te curse becomes "))
+                         .append(Component.text("After the curse becomes "))
                          .append(Component.text("unstable", Colors.DARK_RED))
                          .append(Component.text(", it explodes, dealing "))
                          .append(ElementType.AETHER.asComponentDamage())

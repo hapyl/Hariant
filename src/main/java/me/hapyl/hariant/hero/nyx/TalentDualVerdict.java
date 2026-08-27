@@ -46,15 +46,18 @@ import java.util.List;
 
 public final class TalentDualVerdict extends Talent {
     
-    @DisplayField private final Decimal numberOfDroplets = Decimal.ofValue(3);
-    @DisplayField private final Decimal dropletRadius = Decimal.ofValue(0.75);
+    public static final Component DROPLET_GOOD = Component.text("Harmony", Colors.SUCCESS);
+    public static final Component DROPLET_BAD = Component.text("Discord", Colors.ERROR);
     
-    @DisplayField private final Decimal dropletHealingOfMaxNyxHealth = Decimal.ofPercentage(10);
-    @DisplayField private final Decimal dropletMaxHealthDecrease = Decimal.ofPercentage(10);
-    @DisplayField private final Decimal dropletMaxHealthDecreaseDuration = Decimal.ofSeconds(8);
+    private final @DisplayField Decimal numberOfDroplets = Decimal.ofValue(3);
+    private final @DisplayField Decimal dropletRadius = Decimal.ofValue(0.75);
     
-    @DisplayField private final Decimal initialRadius = Decimal.ofValue(3);
-    @DisplayField private final Decimal maximumRadius = Decimal.ofValue(10);
+    private final @DisplayField Decimal dropletHealingOfMaxNyxHealth = Decimal.ofPercentage(10);
+    private final @DisplayField Decimal dropletMaxHealthDecrease = Decimal.ofPercentage(10);
+    private final @DisplayField Decimal dropletMaxHealthDecreaseDuration = Decimal.ofSeconds(8);
+    
+    private final @DisplayField Decimal initialRadius = Decimal.ofValue(3);
+    private final @DisplayField Decimal maximumRadius = Decimal.ofValue(10);
     
     private final int numberOfFxOrbs = 6;
     private final int maximumSafeLocationAttempts = 10;
@@ -85,7 +88,7 @@ public final class TalentDualVerdict extends Talent {
                          .append(Component.text("If the target is a "))
                          .append(Component.text("teammate", Colors.GREEN))
                          .append(Component.text(", the verdict is "))
-                         .append(Component.text("Harmony", Colors.SUCCESS))
+                         .append(DROPLET_GOOD)
                          .append(Component.text(", which "))
                          .append(Component.text("heals", Colors.GREEN))
                          .append(Component.text(" them "))
@@ -99,7 +102,7 @@ public final class TalentDualVerdict extends Talent {
                          .append(Component.text("If the target is an "))
                          .append(Component.text("enemy", Colors.RED))
                          .append(Component.text(", the verdict is "))
-                         .append(Component.text("Discord", Colors.ERROR))
+                         .append(DROPLET_BAD)
                          .append(Component.text(", which decreases the target's "))
                          .append(AttributeType.MAX_HEALTH)
                          .append(Component.text(" by "))
@@ -122,6 +125,21 @@ public final class TalentDualVerdict extends Talent {
         
         player.delegate(new DualVerdict(player, heroData, location), DelegateType.INTERRUPTABLE);
         return Response.ok();
+    }
+    
+    private @NotNull Entity createDroplet(@NotNull Location location) {
+        return location.getWorld().spawn(location, ArmorStand.class, self -> {
+            self.setSmall(true);
+            self.setInvisible(true);
+            self.setMarker(true);
+            self.getEquipment().setHelmet(dropletItem);
+        });
+    }
+    
+    public enum DropletTickResult {
+        NONE,
+        HARMONY,
+        DISCORD
     }
     
     private class DualVerdict extends HariantTickingStepTask {
@@ -234,15 +252,6 @@ public final class TalentDualVerdict extends Talent {
         }
     }
     
-    private @NotNull Entity createDroplet(@NotNull Location location) {
-        return location.getWorld().spawn(location, ArmorStand.class, self -> {
-            self.setSmall(true);
-            self.setInvisible(true);
-            self.setMarker(true);
-            self.getEquipment().setHelmet(dropletItem);
-        });
-    }
-    
     public class Droplet implements Located, Removable, EntityCollector {
         
         private final HariantPlayer player;
@@ -260,10 +269,10 @@ public final class TalentDualVerdict extends Talent {
             });
         }
         
-        public boolean tick() {
+        public @NotNull DropletTickResult tick() {
             // Ignore collision for first couple ticks
             if (tick++ < dropletNoPickupTick) {
-                return false;
+                return DropletTickResult.NONE;
             }
             
             final HariantEntity entity = collectNearbyEntities(dropletRadius)
@@ -276,10 +285,12 @@ public final class TalentDualVerdict extends Talent {
                     
                     // If the teammate is full health, ignore them
                     if (entity.isFullHealth()) {
-                        return false;
+                        return DropletTickResult.NONE;
                     }
                     
                     entity.heal(HealingSource.create(player.getMaxHealth() * dropletHealingOfMaxNyxHealth.doubleValue(), TalentDualVerdict.this, player));
+                    
+                    return DropletTickResult.HARMONY;
                 }
                 // Otherwise damage nyx and decrement entity energy
                 else {
@@ -293,9 +304,9 @@ public final class TalentDualVerdict extends Talent {
                         playerEntity.playSound(Sound.ENTITY_BEE_HURT, 0.5f);
                         playerEntity.getHandle().sendHurtAnimation(0);
                     }
+                    
+                    return DropletTickResult.DISCORD;
                 }
-                
-                return true;
             }
             
             // Animate droplet
@@ -308,7 +319,7 @@ public final class TalentDualVerdict extends Talent {
             droplet.teleport(dropletLocation);
             
             player.spawnWorldParticle(dropletLocation.add(0, 1, 0), Particle.PORTAL, 1, 0.2, 0.2, 0.2, 0.015f);
-            return false;
+            return DropletTickResult.NONE;
         }
         
         @Override

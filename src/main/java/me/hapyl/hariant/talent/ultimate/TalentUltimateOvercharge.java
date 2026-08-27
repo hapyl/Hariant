@@ -6,6 +6,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayFieldInstance;
@@ -109,6 +110,11 @@ public abstract class TalentUltimateOvercharge extends TalentUltimate {
     @Override
     public final @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
         final ChargeLevel chargeLevel = consumedResource >= overchargeCost ? ChargeLevel.OVERCHARGED : ChargeLevel.NORMAL;
+        
+        // Progress achievement
+        if (chargeLevel == ChargeLevel.OVERCHARGED) {
+            AchievementRegistry.UNLIMITED_POWER.progress(player.getProfile());
+        }
         
         return execute(player, context, chargeLevel);
     }

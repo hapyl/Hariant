@@ -8,9 +8,10 @@ import me.hapyl.eterna.module.reflect.Reflect;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
+import me.hapyl.hariant.achievement.SharedAchievementData;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.database.rank.FormatRules;
-import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.*;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.cooldown.HariantCooldown;
@@ -18,10 +19,11 @@ import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.player.combat.CombatData;
-import me.hapyl.hariant.entity.player.combat.CombatTracker;
 import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.heal.HealingSource;
+import me.hapyl.hariant.entity.player.combat.CombatData;
+import me.hapyl.hariant.entity.player.combat.CombatTracker;
+import me.hapyl.hariant.event.HariantInterruptEvent;
 import me.hapyl.hariant.event.HariantPlayerCreateEvent;
 import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.handler.PlayerHandler;
@@ -79,7 +81,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class HariantPlayer extends HariantEntity implements CooldownHandler, HeroDataRetriever, SettingRetriever, NameFormatter {
+public class HariantPlayer
+        extends HariantEntity
+        implements
+        CooldownHandler, HeroDataRetriever, SettingRetriever, NameFormatter {
     
     /**
      * Defines default attributes that are reset each time player is spawner or removed, used to ensure
@@ -109,6 +114,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     private final ActionbarCache actionbarCache;
     private final CombatTracker combatTracker;
     private final PlayerStatistics statistics;
+    private final SharedAchievementData sharedAchievementData;
     
     private final Map<Class<? extends Hero>, HeroData<? extends Hero>> heroData;
     private final Map<TalentRechargeable, RechargeableTalentData> rechargeableTalentData;
@@ -129,6 +135,11 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         this.rechargeableTalentData = Maps.newHashMap();
         this.combatTracker = new CombatTracker(this);
         this.statistics = new PlayerStatistics(this);
+        this.sharedAchievementData = new SharedAchievementData(this);
+    }
+    
+    public @NotNull SharedAchievementData getSharedAchievementData() {
+        return sharedAchievementData;
     }
     
     public @NotNull PlayerStatistics getStatistics() {
@@ -146,7 +157,7 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         }
         
         // Cancel interruptible delegates
-        cancelDelegates(DelegateCancellable::isInterruptable);
+        final int numberOfCancelledDelegates = cancelDelegates(DelegateCancellable::isInterruptable);
         
         // Interrupt weapon
         final PlayerInventory inventory = getInventory();
@@ -162,6 +173,14 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
         // Fx
         playSound(Sound.ENTITY_ELDER_GUARDIAN_CURSE, 2.0f);
         playSound(Sound.ENCHANT_THORNS_HIT, 0.0f);
+        
+        // Fx when interrupted cancellable
+        if (numberOfCancelledDelegates > 0) {
+            playWorldSound(Sound.ENTITY_ENDERMAN_HURT, 0.75f);
+        }
+        
+        // Call event
+        new HariantInterruptEvent(this, source, numberOfCancelledDelegates).callEvent();
     }
     
     @NotNull
@@ -405,18 +424,8 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     }
     
     @Override
-    public void onElementalAnomaly(@NotNull ElementalAnomalyType elementalAnomaly, @NotNull HariantEntity elementData) {
+    public void onElementalAnomaly(@NotNull HariantEntity elementData, @NotNull ElementalAnomalySource anomalySource) {
         statistics.incrementStatistic(Statistic.ANOMALY_TRIGGERED, 1);
-    }
-    
-    @EventLike
-    public void onTalentExecuted(@NotNull Talent talent, @NotNull Response response) {
-        if (response.isError() || !talent.incrementsStatistics()) {
-            return;
-        }
-        
-        statistics.incrementTalentUsage(talent);
-        statistics.incrementStatistic(talent instanceof TalentUltimate ? Statistic.ULTIMATE_USAGE : Statistic.TALENT_USAGE, 1);
     }
     
     @Override
@@ -631,6 +640,16 @@ public class HariantPlayer extends HariantEntity implements CooldownHandler, Her
     public void onCooldownEnded(@NotNull HariantCooldown cooldown) {
         // Send the packet with 0 duration to reset the visual cooldown
         this.sendCooldownPacket(cooldown, 0);
+    }
+    
+    @EventLike
+    public void onTalentExecuted(@NotNull Talent talent, @NotNull Response response) {
+        if (response.isError() || !talent.incrementsStatistics()) {
+            return;
+        }
+        
+        statistics.incrementTalentUsage(talent);
+        statistics.incrementStatistic(talent instanceof TalentUltimate ? Statistic.ULTIMATE_USAGE : Statistic.TALENT_USAGE, 1);
     }
     
     public @NotNull String getEntityName() {

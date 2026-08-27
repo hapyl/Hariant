@@ -149,25 +149,24 @@ public class DamageSourceImpl implements DamageSource {
     }
     
     @Override
-    public final @NotNull DamageSource createCopy() {
-        // Copying damage source has one massive flaw - it loses it's actual instance, meaning
-        // instanceof checks and casting would not work.
-        //
-        // Although for now it's only used for ferocity, keep in mind that this is a very fragile operation
-        // and should be generally avoided.
-        
-        return new DamageSourceImpl(
-                this.getIdentity(),
-                this.getSource(),
-                this.getDamageType(),
-                this.getElementType(),
-                this.getDamageComponents(),
-                this.getDamageFlags(),
-                this.getDamage(),
-                this.getElementUnits(),
-                this.getCooldownKey(),
-                this.getCooldown()
-        );
+    public @NotNull DamageSource clone() {
+        try {
+            // I'm aware that `clone` is considered a bad design in Java, but after a long chat
+            // with different AIs and myself, I've decided to use it here.
+            //
+            // It's mainly used for Ferocity, since it's purpose it to literally `clone` the attack,
+            // and clone fits here the best, since it keeps the object instance, which is lost any
+            // other way I tried, which is important because most events rely on `instanceof` check
+            // of the damage source of the damage instance.
+            final DamageSourceImpl clone = (DamageSourceImpl) super.clone();
+            
+            clone.damageComponents = List.copyOf(damageComponents);
+            clone.damageFlags = Set.copyOf(damageFlags);
+            
+            return clone;
+        } catch (CloneNotSupportedException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     
     @Override

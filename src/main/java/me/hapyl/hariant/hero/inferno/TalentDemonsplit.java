@@ -64,24 +64,19 @@ public abstract class TalentDemonsplit extends Talent {
         );
     }
     
-    @NotNull
-    public abstract InfernoDemonEntity newInstance(@NotNull HariantPlayer player, InfernoDemonType infernoDemonType);
+    public abstract @NotNull InfernoDemonEntity newInstance(@NotNull HariantPlayer player, InfernoDemonType infernoDemonType);
     
-    @NotNull
-    public abstract Component describeAbility();
+    public abstract @NotNull Component describeAbility();
     
-    @NotNull
-    public abstract Component describeReform();
+    public abstract @NotNull Component describeReform();
     
-    @NotNull
     @Override
-    public final Key getCooldownKey() {
+    public final @NotNull Key getCooldownKey() {
         return SHARED_COOLDOWN_KEY;
     }
     
-    @NotNull
     @Override
-    public final ItemBuilder createBuilder() {
+    public final @NotNull ItemBuilder createBuilder() {
         return super.createBuilder().setCooldownKey(SHARED_COOLDOWN_KEY);
     }
     
@@ -117,9 +112,8 @@ public abstract class TalentDemonsplit extends Talent {
         return Response.ok();
     }
     
-    @NotNull
     @Override
-    public String getTalentClassName() {
+    public @NotNull String getTalentClassName() {
         return "Demonsplit Talent";
     }
     

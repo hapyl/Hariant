@@ -80,7 +80,7 @@ public class MenuHeroTalents extends AbstractMenuHero {
         public SubMenu(@NotNull Player player, @NotNull Component title, @NotNull Menu returnMenu) {
             super(player, () -> title, ChestSize.SIZE_5);
             
-            this.returnMenu = MenuReturn.create(returnMenu.getTitle().asComponent(), () -> returnMenu);
+            this.returnMenu = MenuReturn.create(returnMenu.getTitle().asComponent(), _ -> returnMenu);
         }
         
         @Override

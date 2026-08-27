@@ -58,7 +58,7 @@ public class HariantCommandOpenMenu extends HariantPlayerCommand {
         HERO_SELECTION(MenuHeroSelection::new),
         HERO_PROFILE(player -> AbstractMenuHero.openMenu(player, Category.PROFILE)),
         HERO_TALENTS(player -> AbstractMenuHero.openMenu(player, Category.TALENTS)),
-        HERO_ARTIFACTS(player ->  AbstractMenuHero.openMenu(player, Category.ARTIFACTS)),
+        HERO_ARTIFACTS(player -> AbstractMenuHero.openMenu(player, Category.ARTIFACTS)),
         SETTINGS(MenuSettings::new),
         LEVELLING(MenuLevelling::new),
         BATTLEGROUND(MenuBattlegroundSelection::new),
@@ -66,9 +66,11 @@ public class HariantCommandOpenMenu extends HariantPlayerCommand {
         ;
         
         private final Function<Player, Menu> supplier;
+        private final ClickEvent<?> clickEvent;
         
         Menus(@NotNull Function<Player, Menu> supplier) {
             this.supplier = supplier;
+            this.clickEvent = ClickEvent.runCommand(COMMAND_NAME + " " + this.name().toLowerCase());
         }
         
         public void openMenu(@NotNull Player player) {
@@ -76,7 +78,7 @@ public class HariantCommandOpenMenu extends HariantPlayerCommand {
         }
         
         public @NotNull ClickEvent<?> createClickEvent() {
-            return ClickEvent.runCommand(COMMAND_NAME + " " + this.name().toLowerCase());
+            return clickEvent;
         }
         
     }

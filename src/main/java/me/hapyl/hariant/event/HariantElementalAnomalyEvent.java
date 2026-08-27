@@ -1,5 +1,6 @@
 package me.hapyl.hariant.event;
 
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.HariantEntity;
 import org.bukkit.event.Cancellable;
@@ -11,31 +12,30 @@ public class HariantElementalAnomalyEvent extends HariantEntityEvent implements 
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
-    private final ElementalAnomalyType elementalAnomaly;
-    private final HariantEntity source;
+    private final ElementalAnomalySource source;
     
     private boolean cancel;
     
-    public HariantElementalAnomalyEvent(@NotNull HariantEntity entity, @NotNull ElementalAnomalyType elementalAnomaly, @Nullable HariantEntity source) {
+    public HariantElementalAnomalyEvent(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource source) {
         super(entity);
         
-        this.elementalAnomaly = elementalAnomaly;
         this.source = source;
     }
     
-    @NotNull
-    public ElementalAnomalyType getElementalAnomaly() {
-        return elementalAnomaly;
-    }
-    
-    @Nullable
-    public HariantEntity getSource() {
+    public @NotNull ElementalAnomalySource getAnomalySource() {
         return source;
     }
     
-    @NotNull
+    public @NotNull ElementalAnomalyType getElementalAnomaly() {
+        return source.getElementalAnomaly();
+    }
+    
+    public @Nullable HariantEntity getSource() {
+        return source.getSource();
+    }
+    
     @Override
-    public HandlerList getHandlers() {
+    public @NotNull HandlerList getHandlers() {
         return HANDLER_LIST;
     }
     

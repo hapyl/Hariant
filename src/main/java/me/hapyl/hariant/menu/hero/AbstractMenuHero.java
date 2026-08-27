@@ -55,7 +55,7 @@ public class AbstractMenuHero extends Menu {
     @Nullable
     @Override
     public MenuReturn menuReturn() {
-        return MenuReturn.create(Component.text("Hero Selection"), () -> new MenuHeroSelection(player));
+        return MenuReturn.create(Component.text("Hero Selection"), MenuHeroSelection::new);
     }
     
     public static @NotNull AbstractMenuHero openMenu(@NotNull Player player, @NotNull Category category) {

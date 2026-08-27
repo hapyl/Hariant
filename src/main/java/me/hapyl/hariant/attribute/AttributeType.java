@@ -334,7 +334,12 @@ public enum AttributeType implements Attribute {
                     Component.text("Increases the base chances probabilities."),
                     Colors.ATTRIBUTE_LUCK,
                     DecimalFormat.FLAT
-            )
+            ) {
+                @Override
+                public double maxValue() {
+                    return 200;
+                }
+            }
     ),
     
     COOLDOWN_REDUCTION(

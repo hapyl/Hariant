@@ -13,6 +13,7 @@ import java.util.List;
 public class HeroDataShark extends HeroData<HeroShark> implements ActionbarSupplier {
     
     private @Nullable BloodScent bloodScent;
+    private int lastEmergeTick;
     
     public HeroDataShark(@NotNull HeroShark hero, @NotNull HariantPlayer player) {
         super(hero, player);
@@ -32,6 +33,14 @@ public class HeroDataShark extends HeroData<HeroShark> implements ActionbarSuppl
                 this.disposeBloodScent();
             }
         }
+    }
+    
+    public int getLastEmergeTick() {
+        return lastEmergeTick;
+    }
+    
+    public void setLastEmergeTick() {
+        this.lastEmergeTick = player.localTicks();
     }
     
     public @Nullable BloodScent getBloodScent() {

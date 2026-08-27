@@ -16,7 +16,7 @@ import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -254,7 +254,7 @@ public final class TalentWitherPath extends Talent {
     
     private class DamageSourceWitherPath extends DamageSourceImpl {
         DamageSourceWitherPath(@NotNull HariantPlayer player, double damage) {
-            super(damageSourceIdentity, player, DamageType.TALENT, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damage, spikeElementalApplication.doubleValue(), damageCooldown);
+            super(damageSourceIdentity, player, DamageType.TALENT, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damage, spikeElementalApplication.doubleValue(), damageCooldown);
         }
     }
     
