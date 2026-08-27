@@ -49,6 +49,11 @@ public enum EnumBattleground implements Battleground, Selectable {
         return battleground.getDescription();
     }
     
+    @Override
+    public @NotNull Size getSize() {
+        return battleground.getSize();
+    }
+    
     @NotNull
     @Override
     public List<? extends ImmutableLocation> getSpawnLocations() {

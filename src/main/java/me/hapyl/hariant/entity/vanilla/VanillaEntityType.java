@@ -39,8 +39,7 @@ public interface VanillaEntityType<E extends LivingEntity> extends Keyed {
         return VanillaEntityTypeImpl.VALUES.get(key);
     }
     
-    @NotNull
-    static StringList listKeys() {
+    static @NotNull StringList listKeys() {
         return StringList.of(VanillaEntityTypeImpl.VALUES.keySet().stream().map(Key::toString).toList());
     }
     

@@ -2,11 +2,14 @@ package me.hapyl.hariant.hero.archer;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageSource;
+import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.event.HariantProjectileLaunchEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -57,7 +60,9 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
                          .append(Component.text(" and homes at nearby "))
                          .append(Component.text("enemies", Colors.RED))
                          .append(Component.text("."))
-        
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("Hawkeye arrows do not cause element build-up.", Colors.DARK_GRAY))
         );
     }
     
@@ -72,24 +77,45 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
             return;
         }
         
+        final HeroDataArcher data = player.getHeroData(HeroRegistry.ARCHER, HeroDataArcher::new);
         final Projectile handle = projectile.getHandle();
         
-        if (!(handle instanceof Arrow arrow) || !arrow.isCritical() || !player.getHandle().isSneaking()) {
+        if (!(handle instanceof Arrow arrow) || !arrow.isCritical() || !player.getHandle().isSneaking() || !homingChance.chance(player)) {
+            // Reset achievement on failed arrow shots
+            data.numberOfHawkeyeArrowsShotInARow.reset();
             return;
         }
         
-        if (!homingChance.chance(player)) {
-            return;
-        }
-        
-        // Change the element type to ELECTRIC
-        damageSource.setElementType(ElementType.ELECTRIC);
+        // Update the damage source
+        projectile.setDamageSource(new DamageSourceHawkeye(damageSource));
         
         player.delegate(new Hawkeye(player, projectile), DelegateType.INTERRUPTABLE);
         
         // Fx
         player.playSound(Sound.ENCHANT_THORNS_HIT, 2.0f);
         player.playSound(Sound.ENTITY_ELDER_GUARDIAN_DEATH_LAND, 1.25f);
+        
+        // Progress achievement
+        data.numberOfHawkeyeArrowsShotInARow.count(() -> 0);
+    }
+    
+    @EventHandler
+    public void handleHariantProjectileHitEvent(HariantProjectileHitEvent ev) {
+        final HariantProjectile projectile = ev.getProjectile();
+        
+        if (!(projectile.getShooter() instanceof HariantPlayer player)) {
+            return;
+        }
+        
+        if (!(projectile.getDamageSource() instanceof DamageSourceHawkeye)) {
+            return;
+        }
+        
+        if (ev.getEntity() == null) {
+            return;
+        }
+        
+        AchievementRegistry.ARCHER_BULLSEYE.progress(player.getProfile());
     }
     
     private class Hawkeye extends HariantTickingTask {
@@ -132,6 +158,21 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
                 player.spawnWorldParticle(location, Particle.ENCHANTED_HIT, 5, 0, 0, 0, 0);
                 player.playWorldSound(location, Sound.ENTITY_ELDER_GUARDIAN_AMBIENT_LAND, 2.0f);
             }
+        }
+    }
+    
+    private static class DamageSourceHawkeye extends DamageSourceImpl {
+        DamageSourceHawkeye(@NotNull DamageSource damageSource) {
+            super(
+                    damageSource.getIdentity(),
+                    damageSource.getSource(),
+                    damageSource.getDamageType(),
+                    ElementType.ELECTRIC,
+                    damageSource.getDamageComponents(),
+                    damageSource.getDamageFlags(),
+                    damageSource.getDamage(),
+                    0
+            );
         }
     }
     

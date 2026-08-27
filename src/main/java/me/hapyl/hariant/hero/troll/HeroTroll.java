@@ -70,6 +70,9 @@ public final class HeroTroll extends Hero {
     }
     
     public static class WeaponStickonator extends WeaponMelee {
+        
+        private static final double KNOCKBACK_STRENGTH = 0.4;
+        
         WeaponStickonator() {
             super(
                     Key.ofString("stickonator"),
@@ -77,7 +80,7 @@ public final class HeroTroll extends Hero {
                     new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 56, 10) {
                         @Override
                         public @NotNull KnockbackSource createKnockbackCause(@NotNull HariantEntity attacker) {
-                            return KnockbackSource.create(attacker, 0.4);
+                            return KnockbackSource.create(attacker, KNOCKBACK_STRENGTH);
                         }
                     }
             );

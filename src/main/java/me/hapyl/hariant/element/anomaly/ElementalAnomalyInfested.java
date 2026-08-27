@@ -8,10 +8,12 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
@@ -22,6 +24,8 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
 
 public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     
@@ -63,22 +67,14 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @Nullable HariantEntity source) {
+    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
+        final HariantEntity source = anomalySource.getSource();
+        
         // Calculate cloud duration and damage
         final int duration = calculateDuration(source);
         final double damage = calculateDamage(source);
         
-        new Infested(
-                entity,
-                source,
-                duration,
-                DamageSource.builder(damageSourceIdentity, damage)
-                            .source(source)
-                            .elementType(ElementType.TOXIC)
-                            .damageType(DamageType.ANOMALY)
-                            .damageFlags(DamageFlag.CANNOT_KILL)
-                            .build()
-        );
+        new InfestedCloud(entity, source, duration, new InfestedDamageSource(source != null ? source : entity, damage));
     }
     
     @Override
@@ -114,7 +110,16 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
         }
     }
     
-    private class Infested extends HariantTickingTask implements EntityCollector {
+    private class InfestedDamageSource extends DamageSourceImpl {
+        
+        private static final Set<? extends DamageFlag> DAMAGE_FLAGS = Set.of(DamageFlag.CANNOT_KILL);
+        
+        InfestedDamageSource(@NotNull HariantEntity source, double damage) {
+            super(damageSourceIdentity, source, DamageType.ANOMALY, ElementType.TOXIC, DamageComponents.ofAnomaly(), DAMAGE_FLAGS, damage, 0);
+        }
+    }
+    
+    private class InfestedCloud extends HariantTickingTask implements EntityCollector {
         
         private final HariantEntity entity;
         private final Location location;
@@ -124,7 +129,7 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
         private final int duration;
         private final DamageSource damageSource;
         
-        public Infested(@NotNull HariantEntity entity, @Nullable HariantEntity source, int duration, @NotNull DamageSource damageSource) {
+        public InfestedCloud(@NotNull HariantEntity entity, @Nullable HariantEntity source, int duration, @NotNull DamageSource damageSource) {
             super(Scheduler.ofTimer());
             
             this.entity = entity;

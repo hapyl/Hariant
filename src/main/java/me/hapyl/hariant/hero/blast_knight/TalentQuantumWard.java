@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -15,6 +16,7 @@ import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
+import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -170,6 +172,16 @@ public final class TalentQuantumWard extends Talent implements Listener {
             heroData.removeStoneCastle();
             player.setCooldown(this);
         }
+        
+        // Achievements
+        final PlayerProfile playerProfile = player.getProfile();
+        final double health = entity.getFinalHealth();
+        
+        if (damage >= health && damage - damageReduction < health) {
+            AchievementRegistry.BLAST_KNIGHT_GUARDIAN_ANGEL.progress(playerProfile);
+        }
+        
+        AchievementRegistry.BLAST_KNIGHT_FRONT_LINE.progress(playerProfile, damageToDealToBlastKnight);
     }
     
     public double calculateDamageReductionMultiplier(@NotNull HariantPlayer player) {

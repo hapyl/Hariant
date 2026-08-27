@@ -2,19 +2,21 @@ package me.hapyl.hariant.entity.effect.status;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.InvulnerabilitySource;
 import me.hapyl.hariant.entity.effect.EffectType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Particle;
 import org.jetbrains.annotations.NotNull;
 
 public class StatusEffectRespawnResistance extends StatusEffectImpl {
+    
     StatusEffectRespawnResistance() {
         super(Key.ofString("effect_respawn_resistance"), Component.text("Respawn Resistance"), EffectType.BUFF);
     }
     
     @Override
     public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
-        entity.setInvulnerability(duration + 10);
+        entity.setInvulnerability(InvulnerabilitySource.create(this, duration + 10));
     }
     
     @Override

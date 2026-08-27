@@ -182,6 +182,11 @@ public abstract class Talent
     public void onDestroy(@NotNull HariantPlayer player) {
     }
     
+    @Override
+    public @NotNull Component asComponent() {
+        return name.color(Colors.GOLD);
+    }
+    
     @NotNull
     @Override
     public Component getName() {

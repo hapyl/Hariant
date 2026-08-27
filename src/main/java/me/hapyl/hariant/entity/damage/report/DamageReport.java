@@ -32,9 +32,12 @@ public class DamageReport implements Hoverable {
         this(damageInstance, Lists.newArrayList(new StepBaseImpl(damageInstance.getDamageSource().getDamage())));
     }
     
-    @NotNull
+    public DamageReport(@NotNull DamageInstance damageInstance, @NotNull DamageReport damageReport) {
+        this(damageInstance, Lists.newArrayList(damageReport.steplist));
+    }
+    
     @Override
-    public HoverEvent<?> createHoverEvent() {
+    public @NotNull HoverEvent<?> createHoverEvent() {
         final TextComponent.Builder builder = Component.text();
         
         final DamageSource damageSource = damageInstance.getDamageSource();
@@ -121,10 +124,6 @@ public class DamageReport implements Hoverable {
     
     public void report(@NotNull Identified identified, @NotNull DamageMutator damageMutator, double value, double damageBeforeMutation, double damageAfterMutation) {
         this.steplist.add(new StepImpl(identified, damageMutator, value, damageBeforeMutation, damageAfterMutation));
-    }
-    
-    public static @NotNull DamageReport copyOf(@NotNull DamageInstance damageInstance, @NotNull DamageReport damageReport) {
-        return new DamageReport(damageInstance, Lists.newArrayList(damageReport.steplist));
     }
     
 }

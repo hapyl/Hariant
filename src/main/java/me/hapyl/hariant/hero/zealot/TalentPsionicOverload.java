@@ -58,12 +58,16 @@ public final class TalentPsionicOverload extends Talent {
     
     @Override
     public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+        // Reset achievement progress before applying modifier
+        player.getHeroData(HeroRegistry.ZEALOT, HeroDataZealot::new).numberOfFerocityTriggers.reset();
+        
+        // Apply modifier
         player.getAttributes().addModifier(new ModifierPsionicOverload(player));
         
         return Response.ok();
     }
     
-    private class ModifierPsionicOverload extends AttributeModifier {
+    public class ModifierPsionicOverload extends AttributeModifier {
         
         ModifierPsionicOverload(@NotNull HariantEntity applier) {
             super(TalentPsionicOverload.this, applier, TalentPsionicOverload.this.getDuration());

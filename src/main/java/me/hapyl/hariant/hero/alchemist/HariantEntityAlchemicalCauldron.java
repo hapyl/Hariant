@@ -8,6 +8,7 @@ import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
@@ -196,6 +197,9 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
         
         // Cleanup
         heroData.setAlchemicalCauldron(null);
+        
+        // Achievement
+        AchievementRegistry.ALCHEMIST_LOCAL_BREWERY.progress(player.getProfile());
     }
     
     @NotNull

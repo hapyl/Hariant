@@ -72,7 +72,7 @@ public final class MenuArtifactLoadouts extends Menu {
     
     @Override
     public @NotNull MenuReturn menuReturn() {
-        return MenuReturn.create(Component.text("Artifacts"), () -> new MenuHeroArtifactEquip(player, heroInstance));
+        return MenuReturn.create(Component.text("Artifacts"), player -> new MenuHeroArtifactEquip(player, heroInstance));
     }
     
     private @NotNull ItemStack createArtifactItem(@Nullable ArtifactLoadout loadout, int index) {

@@ -22,7 +22,7 @@ public class DropTable implements LootGenerator {
     private final List<? extends Content> contents;
     private final Amount rolls;
     
-    protected DropTable(@NotNull List<? extends Droppable> contents, final Amount rolls) {
+    protected DropTable(@NotNull List<? extends Droppable> contents, @NotNull Amount rolls) {
         // We have to compute total weight before Content, since drop tiers and chances are constants that require total weight
         this.totalWeight = contents.stream().mapToInt(Droppable::getWeight).sum();
         this.contents = contents.stream().map(Content::new).toList();

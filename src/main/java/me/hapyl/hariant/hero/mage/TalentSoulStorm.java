@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.mage;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentContext;
@@ -23,11 +24,11 @@ import org.jetbrains.annotations.Nullable;
 
 public final class TalentSoulStorm extends TalentUltimate {
     
-    @DisplayField private final Decimal maximumSoulsConsumed = Decimal.ofValue(10);
-    @DisplayField private final Decimal minimumSoulsRequired = Decimal.ofValue(2);
-    @DisplayField private final Decimal maximumSoulStormCharges = Decimal.ofValue(maximumSoulsConsumed.doubleValue() / minimumSoulsRequired.doubleValue());
+    private final @DisplayField Decimal maximumSoulsConsumed = Decimal.ofValue(10);
+    private final @DisplayField Decimal minimumSoulsRequired = Decimal.ofValue(2);
+    private final @DisplayField Decimal maximumSoulStormCharges = Decimal.ofValue(maximumSoulsConsumed.doubleValue() / minimumSoulsRequired.doubleValue());
     
-    @DisplayField private final ComponentFormatter soulToRestlessSoulConversionRatio = ComponentFormatter.format(Component.text("2/1", Colors.SUCCESS));
+    private final @DisplayField ComponentFormatter soulToRestlessSoulConversionRatio = ComponentFormatter.format(Component.text("2/1", Colors.SUCCESS));
     
     public TalentSoulStorm(@NotNull Key key) {
         super(key, Component.text("Soul Storm"), Icon.ofMaterial(Material.WARDEN_SPAWN_EGG), UltimateResourceType.ENERGY, 50);
@@ -79,6 +80,11 @@ public final class TalentSoulStorm extends TalentUltimate {
         
         player.spawnWorldParticle(player.getMidpointLocation(), Particle.SCULK_SOUL, 10, 0.1, 0.1, 0.1, 0.3f);
         
+        // Achievement
+        if (soulsUsed == maximumSoulsConsumed.intValue()) {
+            AchievementRegistry.MAGE_SOUL_STORM.progress(player.getProfile());
+        }
+        
         return Executable.await(promise -> {
             heroData.createSoulStorm(soulStormCharges, maximumSoulStormCharges.intValue(), promise);
         });
@@ -100,6 +106,10 @@ public final class TalentSoulStorm extends TalentUltimate {
                 return Component.text("Not enough souls!");
             }
         };
+    }
+    
+    public @NotNull Decimal getMaximumSoulsConsumed() {
+        return maximumSoulsConsumed;
     }
     
 }

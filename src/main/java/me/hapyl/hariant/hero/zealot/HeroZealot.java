@@ -114,7 +114,7 @@ public final class HeroZealot extends Hero {
             super(
                     Key.ofString("psionic_blade"),
                     Icon.ofMaterial(WEAPON_MATERIAL[0]),
-                    NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 47, 10)
+                    NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 38, 10)
             );
             
             setName(Component.text("Psionic Blade"));

@@ -10,13 +10,11 @@ public interface Amount extends ComponentLike {
     int amount();
     
     @Override
-    @NotNull
-    default Component asComponent() {
+    default @NotNull Component asComponent() {
         return this.amount() == 1 ? Component.empty() : Component.text(this.amount());
     }
     
-    @NotNull
-    static Amount fixed(final int amount) {
+    static @NotNull Amount fixed(final int amount) {
         if (amount < 0) {
             throw new IllegalArgumentException("`amount` cannot be negative!");
         }
@@ -24,8 +22,7 @@ public interface Amount extends ComponentLike {
         return () -> amount;
     }
     
-    @NotNull
-    static Amount range(final int from, final int to) {
+    static @NotNull Amount range(final int from, final int to) {
         return new AmountRangeImpl(from, to);
     }
     

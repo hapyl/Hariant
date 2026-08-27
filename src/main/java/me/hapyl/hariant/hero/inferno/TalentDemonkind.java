@@ -100,7 +100,7 @@ public final class TalentDemonkind extends TalentPassive implements Listener {
         
         // Cancel all FIRE damage
         if (ev.getElementType() == ElementType.FIRE && ev.getDamageType() == DamageType.ENVIRONMENT) {
-            ev.setCancel(HariantDamageEvent.cancel(true, true));
+            ev.cancel(HariantDamageEvent.cancel(this));
         }
     }
     

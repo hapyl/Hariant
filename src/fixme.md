@@ -2,7 +2,6 @@
 
 - Combat Tag
 - Trigger game type win on player leave
-- Implement exp
 - Add inventory
 - Cannot see friendly invisibility
 - Add fx to sakura healing
@@ -11,11 +10,11 @@
 - Hellburn should really NOT be effect
 - Nyx missing "Wither" talent fx
 - Inferno ultimate change
-- Add animation to ULTIMATE CHARGED
-- Tablist
-- Notifications
+- Supply drops
+- Add fx and achievement when casting is interrupted
++ Archive
 
-  [IDEAS]
+[IDEAS]
 
 - Maybe change damage report to use team color bars
 
@@ -23,6 +22,10 @@
 
 # FIXED
 
+- ~~Implement exp~~
+- ~~Add animation to ULTIMATE CHARGED~~
+- ~~Tablist~~
+- ~~Notifications~~
 - ~~Add fall DMG resistance effect~~
 - ~~Cycle arrow is a little offset~~
 - ~~Invisibility duration~~

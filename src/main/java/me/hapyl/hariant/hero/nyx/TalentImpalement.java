@@ -9,11 +9,13 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScalingSingle;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySourceImpl;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.EntityCollector;
+import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
@@ -37,6 +39,7 @@ import org.bukkit.*;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -97,28 +100,28 @@ public final class TalentImpalement extends TalentUltimateOvercharge {
                         .append(bullet(
                                 Component.empty()
                                          .append(Component.text("Increases the radius by "))
-                                         .append(differentInPercent(radius, radiusOvercharged, Colors.SUCCESS))
+                                         .append(differenceInPercent(radius, radiusOvercharged, Colors.SUCCESS))
                                          .append(Component.text("."))
                         ))
                         .appendNewline()
                         .append(bullet(
                                 Component.empty()
                                          .append(Component.text("Increases the damage by "))
-                                         .append(differentInPercent(damage, damageOvercharged, Colors.ERROR))
+                                         .append(differenceInPercent(damage, damageOvercharged, Colors.ERROR))
                                          .append(Component.text("."))
                         ))
                         .appendNewline()
                         .append(bullet(
                                 Component.empty()
                                          .append(Component.text("Increases the duration by "))
-                                         .append(differentInPercent(duration, durationOvercharged, Colors.NUMBER))
+                                         .append(differenceInPercent(duration, durationOvercharged, Colors.NUMBER))
                                          .append(Component.text("."))
                         ))
                         .appendNewline()
                         .append(bullet(
                                 Component.empty()
                                          .append(Component.text("Increases the elemental application by "))
-                                         .append(differentInPercent(elementalApplication, elementalApplicationOvercharged, Colors.ATTRIBUTE_ELEMENTAL_MASTERY))
+                                         .append(differenceInPercent(elementalApplication, elementalApplicationOvercharged, Colors.ATTRIBUTE_ELEMENTAL_MASTERY))
                                          .append(Component.text("."))
                         ))
                         .appendNewline()
@@ -148,7 +151,7 @@ public final class TalentImpalement extends TalentUltimateOvercharge {
         return TalentTarget.none();
     }
     
-    private static <T extends Arithmetic<T>> @NotNull Component differentInPercent(@NotNull T a, @NotNull T b, @NotNull TextColor textColor) {
+    private static <T extends Arithmetic<T>> @NotNull Component differenceInPercent(@NotNull T a, @NotNull T b, @NotNull TextColor textColor) {
         return Component.text("%.0f%%".formatted((b.divide(a) - 1) * 100), textColor);
     }
     
@@ -261,9 +264,7 @@ public final class TalentImpalement extends TalentUltimateOvercharge {
         public void executeFinalSlash() {
             collectNearbyEntities(boundingBox)
                     .filter(player::canAffect)
-                    .forEach(entity -> {
-                        entity.triggerAnomaly(ElementalAnomalyType.INTANGIBILITY, player);
-                    });
+                    .forEach(entity -> entity.triggerAnomaly(new ImpalementAnomalySource(player)));
             
             // Fx
             final Location location = LocationHelper.copyOfPosition(this.location).add(0, 1, 0);
@@ -320,7 +321,7 @@ public final class TalentImpalement extends TalentUltimateOvercharge {
     
     private class DamageSourceImpalement extends DamageSourceImpl {
         public DamageSourceImpalement(@NotNull HariantPlayer player, double damage, double elementalApplication) {
-            super(damageSourceImpalement, player, DamageType.ULTIMATE, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damage, elementalApplication);
+            super(damageSourceImpalement, player, DamageType.ULTIMATE, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damage, elementalApplication);
         }
     }
     
@@ -356,6 +357,14 @@ public final class TalentImpalement extends TalentUltimateOvercharge {
             }
             
             return this.scalingPercent / that.scalingPercent;
+        }
+        
+    }
+    
+    public static class ImpalementAnomalySource extends ElementalAnomalySourceImpl {
+        
+        ImpalementAnomalySource(@Nullable HariantEntity source) {
+            super(ElementalAnomalyType.INTANGIBILITY, source);
         }
         
     }

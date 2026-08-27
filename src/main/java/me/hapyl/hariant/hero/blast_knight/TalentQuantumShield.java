@@ -5,6 +5,7 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.effect.status.StatusEffectType;
@@ -223,6 +224,9 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
         player.playWorldSound(Sound.ENTITY_COPPER_GOLEM_DEATH, 0.0f);
         
         player.spawnWorldParticle(location, Particle.ENCHANTED_HIT, 10, 0.5, 0.5, 0.5, 0.125f);
+        
+        // Achievement
+        AchievementRegistry.BLAST_KNIGHT_PERFECT_TIMING.progress(player.getProfile());
     }
     
     private @Nullable HeroDataBlastKnight getBlastKnightDataIfPlayerIsBlastKnightAndItemIsShieldAndNotOnCooldownOrElseNull(@NotNull HariantPlayer player, @NotNull ItemStack itemStack) {

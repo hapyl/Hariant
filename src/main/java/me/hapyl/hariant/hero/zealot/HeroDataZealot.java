@@ -1,6 +1,8 @@
 package me.hapyl.hariant.hero.zealot;
 
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
+import me.hapyl.hariant.achievement.AchievementUniqueIdCounter;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.TickSupplier;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -22,7 +24,6 @@ import java.util.List;
 public final class HeroDataZealot extends HeroData<HeroZealot> implements ActionbarSupplier {
     
     private static final Component ZEALOT_MARK_ACTIVE = Component.text("✦", Colors.ELEMENT_AETHER);
-    private static final Component ZEALOT_MARK_INACTIVE = Component.text("✧", Colors.DARK_GRAY);
     
     private static final Component[] RECKONING_COMPONENTS = {
             Component.text("丿"),
@@ -44,11 +45,15 @@ public final class HeroDataZealot extends HeroData<HeroZealot> implements Action
             RECKONING_COMPONENTS
     );
     
+    public final AchievementUniqueIdCounter numberOfFerocityTriggers;
+    
     private boolean zealotMarkActive;
     private @Nullable Target target;
     
     public HeroDataZealot(@NotNull HeroZealot hero, @NotNull HariantPlayer player) {
         super(hero, player);
+        
+        this.numberOfFerocityTriggers = AchievementRegistry.ZEALOT_OVERCLOCKED.createUniqueIdCounter(player.getProfile());
     }
     
     public boolean isZealotMarkActive() {

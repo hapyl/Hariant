@@ -9,7 +9,7 @@ import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
@@ -125,7 +125,7 @@ public final class TalentAlchemistPotionExplosion extends TalentAlchemistPotion 
                     source,
                     DamageType.TALENT,
                     ElementType.TOXIC,
-                    DamageComponent.ofCommon(),
+                    DamageComponents.ofCommon(),
                     Set.of(),
                     damage,
                     elementUnits

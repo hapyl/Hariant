@@ -3,12 +3,13 @@ package me.hapyl.hariant.hero.pytaria.bee;
 import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.HariantRandom;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.pytaria.TalentFeelTheBreeze;
@@ -122,14 +123,18 @@ public class BeeSwarm extends HariantTickingTask {
             if (distanceToSquared < talent.stingDistance.doubleValueSquared()) {
                 // If the target exists, deal damage and FUCKING DIE
                 if (bee.target != null) {
-                    final double damage = bee.target.getEntity().hasEffect(StatusEffectType.ROSE_IVY)
-                                          ? talent.beeDamageIvy.getScaledValue(player)
-                                          : talent.beeDamage.getScaledValue(player);
+                    final boolean isTargetInRoseIvy = bee.target.getEntity().hasEffect(StatusEffectType.ROSE_IVY);
+                    final double damage = isTargetInRoseIvy ? talent.beeDamageIvy.getScaledValue(player) : talent.beeDamage.getScaledValue(player);
                     
                     bee.target.getEntity().damage(new BeeSwarmDamageSource(player, damage));
                     
                     bee.remove();
                     iterator.remove();
+                    
+                    // Trigger achievement
+                    if (isTargetInRoseIvy) {
+                        AchievementRegistry.PYTARIA_HUNGRY_BEE.progress(player.getProfile());
+                    }
                     
                     // Fx
                     player.playWorldSound(location, Sound.ENTITY_BEE_DEATH, 0.5f, 2.0f);
@@ -172,7 +177,7 @@ public class BeeSwarm extends HariantTickingTask {
     
     class BeeSwarmDamageSource extends DamageSourceImpl {
         BeeSwarmDamageSource(@Nullable HariantEntity source, double damage) {
-            super(talent.damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponent.ofCommon(), Set.of(), damage, talent.elementalApplication.doubleValue());
+            super(talent.damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponents.ofCommon(), Set.of(), damage, talent.elementalApplication.doubleValue());
         }
     }
     

@@ -34,7 +34,7 @@ public class StatusEffectFallDamageResistance extends StatusEffectImpl implement
         }
         
         entity.removeEffect(StatusEffectType.FALL_DAMAGE_RESISTANCE);
-        ev.setCancel(HariantDamageEvent.cancel(false, false));
+        ev.cancel(HariantDamageEvent.cancel(this));
     }
     
 }

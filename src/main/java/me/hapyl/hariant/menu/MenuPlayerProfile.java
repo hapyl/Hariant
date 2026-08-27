@@ -1,12 +1,15 @@
 package me.hapyl.hariant.menu;
 
 import me.hapyl.eterna.module.component.ButtonComponents;
+import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.achievement.AchievementCategory;
+import me.hapyl.hariant.achievement.AchievementEntry;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.experience.MenuLevelling;
 import me.hapyl.hariant.inventory.item.resource.ResourceRuby;
 import me.hapyl.hariant.menu.achievement.MenuAchievement;
@@ -61,7 +64,7 @@ public class MenuPlayerProfile extends Menu {
         setItem(
                 24,
                 createAchievementItem(),
-                PlayerMenuAction.of(player -> new MenuAchievement(player, AchievementCategory.GAMEPLAY))
+                PlayerMenuAction.of(player -> new MenuAchievement(player, AchievementCategory.GENESIS))
         );
         
         setFooter(
@@ -69,7 +72,7 @@ public class MenuPlayerProfile extends Menu {
                 new ItemBuilder(Material.COMPARATOR)
                         .setName(Component.text("Settings"))
                         .addLore()
-                        .addWrappedLore(Component.text("Customize the personal personal experience to your liking."))
+                        .addWrappedLore(Component.text("Customize the personal experience to your liking."))
                         .addLore()
                         .addLore(ButtonComponents.left("open settings"))
                         .asIcon(),
@@ -78,20 +81,27 @@ public class MenuPlayerProfile extends Menu {
     }
     
     private @NotNull ItemStack createAchievementItem() {
+        final AchievementEntry achievementEntry = profile.getDatabase().achievements;
+        final int unclaimedRewards = achievementEntry.countUnclaimedRewards();
+        
         final ItemBuilder builder = new ItemBuilder(Material.DIAMOND)
                 .setName(Component.text("Achievements"))
                 .addLore()
                 .addWrappedLore(
                         Component.empty()
-                                 .append(Component.text("Complete achievements to earn "))
+                                 .append(Component.text("Complete various achievements to earn "))
                                  .appendNewline()
                                  .append(ResourceRuby.PREFIX)
                                  .appendSpace()
                                  .append(Component.text("rubies", Colors.RESOURCE_RUBY))
                                  .append(Component.text("!"))
+                )
+                .addLore()
+                .addLore(
+                        Component.empty()
+                                 .append(Component.text("Achievements: "))
+                                 .append(Components.makeComponentFractional(achievementEntry.countCompletedAchievements(), AchievementRegistry.totalNumberOfAchievements()))
                 );
-        
-        final int unclaimedRewards = profile.getDatabase().achievements.countUnclaimedRewards();
         
         if (unclaimedRewards > 0) {
             builder.glow();

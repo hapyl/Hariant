@@ -14,9 +14,10 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.StreamRules;
 import me.hapyl.hariant.entity.VanillaAttributeModifier;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -40,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public final class TalentSubmerge extends Talent {
+public final class  TalentSubmerge extends Talent {
     
     private final @DisplayField AttributeScaling damage = AttributeScaling.create(Map.of(
             AttributeType.ATTACK, 63.2,
@@ -171,6 +172,9 @@ public final class TalentSubmerge extends Talent {
             player.show(StreamRules.NOT_SELF);
             
             displayEntity.remove();
+            
+            // Mark emerging tick
+            player.getHeroData(HeroRegistry.SHARK, HeroDataShark::new).setLastEmergeTick();
         }
         
         @Override
@@ -197,7 +201,7 @@ public final class TalentSubmerge extends Talent {
     
     private class SubmergeDamageSource extends DamageSourceImpl {
         SubmergeDamageSource(@Nullable HariantEntity source, double damage) {
-            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.WATER, DamageComponent.ofCommon(), Set.of(), damage, elementalApplication.doubleValue(), cooldownKey, damagePeriod.intValue());
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.WATER, DamageComponents.ofCommon(), Set.of(), damage, elementalApplication.doubleValue(), cooldownKey, damagePeriod.intValue());
         }
     }
     

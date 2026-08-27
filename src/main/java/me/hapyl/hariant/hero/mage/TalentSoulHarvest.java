@@ -22,13 +22,13 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentSoulHarvest extends TalentPassive implements Listener {
     
-    @DisplayField public final Decimal maximumSouls = Decimal.ofValue(10);
-    @DisplayField public final Decimal startingSouls = Decimal.ofValue(5);
+    public final @DisplayField Decimal maximumSouls = Decimal.ofValue(10);
+    public final @DisplayField Decimal startingSouls = Decimal.ofValue(5);
     
-    @DisplayField private final HariantCooldown harvestCooldown = HariantCooldown.ofSeconds(Key.ofString("soul_harvest"), 0.25f);
+    private final @DisplayField HariantCooldown harvestCooldown = HariantCooldown.ofSeconds(Key.ofString("soul_harvest"), 0.25f);
     
-    @DisplayField private final Decimal soulHarvest = Decimal.ofValue(1);
-    @DisplayField private final Decimal soulHarvestElementalMasteryIncreasePerOnePoint = Decimal.ofPercentage(0.25);
+    private final @DisplayField Decimal soulHarvest = Decimal.ofValue(1);
+    private final @DisplayField Decimal soulHarvestElementalMasteryIncreasePerOnePoint = Decimal.ofPercentage(0.25);
     
     public TalentSoulHarvest(@NotNull Key key) {
         super(key, Component.text("Soul Harvest"), Icon.ofMaterial(Material.SKELETON_SPAWN_EGG));

@@ -15,19 +15,22 @@ import java.util.List;
 public final class BattlegroundArena extends BattlegroundImpl {
     
     BattlegroundArena() {
-        super(Component.text("Arena"), Icon.ofMaterial(Material.COARSE_DIRT));
-        
-        this.setDropTable(new DropTableArena());
-        this.setTimeBeforePlayersReveal(Tick.fromSeconds(5));
-        
-        this.setSpawnLocations(
-                ImmutableLocation.create(500, 64, 0)
+        super(
+                Component.text("Arena"),
+                Component.text("A grand arena built as a memorial to the warriors who fell in the Great War."),
+                new DropTableArena(),
+                Icon.ofMaterial(Material.COARSE_DIRT)
         );
         
-        setDescription(
-                Component.empty()
-                        .append(Component.text("A great arena built as a memorial to the great warriors who fell in the Great War."))
+        setTimeBeforePlayersReveal(Tick.fromSeconds(5));
+        
+        setSpawnLocations(
+                ImmutableLocation.create(500, 64, 0),
+                ImmutableLocation.create(479.0, 78.0, 24.0, 180, 0),
+                ImmutableLocation.create(500.0, 66.0, -24.0),
+                ImmutableLocation.create(526.0, 66.0, 16.0, 135, 0)
         );
+        
     }
     
     private static class DropTableArena extends DropTable {
@@ -41,7 +44,7 @@ public final class BattlegroundArena extends BattlegroundImpl {
                             Droppable.ofItem(ItemRegistry.ARTIFACT_BLOODY_ROSE, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_PHILOSOPHERS_STONE, 50)
                     ),
-                    Battleground.DEFAULT_DROP_TABLE_AMOUNT
+                    DEFAULT_DROP_TABLE_AMOUNT
             );
         }
     }

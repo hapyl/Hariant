@@ -3,7 +3,6 @@ package me.hapyl.hariant.entity.damage;
 import me.hapyl.eterna.module.annotate.SelfReturn;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Buildable;
-import me.hapyl.eterna.module.util.Copyable;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -17,7 +16,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Set;
 
-public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSource, Copyable {
+public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSource, Cloneable {
     
     @NotNull DamageSourceIdentity getIdentity();
     
@@ -59,8 +58,7 @@ public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSou
     
     double getDamage();
     
-    @Override
-    @NotNull DamageSource createCopy();
+    @NotNull DamageSource clone();
     
     default void startCooldownIfExists(@NotNull HariantEntity hariantEntity) {
         if (hasCooldown()) {
@@ -70,10 +68,9 @@ public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSou
     }
     
     default boolean canTriggerFerocity() {
-        return switch (this.getDamageType()) {
-            case MELEE, RANGED -> true;
-            default -> false;
-        };
+        final DamageType damageType = this.getDamageType();
+        
+        return damageType == DamageType.MELEE || damageType == DamageType.RANGED;
     }
     
     @NotNull

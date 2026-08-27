@@ -7,7 +7,7 @@ import me.hapyl.hariant.attribute.AttributeScalingSingle;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.weapon.NormalAttackRanged;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ public class NormalAttack extends AttributeScalingSingle implements DamageSource
     
     @Override
     public @NotNull DamageSource createDamageSource(@NotNull HariantEntity attacker) {
-        return new DamageSourceImpl(this.getDamageSourceIdentity(), attacker, DamageType.MELEE, elementType, DamageComponent.ofCommon(), Set.of(), this.getScaledValue(attacker), 0);
+        return new DamageSourceImpl(this.getDamageSourceIdentity(), attacker, DamageType.MELEE, elementType, DamageComponents.ofCommon(), Set.of(), this.getScaledValue(attacker), 0);
     }
     
     @NotNull

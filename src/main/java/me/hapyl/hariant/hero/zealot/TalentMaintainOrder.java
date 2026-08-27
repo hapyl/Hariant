@@ -14,7 +14,7 @@ import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
@@ -205,15 +205,15 @@ public final class TalentMaintainOrder extends TalentUltimate {
         }
     }
     
-    private class DamageSourceMaintainOrderLanding extends DamageSourceImpl {
+    public class DamageSourceMaintainOrderLanding extends DamageSourceImpl {
         DamageSourceMaintainOrderLanding(@NotNull HariantEntity source) {
-            super(damageSourceIdentityLanding, source, DamageType.ULTIMATE, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damageLanding.getScaledValue(source), 0);
+            super(damageSourceIdentityLanding, source, DamageType.ULTIMATE, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damageLanding.getScaledValue(source), 0);
         }
     }
     
-    private class DamageSourceMaintainOrderFerocity extends DamageSourceImpl {
+    public class DamageSourceMaintainOrderFerocity extends DamageSourceImpl {
         DamageSourceMaintainOrderFerocity(@NotNull HariantEntity source) {
-            super(damageSourceIdentityFerocity, source, DamageType.ULTIMATE, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damageFerocity.getScaledValue(source), 0);
+            super(damageSourceIdentityFerocity, source, DamageType.ULTIMATE, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(DamageFlag.CANNOT_CRIT), damageFerocity.getScaledValue(source), 0);
         }
     }
     

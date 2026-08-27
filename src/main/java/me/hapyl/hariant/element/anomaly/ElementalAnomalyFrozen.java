@@ -5,6 +5,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.trap.frozen.TrapFrozen;
@@ -52,10 +53,11 @@ public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implement
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @Nullable HariantEntity source) {
+    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
+        final HariantEntity source = anomalySource.getSource();
         final int duration = this.calculateFrozenDuration(source);
         
-        entity.trap(new TrapFrozen(entity, source, duration));
+        entity.trap(new TrapFrozen(entity, source != null ? source : entity, duration));
     }
     
     @Override

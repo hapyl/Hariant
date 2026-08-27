@@ -19,16 +19,10 @@ public final class SettingImplPrimitiveBoolean extends SettingImplPrimitive<Bool
     }
     
     @Override
-    public @NotNull ItemBuilder menuButton(@NotNull SettingEntry settingEntry) {
+    public @NotNull ItemBuilder createButton(@NotNull SettingEntry settingEntry) {
         final boolean enabled = settingEntry.getValue(this);
         
         return new ItemBuilder(enabled ? Material.LIME_DYE : Material.GRAY_DYE).setName(Component.text("Toggle Setting"));
-    }
-    
-    @Override
-    public void menuClick(@NotNull Player player, @NotNull SettingEntry settingEntry, @NotNull Menu menu, @NotNull ClickType clickType) {
-        settingEntry.setValue(this, !settingEntry.getValue(this));
-        menu.openMenu();
     }
     
     @Override
@@ -45,6 +39,12 @@ public final class SettingImplPrimitiveBoolean extends SettingImplPrimitive<Bool
                .addLore(ButtonComponents.left(enabled ? "disable" : "enable"));
         
         return builder;
+    }
+    
+    @Override
+    public void menuClick(@NotNull Player player, @NotNull SettingEntry settingEntry, @NotNull Menu menu, @NotNull ClickType clickType) {
+        settingEntry.setValue(this, !settingEntry.getValue(this));
+        menu.openMenu();
     }
     
 }

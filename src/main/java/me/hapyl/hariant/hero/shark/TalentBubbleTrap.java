@@ -1,7 +1,5 @@
 package me.hapyl.hariant.hero.shark;
 
-import me.hapyl.eterna.module.block.display.BDEngine;
-import me.hapyl.eterna.module.block.display.DisplayModel;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.math.geometry.Quality;
@@ -14,7 +12,7 @@ import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.*;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.DelegateType;
@@ -59,10 +57,6 @@ public final class TalentBubbleTrap extends Talent implements Effect {
     
     private final double yOffset = 1.2;
     private final double bubbleSize = 1.5;
-    
-    private final DisplayModel model = BDEngine.parse(
-            "/summon block_display ~-0.5 ~ ~-0.5 {Passengers:[{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0.5f,0f,0f,0.314695399f,0f,0.5f,0f,0.3571875095f,0f,0f,0.5f,-0.2653046343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0.3535533906f,-0.3535533906f,0f,0.395320399f,0.3535533906f,0.3535533906f,0f,0.6606250095f,0f,0f,0.5f,-0.2653046343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0.3535533906f,0.3535533906f,0f,0.043445399f,-0.3535533906f,0.3535533906f,0f,0.2009375095f,0f,0f,0.5f,-0.2653046343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0.3535533906f,0f,0.3535533906f,0.043445399f,0f,0.5f,0f,0.3571875095f,-0.3535533906f,0f,0.3535533906f,-0.4215546343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0.3535533906f,0f,-0.3535533906f,0.387195399f,0f,0.5f,0f,0.3571875095f,0.3535533906f,0f,0.3535533906f,0.0381328657f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0f,0f,-0.5f,0.230945399f,0f,0.5f,0f,0.3571875095f,0.5f,0f,0f,0.3078203657f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0f,0f,-0.5f,0.242820399f,0f,0.5f,0f,0.3571875095f,0.5f,0f,0f,-0.8418671343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0.5f,0f,0f,-0.840304601f,0f,0.5f,0f,0.3571875095f,0f,0f,0.5f,-0.2653046343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0.3535533906f,0f,0.3535533906f,-0.779679601f,0f,0.5f,0f,0.3571875095f,-0.3535533906f,0f,0.3535533906f,0.3881328657f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0.3535533906f,0f,-0.3535533906f,-0.415304601f,0f,0.5f,0f,0.3571875095f,0.3535533906f,0f,0.3535533906f,-0.7796796343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[1.29e-8f,0f,0.5f,-0.256242101f,0.3535533906f,0.3535533906f,-9.1e-9f,0.6606250095f,-0.3535533906f,0.3535533906f,9.1e-9f,-0.4243671343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[-0.3535533906f,0.3535533906f,0f,-0.425304601f,0.3535533906f,0.3535533906f,0f,0.6606250095f,0f,0f,-0.5f,0.2346953657f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[1.67e-8f,0f,-0.5f,0.230945399f,0.3535533906f,0.3535533906f,1.18e-8f,0.6606250095f,0.3535533906f,-0.3535533906f,1.18e-8f,0.3909453657f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0f,-0.5f,0f,0.233132899f,0.5f,0f,0f,0.9296875095f,0f,0f,0.5f,-0.2653046343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[0f,-0.5f,0f,0.233132899f,0.5f,0f,0f,-0.2187499905f,0f,0f,0.5f,-0.2653046343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[1.83e-8f,0f,0.5f,-0.269054601f,-0.3535533906f,0.3535533906f,1.29e-8f,0.2009375095f,-0.3535533906f,-0.3535533906f,1.29e-8f,-0.0668671343f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[-0.3535533906f,-0.3535533906f,1.18e-8f,-0.062804601f,-0.3535533906f,0.3535533906f,1.18e-8f,0.2009375095f,-1.67e-8f,0f,-0.5f,0.2346953657f,0f,0f,0f,1f]},{id:\"minecraft:block_display\",block_state:{Name:\"minecraft:blue_stained_glass_pane\",Properties:{north:\"true\",south:\"true\",east:\"false\",west:\"false\"}},transformation:[1.67e-8f,0f,-0.5f,0.230945399f,-0.3535533906f,0.3535533906f,-1.18e-8f,0.2009375095f,0.3535533906f,0.3535533906f,1.18e-8f,0.0331328657f,0f,0f,0f,1f]}]}"
-    );
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             this,
@@ -194,9 +188,9 @@ public final class TalentBubbleTrap extends Talent implements Effect {
         
     }
     
-    private class BubbleTrap extends Trap implements EntityCollector {
+    public class BubbleTrap extends Trap implements EntityCollector {
         
-        private static final TrapName TRAP_NAME = new TrapName("Bubble", Style.style(Colors.SHARK));
+        public static final TrapName TRAP_NAME = new TrapName("Bubble", Style.style(Colors.SHARK));
         
         private final Location location;
         private final SitHandler sitHandler;
@@ -276,10 +270,10 @@ public final class TalentBubbleTrap extends Talent implements Effect {
         }
     }
     
-    private class BubbleDamageSource extends DamageSourceImpl {
+    public class BubbleDamageSource extends DamageSourceImpl {
         
         BubbleDamageSource(@NotNull HariantPlayer player, double damage) {
-            super(damageSourceIdentity, player, DamageType.TALENT, ElementType.WATER, DamageComponent.ofCommon(), Set.of(), damage, 0);
+            super(damageSourceIdentity, player, DamageType.TALENT, ElementType.WATER, DamageComponents.ofCommon(), Set.of(), damage, 0);
         }
         
     }

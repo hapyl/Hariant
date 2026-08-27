@@ -12,7 +12,7 @@ import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -105,7 +105,7 @@ public final class TalentReckoning extends TalentPassive implements Listener {
                     source,
                     DamageType.FEROCITY,
                     ElementType.AETHER,
-                    DamageComponent.ofCommon(),
+                    DamageComponents.ofCommon(),
                     Set.of(),
                     damage.getScaledValue(source),
                     0

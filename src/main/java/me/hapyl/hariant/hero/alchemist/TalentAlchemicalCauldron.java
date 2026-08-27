@@ -25,12 +25,12 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentAlchemicalCauldron extends Talent {
     
-    @DisplayField public final Decimal cauldronHealth = Decimal.ofValue(500);
-    @DisplayField public final Decimal cauldronElementalApplication = Decimal.ofElementalApplication(ElementType.TOXIC, 10);
-    @DisplayField public final Decimal cauldronElementalApplicationRadius = Decimal.ofValue(1.5);
+    public final @DisplayField Decimal cauldronHealth = Decimal.ofValue(500);
+    public final @DisplayField Decimal cauldronElementalApplication = Decimal.ofElementalApplication(ElementType.TOXIC, 10);
+    public final @DisplayField Decimal cauldronElementalApplicationRadius = Decimal.ofValue(1.5);
     
-    @DisplayField public final Decimal infusionDuration = Decimal.ofSeconds(15);
-    @DisplayField public final Decimal toxicDamageIncrease = Decimal.ofAttribute(AttributeType.TOXIC_DAMAGE_BONUS, 40);
+    public final @DisplayField Decimal infusionDuration = Decimal.ofSeconds(15);
+    public final @DisplayField Decimal toxicDamageIncrease = Decimal.ofAttribute(AttributeType.TOXIC_DAMAGE_BONUS, 40);
     
     public TalentAlchemicalCauldron(@NotNull Key key) {
         super(key, Component.text("Alchemical Cauldron"), Icon.ofMaterial(Material.CAULDRON));

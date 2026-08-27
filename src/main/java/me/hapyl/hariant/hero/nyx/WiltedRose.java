@@ -7,7 +7,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
@@ -112,7 +112,7 @@ public final class WiltedRose extends HariantTickingTask {
     
     public static class WilterRoseDamageSource extends DamageSourceImpl {
         WilterRoseDamageSource(@Nullable HariantEntity source, double damage, double elementalApplication) {
-            super(DAMAGE_SOURCE_IDENTITY, source, DamageType.TALENT, ElementType.AETHER, DamageComponent.ofCommon(), Set.of(), damage, elementalApplication);
+            super(DAMAGE_SOURCE_IDENTITY, source, DamageType.TALENT, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damage, elementalApplication);
         }
     }
     

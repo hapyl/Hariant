@@ -5,49 +5,44 @@ import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.inventory.item.ItemCreator;
 import me.hapyl.hariant.util.Icon;
-import me.hapyl.hariant.util.SlotBound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-public enum AchievementCategory implements SlotBound, Named, Described, ItemCreator {
+public enum AchievementCategory implements Named, Described, ItemCreator {
     
-    GAMEPLAY(
-            2,
-            Component.text("Gameplay"),
-            Component.text("Achievements related to the game gameplay of Hariant."),
+    GENESIS(
+            Component.text("Genesis"),
+            Component.text("Where it all began."),
+            Icon.ofMaterial(Material.PRIZE_POTTERY_SHERD)
+    ),
+    
+    COMBAT(
+            Component.text("Combat"),
+            Component.text("Conflict means war, but also rewards."),
             Icon.ofMaterial(Material.BLADE_POTTERY_SHERD)
     ),
     
-    HERO_RELATED(
-            4,
-            Component.text("Hero's Path"),
-            Component.text("Hero-specific achievements."),
-            Icon.ofMaterial(Material.ARMS_UP_POTTERY_SHERD)
+    ELEMENTS_OF_THE_WORLD(
+            Component.text("Elementals"),
+            Component.text("The flow of the elements."),
+            Icon.ofMaterial(Material.FLOW_POTTERY_SHERD)
     ),
     
-    MISCELLANEOUS(
-            6,
-            Component.text("Miscellaneous"),
-            Component.text("Miscellaneous achievements."),
-            Icon.ofMaterial(Material.PRIZE_POTTERY_SHERD)
+    HERO_PATH(
+            Component.text("Path of a Hero"),
+            Component.text("One must overcome the weaknesses to be called a Hero."),
+            Icon.ofMaterial(Material.ARMS_UP_POTTERY_SHERD)
     );
     
-    private final int slot;
     private final Component name;
     private final Component description;
     private final Icon icon;
     
-    AchievementCategory(int slot, @NotNull Component name, @NotNull Component description, @NotNull Icon icon) {
-        this.slot = slot;
+    AchievementCategory( @NotNull Component name, @NotNull Component description, @NotNull Icon icon) {
         this.name = name;
         this.description = description;
         this.icon = icon;
-    }
-    
-    @Override
-    public int getSlot() {
-        return slot;
     }
     
     @Override
@@ -64,4 +59,5 @@ public enum AchievementCategory implements SlotBound, Named, Described, ItemCrea
     public @NotNull ItemBuilder createBuilder() {
         return icon.createBuilder();
     }
+    
 }

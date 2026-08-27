@@ -5,12 +5,14 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
+import me.hapyl.hariant.util.Counter;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -23,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentRepulsor extends Talent implements Effect {
     
-    @DisplayField private final Decimal radius = Decimal.ofValue(10);
-    @DisplayField private final Decimal strength = Decimal.ofValue(1.2);
+    private final @DisplayField Decimal radius = Decimal.ofValue(10);
+    private final @DisplayField Decimal strength = Decimal.ofValue(1.2);
     
     public TalentRepulsor(@NotNull Key key) {
         super(key, Component.text("Repulsor"), Icon.ofMaterial(Material.IRON_BOOTS));
@@ -47,6 +49,8 @@ public final class TalentRepulsor extends Talent implements Effect {
     
     @Override
     public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+        final Counter enemiesHit = Counter.counter();
+        
         player.collectNearbyEntities(radius)
               .filter(player::canAffect)
               .forEach(entity -> {
@@ -55,6 +59,7 @@ public final class TalentRepulsor extends Talent implements Effect {
                   }
                   
                   entity.setVelocity(new Vector(0, strength.doubleValue(), 0));
+                  enemiesHit.increment();
                   
                   // Fx
                   final Location location = entity.getLocation();
@@ -66,6 +71,11 @@ public final class TalentRepulsor extends Talent implements Effect {
         
         // Fx
         player.playSound(Sound.ENTITY_BREEZE_SHOOT, 1.25f);
+        
+        // Progress achievement if at least one enemy was hit
+        if (enemiesHit.count() > 0) {
+            player.getHeroData(HeroRegistry.TROLL, HeroDataTroll::new).setLastRepulsorUsage();
+        }
         
         return Response.ok();
     }

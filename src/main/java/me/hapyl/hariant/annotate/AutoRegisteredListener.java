@@ -15,6 +15,9 @@ import java.lang.annotation.Target;
 public @interface AutoRegisteredListener {
     
     class Registry {
+        private Registry() {
+        }
+        
         public static void register(@NotNull Object object) {
             if (!(object instanceof Listener listener)) {
                 return;

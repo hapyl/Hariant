@@ -56,6 +56,11 @@ public final class AttributesInstanceSnapshotEnvironment implements AttributesIn
     }
     
     @Override
+    public boolean hasModifier(@NotNull Class<? extends AttributeModifier> modifierClass) {
+        return false;
+    }
+    
+    @Override
     @NotNull
     public List<? extends AttributeModifier> getModifiers() {
         return List.of();

@@ -7,6 +7,7 @@ import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -29,7 +30,7 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
         
         this.setDescription(
                 Component.empty()
-                         .append(Component.text("Causes the affected entity to become soaked, decreasing their "))
+                         .append(Component.text("Causes the affected entity to drown, decreasing their "))
                          .append(AttributeType.MAX_HEALTH)
                          .append(Component.text(" by "))
                          .append(maxHealthDecrease)
@@ -42,7 +43,8 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @Nullable HariantEntity source) {
+    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
+        final HariantEntity source = anomalySource.getSource();
         final int duration = this.calculateSoakedDuration(source);
         
         entity.getAttributes().addModifier(new ElementalAnomalySoakedAttributeModifier(source != null ? source : entity, duration));

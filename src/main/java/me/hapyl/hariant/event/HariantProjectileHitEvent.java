@@ -24,24 +24,20 @@ public class HariantProjectileHitEvent extends HariantEvent implements Cancellab
         this.projectile = projectile;
     }
     
-    @Nullable
-    public HariantEntity getEntity() {
+    public @Nullable HariantEntity getEntity() {
         return entity;
     }
     
-    @Nullable
-    public Block getBlock() {
+    public @Nullable Block getBlock() {
         return block;
     }
     
-    @NotNull
-    public HariantProjectile getProjectile() {
+    public @NotNull HariantProjectile getProjectile() {
         return projectile;
     }
     
-    @NotNull
     @Override
-    public HandlerList getHandlers() {
+    public @NotNull HandlerList getHandlers() {
         return HANDLER_LIST;
     }
     

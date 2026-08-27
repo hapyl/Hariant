@@ -29,7 +29,7 @@ public final class StepBaseImpl implements Step {
     @NotNull
     @Override
     public String identify() {
-        return "base";
+        return "Base";
     }
     
     @Override

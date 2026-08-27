@@ -15,6 +15,18 @@ public enum DamageResult {
     /**
      * The entity was immune to the damage and did not any damage.
      */
-    IMMUNE
+    IMMUNE;
+    
+    public boolean isOk() {
+        return this == OK;
+    }
+    
+    public boolean isDead() {
+        return this == DEAD;
+    }
+    
+    public boolean isImmune() {
+        return this == IMMUNE;
+    }
     
 }

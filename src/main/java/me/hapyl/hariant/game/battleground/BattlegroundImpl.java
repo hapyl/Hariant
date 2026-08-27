@@ -1,7 +1,6 @@
 package me.hapyl.hariant.game.battleground;
 
 import com.google.common.collect.Lists;
-import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
@@ -14,6 +13,7 @@ import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.ImmutableLocation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -24,46 +24,52 @@ import java.util.Map;
 public class BattlegroundImpl implements Battleground {
     
     private final Component name;
+    private final Component description;
+    private final DropTable dropTable;
+    
     private final Icon icon;
     private final List<ImmutableLocation> spawnLocations;
     private final List<BattlegroundFeature> features;
     
-    private DropTable dropTable;
-    private Component description;
     private int timeBeforePlayersReveal;
+    private Size size;
+    private @NotNull List<BoundingBox> supplyBoundingBoxes;
     
-    public BattlegroundImpl(@NotNull Component name, @NotNull Icon icon) {
+    public BattlegroundImpl(@NotNull Component name, @NotNull Component description, @NotNull DropTable dropTable, @NotNull Icon icon) {
         this.name = name;
+        this.description = description;
+        this.dropTable = dropTable;
         this.icon = icon;
         this.spawnLocations = Lists.newArrayList();
-        this.dropTable = DropTable.empty();
-        this.description = Described.defaultValue();
         this.timeBeforePlayersReveal = 100;
         this.features = Lists.newArrayList();
+        this.size = Size.MEDIUM;
+        this.supplyBoundingBoxes = List.of();
         
         AutoRegisteredListener.Registry.register(this);
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return name;
     }
     
-    @NotNull
     @Override
-    public Component getDescription() {
+    public @NotNull Component getDescription() {
         return description;
     }
     
     @Override
-    public void setDescription(@NotNull Component description) {
-        this.description = description;
+    public @NotNull Size getSize() {
+        return size;
     }
     
-    @NotNull
+    protected void setSize(@NotNull Size size) {
+        this.size = size;
+    }
+    
     @Override
-    public List<? extends ImmutableLocation> getSpawnLocations() {
+    public @NotNull List<? extends ImmutableLocation> getSpawnLocations() {
         return spawnLocations;
     }
     
@@ -72,11 +78,11 @@ public class BattlegroundImpl implements Battleground {
         return features;
     }
     
-    @NotNull
     @Override
-    public ItemBuilder createBuilder() {
+    public @NotNull ItemBuilder createBuilder() {
         final ItemBuilder builder = icon.createBuilder();
         builder.setName(name);
+        builder.addLore(size.getName().color(Colors.DARK_GRAY));
         builder.addLore();
         
         // Append description
@@ -85,7 +91,7 @@ public class BattlegroundImpl implements Battleground {
         
         // Append features
         if (!features.isEmpty()) {
-            builder.addLore(Component.text("Features:", Colors.DEFAULT_COLOR));
+            builder.addLore(Component.text("ꜰᴇᴀᴛᴜʀᴇꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
             
             features.forEach(feature -> {
                 builder.addLore(Component.space().append(feature.getName().color(Colors.SUCCESS)));
@@ -97,7 +103,7 @@ public class BattlegroundImpl implements Battleground {
         // Append drops
         final Map<DropTier, List<DropTable.Content>> dropTableContents = dropTable.getContentsTiered();
         
-        builder.addLore(Component.text("Possible Drops:", Colors.DEFAULT_COLOR));
+        builder.addLore(Component.text("ᴘᴏꜱꜱɪʙʟᴇ ᴅʀᴏᴘꜱ", Colors.DEFAULT_COLOR, TextDecoration.BOLD));
         
         dropTableContents.forEach((dropTier, contents) -> {
             builder.addLore(
@@ -133,14 +139,9 @@ public class BattlegroundImpl implements Battleground {
         return builder;
     }
     
-    @NotNull
     @Override
-    public DropTable getDropTable() {
+    public @NotNull DropTable getDropTable() {
         return dropTable;
-    }
-    
-    protected void setDropTable(@NotNull DropTable dropTable) {
-        this.dropTable = dropTable;
     }
     
     @Override
@@ -162,6 +163,14 @@ public class BattlegroundImpl implements Battleground {
     protected void setSpawnLocations(@NotNull ImmutableLocation... locations) {
         this.spawnLocations.clear();
         this.spawnLocations.addAll(Arrays.asList(locations));
+    }
+    
+    public @NotNull List<? extends BoundingBox> getSupplyBoundingBoxes() {
+        return supplyBoundingBoxes;
+    }
+    
+    protected void setSupplyBoxBoundingBox(@NotNull BoundingBox... boundingBoxes) {
+        this.supplyBoundingBoxes = List.of(boundingBoxes);
     }
     
     protected void setTimeBeforePlayersReveal(int timeBeforePlayersReveal) {

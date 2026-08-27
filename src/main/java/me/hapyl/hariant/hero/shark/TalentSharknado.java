@@ -7,13 +7,14 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySourceImpl;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.PullSource;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
@@ -165,7 +166,7 @@ public final class TalentSharknado extends TalentUltimate {
                         entity.damage(damageSource);
                         
                         if (applyBleed) {
-                            entity.triggerAnomaly(ElementalAnomalyType.BLEED, player);
+                            entity.triggerAnomaly(new SharknadoAnomalySource(player));
                         }
                     });
                     
@@ -203,7 +204,13 @@ public final class TalentSharknado extends TalentUltimate {
     
     private class SharknadoDamageSource extends DamageSourceImpl {
         SharknadoDamageSource(@Nullable HariantEntity source, double damage) {
-            super(damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.WATER, DamageComponent.ofCommon(), Set.of(), damage, 0);
+            super(damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.WATER, DamageComponents.ofCommon(), Set.of(), damage, 0);
+        }
+    }
+    
+    public static class SharknadoAnomalySource extends ElementalAnomalySourceImpl {
+        SharknadoAnomalySource(@Nullable HariantEntity source) {
+            super(ElementalAnomalyType.BLEED, source);
         }
     }
     

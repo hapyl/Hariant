@@ -1,5 +1,7 @@
 package me.hapyl.hariant.menu;
 
+import me.hapyl.eterna.module.component.ButtonComponents;
+import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPattern;
@@ -22,7 +24,7 @@ public class MenuBattlegroundSelection extends Menu {
     
     @Override
     public @Nullable MenuReturn menuReturn() {
-        return MenuReturn.create(Component.text("Game Management"), () -> new MenuGameManagement(player));
+        return MenuReturn.create(Component.text("Game Management"), MenuGameManagement::new);
     }
     
     @Override
@@ -34,8 +36,20 @@ public class MenuBattlegroundSelection extends Menu {
                 continue;
             }
             
-            applier.add(battleground.createItem(), PlayerMenuAction.of(player -> {
-                if (battleground.isSelected()) {
+            final ItemBuilder builder = battleground.createBuilder();
+            final boolean selected = battleground.isSelected();
+            
+            builder.addLore();
+            
+            if (selected) {
+                builder.addLore(Component.text("Currently selected!", Colors.SUCCESS));
+            }
+            else {
+                builder.addLore(ButtonComponents.left("select"));
+            }
+            
+            applier.add(builder.asIcon(), PlayerMenuAction.of(player -> {
+                if (selected) {
                     HariantLogger.error(player, Component.text("This battleground is already selected!"));
                 }
                 else {

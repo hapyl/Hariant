@@ -12,7 +12,7 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
@@ -185,7 +185,7 @@ public final class TalentShockDart extends Talent implements Listener {
     
     public class ShockDartExplosionDamageSource extends DamageSourceImpl {
         ShockDartExplosionDamageSource(@NotNull HariantPlayer attacker, double damage) {
-            super(damageSourceIdentity, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponent.ofCommon(), Set.of(), damage, elementApplication.doubleValue());
+            super(damageSourceIdentity, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponents.ofCommon(), Set.of(), damage, elementApplication.doubleValue());
         }
     }
     

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentApexPredator extends TalentPassive implements Listener {
     
-    private final @DisplayField AttributeScaling damageIncrease = AttributeScaling.create(AttributeType.ELEMENTAL_MASTERY, 25, 10);
+    private final @DisplayField AttributeScaling damageIncrease = AttributeScaling.create(AttributeType.ELEMENTAL_MASTERY, 25);
     
     public TalentApexPredator(@NotNull Key key) {
         super(key, Component.text("Apex Predator"), Icon.ofMaterial(Material.REDSTONE));
@@ -94,7 +94,7 @@ public final class TalentApexPredator extends TalentPassive implements Listener 
             return;
         }
         
-        ev.mutateDamage(() -> "Apex Predator", DamageMutator.multiply(), calculateDamageMultiplier(player));
+        ev.mutateDamage(() -> "Apex Predator", DamageMutator.multiply(), this.calculateDamageMultiplier(player));
     }
     
     private double calculateDamageMultiplier(@NotNull HariantPlayer player) {

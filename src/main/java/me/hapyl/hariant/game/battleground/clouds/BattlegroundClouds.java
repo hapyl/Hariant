@@ -8,10 +8,16 @@ import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.game.battleground.BattlegroundImpl;
 import me.hapyl.hariant.game.booster.Booster;
+import me.hapyl.hariant.inventory.drop.CommonDroppable;
+import me.hapyl.hariant.inventory.drop.DropTable;
+import me.hapyl.hariant.inventory.drop.Droppable;
+import me.hapyl.hariant.inventory.item.ItemRegistry;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.ImmutableLocation;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+
+import java.util.List;
 
 public final class BattlegroundClouds extends BattlegroundImpl {
     
@@ -23,7 +29,12 @@ public final class BattlegroundClouds extends BattlegroundImpl {
     )).build();
     
     public BattlegroundClouds() {
-        super(Component.text("Clouds"), Icon.ofMaterial(Material.WHITE_STAINED_GLASS));
+        super(
+                Component.text("Clouds"),
+                Component.text("The remnants of an ancient kingdom in the sky."),
+                new DropTableClouds(),
+                Icon.ofMaterial(Material.WHITE_STAINED_GLASS)
+        );
         
         this.setSpawnLocations(
                 ImmutableLocation.create(3500, 64, 0, -180f, 0f),
@@ -62,6 +73,21 @@ public final class BattlegroundClouds extends BattlegroundImpl {
                 AchievementRegistry.BEYOND_CLOUDS.progress(player.getProfile());
             }
         });
+    }
+    
+    private static class DropTableClouds extends DropTable {
+        DropTableClouds() {
+            super(
+                    List.of(
+                            CommonDroppable.CAT_COINS,
+                            CommonDroppable.HERO_RECRUIT_VOUCHER,
+                            CommonDroppable.ARTIFACT_ARTIFICER,
+                            Droppable.ofItem(ItemRegistry.ARTIFACT_VOID_RIFT, 50),
+                            Droppable.ofItem(ItemRegistry.ARTIFACT_ZEALOT_MEDALLION, 50)
+                    ),
+                    DEFAULT_DROP_TABLE_AMOUNT
+            );
+        }
     }
     
 }

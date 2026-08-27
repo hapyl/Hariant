@@ -3,9 +3,9 @@ package me.hapyl.hariant.game.battleground.japan;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.player.PlayerLib;
+import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.heal.HealingSource;
-import me.hapyl.hariant.game.battleground.Battleground;
 import me.hapyl.hariant.game.battleground.BattlegroundImpl;
 import me.hapyl.hariant.game.battleground.feature.BattlegroundFeatureImpl;
 import me.hapyl.hariant.game.booster.Booster;
@@ -28,7 +28,12 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
     private final Booster[] boosters;
     
     public BattlegroundJapan() {
-        super(Component.text("Japan"), Icon.ofMaterial(Material.CHERRY_SAPLING));
+        super(
+                Component.text("Japan"),
+                Component.text("A grand Japanese temple which seem to be linked to some unknown God."),
+                new DropTableJapan(),
+                Icon.ofMaterial(Material.CHERRY_SAPLING)
+        );
         
         this.setTimeBeforePlayersReveal(Tick.fromSeconds(8));
         
@@ -40,7 +45,6 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
         );
         
         this.setFeatures(new BattlegroundFeatureJapanSakura());
-        this.setDropTable(new DropTableJapan());
         
         // Store local boosters for particle fx
         this.boosters = new JapanBooster[] {
@@ -81,7 +85,7 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
                             Droppable.ofItem(ItemRegistry.ARTIFACT_SHATTERED_SOUL, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_WHOOPEE_CUSHION, 50)
                     ),
-                    Battleground.DEFAULT_DROP_TABLE_AMOUNT
+                    DEFAULT_DROP_TABLE_AMOUNT
             );
         }
     }
@@ -94,7 +98,9 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
         };
         
         private final Color outlineColor = Color.fromBGR(237, 57, 204);
-        private final HealingSource healingSource = HealingSource.create(1, this);
+        
+        private final int healingInterval = Tick.fromSeconds(2.5f);
+        private final HealingSource healingSource = HealingSource.create(15, this);
         
         BattlegroundFeatureJapanSakura() {
             super(
@@ -105,8 +111,16 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
         
         @Override
         public void tick() {
+            // Heal at intervals
+            if (Hariant.currentTick() % healingInterval != 0) {
+                return;
+            }
+            
             for (BoundingBox sakuraBoundingBox : sakuraBoundingBoxes) {
-                this.collectNearbyEntities(sakuraBoundingBox).forEach(entity -> entity.heal(healingSource));
+                this.collectNearbyEntities(sakuraBoundingBox).forEach(entity -> {
+                    entity.heal(healingSource);
+                    entity.playSound(Sound.BLOCK_CHERRY_LEAVES_FALL, 0.75f);
+                });
             }
         }
         

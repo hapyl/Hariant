@@ -11,10 +11,9 @@ public final class DamageComponentDefense implements DamageComponent {
     DamageComponentDefense() {
     }
     
-    @NotNull
     @Override
-    public String identify() {
-        return "defense";
+    public @NotNull String identify() {
+        return "Defense";
     }
     
     @Override

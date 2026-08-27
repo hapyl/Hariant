@@ -3,6 +3,7 @@ package me.hapyl.hariant.hero.troll;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HariantRandom;
+import me.hapyl.hariant.entity.InvulnerabilitySource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -17,13 +18,16 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-public final class TalentPanicRoll extends Talent {
+public final class TalentPanicRoll extends Talent implements Listener {
     
-    @DisplayField private final Decimal invulnerabilityDuration = Decimal.ofValue(15);
-    @DisplayField private final Decimal rollStrength = Decimal.ofValue(1.25);
+    private final @DisplayField Decimal invulnerabilityDuration = Decimal.ofValue(15);
+    private final @DisplayField Decimal rollStrength = Decimal.ofValue(1.25);
+    
+    private final InvulnerabilitySource invulnerabilitySource = InvulnerabilitySource.create(this, invulnerabilityDuration.intValue());
     
     public TalentPanicRoll(@NotNull Key key) {
         super(key, Component.text("Panic Roll"), Icon.ofMaterial(Material.IRON_NAUTILUS_ARMOR));
@@ -40,6 +44,10 @@ public final class TalentPanicRoll extends Talent {
         );
     }
     
+    public @NotNull InvulnerabilitySource getInvulnerabilitySource() {
+        return invulnerabilitySource;
+    }
+    
     @Override
     public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
@@ -50,7 +58,7 @@ public final class TalentPanicRoll extends Talent {
         final HariantRandom random = player.getRandom();
         
         // Set invulnerability
-        player.setInvulnerability(invulnerabilityDuration.intValue());
+        player.setInvulnerability(invulnerabilitySource);
         
         // Roll
         final Vector direction = new Vector(

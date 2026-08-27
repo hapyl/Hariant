@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class TalentWiltBlink extends Talent {
     
-    @DisplayField private final Decimal maxBlinkDistance = Decimal.ofValue(5);
+    private final @DisplayField Decimal maxBlinkDistance = Decimal.ofValue(5);
     
     public TalentWiltBlink(@NotNull Key key) {
         super(key, Component.text("Wilted Blink"), Icon.ofMaterial(Material.CLOSED_EYEBLOSSOM));

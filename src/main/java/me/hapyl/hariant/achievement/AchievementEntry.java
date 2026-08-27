@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class AchievementEntry extends PlayerDatabaseEntry {
     
@@ -53,6 +54,7 @@ public final class AchievementEntry extends PlayerDatabaseEntry {
     };
     
     private final Map<Key, AchievementProgress> achievementProgressMap;
+    private boolean hideCompletedAchievements;
     
     @MongoSerializableConstructor
     private AchievementEntry(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull String parent) {
@@ -61,31 +63,54 @@ public final class AchievementEntry extends PlayerDatabaseEntry {
         this.achievementProgressMap = Maps.newHashMap();
     }
     
+    public boolean isHideCompletedAchievements() {
+        return hideCompletedAchievements;
+    }
+    
+    public void setHideCompletedAchievements(boolean hideCompletedAchievements) {
+        this.hideCompletedAchievements = hideCompletedAchievements;
+    }
+    
     @Override
     public void write(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
-        achievementProgressMap.forEach((key, data) -> document.put(key.getKey(), data.writeToNewDocument(database, problemReporter)));
+        // Write progress
+        document.put(
+                "progress",
+                achievementProgressMap.values()
+                                      .stream()
+                                      .collect(Collectors.toMap(progress -> progress.getAchievement().getKeyAsString(), progress -> progress.writeToNewDocument(database, problemReporter)))
+        );
+        
+        // Write settings
+        document.put("hide_completed_achievements", hideCompletedAchievements);
     }
     
     @Override
     public void read(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull ProblemReporter problemReporter) {
-        document.keySet().forEach(stringKey -> {
-            final Document dataDocument = document.get(stringKey, new Document());
-            final Key key = Key.ofStringOrNull(stringKey);
-            
-            if (key == null) {
-                problemReporter.report(Problem.severe(AchievementEntry.class, "Malformed key: `%s`!".formatted(stringKey)));
-                return;
-            }
-            
-            final Achievement achievement = AchievementRegistry.getRegistry().get(key).orElse(null);
-            
-            if (achievement == null) {
-                problemReporter.report(Problem.severe(AchievementEntry.class, "Achievement with key `%s` doesn't exist!".formatted(stringKey)));
-                return;
-            }
-            
-            achievementProgressMap.put(key, AchievementProgress.fromDocument(achievement, database, dataDocument, problemReporter));
-        });
+        // Read progress
+        if (document.get("progress") instanceof Document progressDocument) {
+            progressDocument.keySet().forEach(stringKey -> {
+                final Document dataDocument = progressDocument.get(stringKey, new Document());
+                final Key key = Key.ofStringOrNull(stringKey);
+                
+                if (key == null) {
+                    problemReporter.report(Problem.severe(AchievementEntry.class, "Malformed key: `%s`!".formatted(stringKey)));
+                    return;
+                }
+                
+                final Achievement achievement = AchievementRegistry.getRegistry().get(key).orElse(null);
+                
+                if (achievement == null) {
+                    problemReporter.report(Problem.severe(AchievementEntry.class, "Achievement with key `%s` doesn't exist!".formatted(stringKey)));
+                    return;
+                }
+                
+                achievementProgressMap.put(key, AchievementProgress.fromDocument(achievement, database, dataDocument, problemReporter));
+            });
+        }
+        
+        // Read settings
+        this.hideCompletedAchievements = document.get("hide_completed_achievements", false);
     }
     
     public @NotNull Optional<AchievementProgress> getProgress(@NotNull Achievement achievement) {
@@ -100,6 +125,20 @@ public final class AchievementEntry extends PlayerDatabaseEntry {
         final AchievementProgress progress = achievementProgressMap.get(achievement.getKey());
         
         return progress != null && progress.hasCompleted();
+    }
+    
+    public boolean hasClaimedRewards(@NotNull Achievement achievement) {
+        final AchievementProgress progress = achievementProgressMap.get(achievement.getKey());
+        
+        return progress != null && progress.hasClaimedRewards();
+    }
+    
+    public boolean hasCompletedClaimedRewards(@NotNull Achievement achievement) {
+        return this.hasCompleted(achievement) && this.hasClaimedRewards(achievement);
+    }
+    
+    public boolean hasCompletedNotClaimedRewards(@NotNull Achievement achievement) {
+        return this.hasCompleted(achievement) && !this.hasClaimedRewards(achievement);
     }
     
     public @NotNull AchievementProgress progress(@NotNull Achievement achievement, double progress) {
@@ -121,10 +160,38 @@ public final class AchievementEntry extends PlayerDatabaseEntry {
     }
     
     public int countUnclaimedRewards() {
-        return (int) achievementProgressMap.values()
-                                           .stream()
-                                           .filter(AchievementProgress::hasCompletedButNotClaimedRewards)
-                                           .count();
+        return (int) achievementProgressMap.values().stream().filter(achievement -> achievement.hasCompleted() && !achievement.hasClaimedRewards()).count();
+    }
+    
+    public int countCompletedAchievements() {
+        return (int) achievementProgressMap.values().stream().filter(AchievementProgress::hasCompleted).count();
+    }
+    
+    public @NotNull PlayerAchievementCategoryInfo getCategoryInfo(@NotNull AchievementCategory category) {
+        final AchievementCategoryInfo categoryInfo = AchievementRegistry.getCategoryInfo(category);
+        
+        if (categoryInfo == null) {
+            return PlayerAchievementCategoryInfo.empty();
+        }
+        
+        long completedAchievements = 0;
+        long completedRubies = 0;
+        long unclaimedRewards = 0;
+        
+        for (Achievement achievement : categoryInfo.achievements()) {
+            if (this.hasCompleted(achievement)) {
+                completedAchievements++;
+                
+                if (this.hasClaimedRewards(achievement)) {
+                    completedRubies += achievement.getRubyReward();
+                }
+                else {
+                    unclaimedRewards++;
+                }
+            }
+        }
+        
+        return new PlayerAchievementCategoryInfo(categoryInfo.totalNumberOfAchievements(), categoryInfo.totalAmountOfRubies(), completedAchievements, completedRubies, unclaimedRewards);
     }
     
 }

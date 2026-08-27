@@ -8,9 +8,10 @@ import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.event.HariantHealEvent;
 import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.util.decimal.Decimal;
@@ -23,7 +24,6 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
 public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements Listener {
@@ -87,11 +87,13 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @Nullable HariantEntity source) {
+    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
+        final HariantEntity source = anomalySource.getSource();
+        
         final int duration = this.calculateBleedDuration(source);
         final double damage = this.calculateBleedDamage(source);
         
-        entity.getAttributes().addModifier(new ElementalAnomalyBleedAttributeModifier(modifierKey, source != null ? source : entity, duration, damage));
+        entity.getAttributes().addModifier(new ElementalAnomalyBleedAttributeModifier(modifierKey, source != null ? source : entity, duration, damage, anomalySource));
     }
     
     @Override
@@ -124,14 +126,14 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         
         private final DamageSource damageSource;
         
-        ElementalAnomalyBleedAttributeModifier(@NotNull Key key, @NotNull HariantEntity applier, int duration, double damage) {
+        ElementalAnomalyBleedAttributeModifier(@NotNull Key key, @NotNull HariantEntity applier, int duration, double damage, @NotNull ElementalAnomalySource anomalySource) {
             super(key, ElementalAnomalyBleed.this.getName(), applier, duration);
             
             // Reduce vitality
             this.of(AttributeType.VITALITY, AttributeModifierType.FLAT, -vitalityReduction.doubleValue());
             
             // Create damage source
-            this.damageSource = new ElementalAnomalyBleedDamageSource(applier, damage);
+            this.damageSource = new ElementalAnomalyBleedDamageSource(applier, damage, anomalySource);
         }
         
         @Override
@@ -157,17 +159,29 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
     }
     
     public class ElementalAnomalyBleedDamageSource extends DamageSourceImpl {
-        ElementalAnomalyBleedDamageSource(@Nullable HariantEntity source, double damage) {
+        
+        private final ElementalAnomalySource anomalySource;
+        
+        ElementalAnomalyBleedDamageSource(@Nullable HariantEntity source, double damage, @NotNull ElementalAnomalySource anomalySource) {
             super(
                     damageSourceIdentity,
                     source,
                     DamageType.ANOMALY,
                     ElementType.PHYSICAL,
-                    List.of(DamageComponent.elemental()),
+                    DamageComponents.ofAnomaly(),
                     Set.of(),
                     damage,
                     0
             );
+            
+            this.anomalySource = anomalySource;
         }
+        
+        public @NotNull ElementalAnomalySource getAnomalySource() {
+            return anomalySource;
+        }
+        
     }
+    
+    
 }

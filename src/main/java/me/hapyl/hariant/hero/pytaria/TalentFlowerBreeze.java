@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.CollectionUtils;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
@@ -34,6 +35,8 @@ public final class TalentFlowerBreeze extends Talent {
     private final @DisplayField Decimal healthSacrifice = Decimal.ofPercentage(20);
     private final @DisplayField Decimal attackIncrease = Decimal.ofPercentage(50);
     private final @DisplayField Decimal defenseIncrease = Decimal.ofPercentage(1000);
+    
+    private final @DisplayField Decimal minimumHealth = Decimal.ofValue(5);
     
     private final ItemStack angryPytariaHead = ItemBuilder.playerHead("cb3a2c6fa906d782e9bf33cc79ebd043feae0e1284c7e6e43e31e24a59a5d6b1").asIcon();
     
@@ -92,7 +95,10 @@ public final class TalentFlowerBreeze extends Talent {
     @NotNull
     @Override
     public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        final double healthSacrifice = Math.min(player.getHealth() - 5, player.getMaxHealth() * this.healthSacrifice.doubleValue());
+        final double healthSacrifice = Math.min(
+                player.getHealth() - minimumHealth.intValue(),
+                player.getMaxHealth() * this.healthSacrifice.doubleValue()
+        );
         
         player.decrementHealth(healthSacrifice);
         
@@ -131,6 +137,11 @@ public final class TalentFlowerBreeze extends Talent {
                 },
                 DelegateType.PERSISTENT
         );
+        
+        // Trigger achievement
+        if (player.getHealth() <= minimumHealth.doubleValue()) {
+            AchievementRegistry.PYTARIA_PETAL_STANDING.progress(player.getProfile());
+        }
         
         return Response.ok();
     }

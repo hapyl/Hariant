@@ -4,12 +4,13 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.element.ElementalAnomalySourceImpl;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -125,7 +126,7 @@ public final class TalentSharkBite extends Talent {
         private void bite(@NotNull Stream<? extends HariantEntity> entities) {
             entities.forEach(entity -> {
                 entity.damage(damageSource);
-                entity.triggerAnomaly(ElementalAnomalyType.BLEED, player);
+                entity.triggerAnomaly(new SharkBiteAnomalySource(player));
             });
         }
         
@@ -133,7 +134,16 @@ public final class TalentSharkBite extends Talent {
     
     private class SharkBiteDamageSource extends DamageSourceImpl {
         SharkBiteDamageSource(@Nullable HariantEntity source, double damage) {
-            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.PHYSICAL, DamageComponent.ofCommon(), Set.of(), damage, 0);
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.PHYSICAL, DamageComponents.ofCommon(), Set.of(), damage, 0);
         }
     }
+    
+    public static class SharkBiteAnomalySource extends ElementalAnomalySourceImpl {
+        
+        SharkBiteAnomalySource(@NotNull HariantEntity source) {
+            super(ElementalAnomalyType.BLEED, source);
+        }
+        
+    }
+    
 }

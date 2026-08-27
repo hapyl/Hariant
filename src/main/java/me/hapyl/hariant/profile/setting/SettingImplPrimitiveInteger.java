@@ -39,8 +39,21 @@ public final class SettingImplPrimitiveInteger extends SettingImplPrimitive<Inte
     }
     
     @Override
-    public @NotNull ItemBuilder menuButton(@NotNull SettingEntry settingEntry) {
+    public @NotNull ItemBuilder createButton(@NotNull SettingEntry settingEntry) {
         return new ItemBuilder(Material.LIGHT_BLUE_DYE).setName(Component.text("Enter Number"));
+    }
+    
+    @NotNull
+    @Override
+    public ItemBuilder menuFormat(@NotNull SettingEntry settingEntry, @NotNull ItemBuilder builder) {
+        final int value = settingEntry.getValue(this);
+        
+        builder.addLore()
+               .addLore(Component.empty().append(Component.text("Current Value: ")).append(Component.text(value, Colors.NUMBER)))
+               .addLore()
+               .addLore(ButtonComponents.left("enter number"));
+        
+        return builder;
     }
     
     @Override
@@ -72,19 +85,6 @@ public final class SettingImplPrimitiveInteger extends SettingImplPrimitive<Inte
                 });
             }
         };
-    }
-    
-    @NotNull
-    @Override
-    public ItemBuilder menuFormat(@NotNull SettingEntry settingEntry, @NotNull ItemBuilder builder) {
-        final int value = settingEntry.getValue(this);
-        
-        builder.addLore()
-               .addLore(Component.empty().append(Component.text("Current Value: ")).append(Component.text(value, Colors.NUMBER)))
-               .addLore()
-               .addLore(ButtonComponents.left("enter number"));
-        
-        return builder;
     }
     
 }

@@ -1,12 +1,12 @@
 package me.hapyl.hariant.element.anomaly;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public enum ElementalAnomalyType implements ElementalAnomaly {
     
@@ -61,8 +61,8 @@ public enum ElementalAnomalyType implements ElementalAnomaly {
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @Nullable HariantEntity source) {
-        anomaly.trigger(entity, source);
+    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
+        anomaly.trigger(entity, anomalySource);
     }
     
     @Override

@@ -35,11 +35,11 @@ public class BaseChance implements ComponentFormatter, ComponentLike {
         
         final double luck = attributable.getAttributes().get(AttributeType.LUCK);
         
-        return chance * (1 + (luck / (luck + 100)));
+        return chance * (1 + luck / AttributeType.LUCK.maxValue());
     }
     
     public boolean chance(@NotNull HariantPlayer player) {
-        return player.getRandom().chance(calculateChance(player));
+        return player.getRandom().chance(this.calculateChance(player));
     }
     
     @NotNull

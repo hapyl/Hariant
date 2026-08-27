@@ -13,7 +13,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
-import me.hapyl.hariant.entity.damage.component.DamageComponent;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -61,15 +61,15 @@ public final class TalentFirePit extends Talent {
             Material.RED_TERRACOTTA.createBlockData()
     };
     
-    @DisplayField private final Decimal transformationDelay = Decimal.ofSeconds(1f);
-    @DisplayField private final Decimal totalStages = Decimal.ofValue(firePitsMaterials.length);
+    private final @DisplayField Decimal transformationDelay = Decimal.ofSeconds(1f);
+    private final @DisplayField Decimal totalStages = Decimal.ofValue(firePitsMaterials.length);
     
-    @DisplayField private final AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 84);
-    @DisplayField private final Decimal damagePeriod = Decimal.ofSeconds(0.5f);
-    @DisplayField private final Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 250);
+    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 84);
+    private final @DisplayField Decimal damagePeriod = Decimal.ofSeconds(0.5f);
+    private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 250);
     
-    @DisplayField private final Decimal hellburnDuration = Decimal.ofSeconds(5);
-    @DisplayField private final Decimal hellburnElementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 6);
+    private final @DisplayField Decimal hellburnDuration = Decimal.ofSeconds(5);
+    private final @DisplayField Decimal hellburnElementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 6);
     
     private final int transformationDelayPerStage = transformationDelay.intValue() / totalStages.intValue();
     private final Key damageCooldownKey = Key.ofString("fire_pit_damage");
@@ -126,8 +126,7 @@ public final class TalentFirePit extends Talent {
         return Response.ok();
     }
     
-    @NotNull
-    public Decimal getHellburnElementalApplication() {
+    public @NotNull Decimal getHellburnElementalApplication() {
         return hellburnElementalApplication;
     }
     
@@ -153,7 +152,7 @@ public final class TalentFirePit extends Talent {
                                             .elementalUnits(elementalApplication.doubleValue())
                                             .elementType(ElementType.FIRE)
                                             .damageType(DamageType.TALENT)
-                                            .components(DamageComponent.ofCommon())
+                                            .components(DamageComponents.ofCommon())
                                             .cooldown(damageCooldownKey, damagePeriod.intValue())
                                             .build();
             

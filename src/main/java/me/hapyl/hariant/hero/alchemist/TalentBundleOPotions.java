@@ -4,11 +4,13 @@ import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.achievement.UniqueId;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantRandom;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -37,14 +39,14 @@ import java.util.Map;
 
 public class TalentBundleOPotions extends Talent implements Listener {
     
-    @DisplayField private final Decimal magnitude = Decimal.ofValue(0.9);
-    @DisplayField private final Decimal maxY = Decimal.ofValue(0.5);
+    private final @DisplayField Decimal magnitude = Decimal.ofValue(0.9);
+    private final @DisplayField Decimal maxY = Decimal.ofValue(0.5);
     
-    @DisplayField private final Decimal potionYOffset = Decimal.ofValue(0.35);
-    @DisplayField private final Decimal potionMaxXOffset = Decimal.ofValue(0.2);
-    @DisplayField private final Decimal potionMaxZOffset = Decimal.ofValue(0.2);
-    @DisplayField private final Decimal potionExplosionRadius = Decimal.ofValue(4);
-    @DisplayField private final Decimal potionElementalApplication = Decimal.ofValue(500);
+    private final @DisplayField Decimal potionYOffset = Decimal.ofValue(0.35);
+    private final @DisplayField Decimal potionMaxXOffset = Decimal.ofValue(0.2);
+    private final @DisplayField Decimal potionMaxZOffset = Decimal.ofValue(0.2);
+    private final @DisplayField Decimal potionExplosionRadius = Decimal.ofValue(4);
+    private final @DisplayField Decimal potionElementalApplication = Decimal.ofValue(500);
     
     private final Map<ThrownPotion, BundlePotion> alchemistPotionMap = Maps.newHashMap();
     
@@ -73,15 +75,13 @@ public class TalentBundleOPotions extends Talent implements Listener {
         );
     }
     
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
     }
     
-    @NotNull
     @Override
-    public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+    public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
         final Location location = player.getEyeLocation();
         final Vector vector = location.getDirection().normalize();
         
@@ -90,9 +90,11 @@ public class TalentBundleOPotions extends Talent implements Listener {
         
         player.setVelocity(vector);
         
+        final int localTick = player.localTicks();
+        
         // Throw a potion for each element
         for (ElementType elementType : ElementType.values()) {
-            final BundlePotion potion = BundlePotion.create(player, location, elementType);
+            final BundlePotion potion = BundlePotion.create(localTick, player, location, elementType);
             
             // Calculate direction
             final Vector direction = location.getDirection().normalize().multiply(-1);
@@ -124,14 +126,18 @@ public class TalentBundleOPotions extends Talent implements Listener {
             return;
         }
         
+        final HeroDataAlchemist data = potion.alchemist.getHeroData(HeroRegistry.ALCHEMIST, HeroDataAlchemist::new);
+        
         potion.collectNearbyEntities(potionExplosionRadius)
               .filter(potion.alchemist::canAffect)
               .forEach(entity -> {
-                  entity.applyElement(ElementSource.create(potion.elementType, potion.alchemist, potionElementalApplication.doubleValue()));
+                  if (entity.applyElement(ElementSource.create(potion.elementType, potion.alchemist, potionElementalApplication.doubleValue()))) {
+                      data.reactionsTriggered.count(potion);
+                  }
               });
     }
     
-    public record BundlePotion(@NotNull HariantPlayer alchemist, @NotNull ThrownPotion thrownPotion, @NotNull ElementType elementType) implements EntityCollector {
+    public record BundlePotion(int uniqueId, @NotNull HariantPlayer alchemist, @NotNull ThrownPotion thrownPotion, @NotNull ElementType elementType) implements EntityCollector, UniqueId {
         
         private static final Map<ElementType, ItemStack> ELEMENT_TYPE_ITEM_STACK = Map.ofEntries(
                 createPotionOfColor(ElementType.PHYSICAL),
@@ -143,15 +149,19 @@ public class TalentBundleOPotions extends Talent implements Listener {
                 createPotionOfColor(ElementType.AETHER)
         );
         
-        @NotNull
         @Override
-        public Location getLocation() {
+        public @NotNull Location getLocation() {
             return thrownPotion.getLocation();
         }
         
-        @NotNull
-        public static BundlePotion create(@NotNull HariantPlayer player, @NotNull Location location, @NotNull ElementType elementType) {
+        @Override
+        public int getUniqueId() {
+            return uniqueId;
+        }
+        
+        public static @NotNull BundlePotion create(int uniqueId, @NotNull HariantPlayer player, @NotNull Location location, @NotNull ElementType elementType) {
             return new BundlePotion(
+                    uniqueId,
                     player,
                     player.getWorld().spawn(location, SplashPotion.class, self -> {
                         self.setItem(ELEMENT_TYPE_ITEM_STACK.get(elementType));
@@ -160,8 +170,7 @@ public class TalentBundleOPotions extends Talent implements Listener {
             );
         }
         
-        @NotNull
-        private static Map.Entry<ElementType, ItemStack> createPotionOfColor(@NotNull ElementType elementType) {
+        private static @NotNull Map.Entry<ElementType, ItemStack> createPotionOfColor(@NotNull ElementType elementType) {
             final TextColor color = elementType.getStyle().color();
             
             return Map.entry(
