@@ -8,6 +8,7 @@ import me.hapyl.eterna.module.player.tablist.EntryList;
 import me.hapyl.eterna.module.player.tablist.EntryTexture;
 import me.hapyl.eterna.module.text.TimeFormat;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.daily.DailyType;
 import me.hapyl.hariant.entity.PlayerState;
 import me.hapyl.hariant.entity.effect.status.StatusEffectInstance;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -135,7 +136,7 @@ public class GameInstanceImpl implements GameInstance {
     
     @Override
     public void onDestroy(@NotNull Iterable<? extends HariantPlayer> players, @NotNull WinResult result) {
-        final Component componentDuration = Components.centerText(TimeFormat.format((gameType.getTimeLimit() - timeLeft) * 50L), Colors.GRAY);
+        final Component componentDuration = Components.centerText(TimeFormat.format((gameType.getTimeLimit() - timeLeft) * 50L, TimeFormat.Part.MINUTES, TimeFormat.Part.SECONDS), Colors.GRAY);
         final List<? extends Component> winners = result.createWinnerCenterComponents();
         
         for (HariantPlayer player : players) {
@@ -266,6 +267,9 @@ public class GameInstanceImpl implements GameInstance {
                     }
                 }, LEVEL_UP_NOTIFICATION_DELAY);
             }
+            
+            // Progress daily
+            DailyType.progressArchetypeDaily(profile, player.getHero().getProfile().getArchetype());
         }
         
         // TODO (xanyjl @ Saturday, August 1) -> Save instance result to database
@@ -293,6 +297,11 @@ public class GameInstanceImpl implements GameInstance {
         teamDataMap.getData(player.getPlayerTeam()).kills++;
         
         gameType.onKill(gameInstance, player, victim);
+        
+        // Progress first blood
+        if (totalKills() == 1) {
+            DailyType.FIRST_BLOOD.progress(player.getProfile());
+        }
     }
     
     @Override
@@ -394,6 +403,10 @@ public class GameInstanceImpl implements GameInstance {
         return Component.text(TimeFormat.format(Math.max(0, timeLeft) * 50L, TimeFormat.Part.MINUTES, TimeFormat.Part.SECONDS));
     }
     
+    public int totalKills() {
+        return teamDataMap.stream().mapToInt(TeamData::getKills).sum();
+    }
+    
     private @NotNull List<? extends ExperienceSource> calculateExperience(@NotNull HariantPlayer player, @NotNull Placement placement, int minutesPlayed) {
         final List<ExperienceSource> sources = Lists.newArrayList();
         
@@ -423,5 +436,5 @@ public class GameInstanceImpl implements GameInstance {
     public static void calculateCombatData(@NotNull HariantPlayer player, @NotNull CombatData.Type type) {
         // FIXME (xanyjl @ Sunday, August 2) ->
     }
-
+    
 }

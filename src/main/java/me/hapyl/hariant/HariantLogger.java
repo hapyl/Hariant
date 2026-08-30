@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.ServerOperator;
 import org.jetbrains.annotations.NotNull;
@@ -91,11 +92,10 @@ public final class HariantLogger {
     }
     
     public static void sound(@NotNull Player player, @NotNull Sound sound, @Range(from = 0, to = 2) float pitch) {
-        player.playSound(player, sound, 3.0f, Math.clamp(pitch, 0.0f, 2.0f));
+        player.playSound(player, sound, SoundCategory.UI, 3.0f, Math.clamp(pitch, 0.0f, 2.0f));
     }
     
-    @NotNull
-    public static Logger logger() {
+    public static @NotNull Logger logger() {
         return LOGGER;
     }
     

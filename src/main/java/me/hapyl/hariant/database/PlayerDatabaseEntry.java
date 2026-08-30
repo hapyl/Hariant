@@ -34,18 +34,15 @@ public abstract class PlayerDatabaseEntry implements MongoSerializable {
         this.document = document;
     }
     
-    @NotNull
-    public PlayerDatabase getDatabase() {
+    public @NotNull PlayerDatabase getDatabase() {
         return database;
     }
     
-    @NotNull
-    public Document getDocument() {
+    public @NotNull Document getDocument() {
         return document;
     }
     
-    @NotNull
-    public String getParent() {
+    public @NotNull String getParent() {
         return parent;
     }
     

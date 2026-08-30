@@ -95,7 +95,7 @@ public class StatusEffectStunned extends StatusEffectImpl implements Listener {
         
         if (attacker.hasEffect(StatusEffectType.STUNNED)) {
             ev.setCancelled(true);
-            attacker.sendMessage(Component.text("Cannot attack while stunned!"));
+            attacker.messageError(Component.text("Cannot attack while stunned!"));
         }
     }
     

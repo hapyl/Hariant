@@ -242,7 +242,7 @@ public final class Hariant implements Runnable, Lifecycle {
                     
                     tick++;
                 }
-             
+                
             }
         }.runTaskTimer(PLUGIN, 0, 1);
         
@@ -689,6 +689,29 @@ public final class Hariant implements Runnable, Lifecycle {
     
     public static @NotNull Database getDatabase() {
         return PLUGIN.getDatabase();
+    }
+    
+    public static int getCurrentDaySinceEpoch() {
+        return (int) (System.currentTimeMillis() / HariantConstants.MILLIS_IN_DAY);
+    }
+    
+    public static long getTimeUntilReset() {
+        final long currentTimeMillis = System.currentTimeMillis();
+        
+        // Calculate the day since epoch
+        final long startOfCurrentDay = Math.floorDiv(currentTimeMillis, HariantConstants.MILLIS_IN_DAY) * HariantConstants.MILLIS_IN_DAY;
+        final long startOfNextDay = startOfCurrentDay + HariantConstants.MILLIS_IN_DAY;
+        
+        return startOfNextDay - currentTimeMillis;
+    }
+    
+    public static @NotNull Component getTimeUntilResetFormatted() {
+        final long totalSeconds = getTimeUntilReset() / 1000;
+        final long hoursPart = totalSeconds / 3600;
+        final long minutesPart = (totalSeconds % 3600) / 60;
+        final long secondsPart = totalSeconds % 60;
+        
+        return Component.text("%dh %02dm %02ds".formatted(hoursPart, minutesPart, secondsPart));
     }
     
     private static void clearEntities() {

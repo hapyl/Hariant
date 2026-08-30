@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.eterna.module.util.Streamable;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseEntry;
 import me.hapyl.hariant.database.problem.Problem;
@@ -13,12 +14,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public final class HeroDirectory extends PlayerDatabaseEntry {
+public final class HeroDirectory extends PlayerDatabaseEntry implements Streamable<HeroInstance> {
     
     private final Map<Hero, HeroInstance> heroes;
     
-    @NotNull private Hero selectedHero;
+    private @NotNull Hero selectedHero;
     
     @MongoSerializableConstructor
     private HeroDirectory(@NotNull PlayerDatabase database, @NotNull Document document, @NotNull String parent) {
@@ -28,26 +30,27 @@ public final class HeroDirectory extends PlayerDatabaseEntry {
         this.selectedHero = HeroRegistry.ARCHER;
     }
     
-    @NotNull
-    public Hero getSelectedHero() {
-        return selectedHero;
+    public @NotNull Stream<HeroInstance> stream() {
+        return heroes.values().stream();
     }
     
-    @NotNull
-    public HeroInstance getSelectedHeroInstance() {
-        return heroes.get(selectedHero);
+    public @NotNull Hero getSelectedHero() {
+        return selectedHero;
     }
     
     public void setSelectedHero(@NotNull HeroInstance heroInstance) {
         this.selectedHero = heroInstance.getOrigin();
     }
     
+    public @NotNull HeroInstance getSelectedHeroInstance() {
+        return heroes.get(selectedHero);
+    }
+    
     public boolean isOwned(@NotNull Hero hero) {
         return this.heroes.containsKey(hero);
     }
     
-    @NotNull
-    public Optional<HeroInstance> getHero(@NotNull Hero hero) {
+    public @NotNull Optional<HeroInstance> getHero(@NotNull Hero hero) {
         return Optional.ofNullable(heroes.get(hero));
     }
     
@@ -66,8 +69,7 @@ public final class HeroDirectory extends PlayerDatabaseEntry {
      * @param hero - The hero create the instance of.
      * @return the hero instance.
      */
-    @NotNull
-    public HeroInstance createHero(@NotNull Hero hero) {
+    public @NotNull HeroInstance createHero(@NotNull Hero hero) {
         HeroInstance heroInstance = heroes.get(hero);
         
         if (heroInstance == null) {

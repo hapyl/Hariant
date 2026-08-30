@@ -96,7 +96,7 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
             return Map.of();
         }
         
-        final Map<EnumTeam, Placement> placementMap = Maps.newLinkedHashMap();
+        final Map<EnumTeam, Placement> placementMap = Maps.newHashMap();
         
         int bracket = 0;
         int topKills = sortedData.getFirst().kills;

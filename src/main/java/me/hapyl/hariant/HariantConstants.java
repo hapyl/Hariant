@@ -230,6 +230,11 @@ public interface HariantConstants {
      */
     @NotNull Component CHARACTER_INFINITY = Component.text("∞");
     
+    /**
+     * Defines how many millis are there in a single day.
+     */
+    long MILLIS_IN_DAY = 86_400_000;
+    
     private static @NotNull ComponentStyler createStylerWithPadding(int padding) {
         return ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(padding).build();
     }

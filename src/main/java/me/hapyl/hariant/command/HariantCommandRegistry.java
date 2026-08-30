@@ -16,6 +16,8 @@ import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.HariantPlugin;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
+import me.hapyl.hariant.daily.DailyEntry;
+import me.hapyl.hariant.daily.DailyType;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
@@ -104,7 +106,7 @@ public final class HariantCommandRegistry {
         register("ready", HariantCommandReady::new);
         register("exp", HariantCommandExperience::new);
         register("aggregateStatistic", HariantCommandAggregateStatistic::new);
-        register("openMenu", HariantCommandOpenMenu::new);
+        register(HariantCommandMenu.COMMAND_NAME, HariantCommandMenu::new);
         register("goto", HariantCommandGoTo::new);
         
         register("showAttributes", context -> {
@@ -799,6 +801,30 @@ public final class HariantCommandRegistry {
             if (NotificationHandler.getNotificationsNotify(context.getProfile()).isEmpty()) {
                 HariantLogger.error(context.getPlayer(), Component.text("No new notifications!"));
             }
+        });
+        
+        register("resetdailies", context -> {
+            context.getProfile().getDatabase().daily.resetDailies();
+        });
+        
+        register("progressdaily", context -> {
+            final PlayerProfile profile = context.getProfile();
+            final DailyType dailyType = context.argument(0).toEnum(DailyType.class);
+            
+            if (dailyType == null) {
+                profile.messageError(Component.text("Unknown daily type " + context.argument(0)));
+                return;
+            }
+            
+            final DailyEntry dailyEntry = profile.getDatabase().daily;
+            
+            if (!dailyEntry.contains(dailyType)) {
+                profile.messageError(Component.text("You don't have dailies of that type!"));
+                return;
+            }
+            
+            profile.messageInfo(Component.text("Progressing ").append(dailyType.getName()).append(Component.text("...")));
+            dailyEntry.progress(dailyType);
         });
         
         // If this is ever 2000 lines of code, don't add another fucking command and either refactor or delete commands that you haven't used for 10 years

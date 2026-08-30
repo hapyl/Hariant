@@ -52,7 +52,7 @@ public class Trap implements Ticking, AssistSource, Prioritable {
             VanillaAttributeModifier.create(MODIFIER_KEY, Attribute.MOVEMENT_SPEED, VanillaAttributeModifier.Operation.FLAT, -100)
     );
     
-    private static final long KEY_COOLDOWN = 100;
+    private static final long KEY_COOLDOWN = 50;
     private static final double SPEEDUP = 0.05;
     
     public final @NotNull HariantEntity entity;

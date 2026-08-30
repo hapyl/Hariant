@@ -2,12 +2,12 @@ package me.hapyl.hariant.achievement;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.command.HariantCommandOpenMenu;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseEntry;
 import me.hapyl.hariant.database.problem.Problem;
 import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializableConstructor;
+import me.hapyl.hariant.menu.Menus;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.notification.Notification;
 import me.hapyl.hariant.profile.notification.NotificationListener;
@@ -39,7 +39,7 @@ public final class AchievementEntry extends PlayerDatabaseEntry {
             
             @Override
             public @NotNull ClickEvent<?> clickEvent() {
-                return HariantCommandOpenMenu.Menus.ACHIEVEMENTS.createClickEvent();
+                return Menus.ACHIEVEMENTS.createClickEvent();
             }
         };
         

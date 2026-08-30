@@ -9,7 +9,16 @@
 - Hellburn should really NOT be effect
 - Nyx missing "Wither" talent fx
 - Supply drops
-+ Archive
+- 
+- ~~Trap cd too big~~
+- ~~Cannot damage while stunned is WHITE~~
+ 
++ Next Hero - Bounty Hunter
++ Inferno ult casting time too long
++ Zealot data not reset
++ Wrong placemenent
++ Wrong time
++ Sum level rewards?
 
   [IDEAS]
 

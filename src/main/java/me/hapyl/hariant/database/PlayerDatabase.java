@@ -7,6 +7,7 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.HariantPlugin;
 import me.hapyl.hariant.achievement.AchievementEntry;
+import me.hapyl.hariant.daily.DailyEntry;
 import me.hapyl.hariant.database.problem.*;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.database.serialize.MongoSerializable;
@@ -43,6 +44,7 @@ public final class PlayerDatabase {
     public final AchievementEntry achievements;
     public final RewardsEntry rewards;
     public final StatisticEntry statistics;
+    public final DailyEntry daily;
     
     // *-* Private Fields *-* //
     
@@ -94,6 +96,7 @@ public final class PlayerDatabase {
         this.achievements = deserialize("achievements", AchievementEntry.class, problemReporter);
         this.rewards = deserialize("rewards", RewardsEntry.class, problemReporter);
         this.statistics = deserialize("statistics", StatisticEntry.class, problemReporter);
+        this.daily = deserialize("daily", DailyEntry.class, problemReporter);
         
         // Handle problems
         problemReporter.handle(problem -> {

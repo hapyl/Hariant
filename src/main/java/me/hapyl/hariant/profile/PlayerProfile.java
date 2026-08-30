@@ -13,6 +13,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.achievement.AchievementRegistry;
+import me.hapyl.hariant.daily.DailyType;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.rank.FormatRules;
 import me.hapyl.hariant.database.rank.PlayerRank;
@@ -110,13 +111,11 @@ public final class PlayerProfile
         }
     }
     
-    @NotNull
-    public PlayerRank getRank() {
+    public @NotNull PlayerRank getRank() {
         return database.getRank();
     }
     
-    @NotNull
-    public Component getName() {
+    public @NotNull Component getName() {
         return player.name();
     }
     
@@ -135,34 +134,28 @@ public final class PlayerProfile
         return this.getNameFormatted(DEFAULT_NAME_FORMAT_SOCIAL);
     }
     
-    @NotNull
-    public Player getPlayer() {
+    public @NotNull Player getPlayer() {
         return player;
     }
     
-    @NotNull
     @Override
-    public Component asHeadComponent() {
+    public @NotNull Component asHeadComponent() {
         return Component.object(ObjectContents.playerHead(player)).color(Colors.WHITE);
     }
     
-    @NotNull
-    public Optional<HariantPlayer> getHariantPlayer() {
+    public @NotNull Optional<HariantPlayer> getHariantPlayer() {
         return Hariant.getPlayer(this.getPlayer());
     }
     
-    @NotNull
-    public PlayerDatabase getDatabase() {
+    public @NotNull PlayerDatabase getDatabase() {
         return database;
     }
     
-    @NotNull
-    public PlayerUI getPlayerUI() {
+    public @NotNull PlayerUI getPlayerUI() {
         return playerUI;
     }
     
-    @NotNull
-    public Hero getSelectedHero() {
+    public @NotNull Hero getSelectedHero() {
         return database.heroDirectory.getSelectedHero();
     }
     
@@ -384,12 +377,16 @@ public final class PlayerProfile
             }
         }, AUTO_READY_DELAY);
         
-        // Trigger achievements
+        // Trigger achievements & progress daily
         AchievementRegistry.FIRST_GAME.progress(this);
+        DailyType.PLAY_GAMES.progress(this);
         
         if (winResult.getPlacement(this) == Placement.FIRST_PLACE) {
             AchievementRegistry.CHAMPION_4.progressFamily(this);
+            DailyType.WIN_GAMES.progress(this);
         }
+        
+        
     }
     
     public boolean isOnline() {
