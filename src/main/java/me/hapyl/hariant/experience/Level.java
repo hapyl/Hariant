@@ -7,8 +7,8 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.prefix.Prefix;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
-import me.hapyl.hariant.command.HariantCommandOpenMenu;
 import me.hapyl.hariant.inventory.item.ResourceRegistry;
+import me.hapyl.hariant.menu.Menus;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.notification.Notification;
 import me.hapyl.hariant.profile.notification.NotificationListener;
@@ -46,7 +46,7 @@ public final class Level implements Styled, ComponentLike, ComparableOrdinal<Lev
             
             @Override
             public @NotNull ClickEvent<?> clickEvent() {
-                return HariantCommandOpenMenu.Menus.LEVELLING.createClickEvent();
+                return Menus.LEVELLING.createClickEvent();
             }
         };
         

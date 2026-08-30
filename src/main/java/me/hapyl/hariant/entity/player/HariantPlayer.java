@@ -10,6 +10,7 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.achievement.SharedAchievementData;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.daily.DailyType;
 import me.hapyl.hariant.database.rank.FormatRules;
 import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.*;
@@ -306,27 +307,25 @@ public class HariantPlayer
     
     @Override
     public void onKill(@NotNull HariantEntity entity, @NotNull DamageSource damageSource) {
-        if (entity instanceof HariantPlayer player) {
-            // Make sure it's not suicide nor teammate
-            if (this.isSelfOrTeammate(player)) {
-                return;
-            }
-            
-            fetchGameInstance(gameInstance -> gameInstance.onKill(gameInstance, this, player));
-            
-            this.statistics.incrementStatistic(Statistic.KILLS, 1);
-            
-            this.sendEliminationFeedback(EliminationFeedback.KILL, player);
-            
-            // Generate energy
-            this.incrementUltimateResource(heroInstance.getOrigin().getUltimateTalent().getUltimateResourceType().regenerateOnElimination());
-            
-            // Heal
-            this.heal(HealingSource.create(this.getMaxHealth() * HariantConstants.HEALING_ON_PLAYER_ELIMINATION, HEALING_SOURCE_PLAYER_ELIMINATION));
-            
-            // Reward for kill
-            //CommonRewards.PLAYER_ELIMINATION.reward(profile);
+        // Make sure it's not suicide nor teammate
+        if (!(entity instanceof HariantPlayer player) || this.isSelfOrTeammate(player)) {
+            return;
         }
+        
+        fetchGameInstance(gameInstance -> gameInstance.onKill(gameInstance, this, player));
+        
+        this.statistics.incrementStatistic(Statistic.KILLS, 1);
+        
+        this.sendEliminationFeedback(EliminationFeedback.KILL, player);
+        
+        // Generate energy
+        this.incrementUltimateResource(heroInstance.getOrigin().getUltimateTalent().getUltimateResourceType().regenerateOnElimination());
+        
+        // Heal
+        this.heal(HealingSource.create(this.getMaxHealth() * HariantConstants.HEALING_ON_PLAYER_ELIMINATION, HEALING_SOURCE_PLAYER_ELIMINATION));
+        
+        // Progress daily
+        DailyType.KILL_PLAYERS.progress(profile);
     }
     
     @Override
@@ -648,8 +647,18 @@ public class HariantPlayer
             return;
         }
         
+        final boolean isUltimateTalent = talent instanceof TalentUltimate;
+        
         statistics.incrementTalentUsage(talent);
-        statistics.incrementStatistic(talent instanceof TalentUltimate ? Statistic.ULTIMATE_USAGE : Statistic.TALENT_USAGE, 1);
+        statistics.incrementStatistic(isUltimateTalent ? Statistic.ULTIMATE_USAGE : Statistic.TALENT_USAGE, 1);
+        
+        // Progress daily
+        if (isUltimateTalent) {
+            DailyType.USE_ULTIMATES.progress(profile);
+        }
+        else {
+            DailyType.USE_TALENTS.progress(profile);
+        }
     }
     
     public @NotNull String getEntityName() {

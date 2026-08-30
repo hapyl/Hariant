@@ -1,6 +1,7 @@
 package me.hapyl.hariant.experience;
 
 import com.google.common.collect.Maps;
+import io.papermc.paper.registry.keys.SoundEventKeys;
 import me.hapyl.eterna.module.component.ButtonComponents;
 import me.hapyl.eterna.module.component.ComponentStyler;
 import me.hapyl.eterna.module.component.Components;
@@ -14,6 +15,7 @@ import me.hapyl.hariant.menu.Menu;
 import me.hapyl.hariant.menu.MenuPlayerProfile;
 import me.hapyl.hariant.menu.MenuReturn;
 import me.hapyl.hariant.reward.Reward;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.bukkit.Material;
@@ -85,6 +87,7 @@ public class MenuLevelling extends Menu {
                         
                         if (unclaimedReward.isEmpty()) {
                             profile.messageSuccess(Component.text("Successfully claimed all rewards!"));
+                            profile.playSound(Sound.sound(SoundEventKeys.ENTITY_PLAYER_LEVELUP, Sound.Source.UI, 3, 2.0f));
                         }
                         else {
                             profile.messageSuccess(Component.text("Partially claimed %s/%s rewards!".formatted(rewardsToClaim - unclaimedReward.size(), rewardsToClaim)));

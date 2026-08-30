@@ -6,6 +6,7 @@ import me.hapyl.eterna.module.player.sequencer.Track;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.achievement.AchievementEntry;
+import me.hapyl.hariant.daily.DailyEntry;
 import me.hapyl.hariant.experience.Level;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.setting.Settings;
@@ -27,6 +28,7 @@ public class NotificationHandler {
     
     // We use an immutable list that's instantiated here to keep all notifications loaded
     private static final List<NotificationListener> LISTENERS = List.of(
+            DailyEntry.NOTIFICATION_LISTENER,
             Level.NOTIFICATION_LISTENER,
             AchievementEntry.NOTIFICATION_LISTENER
     );

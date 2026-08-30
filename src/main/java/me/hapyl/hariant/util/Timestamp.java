@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 
 public final class Timestamp implements ComponentLike, Comparable<Timestamp> {
     
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss z").withZone(Hariant.TIME_ZONE);
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss z").withZone(Hariant.TIME_ZONE);
     
     private final long timestamp;
     private final Component component;

@@ -55,9 +55,9 @@ public class TalentInfernalWrath extends TalentUltimate {
     
     private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 153.6);
     
-    private final @DisplayField Decimal radius = Decimal.ofValue(15);
+    private final @DisplayField Decimal radius = Decimal.ofValue(16);
     private final @DisplayField Decimal castingTime = Decimal.ofSeconds(0.75f);
-    private final @DisplayField Decimal coneAngle = Decimal.ofAngle(75);
+    private final @DisplayField Decimal coneAngle = Decimal.ofAngle(80);
     
     private final double halfAngleRadians = Math.toRadians(coneAngle.doubleValue() * 0.5);
     private final double halfAngleRadiansCos = Math.cos(halfAngleRadians);
@@ -70,7 +70,7 @@ public class TalentInfernalWrath extends TalentUltimate {
     public TalentInfernalWrath(@NotNull Key key) {
         super(key, Component.text("Infernal Wrath"), Icon.ofMaterial(Material.MAGMA_BLOCK), UltimateResourceType.ENERGY, 60);
         
-        setDurationSeconds(3);
+        setDurationSeconds(2);
         setTalentType(TalentType.IMPAIR);
         
         setDescription(
@@ -179,7 +179,8 @@ public class TalentInfernalWrath extends TalentUltimate {
                 // Fx
                 fxEntities.forEach(entity -> player.spawnWorldParticle(entity.location, Particle.LAVA, 2, 0.1, 0.1, 0.1, 0.15f));
                 
-                player.playWorldSound(origin, Sound.ENTITY_BLAZE_DEATH, 0.0f);
+                player.playWorldSound(origin, Sound.ENTITY_BLAZE_DEATH, 0.75f);
+                player.playWorldSound(origin, Sound.ENTITY_GENERIC_EXPLODE, 0.75f);
                 
                 this.cancel();
             }
@@ -281,7 +282,7 @@ public class TalentInfernalWrath extends TalentUltimate {
                 self.setVisible(false);
                 
                 // Rotate the head randomly
-                self.setHeadRotations(Rotations.ofDegrees(RANDOM.nextDouble() * 90, RANDOM.nextDouble() * 45, RANDOM.nextDouble() * 90));
+                self.setHeadRotations(Rotations.ofDegrees(RANDOM.nextDouble() * 90, RANDOM.nextDouble() * 90, RANDOM.nextDouble() * 90));
                 self.getEquipment().setHelmet(MAGMA_TEXTURE);
             });
         }

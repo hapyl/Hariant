@@ -268,6 +268,17 @@ public final class TalentBubbleTrap extends Talent implements Effect {
         public @NotNull Location getLocation() {
             return location;
         }
+        
+        @Override
+        public boolean blocksAttacks() {
+            return true;
+        }
+        
+        @Override
+        public boolean blocksTalents() {
+            return true;
+        }
+        
     }
     
     public class BubbleDamageSource extends DamageSourceImpl {

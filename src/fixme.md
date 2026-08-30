@@ -5,16 +5,22 @@
 - Add inventory
 - Cannot see friendly invisibility
 - Add fx to sakura healing
-- Achievement families
 - Clear vanilla effects on game start
 - Hellburn should really NOT be effect
 - Nyx missing "Wither" talent fx
-- Inferno ultimate change
 - Supply drops
-- Add fx and achievement when casting is interrupted
-+ Archive
+- 
+- ~~Trap cd too big~~
+- ~~Cannot damage while stunned is WHITE~~
+ 
++ Next Hero - Bounty Hunter
++ Inferno ult casting time too long
++ Zealot data not reset
++ Wrong placemenent
++ Wrong time
++ Sum level rewards?
 
-[IDEAS]
+  [IDEAS]
 
 - Maybe change damage report to use team color bars
 
@@ -22,6 +28,9 @@
 
 # FIXED
 
+- ~~Achievement families~~
+- ~~Inferno ultimate change~~
+- ~~Add fx and achievement when casting is interrupted~~
 - ~~Implement exp~~
 - ~~Add animation to ULTIMATE CHARGED~~
 - ~~Tablist~~
