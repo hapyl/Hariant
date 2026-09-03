@@ -5,18 +5,26 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.StreamRules;
+import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
+import me.hapyl.hariant.talent.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public abstract class TalentDemonsplit extends Talent {
+    
+    public static final double REACH_INCREASE = 1.5;
     
     private static final Key SHARED_COOLDOWN_KEY = Key.ofString("demonsplit");
     
@@ -29,6 +37,22 @@ public abstract class TalentDemonsplit extends Talent {
         
         setDurationSeconds(10);
         setCooldownSeconds(20);
+    }
+    
+    public abstract @NotNull InfernoDemonEntity newInstance(@NotNull HariantPlayer player, InfernoDemonType infernoDemonType);
+    
+    public abstract @NotNull Component describeAbility();
+    
+    public abstract @NotNull Component describeReform();
+    
+    @Override
+    public final @NotNull Key getCooldownKey() {
+        return SHARED_COOLDOWN_KEY;
+    }
+    
+    @Override
+    public final @NotNull ItemBuilder createBuilder() {
+        return super.createBuilder().setCooldownKey(SHARED_COOLDOWN_KEY);
     }
     
     @Override
@@ -62,22 +86,6 @@ public abstract class TalentDemonsplit extends Talent {
                          .appendNewline()
                          .append(Component.text("Demonsplit talents share the cooldown!", Colors.DARK_GRAY))
         );
-    }
-    
-    public abstract @NotNull InfernoDemonEntity newInstance(@NotNull HariantPlayer player, InfernoDemonType infernoDemonType);
-    
-    public abstract @NotNull Component describeAbility();
-    
-    public abstract @NotNull Component describeReform();
-    
-    @Override
-    public final @NotNull Key getCooldownKey() {
-        return SHARED_COOLDOWN_KEY;
-    }
-    
-    @Override
-    public final @NotNull ItemBuilder createBuilder() {
-        return super.createBuilder().setCooldownKey(SHARED_COOLDOWN_KEY);
     }
     
     @Override
@@ -115,6 +123,21 @@ public abstract class TalentDemonsplit extends Talent {
     @Override
     public @NotNull String getTalentClassName() {
         return "Demonsplit Talent";
+    }
+    
+    @Override
+    protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
+        super.initAttributeFields(attributeFields);
+        
+        attributeFields.add(DisplayFieldInstance.create(Component.text("Demon Reach"), Component.text("%.1f blocks".formatted(REACH_INCREASE))));
+    }
+    
+    protected static @Nullable InfernoDemon demonEntityFromDamageEventOrNull(@NotNull HariantDamageEvent ev) {
+        if (!(ev.getAttacker() instanceof HariantPlayer player) || !player.getHero().equals(HeroRegistry.INFERNO) || ev.getDamageType() != DamageType.MELEE) {
+            return null;
+        }
+        
+        return player.getHeroData(HeroRegistry.INFERNO, HeroDataInferno::new).currentDemon;
     }
     
 }

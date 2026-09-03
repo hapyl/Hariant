@@ -35,7 +35,7 @@ public final class TalentShieldRam extends Talent {
     private final VanillaAttributeModifier vanillaAttributeModifier = VanillaAttributeModifier.create(
             Key.ofString("shield_ram"),
             Attribute.STEP_HEIGHT,
-            VanillaAttributeModifier.Operation.FLAT,
+            VanillaAttributeModifier.Operation.ADDITIVE,
             1.0
     );
     

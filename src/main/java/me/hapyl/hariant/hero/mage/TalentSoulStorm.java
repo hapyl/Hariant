@@ -2,9 +2,10 @@ package me.hapyl.hariant.hero.mage;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.achievement.AchievementRegistry;
+import me.hapyl.hariant.attribute.AttributeScaling;
+import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
@@ -12,104 +13,80 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.executor.Executable;
-import me.hapyl.hariant.util.ComponentFormatter;
-import me.hapyl.hariant.util.Definition;
+import me.hapyl.hariant.task.executor.ExecutorService;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class TalentSoulStorm extends TalentUltimate {
     
-    private final @DisplayField Decimal maximumSoulsConsumed = Decimal.ofValue(10);
-    private final @DisplayField Decimal minimumSoulsRequired = Decimal.ofValue(2);
-    private final @DisplayField Decimal maximumSoulStormCharges = Decimal.ofValue(maximumSoulsConsumed.doubleValue() / minimumSoulsRequired.doubleValue());
+    public final @DisplayField Decimal castingDuration = Decimal.ofSeconds(1.25f);
     
-    private final @DisplayField ComponentFormatter soulToRestlessSoulConversionRatio = ComponentFormatter.format(Component.text("2/1", Colors.SUCCESS));
+    public final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 75);
+    
+    public final @DisplayField Decimal distance = Decimal.ofValue(30);
+    public final @DisplayField Decimal radius = Decimal.ofValue(1.5f);
+    public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 100);
+    public final @DisplayField Decimal damagePeriod = Decimal.ofSeconds(0.5f);
+    
+    public final Key cooldownKey = Key.ofString("soul_storm_icd");
     
     public TalentSoulStorm(@NotNull Key key) {
-        super(key, Component.text("Soul Storm"), Icon.ofMaterial(Material.WARDEN_SPAWN_EGG), UltimateResourceType.ENERGY, 50);
+        super(key, Component.text("Soul Storm"), Icon.ofMaterial(Material.WARDEN_SPAWN_EGG), UltimateResourceType.ENERGY, 60);
         
-        setTalentType(TalentType.ENHANCE);
+        setTalentType(TalentType.DAMAGE);
         
+        setDurationSeconds(5);
         setCooldownSeconds(20);
         
         setDescription(
                 Component.empty()
-                         .append(Component.text("Consume up to "))
-                         .append(maximumSoulsConsumed)
-                         .appendSpace()
-                         .append(Definition.SOUL_FRAGMENT)
-                         .append(Component.text("s", Definition.SOUL_FRAGMENT.getStyle()))
-                         .append(Component.text(", converting them into "))
-                         .append(Component.text("Restless Souls", Colors.RESTLESS_SOUL))
-                         .append(Component.text(" with a "))
-                         .append(soulToRestlessSoulConversionRatio)
-                         .append(Component.text(" ratio."))
+                         .append(Component.text("Start charging a powerful Soul Storm."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("Requires at least %s souls.".formatted(minimumSoulsRequired.intValue()), Colors.DARK_GRAY))
+                         .append(Component.text("After "))
+                         .append(castingDuration)
+                         .append(Component.text(", release the "))
+                         .append(Component.text("souls", Colors.SOUL))
+                         .append(Component.text(" that rush forward, dealing "))
+                         .append(ElementType.AETHER.asComponentAreaOfEffectDamage())
+                         .append(Component.text(" and apply "))
+                         .append(ElementType.AETHER)
+                         .append(Component.text(" anomaly."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("Restless Soul", Colors.ORANGE))
-                         .appendNewline()
-                         .append(WeaponSoulEaterUltimate.WeaponRangeProjectileTypeRestlessSoul.DESCRIPTION)
-                         .appendNewline()
-                         .appendNewline()
-                         .append(
-                                 Component.empty()
-                                          .append(Component.text("Restless Souls are used before ", Colors.DARK_GRAY))
-                                          .append(Definition.SOUL_FRAGMENT.asComponent().color(Colors.DARK_GRAY))
-                                          .append(Component.text(".", Colors.DARK_GRAY))
-                         )
+                         .append(Component.text("The souls can pass through solid blocks.", Colors.DARK_GRAY))
         );
     }
     
     @Override
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
-        final HeroDataMage heroData = player.getHeroData(HeroRegistry.MAGE, HeroDataMage::new);
+        final Location location = player.getEyeLocation();
+        final Vector vector = location.getDirection().normalize();
         
-        final int soulsUsed = Math.min((heroData.getSouls() / minimumSoulsRequired.intValue()) * minimumSoulsRequired.intValue(), maximumSoulsConsumed.intValue());
-        final int soulStormCharges = soulsUsed / minimumSoulsRequired.intValue();
-        
-        // Decrement souls
-        heroData.decrementSouls(soulsUsed);
-        
-        player.spawnWorldParticle(player.getMidpointLocation(), Particle.SCULK_SOUL, 10, 0.1, 0.1, 0.1, 0.3f);
-        
-        // Achievement
-        if (soulsUsed == maximumSoulsConsumed.intValue()) {
-            AchievementRegistry.MAGE_SOUL_STORM.progress(player.getProfile());
-        }
-        
-        return Executable.await(promise -> {
-            heroData.createSoulStorm(soulStormCharges, maximumSoulStormCharges.intValue(), promise);
-        });
+        return new ExecutorService()
+                .then(Executable.execute(() -> {
+                    // Fx
+                    player.playWorldSound(Sound.ENTITY_WARDEN_EMERGE, 5, 2.0f);
+                    
+                    player.spawnWorldParticle(location, Particle.SOUL, 50, 0.2, 0.2, 0.2, 0.15f);
+                    player.spawnWorldParticle(location, Particle.SONIC_BOOM, 1, 0);
+                }))
+                .then(Executable.later(() -> {
+                    // Don't delegate
+                    new SoulStorm(player, location, vector, TalentSoulStorm.this);
+                }, castingDuration.intValue()));
     }
     
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
-        return new TalentTarget() {
-            @Override
-            public @Nullable TalentContext createContext(@NotNull HariantPlayer player) {
-                return player.getHeroData(HeroRegistry.MAGE, HeroDataMage::new).getSouls() < minimumSoulsRequired.intValue()
-                       ? null
-                       : TalentContext.empty();
-            }
-            
-            @Override
-            public @NotNull Component errorMessage() {
-                return Component.text("Not enough souls!");
-            }
-        };
-    }
-    
-    public @NotNull Decimal getMaximumSoulsConsumed() {
-        return maximumSoulsConsumed;
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
+        return TalentTarget.none();
     }
     
 }

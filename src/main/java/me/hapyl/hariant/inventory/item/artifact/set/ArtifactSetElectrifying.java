@@ -18,12 +18,11 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class ArtifactSetElectrifying extends ArtifactSet implements Listener {
     
     private final ArtifactSetModifier electricDamageBonus = CommonArtifactSetModifiers.ELECTRIC_DAMAGE_BONUS;
-    private final Decimal energyRegeneration = Decimal.ofValue(8);
+    private final Decimal energyRegeneration = Decimal.ofValue(6);
     
     private final HariantCooldown energyRegenerationCooldown = HariantCooldown.ofSeconds(Key.ofString("electrifying"), 6f);
     
@@ -52,9 +51,8 @@ public final class ArtifactSetElectrifying extends ArtifactSet implements Listen
         );
     }
     
-    @Nullable
     @Override
-    public ElementType getEffectiveElementType() {
+    public @NotNull ElementType getEffectiveElementType() {
         return ElementType.ELECTRIC;
     }
     
@@ -101,7 +99,6 @@ public final class ArtifactSetElectrifying extends ArtifactSet implements Listen
         ModifierTwoPiece(@NotNull HariantEntity applier) {
             super(ArtifactSetElectrifying.this, PieceCount.TWO_PIECE, applier, electricDamageBonus);
         }
-        
     }
     
 }

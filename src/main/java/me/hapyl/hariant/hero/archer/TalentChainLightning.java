@@ -12,10 +12,10 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -29,20 +29,20 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public final class TalentChainLightning extends Talent implements Listener {
+public final class TalentChainLightning extends Talent {
     
     private static final Color ARROW_COLOR = Color.fromRGB(Colors.ELEMENT_ELECTRIC.value());
     private static final ParticleBuilder PARTICLE_CHAIN_LIGHTNING = ParticleBuilder.dustColorTransition(Color.fromRGB(240, 213, 79), Color.fromRGB(252, 186, 3), 1);
     
-    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 207);
-    private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 200);
+    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 186.3);
+    private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 250);
     
     private final @DisplayField Decimal maxChainReaction = Decimal.ofValue(2);
     private final @DisplayField Decimal maxChainReactionDistance = Decimal.ofValue(6);
@@ -74,97 +74,14 @@ public final class TalentChainLightning extends Talent implements Listener {
         
     }
     
-    @EventHandler
-    public void handleHariantProjectileHitEvent(HariantProjectileHitEvent ev) {
-        final HariantEntity entity = ev.getEntity();
-        final HariantProjectile projectile = ev.getProjectile();
-        
-        if (entity == null || !(projectile.getDamageSource() instanceof ChainLightningArrowDamageSource damageSource)) {
-            return;
-        }
-        
-        if (!(damageSource.getSource() instanceof HariantPlayer player)) {
-            return;
-        }
-        
-        // Find the targets
-        final List<HariantEntity> chainLightningTarget = findChainLightningTarget(player, entity);
-        final int targetsSize = chainLightningTarget.size();
-        
-        // Affect the entities
-        for (int i = 0; i < targetsSize; i++) {
-            final HariantEntity targetCurrent = chainLightningTarget.get(i);
-            final HariantEntity targetNext = i + 1 < targetsSize ? chainLightningTarget.get(i + 1) : null;
-            
-            // Damage non-first entity, because the arrow does the damage for that one
-            if (i != 0) {
-                targetCurrent.damage(ev.getProjectile().getDamageSource());
-            }
-            
-            // Fx
-            if (targetNext != null) {
-                this.drawLightning(player.getWorld(), Vector3.ofLocation(targetCurrent.getMidpointLocation()), Vector3.ofLocation(targetNext.getMidpointLocation()), 0.25, 3);
-            }
-            
-            targetCurrent.playWorldSound(Sound.ENTITY_LIGHTNING_BOLT_THUNDER, player.getRandom().nextFloat(1.25f, 2f));
-        }
-        
-        // Trigger achievement
-        if (targetsSize == (maxChainReaction.intValue() + 1)) {
-            AchievementRegistry.ARCHER_CHAIN_LIGHTNING.progress(player.getProfile());
-        }
-    }
-    
-    @NotNull
-    public List<HariantEntity> findChainLightningTarget(@NotNull HariantPlayer player, @NotNull HariantEntity entity) {
-        final List<HariantEntity> result = Lists.newArrayList();
-        result.add(entity);
-        
-        final int maxChainReaction = this.maxChainReaction.intValue();
-        final double maxChainReactionDistance = this.maxChainReactionDistance.doubleValue();
-        
-        HariantEntity current = entity;
-        
-        while (result.size() <= maxChainReaction) {
-            HariantEntity closestEntity = null;
-            double closestDistance = 0;
-            
-            for (HariantEntity potentialEntity : current.collectNearbyEntities(maxChainReactionDistance).toList()) {
-                final double distanceToSquared = current.distanceToSquared(potentialEntity);
-                
-                // If already chained or not valid, skip
-                if (result.contains(potentialEntity) || !player.canAffect(potentialEntity)) {
-                    continue;
-                }
-                
-                if (closestEntity == null || distanceToSquared < closestDistance) {
-                    closestEntity = potentialEntity;
-                    closestDistance = distanceToSquared;
-                }
-            }
-            
-            // No more entities to link
-            if (closestEntity == null) {
-                break;
-            }
-            
-            current = closestEntity;
-            result.add(closestEntity);
-        }
-        
-        return result;
-    }
-    
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
     }
     
-    @NotNull
     @Override
-    public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        player.launchProjectile(Arrow.class, new ChainLightningArrowDamageSource(player, damage.getScaledValue(player)), self -> self.setColor(ARROW_COLOR));
+    public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+        player.launchProjectile(Arrow.class, new ChainLightningArrowDamageSource(player, damage.getScaledValue(player)), ChainLightningProjectile::new);
         
         // Fx
         player.playWorldSound(Sound.ENTITY_ARROW_SHOOT, 0.75f);
@@ -173,27 +90,113 @@ public final class TalentChainLightning extends Talent implements Listener {
         return Response.ok();
     }
     
-    private void drawLightning(@NotNull World world, @NotNull Vector3 from, @NotNull Vector3 to, double offset, int depth) {
-        if (depth == 0) {
-            Geometry.drawLine(from.toLocation(world), to.toLocation(world), 0.25, PARTICLE_CHAIN_LIGHTNING::display);
-            return;
+    private class ChainLightningProjectile extends HariantProjectile {
+        
+        ChainLightningProjectile(@NotNull Arrow projectile, @NotNull DamageSource damageSource) {
+            super(projectile, damageSource);
+            
+            projectile.setColor(ARROW_COLOR);
         }
         
-        final Vector3 midpoint = from.midpoint(to);
-        final Vector3 direction = to.subtract(from);
+        @Override
+        public void onHit(@Nullable HariantEntity entity, @Nullable Block block) {
+            super.onHit(entity, block);
+            
+            if (entity == null) {
+                return;
+            }
+            
+            final HariantEntity shooter = getShooter();
+            
+            // Find the targets
+            final List<HariantEntity> chainLightningTarget = findChainLightningTarget(shooter, entity);
+            final int targetsSize = chainLightningTarget.size();
+            
+            // Affect the entities
+            for (int i = 0; i < targetsSize; i++) {
+                final HariantEntity targetCurrent = chainLightningTarget.get(i);
+                final HariantEntity targetNext = i + 1 < targetsSize ? chainLightningTarget.get(i + 1) : null;
+                
+                // Damage non-first entity, because the arrow does the damage for that one
+                if (i != 0) {
+                    targetCurrent.damage(this.getDamageSource());
+                }
+                
+                // Fx
+                if (targetNext != null) {
+                    this.drawLightning(entity.getWorld(), Vector3.ofLocation(targetCurrent.getMidpointLocation()), Vector3.ofLocation(targetNext.getMidpointLocation()), 0.25, 3);
+                }
+                
+                targetCurrent.playWorldSound(Sound.ENTITY_LIGHTNING_BOLT_THUNDER, entity.random.nextFloat(1.25f, 2f));
+            }
+            
+            // Trigger achievement
+            if (entity instanceof HariantPlayer player && targetsSize == (maxChainReaction.intValue() + 1)) {
+                AchievementRegistry.ARCHER_CHAIN_LIGHTNING.progress(player.getProfile());
+            }
+        }
         
-        final Vector3 perpendicular = perpendicular(direction);
-        final Vector3 newMidpoint = midpoint.add(perpendicular.multiply(Hariant.getRandom().nextDouble(-offset, offset)));
+        public @NotNull List<HariantEntity> findChainLightningTarget(@NotNull HariantEntity source, @NotNull HariantEntity entity) {
+            final List<HariantEntity> result = Lists.newArrayList();
+            result.add(entity);
+            
+            final int maxChainReaction = TalentChainLightning.this.maxChainReaction.intValue();
+            final double maxChainReactionDistance = TalentChainLightning.this.maxChainReactionDistance.doubleValue();
+            
+            HariantEntity current = entity;
+            
+            while (result.size() <= maxChainReaction) {
+                HariantEntity closestEntity = null;
+                double closestDistance = 0;
+                
+                for (HariantEntity potentialEntity : current.collectNearbyEntities(maxChainReactionDistance).toList()) {
+                    final double distanceToSquared = current.distanceToSquared(potentialEntity);
+                    
+                    // If already chained or not valid, skip
+                    if (result.contains(potentialEntity) || !source.canAffect(potentialEntity)) {
+                        continue;
+                    }
+                    
+                    if (closestEntity == null || distanceToSquared < closestDistance) {
+                        closestEntity = potentialEntity;
+                        closestDistance = distanceToSquared;
+                    }
+                }
+                
+                // No more entities to link
+                if (closestEntity == null) {
+                    break;
+                }
+                
+                current = closestEntity;
+                result.add(closestEntity);
+            }
+            
+            return result;
+        }
         
-        this.drawLightning(world, from, newMidpoint, offset * 0.5, depth - 1);
-        this.drawLightning(world, newMidpoint, to, offset * 0.5, depth - 1);
-    }
-    
-    @NotNull
-    private Vector3 perpendicular(@NotNull Vector3 vector) {
-        final Vector3 perpendicular = vector.crossProduct(Vector3.up());
+        private void drawLightning(@NotNull World world, @NotNull Vector3 from, @NotNull Vector3 to, double offset, int depth) {
+            if (depth == 0) {
+                Geometry.drawLine(from.toLocation(world), to.toLocation(world), 0.25, PARTICLE_CHAIN_LIGHTNING::display);
+                return;
+            }
+            
+            final Vector3 midpoint = from.midpoint(to);
+            final Vector3 direction = to.subtract(from);
+            
+            final Vector3 perpendicular = perpendicular(direction);
+            final Vector3 newMidpoint = midpoint.add(perpendicular.multiply(Hariant.getRandom().nextDouble(-offset, offset)));
+            
+            this.drawLightning(world, from, newMidpoint, offset * 0.5, depth - 1);
+            this.drawLightning(world, newMidpoint, to, offset * 0.5, depth - 1);
+        }
         
-        return perpendicular.lengthSquared() != 0 ? perpendicular : vector.crossProduct(new Vector3(1, 0, 0));
+        private @NotNull Vector3 perpendicular(@NotNull Vector3 vector) {
+            final Vector3 perpendicular = vector.crossProduct(Vector3.up());
+            
+            return perpendicular.lengthSquared() != 0 ? perpendicular : vector.crossProduct(new Vector3(1, 0, 0));
+        }
+        
     }
     
     public class ChainLightningArrowDamageSource extends DamageSourceArcherTalent {

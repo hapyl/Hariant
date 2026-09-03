@@ -5,7 +5,7 @@ import me.hapyl.eterna.module.block.display.DisplayEntity;
 import me.hapyl.eterna.module.block.display.DisplayModel;
 import me.hapyl.eterna.module.entity.Entities;
 import me.hapyl.hariant.attribute.instance.Attributes;
-import me.hapyl.hariant.entity.damage.DamageSource;
+import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -37,12 +37,11 @@ public class HariantDisplayEntity extends HariantEntity {
     
     @Override
     @OverridingMethodsMustInvokeSuper
-    @NotNull
-    public ImmunityResult isImmuneTo(@NotNull DamageSource source) {
-        final DamageType damageType = source.getDamageType();
+    public boolean isImmuneTo(@NotNull DamageInstance damageInstance) {
+        final DamageType damageType = damageInstance.getDamageType();
         
         // Default immunity to all environment damage
-        return ImmunityResult.ofBooleanSilent(damageType == DamageType.ENVIRONMENT);
+        return damageType == DamageType.ENVIRONMENT;
     }
     
     @NotNull

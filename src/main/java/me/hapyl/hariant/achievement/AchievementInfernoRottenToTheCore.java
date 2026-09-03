@@ -2,16 +2,16 @@ package me.hapyl.hariant.achievement;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.entity.mutator.HealthMutatorDecay;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.hero.inferno.InfernoDemonType;
-import me.hapyl.hariant.util.Definition;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 public final class AchievementInfernoRottenToTheCore extends AchievementHeroImpl {
     
-    private static final int DECAY_TO_APPLY = 2000;
+    private static final int DECAY_TO_APPLY = 666;
     
     AchievementInfernoRottenToTheCore(@NotNull Key key) {
         super(
@@ -22,7 +22,7 @@ public final class AchievementInfernoRottenToTheCore extends AchievementHeroImpl
                         .append(Component.text("Apply "))
                         .append(Component.text("%,d".formatted(DECAY_TO_APPLY), Colors.RED))
                         .append(Component.text(" worth of "))
-                        .append(Definition.DECAY)
+                        .append(HealthMutatorDecay.COMPONENT)
                         .append(Component.text(" to enemies within a single use of "))
                         .append(InfernoDemonType.QUAZII.getName())
                         .append(Component.text(" death beam.")),

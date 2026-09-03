@@ -25,7 +25,7 @@ public final class AchievementChainOfCommand extends AchievementImpl implements 
     
     @EventHandler
     public void handleHariantFerocityEvent(HariantFerocityEvent ev) {
-        if (!(ev.getSource() instanceof HariantPlayer player)) {
+        if (!(ev.getFerocitySource().getSource() instanceof HariantPlayer player)) {
             return;
         }
         

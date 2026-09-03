@@ -17,8 +17,7 @@ public class HariantRandom extends Random {
         super(seed);
     }
     
-    @NotNull
-    public <E> E choice(@NotNull Collection<? extends E> collection) {
+    public @NotNull <E> E choice(@NotNull Collection<? extends E> collection) {
         final int randomIndex = nextInt(collection.size());
         
         if (collection instanceof List<? extends E> list) {
@@ -37,8 +36,7 @@ public class HariantRandom extends Random {
         throw new IllegalArgumentException("Cannot choose a random element from an empty collection!");
     }
     
-    @NotNull
-    public <E> E choice(@NotNull E[] array) {
+    public @NotNull <E> E choice(@NotNull E[] array) {
         if (array.length == 0) {
             throw new IllegalArgumentException("Cannot choose a random element from an empty array!");
         }

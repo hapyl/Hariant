@@ -80,7 +80,7 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements Action
         if (abyssalCorrosion > 0) {
             // If corrosion is higher than or equals to maximum, just die
             if (abyssalCorrosion >= TalentRegistry.ABYSSAL_CORROSION.maximumCorrosion.doubleValue()) {
-                player.die(DamageSource.death(OVERDOSE).build());
+                player.die(DamageSource.death(OVERDOSE));
                 
                 // Trigger achievement
                 AchievementRegistry.ALCHEMIST_I_THINK_I_DRANK_TOO_MUCH.progress(player.getProfile());

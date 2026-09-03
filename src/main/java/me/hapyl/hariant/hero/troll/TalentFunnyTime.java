@@ -27,10 +27,10 @@ public class TalentFunnyTime extends TalentUltimate {
     
     private final @DisplayField Decimal period = Decimal.ofSeconds(1);
     private final @DisplayField Decimal prankDelay = Decimal.ofSeconds(0.5f);
-    private final @DisplayField Decimal rotationAngle = Decimal.ofValue(90, value -> Component.text("%.0f°".formatted(value)));
+    private final @DisplayField Decimal rotationAngle = Decimal.ofAngle(90);
     
     public TalentFunnyTime(@NotNull Key key) {
-        super(key, Component.text("Prank Time"), Icon.ofMaterial(Material.CLOCK), UltimateResourceType.ENERGY, 50);
+        super(key, Component.text("Prank Time"), Icon.ofMaterial(Material.CLOCK), UltimateResourceType.ENERGY, 60);
         
         setTalentType(TalentType.IMPAIR);
         setDurationSeconds(5);

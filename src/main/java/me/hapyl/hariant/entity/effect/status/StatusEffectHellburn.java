@@ -5,8 +5,6 @@ import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.effect.EffectType;
-import me.hapyl.hariant.talent.TalentRegistry;
-import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Particle;
 import org.bukkit.event.Listener;
@@ -20,9 +18,7 @@ public class StatusEffectHellburn extends StatusEffectImpl implements Listener {
     
     @Override
     public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
-        final Decimal elementalApplication = TalentRegistry.FIRE_PIT.getHellburnElementalApplication();
-        
-        entity.applyElement(ElementSource.create(ElementType.FIRE, applier, elementalApplication.doubleValue()));
+        entity.applyElement(ElementSource.create(ElementType.FIRE, applier, 1));
         
         entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.LAVA, 1, 0.25, 0.25, 0.25, 0.075f);
         entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.FLAME, 1, 0.25, 0.25, 0.25, 0.075f);

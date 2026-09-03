@@ -1,6 +1,7 @@
 package me.hapyl.hariant.entity;
 
 import me.hapyl.eterna.module.annotate.EventLike;
+import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
@@ -31,7 +32,7 @@ public class PullSource extends HariantTickingTask implements EntityCollector {
         super(Scheduler.ofTimer());
         
         this.source = source;
-        this.centre = centre;
+        this.centre = LocationHelper.copyOf(centre);
         this.assistSource = AssistSource.create(source, name);
         this.duration = duration;
         this.radius = radius;

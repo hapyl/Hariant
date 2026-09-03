@@ -209,8 +209,8 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
         return new DecimalBlocksPerSecondImpl(blocksPerSecond);
     }
     
-    public static @NotNull Decimal ofAngle(double angle) {
-        return new DecimalAngleImpl(angle);
+    public static @NotNull Decimal ofAngle(double angleDegrees) {
+        return new DecimalAngleImpl(angleDegrees);
     }
     
 }

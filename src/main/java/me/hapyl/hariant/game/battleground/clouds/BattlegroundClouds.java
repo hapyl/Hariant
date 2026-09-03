@@ -26,7 +26,7 @@ public final class BattlegroundClouds extends BattlegroundImpl {
             Key.ofString("fell_of_clouds"),
             Component.text("Fell out of Clouds"),
             DeathMessage.createWithDefaultKiller("{player} fell from the clouds")
-    )).build();
+    ));
     
     public BattlegroundClouds() {
         super(

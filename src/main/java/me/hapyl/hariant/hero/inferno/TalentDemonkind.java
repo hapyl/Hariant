@@ -8,7 +8,7 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.term.EnumTerminology;
@@ -87,7 +87,7 @@ public final class TalentDemonkind extends TalentPassive implements Listener {
     }
     
     @EventHandler
-    public void handleHariantDamageEvent(HariantDamageEvent ev) {
+    public void handleHariantDamageComputeEvent(HariantDamageComputeEvent ev) {
         final HariantEntity entity = ev.getEntity();
         
         if (!(entity instanceof HariantPlayer player)) {
@@ -100,7 +100,7 @@ public final class TalentDemonkind extends TalentPassive implements Listener {
         
         // Cancel all FIRE damage
         if (ev.getElementType() == ElementType.FIRE && ev.getDamageType() == DamageType.ENVIRONMENT) {
-            ev.cancel(HariantDamageEvent.cancel(this));
+            ev.cancel(HariantDamageComputeEvent.cancel(this));
         }
     }
     

@@ -5,6 +5,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.entity.HariantEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,11 @@ public final class AttributesInstanceSnapshotEnvironment implements AttributesIn
     @Override
     public Optional<HariantEntity> entity() {
         return Optional.empty();
+    }
+    
+    @Override
+    public @Nullable HariantEntity entityOrNull() {
+        return null;
     }
     
     @Override

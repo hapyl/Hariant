@@ -4,7 +4,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageSource;
+import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.shield.Shield;
 import me.hapyl.hariant.entity.shield.ShieldStrength;
@@ -77,7 +77,7 @@ public final class TalentMalevolentHitshield extends Talent {
         }
         
         @Override
-        public boolean canShield(@NotNull DamageSource damageSource) {
+        public boolean canShield(@NotNull DamageInstance damageInstance) {
             // Always shields, regardless of the source
             return true;
         }

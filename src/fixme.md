@@ -14,13 +14,27 @@
 - ~~Cannot damage while stunned is WHITE~~
  
 + Next Hero - Bounty Hunter
-+ Inferno ult casting time too long
-+ Zealot data not reset
-+ Wrong placemenent
-+ Wrong time
 + Sum level rewards?
 
-  [IDEAS]
+
++ Add achievement complete in chat
++ Add per map time/weather
++ Cannot press buttons/pressure plates while have player
++ Impl end portal & library teleport
++ Change Stream -> Stream Capture for EntityCollector
++ Remove newline in placements
++ FUCK THEM CARPETS
++ Void charges not removed on death
++ Add fx to teleport
++ Inferno nerf and Quazii change
++ Nerf archer
++ Reset void on death
++ Is there config loading problem?
+- Wait why does modifier damage throws concurrent? Removal is done one tick after? And check corrosion
+
+---
+
+[IDEAS]
 
 - Maybe change damage report to use team color bars
 
@@ -28,6 +42,8 @@
 
 # FIXED
 
++ ~~Wrong placemenent~~
++ ~~Wrong time~~
 - ~~Achievement families~~
 - ~~Inferno ultimate change~~
 - ~~Add fx and achievement when casting is interrupted~~

@@ -9,36 +9,29 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Scheduler {
     
-    @NotNull
-    BukkitTask schedule(@NotNull Runnable runnable);
+    @NotNull BukkitTask schedule(@NotNull Runnable runnable);
     
-    @NotNull
-    static Scheduler ofNow() {
+    static @NotNull Scheduler ofNow() {
         return create(BukkitScheduler::runTask);
     }
     
-    @NotNull
-    static Scheduler ofDelayed(final int delay) {
+    static @NotNull Scheduler ofDelayed(final int delay) {
         return create((scheduler, plugin, runnable) -> scheduler.runTaskLater(plugin, runnable, delay));
     }
     
-    @NotNull
-    static Scheduler ofTimer(final int delay, final int period) {
+    static @NotNull Scheduler ofTimer(final int delay, final int period) {
         return create(((scheduler, plugin, runnable) -> scheduler.runTaskTimer(plugin, runnable, delay, period)));
     }
     
-    @NotNull
-    static Scheduler ofTimer(final int period) {
+    static @NotNull Scheduler ofTimer(final int period) {
         return ofTimer(0, period);
     }
     
-    @NotNull
-    static Scheduler ofTimer() {
+    static @NotNull Scheduler ofTimer() {
         return ofTimer(0, 1);
     }
     
-    @NotNull
-    private static Scheduler create(@NotNull BukkitSchedulerSupplier supplier) {
+    private static @NotNull Scheduler create(@NotNull BukkitSchedulerSupplier supplier) {
         return runnable -> supplier.supply(Bukkit.getScheduler(), Hariant.getPlugin(), runnable);
     }
     

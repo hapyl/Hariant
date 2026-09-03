@@ -26,7 +26,7 @@ public final class HeroShark extends Hero {
     private final VanillaAttributeModifier vanillaAttributeModifier = VanillaAttributeModifier.create(
             Key.ofString("shark_modifier"),
             Attribute.WATER_MOVEMENT_EFFICIENCY,
-            VanillaAttributeModifier.Operation.FLAT,
+            VanillaAttributeModifier.Operation.ADDITIVE,
             2.5
     );
     

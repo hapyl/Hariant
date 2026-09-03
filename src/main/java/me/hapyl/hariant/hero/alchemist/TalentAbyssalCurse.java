@@ -10,10 +10,11 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.HariantRandom;
-import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -300,13 +301,11 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         }
         
         public void boom() {
-            bearer.damage(
-                    DamageSource.builder(damageSourceIdentity, bearer.getMaxHealth() * curseDamage.doubleValue())
-                                // If the last bearer is the one who applied the curse, source the kill to whoever last transferred the curse
-                                .source(bearer.equals(player) ? lastTransferer != null ? lastTransferer : player : player)
-                                .elementType(ElementType.AETHER)
-                                .build()
-            );
+            bearer.damage(new AbyssalCurseDamageSource(
+                    bearer.getMaxHealth() * curseDamage.doubleValue(),
+                    // If the last bearer is the one who applied the curse, source the kill to whoever last transferred the curse
+                    bearer.equals(player) ? lastTransferer != null ? lastTransferer : player : player
+            ));
             
             // Fx
             final Location location = bearer.getLocation();
@@ -382,6 +381,14 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         public void onCancel() {
             globalCurses.remove(this);
         }
+    }
+    
+    private class AbyssalCurseDamageSource extends DamageSourceImpl {
+        
+        AbyssalCurseDamageSource(final double damage, @NotNull HariantEntity source) {
+            super(damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damage, 0);
+        }
+        
     }
     
 }

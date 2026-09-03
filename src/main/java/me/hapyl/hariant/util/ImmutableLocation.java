@@ -2,7 +2,7 @@ package me.hapyl.hariant.util;
 
 import me.hapyl.eterna.module.location.Coordinates;
 import me.hapyl.eterna.module.location.Located;
-import org.bukkit.Bukkit;
+import me.hapyl.hariant.Hariant;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -12,8 +12,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class ImmutableLocation implements Coordinates, Located, Comparable<ImmutableLocation> {
-    
-    private static final World WORLD = Objects.requireNonNull(Bukkit.getWorlds().getFirst(), "Unloaded world!");
     
     private final double x;
     private final double y;
@@ -47,18 +45,18 @@ public final class ImmutableLocation implements Coordinates, Located, Comparable
     @NotNull
     @Override
     public Location getLocation() {
-        return new Location(WORLD, x, y, z, yaw, pitch);
+        return new Location(Hariant.WORLD, x, y, z, yaw, pitch);
     }
     
     @NotNull
     @Override
     public World getWorld() {
-        return WORLD;
+        return Hariant.WORLD;
     }
     
     @NotNull
     public Location getCenteredLocation() {
-        return new Location(WORLD, x + 0.5, y, z + 0.5, yaw, pitch);
+        return new Location(Hariant.WORLD, x + 0.5, y, z + 0.5, yaw, pitch);
     }
     
     @Override

@@ -5,9 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DamageMutator extends Identified {
     
-    @NotNull
     @Override
-    String identify();
+    @NotNull String identify();
     
     double mutate(double damage, final double value);
     

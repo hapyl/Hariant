@@ -21,7 +21,7 @@ public final class DamageComponentElementalResistance implements DamageComponent
     
     @Override
     public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot entity, @NotNull AttributesInstanceSnapshot attacker) {
-        final ElementType elementType = damageInstance.getDamageSource().getElementType();
+        final ElementType elementType = damageInstance.getElementType();
         final AttributeType defensiveAttribute = elementType.getDefensiveAttribute();
         
         if (defensiveAttribute == null) {

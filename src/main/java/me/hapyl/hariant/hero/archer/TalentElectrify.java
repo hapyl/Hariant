@@ -9,10 +9,7 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -42,6 +39,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 public final class TalentElectrify extends TalentUltimate implements Listener {
     
@@ -87,8 +86,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
     }
     
     @Override
-    @NotNull
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
     }
     
@@ -113,7 +111,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
         
         archerData.setInfused(false);
         
-        final Projectile handle = projectile.getHandle();
+        final Projectile handle = projectile.getProjectile();
         
         final ElectrifyArrowDamageSource damageSource = new ElectrifyArrowDamageSource(player);
         projectile.setDamageSource(damageSource);
@@ -139,9 +137,8 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
         player.playWorldSound(Sound.ENTITY_BREEZE_DEATH, 1.0f);
     }
     
-    @NotNull
     @Override
-    public Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
+    public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
         final int duration = this.getDuration();
         
         final HeroDataArcher archerData = player.getHeroData(HeroRegistry.ARCHER, HeroDataArcher::new);
@@ -210,13 +207,16 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
             // The one defines the arrow damage, which shouldn't actually deal damage
             super(damageSourceIdentity, attacker, 1, 0);
             
-            this.damageSource = DamageSource.builder(damageSourceIdentity, explosionDamage.getScaledValue(attacker))
-                                            .source(attacker)
-                                            .elementType(ElementType.ELECTRIC)
-                                            .elementalUnits(elementalApplication.doubleValue())
-                                            .damageType(DamageType.ULTIMATE)
-                                            .components(DamageComponents.ofCommon())
-                                            .build();
+            // This is the explosion damage
+            this.damageSource = new ElectrifyExplosionDamageSource(attacker);
+        }
+        
+    }
+    
+    private class ElectrifyExplosionDamageSource extends DamageSourceImpl {
+        
+        ElectrifyExplosionDamageSource(@NotNull HariantEntity source) {
+            super(damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.ELECTRIC, DamageComponents.ofCommon(), Set.of(), explosionDamage.getScaledValue(source), elementalApplication.doubleValue());
         }
         
     }

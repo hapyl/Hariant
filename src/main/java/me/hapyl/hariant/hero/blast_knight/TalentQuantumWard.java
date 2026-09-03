@@ -14,7 +14,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.talent.Response;
@@ -127,7 +127,7 @@ public final class TalentQuantumWard extends Talent implements Listener {
     }
     
     @EventHandler
-    public void handleHariantDamageEvent(HariantDamageEvent ev) {
+    public void handleHariantDamageComputeEvent(HariantDamageComputeEvent ev) {
         final HariantEntity entity = ev.getEntity();
         final EnumTeam team = entity.getTeam().orElse(null);
         

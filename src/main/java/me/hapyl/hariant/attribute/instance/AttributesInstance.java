@@ -31,7 +31,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
         super(copyFrom);
         
         this.entity = entity;
-        this.modifiers = Maps.newLinkedHashMap();    // Keep order, literally just for the display purpose
+        this.modifiers = Maps.newLinkedHashMap(); // Keep order, literally just for the display purpose
     }
     
     @NotNull

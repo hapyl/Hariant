@@ -10,7 +10,7 @@ import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.Cancel;
 import me.hapyl.hariant.event.HariantAttackEvent;
-import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -69,7 +69,7 @@ public class StatusEffectStunned extends StatusEffectImpl implements Listener {
     }
     
     @EventHandler
-    public void handleHariantDamageEvent(HariantDamageEvent ev) {
+    public void handleHariantDamageComputeEvent(HariantDamageComputeEvent ev) {
         final HariantEntity entity = ev.getEntity();
         
         if (entity.hasEffect(StatusEffectType.STUNNED)) {

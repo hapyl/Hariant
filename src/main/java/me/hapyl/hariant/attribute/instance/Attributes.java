@@ -12,8 +12,7 @@ import java.util.EnumMap;
 
 public class Attributes implements AttributesBase {
     
-    @NotEmpty
-    protected final EnumMap<AttributeType, Double> attributeMap;
+    protected final @NotEmpty EnumMap<AttributeType, Double> attributeMap;
     
     public Attributes(@Nullable Attributes copyFrom) {
         this.attributeMap = Maps.newEnumMap(AttributeType.class);
@@ -78,8 +77,7 @@ public class Attributes implements AttributesBase {
                  : Component.text("■", Colors.DARK_GRAY);
     }
     
-    @NotNull
-    public static Attributes base(final double maxHealth, final double attack, final double defense) {
+    public static @NotNull Attributes base(final double maxHealth, final double attack, final double defense) {
         final Attributes attributes = new Attributes(null);
         attributes.set(AttributeType.MAX_HEALTH, maxHealth);
         attributes.set(AttributeType.ATTACK, attack);
@@ -88,21 +86,11 @@ public class Attributes implements AttributesBase {
         return attributes;
     }
     
-    @NotNull
-    public static Attributes zero() {
-        final Attributes attributes = new Attributes(null);
-        attributes.attributeMap.replaceAll((k, v) -> 0.0);
-        
-        return attributes;
-    }
-    
-    @NotNull
-    public static Attributes common() {
+    public static @NotNull Attributes common() {
         return base(1000, 100, 100);
     }
     
-    @NotNull
-    public static Attributes copyOf(@NotNull Attributes attributes) {
+    public static @NotNull Attributes copyOf(@NotNull Attributes attributes) {
         return new Attributes(attributes);
     }
     

@@ -1,15 +1,15 @@
 package me.hapyl.hariant.hero.inferno;
 
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
+import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.ImmunityResult;
 import me.hapyl.hariant.entity.StreamRules;
+import me.hapyl.hariant.entity.VanillaAttributeModifier;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageResult;
-import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.team.EnumTeam;
@@ -17,11 +17,19 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 public abstract class InfernoDemonEntity extends HariantEntity implements InfernoDemon {
+    
+    private static final VanillaAttributeModifier REACH_MODIFIER = VanillaAttributeModifier.create(
+            Key.ofString("demonsplit_reach"),
+            Attribute.ENTITY_INTERACTION_RANGE,
+            VanillaAttributeModifier.Operation.ADDITIVE,
+            TalentDemonsplit.REACH_INCREASE
+    );
     
     protected final HariantPlayer player;
     protected final InfernoDemonType demonType;
@@ -53,6 +61,9 @@ public abstract class InfernoDemonEntity extends HariantEntity implements Infern
                 Hariant.showBukkitEntity(other, getHandle());
             }
         });
+        
+        // Add modifier
+        player.addVanillaAttributeModifier(REACH_MODIFIER);
     }
     
     @Override
@@ -61,14 +72,13 @@ public abstract class InfernoDemonEntity extends HariantEntity implements Infern
     }
     
     @Override
-    public @NotNull ImmunityResult isImmuneTo(@NotNull DamageSource source) {
-        return ImmunityResult.ofBooleanSilent(source.getElementType() == ElementType.FIRE || source.getDamageType() == DamageType.ENVIRONMENT);
+    public boolean isImmuneTo(@NotNull DamageInstance damageInstance) {
+        return damageInstance.getElementType() == ElementType.FIRE || damageInstance.getDamageType() == DamageType.ENVIRONMENT;
     }
     
     @Override
-    public @NotNull DamageResult damage(@NotNull DamageInstance damageInstance) {
-        final DamageSource damageSource = damageInstance.getDamageSource();
-        final DamageType damageType = damageSource.getDamageType();
+    public @NotNull DamageResult damage0(@NotNull DamageInstance damageInstance) {
+        final DamageType damageType = damageInstance.getDamageType();
         
         // Only redirect melee and ranged damage
         if (damageType != DamageType.MELEE && damageType != DamageType.RANGED) {
@@ -103,11 +113,13 @@ public abstract class InfernoDemonEntity extends HariantEntity implements Infern
         
         // Always show the player
         player.show(StreamRules.ALL);
+        
+        // Remove reach modifier
+        player.removeVanillaAttributeModifier(REACH_MODIFIER);
     }
     
-    @NotNull
     @Override
-    public InfernoDemonType getDemonType() {
+    public @NotNull InfernoDemonType getDemonType() {
         return demonType;
     }
     

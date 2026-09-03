@@ -26,13 +26,13 @@ import org.jetbrains.annotations.Nullable;
 
 public final class TalentMetempsychosis extends Talent {
     
-    @DisplayField private final Decimal maxRadius = Decimal.ofValue(30);
-    @DisplayField private final Decimal transmigrationDuration = Decimal.ofSeconds(0.5f);
+    private final @DisplayField Decimal maxRadius = Decimal.ofValue(30);
+    private final @DisplayField Decimal transmigrationDuration = Decimal.ofSeconds(0.5f);
     
     public TalentMetempsychosis(@NotNull Key key) {
         super(key, Component.text("Metempsychosis"), Icon.ofMaterial(Material.ECHO_SHARD));
         
-        setDurationSeconds(1f);
+        setDurationSeconds(0.5f);
         setCooldownSeconds(12);
         
         setTalentType(TalentType.MOVEMENT);
@@ -53,15 +53,13 @@ public final class TalentMetempsychosis extends Talent {
         );
     }
     
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return new TalentTargetMetempsychosis();
     }
     
-    @NotNull
     @Override
-    public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+    public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
         final Location targetLocation = context.retrieve(Location.class);
         
         player.delegate(new Metempsychosis(player, targetLocation), DelegateType.INTERRUPTABLE);

@@ -35,12 +35,6 @@ public enum Definition implements Prefixed, Named, Styled, ComponentLike {
             Style.style(Colors.SOUL)
     ),
     
-    DECAY(
-            Component.text("\uD83D\uDC94"),
-            Component.text("Decay"),
-            Style.style(Colors.DECAY)
-    ),
-    
     QUANTUM_ENERGY(
             Component.text("⚛"),
             Component.text("Quantum Energy"),

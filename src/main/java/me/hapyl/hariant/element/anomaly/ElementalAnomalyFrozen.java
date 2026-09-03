@@ -9,7 +9,7 @@ import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.trap.frozen.TrapFrozen;
-import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
@@ -39,7 +39,7 @@ public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implement
     }
     
     @EventHandler
-    public void handleHariantDamageEvent(HariantDamageEvent ev) {
+    public void handleHariantDamageComputeEvent(HariantDamageComputeEvent ev) {
         final HariantEntity entity = ev.getEntity();
         
         if (!(entity.getTrap() instanceof TrapFrozen)) {

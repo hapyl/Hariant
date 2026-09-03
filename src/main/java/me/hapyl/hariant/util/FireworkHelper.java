@@ -10,8 +10,7 @@ public final class FireworkHelper {
     private FireworkHelper() {
     }
     
-    @NotNull
-    public static Firework spawn(@NotNull Location location, @NotNull FireworkEdit edit) {
+    public static @NotNull Firework spawn(@NotNull Location location, @NotNull FireworkEdit edit) {
         return location.getWorld().spawn(location, Firework.class, self -> {
             final FireworkMeta fireworkMeta = self.getFireworkMeta();
             
@@ -20,8 +19,7 @@ public final class FireworkHelper {
         });
     }
     
-    @NotNull
-    public static Firework explode(@NotNull Location location, @NotNull FireworkEdit edit) {
+    public static @NotNull Firework detonate(@NotNull Location location, @NotNull FireworkEdit edit) {
         final Firework firework = spawn(location, edit);
         firework.detonate();
         return firework;

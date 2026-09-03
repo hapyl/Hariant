@@ -8,11 +8,9 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageSourceImpl;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
+import me.hapyl.hariant.entity.ferocity.FerocitySource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -95,22 +93,15 @@ public final class TalentReckoning extends TalentPassive implements Listener {
     }
     
     public void trigger(@NotNull HariantPlayer player, @NotNull HariantEntity entity) {
-        entity.damageFerocity(entity.createDamageInstance(new ReckoningDamageSource(player)), ferocityHits.intValue(), true);
+        entity.damageFerocity(FerocitySource.create(player, new DamageInstance(entity, new ReckoningDamageSource(player)), ferocityHits.intValue()), true);
     }
     
     public class ReckoningDamageSource extends DamageSourceImpl {
+        
         ReckoningDamageSource(@NotNull HariantEntity source) {
-            super(
-                    damageSourceIdentity,
-                    source,
-                    DamageType.FEROCITY,
-                    ElementType.AETHER,
-                    DamageComponents.ofCommon(),
-                    Set.of(),
-                    damage.getScaledValue(source),
-                    0
-            );
+            super(damageSourceIdentity, source, DamageType.FEROCITY, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damage.getScaledValue(source), 0);
         }
+        
     }
     
 }

@@ -47,33 +47,28 @@ public class HeroArcher extends Hero {
         setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.ENERGY_RECHARGE, AttributeType.ELECTRIC_DAMAGE_BONUS));
     }
     
-    @NotNull
     @Override
-    public TalentTripleShot getFirstTalent() {
+    public @NotNull TalentTripleShot getFirstTalent() {
         return TalentRegistry.TRIPLE_SHOT;
     }
     
-    @NotNull
     @Override
-    public TalentShockDart getSecondTalent() {
+    public @NotNull TalentShockDart getSecondTalent() {
         return TalentRegistry.SHOCK_DART;
     }
     
-    @NotNull
     @Override
-    public TalentChainLightning getThirdTalent() {
+    public @NotNull TalentChainLightning getThirdTalent() {
         return TalentRegistry.CHAIN_LIGHTNING;
     }
     
-    @NotNull
     @Override
-    public TalentHawkeye getPassiveTalent() {
+    public @NotNull TalentHawkeye getPassiveTalent() {
         return TalentRegistry.HAWKEYE;
     }
     
-    @NotNull
     @Override
-    public TalentElectrify getUltimateTalent() {
+    public @NotNull TalentElectrify getUltimateTalent() {
         return TalentRegistry.ELECTRIFY;
     }
     
@@ -82,7 +77,7 @@ public class HeroArcher extends Hero {
             super(
                     Key.ofString("bow_of_destiny"),
                     NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 15, 10),
-                    NormalAttack.ranged(ElementType.PHYSICAL, AttributeType.ATTACK, 105, 10)
+                    NormalAttack.ranged(ElementType.PHYSICAL, AttributeType.ATTACK, 94.5, 10)
             );
             
             this.setName(Component.text("Bow of Destiny"));

@@ -12,7 +12,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 public class DamageSourceArcherTalent extends DamageSourceImpl {
+    
     DamageSourceArcherTalent(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity attacker, double damage, double elementUnits) {
         super(identity, attacker, DamageType.TALENT, ElementType.ELECTRIC, DamageComponents.ofCommon(), Set.of(), damage, elementUnits);
     }
+    
 }

@@ -15,7 +15,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantHealEvent;
-import me.hapyl.hariant.event.HariantMonitorDamageEvent;
+import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.profile.PlayerProfile;
@@ -275,7 +275,7 @@ public final class PlayerHandler implements Listener {
     }
     
     @EventHandler
-    public void handleHariantMonitorDamageEvent(HariantMonitorDamageEvent ev) {
+    public void handleHariantDamageEvent(HariantDamageEvent ev) {
         final DamageInstance damageInstance = ev.getDamageInstance();
         final DamageSource damageSource = damageInstance.getDamageSource();
         

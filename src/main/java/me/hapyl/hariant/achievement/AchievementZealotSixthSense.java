@@ -1,7 +1,6 @@
 package me.hapyl.hariant.achievement;
 
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDeathEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -31,9 +30,7 @@ public final class AchievementZealotSixthSense extends AchievementHeroImpl imple
     
     @EventHandler
     public void handleHariantDeathEvent(HariantDeathEvent ev) {
-        final DamageSource damageSource11 = ev.getDamageInstance().getDamageSource();
-        
-        if (!(damageSource11 instanceof TalentReckoning.ReckoningDamageSource damageSource)) {
+        if (!(ev.getDamageInstance().getDamageSource() instanceof TalentReckoning.ReckoningDamageSource damageSource)) {
             return;
         }
         

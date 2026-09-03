@@ -105,10 +105,11 @@ public class HariantPlayer
     private static final String NO_COLLISION_BUKKIT_TEAM = "no_collision";
     private static final int[] HOT_BAR_SLOTS = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
     
-    private static final @NotNull Component HEALING_SOURCE_PLAYER_ELIMINATION = Component.text("Player Elimination");
-    private static final @NotNull Component HEALING_SOURCE_PLAYER_ASSIST = Component.text("Player Assist");
+    private static final Component HEALING_SOURCE_PLAYER_ELIMINATION = Component.text("Player Elimination");
+    private static final Component HEALING_SOURCE_PLAYER_ASSIST = Component.text("Player Assist");
     
-    private static final @NotNull Component PREFIX_DEATH = PlayerHandler.createPrefix(Component.text("☠", Colors.DARK_RED));
+    private static final Component PREFIX_DEATH = PlayerHandler.createPrefix(Component.text("☠", Colors.DARK_RED));
+    private static final Component COMPONENT_YOU_DIED = Component.text("ʏᴏᴜ ᴅɪᴇᴅ", Colors.ERROR, TextDecoration.BOLD);
     
     private final PlayerProfile profile;
     private final HeroInstance heroInstance;
@@ -312,7 +313,7 @@ public class HariantPlayer
             return;
         }
         
-        fetchGameInstance(gameInstance -> gameInstance.onKill(gameInstance, this, player));
+        supplyCurrentGameInstance(gameInstance -> gameInstance.onKill(gameInstance, this, player));
         
         this.statistics.incrementStatistic(Statistic.KILLS, 1);
         
@@ -346,7 +347,7 @@ public class HariantPlayer
     @Override
     public void onDamageDealt(@NotNull DamageInstance damageInstance, @NotNull HariantEntity entity) {
         // Start the attack cooldown if damage type is MELEE
-        if (damageInstance.getDamageSource().getDamageType() == DamageType.MELEE) {
+        if (damageInstance.getDamageType() == DamageType.MELEE) {
             this.startAttackCooldown(true);
         }
         
@@ -374,11 +375,11 @@ public class HariantPlayer
         player.setGameMode(GameMode.SPECTATOR);
         
         // Increment deaths for the team if the game is in progress
-        fetchGameInstance(gameInstance -> gameInstance.onDeath(gameInstance, this));
+        supplyCurrentGameInstance(gameInstance -> gameInstance.onDeath(gameInstance, this, damageSource.getSource()));
         
         this.statistics.incrementStatistic(Statistic.DEATH, 1);
         
-        this.sendTitle(Component.text("ʏᴏᴜ ᴅɪᴇᴅ", Colors.ERROR, TextDecoration.BOLD), 5, 25, 10);
+        this.sendTitle(COMPONENT_YOU_DIED, 5, 25, 10);
         this.playSound(Sound.ENTITY_BLAZE_DEATH, 1.0f);
         
         // Award eliminations & assists
@@ -402,7 +403,7 @@ public class HariantPlayer
     }
     
     @Override
-    public void onShoot(@NotNull DamageSource damageSource) {
+    public void onShoot() {
         this.startAttackCooldown(false);
     }
     
@@ -993,7 +994,7 @@ public class HariantPlayer
         this.entity.setHealth(Math.max(radio * maxHearts, HariantConstants.ABSOLUTE_MIN_HEALTH));
     }
     
-    private void fetchGameInstance(@NotNull Consumer<GameInstance> consumer) {
+    private static void supplyCurrentGameInstance(@NotNull Consumer<GameInstance> consumer) {
         Hariant.getCurrentGameInstance().ifPresent(consumer);
     }
     

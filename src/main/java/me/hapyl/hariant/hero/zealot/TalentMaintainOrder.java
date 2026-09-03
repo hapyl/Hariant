@@ -15,6 +15,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
+import me.hapyl.hariant.entity.ferocity.FerocitySource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
@@ -150,11 +151,7 @@ public final class TalentMaintainOrder extends TalentUltimate {
                 if (tick >= durationWithImpact) {
                     entities.forEach(entity -> {
                         // Execute ferocity
-                        entity.damageFerocity(
-                                new DamageInstance(entity, damageSourceFerocity),
-                                ferocityStrikes.intValue(),
-                                true
-                        );
+                        entity.damageFerocity(FerocitySource.create(player, new DamageInstance(entity, damageSourceFerocity), ferocityStrikes.intValue()), true);
                     });
                     
                     // Fx

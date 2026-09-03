@@ -28,10 +28,7 @@ import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.util.BooleanExplained;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.ServerTickManager;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -56,6 +53,8 @@ public final class Hariant implements Runnable, Lifecycle {
     
     public static final Component GAME_NAME = Component.text("ʜᴀʀɪᴀɴᴛ", Colors.BRAND_COLOR, TextDecoration.BOLD);
     public static final Component UPDATE_TOPIC = Component.text("👽 Alien Invasion!", Colors.ALIEN);
+    
+    public static final World WORLD = Objects.requireNonNull(Bukkit.getWorlds().getFirst(), "Unloaded world!");
     
     public static final int TICK_RATE_NORMAL = 20;
     public static final int TICK_RATE_SLOW = 2;
@@ -433,11 +432,6 @@ public final class Hariant implements Runnable, Lifecycle {
     /**
      * Retrieves a {@link PlayerDatabase} for the given <b>online</b> player.
      *
-     * <p>
-     * This method must only be used to retrieve a runtime database for a connected player. If you require
-     * a database for offline player, use {@link Hariant#getPlayerDatabase(UUID)} to load a new instance.
-     * </p>
-     *
      * @param player - The online player whose database to get.
      * @return the player database instance.
      */
@@ -712,6 +706,10 @@ public final class Hariant implements Runnable, Lifecycle {
         final long secondsPart = totalSeconds % 60;
         
         return Component.text("%dh %02dm %02ds".formatted(hoursPart, minutesPart, secondsPart));
+    }
+    
+    public static @NotNull World getWorld() {
+        return WORLD;
     }
     
     private static void clearEntities() {

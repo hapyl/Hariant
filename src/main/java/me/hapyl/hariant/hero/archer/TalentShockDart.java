@@ -40,13 +40,13 @@ import java.util.stream.Stream;
 
 public final class TalentShockDart extends Talent implements Listener {
     
-    @DisplayField private final AttributeScaling arrowDamage = AttributeScaling.create(AttributeType.ATTACK, 67);
-    @DisplayField private final AttributeScaling explosionMaxDamage = AttributeScaling.create(AttributeType.ATTACK, 345);
+    private final @DisplayField AttributeScaling arrowDamage = AttributeScaling.create(AttributeType.ATTACK, 60.3);
+    private final @DisplayField AttributeScaling explosionMaxDamage = AttributeScaling.create(AttributeType.ATTACK, 293.25);
     
-    @DisplayField private final Decimal explosionRadius = Decimal.ofValue(4.0);
-    @DisplayField private final Decimal explosionDelay = Decimal.ofSeconds(1.2f);
+    private final @DisplayField Decimal explosionRadius = Decimal.ofValue(4.0);
+    private final @DisplayField Decimal explosionDelay = Decimal.ofSeconds(1.0f);
     
-    @DisplayField private final Decimal elementApplication = Decimal.ofValue(150);
+    private final @DisplayField Decimal elementApplication = Decimal.ofValue(250);
     
     private final ParticleBuilder particleWindup = ParticleBuilder.dustColorTransition(Color.fromRGB(235, 224, 169), Color.fromRGB(224, 211, 141), 1);
     private final ParticleBuilder particleExplosion = ParticleBuilder.dustColorTransition(Color.fromRGB(242, 204, 97), Color.fromRGB(252, 186, 3), 1);
@@ -139,15 +139,13 @@ public final class TalentShockDart extends Talent implements Listener {
         player.playWorldSound(location, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 2.0f);
     }
     
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
     }
     
-    @NotNull
     @Override
-    public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+    public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
         final Arrow arrow = player.launchProjectile(Arrow.class, new ShockDartArrowDamageSource(
                 player,
                 arrowDamage.getScaledValue(player),

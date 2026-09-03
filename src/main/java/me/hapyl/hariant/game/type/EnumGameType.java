@@ -1,14 +1,18 @@
 package me.hapyl.hariant.game.type;
 
 import me.hapyl.eterna.module.component.ComponentList;
+import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.game.Placement;
+import me.hapyl.hariant.game.WinResult;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 
 public enum EnumGameType implements GameType {
@@ -56,13 +60,28 @@ public enum EnumGameType implements GameType {
     }
     
     @Override
+    public void onCreate(@NotNull Iterable<? extends HariantPlayer> players) {
+    
+    }
+    
+    @Override
+    public void onDestroy(@NotNull Iterable<? extends HariantPlayer> players, @NotNull WinResult result) {
+        gameType.onDestroy(players, result);
+    }
+    
+    @Override
+    public void onFinalize(@NotNull List<? extends HariantPlayer> players, @NotNull WinResult result) {
+        gameType.onFinalize(players, result);
+    }
+    
+    @Override
     public void onKill(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
         gameType.onKill(gameInstance, player, victim);
     }
     
     @Override
-    public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player) {
-        gameType.onDeath(gameInstance, player);
+    public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @Nullable HariantEntity killer) {
+        gameType.onDeath(gameInstance, player, killer);
     }
     
     @Override

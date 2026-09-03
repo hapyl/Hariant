@@ -8,10 +8,10 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
@@ -22,25 +22,24 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
-public final class TalentTripleShot extends Talent implements Listener {
+public final class TalentTripleShot extends Talent {
     
     private final Color arrowColor = Color.fromRGB(Colors.ELEMENT_ELECTRIC.value());
     
-    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 135);
+    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 121.5);
     
     private final @DisplayField Decimal additionalArrowDamageMultiplier = Decimal.ofPercentage(50);
-    private final @DisplayField Decimal additionalArrowSpread = Decimal.ofValue(5, v -> Component.text(v).append(Component.text("°")).color(TextColor.color(0xFFF854)));
+    private final @DisplayField Decimal additionalArrowSpread = Decimal.ofAngle(5);
     private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 100);
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
@@ -84,10 +83,10 @@ public final class TalentTripleShot extends Talent implements Listener {
         // we're caching the tick the arrows were shot at ¯\_(ツ)_/¯
         final int localTick = player.localTicks();
         
-        final Arrow middleArrow = createArrow(localTick, player, damage, null);
+        final Arrow middleArrow = launchArrow(localTick, player, damage, null);
         
-        createArrow(localTick, player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorLeft(spread)));
-        createArrow(localTick, player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorRight(spread)));
+        launchArrow(localTick, player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorLeft(spread)));
+        launchArrow(localTick, player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorRight(spread)));
         
         // Fx
         player.playWorldSound(Sound.ITEM_CROSSBOW_SHOOT, 0.75f);
@@ -97,59 +96,55 @@ public final class TalentTripleShot extends Talent implements Listener {
         return Response.ok();
     }
     
-    private @NotNull Arrow createArrow(int localTick, @NotNull HariantPlayer player, double damage, @Nullable Vector velocity) {
+    private @NotNull Arrow launchArrow(int localTick, @NotNull HariantPlayer player, double damage, @Nullable Vector velocity) {
         return player.launchProjectile(
                 Arrow.class,
-                new DamageSourceTripleShot(localTick, damageSourceIdentity, player, damage, elementalApplication.doubleValue()),
-                self -> {
-                    self.setColor(arrowColor);
-                    self.setCritical(false);
-                    
-                    if (velocity != null) {
-                        self.setVelocity(velocity);
-                    }
-                }
+                velocity,
+                new DamageSourceTripleShot(damageSourceIdentity, player, damage, elementalApplication.doubleValue()),
+                (projectile, damageSource) -> new TripleShotProjectile(projectile, damageSource, localTick)
         );
     }
     
-    @EventHandler
-    public void handleHariantProjectileHitEvent(HariantProjectileHitEvent ev) {
-        final HariantProjectile projectile = ev.getProjectile();
+    public static class DamageSourceTripleShot extends DamageSourceArcherTalent {
         
-        if (!(projectile.getShooter() instanceof HariantPlayer player)) {
-            return;
+        DamageSourceTripleShot(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity attacker, double damage, double elementUnits) {
+            super(identity, attacker, damage, elementUnits);
         }
         
-        if (!(projectile.getDamageSource() instanceof DamageSourceTripleShot damageSource)) {
-            return;
-        }
-        
-        if (ev.getEntity() == null) {
-            return;
-        }
-        
-        if (player.getProfile().getDatabase().achievements.hasCompleted(AchievementRegistry.ARCHER_TRIPLET)) {
-            return;
-        }
-        
-        player.getHeroData(HeroRegistry.ARCHER, HeroDataArcher::new).lastThreeHits.count(damageSource);
     }
     
-    public static class DamageSourceTripleShot extends DamageSourceArcherTalent implements UniqueId {
+    private class TripleShotProjectile extends HariantProjectile implements UniqueId {
         
-        private final int shotAtTick;
+        private final int uniqueId;
         
-        DamageSourceTripleShot(int shotAtTick, @NotNull DamageSourceIdentity identity, @Nullable HariantEntity attacker, double damage, double elementUnits) {
-            super(identity, attacker, damage, elementUnits);
+        TripleShotProjectile(@NotNull Arrow projectile, @NotNull DamageSource damageSource, int uniqueId) {
+            super(projectile, damageSource);
             
-            this.shotAtTick = shotAtTick;
+            this.uniqueId = uniqueId;
+            
+            projectile.setColor(arrowColor);
+            projectile.setCritical(false);
         }
         
         @Override
-        public int getUniqueId() {
-            return shotAtTick;
+        public @Range(from = 0, to = Integer.MAX_VALUE) int getUniqueId() {
+            return uniqueId;
         }
         
+        @Override
+        public void onHit(@Nullable HariantEntity entity, @Nullable Block block) {
+            super.onHit(entity, block);
+            
+            if (!(this.getShooter() instanceof HariantPlayer player)) {
+                return;
+            }
+            
+            if (player.getProfile().getDatabase().achievements.hasCompleted(AchievementRegistry.ARCHER_TRIPLET)) {
+                return;
+            }
+            
+            player.getHeroData(HeroRegistry.ARCHER, HeroDataArcher::new).lastThreeHits.count(this);
+        }
     }
     
 }

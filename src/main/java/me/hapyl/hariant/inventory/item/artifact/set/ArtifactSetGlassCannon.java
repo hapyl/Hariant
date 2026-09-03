@@ -7,7 +7,7 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.event.HariantHealthChangeEvent;
 import me.hapyl.hariant.event.HariantPlayerCreateEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
@@ -74,7 +74,7 @@ public final class ArtifactSetGlassCannon extends ArtifactSet implements Listene
     }
     
     @EventHandler
-    public void handleHariantDamageEvent(HariantDamageEvent ev) {
+    public void handleHariantDamageComputeEvent(HariantDamageComputeEvent ev) {
         if (!(ev.getAttacker() instanceof HariantPlayer player)) {
             return;
         }

@@ -95,7 +95,7 @@ public abstract class TalentRechargeable extends Talent {
     protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
         super.initAttributeFields(attributeFields);
         
-        attributeFields.add(new DisplayFieldInstance(Component.text("Charges"), Component.text(maxCharges)));
+        attributeFields.add(DisplayFieldInstance.create(Component.text("Charges"), Component.text(maxCharges)));
     }
     
     @Override

@@ -5,6 +5,10 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
+import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.game.GameInstance;
+import me.hapyl.hariant.game.WinResult;
 import me.hapyl.hariant.game.battleground.feature.BattlegroundFeature;
 import me.hapyl.hariant.inventory.drop.Amount;
 import me.hapyl.hariant.inventory.drop.DropTable;
@@ -15,7 +19,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +159,36 @@ public class BattlegroundImpl implements Battleground {
     public void tick() {
         // Tick features
         this.features.forEach(BattlegroundFeature::tick);
+    }
+    
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onCreate(@NotNull Iterable<? extends HariantPlayer> players) {
+        features.forEach(feature -> feature.onCreate(players));
+    }
+    
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onDestroy(@NotNull Iterable<? extends HariantPlayer> players, @NotNull WinResult result) {
+        features.forEach(feature -> feature.onDestroy(players, result));
+    }
+    
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onFinalize(@NotNull List<? extends HariantPlayer> players, @NotNull WinResult result) {
+        features.forEach(feature -> feature.onFinalize(players, result));
+    }
+    
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onKill(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
+        features.forEach(feature -> feature.onKill(gameInstance, player, victim));
+    }
+    
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @Nullable HariantEntity killer) {
+        features.forEach(feature -> feature.onDeath(gameInstance, player, killer));
     }
     
     protected void setFeatures(@NotNull BattlegroundFeature... features) {

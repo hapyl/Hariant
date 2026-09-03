@@ -21,8 +21,8 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentArcaneMute extends Talent {
     
-    @DisplayField private final Decimal maxDistance = Decimal.ofValue(20);
-    @DisplayField private final Decimal lookupRadius = Decimal.ofValue(1.25);
+    private final @DisplayField Decimal maxDistance = Decimal.ofValue(20);
+    private final @DisplayField Decimal lookupRadius = Decimal.ofValue(1.25);
     
     public TalentArcaneMute(@NotNull Key key) {
         super(key, Component.text("Arcane Mute"), Icon.ofMaterial(Material.FEATHER));

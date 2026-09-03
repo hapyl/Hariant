@@ -15,14 +15,10 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageSourceImpl;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -41,17 +37,16 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Snowball;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
 
-public final class TalentRoseIvy extends Talent implements Listener {
+public final class TalentRoseIvy extends Talent {
     
     public final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 54);
     public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 50);
@@ -111,38 +106,14 @@ public final class TalentRoseIvy extends Talent implements Listener {
         );
     }
     
-    @EventHandler
-    public void handleHariantProjectileHitEvent(HariantProjectileHitEvent ev) {
-        final HariantProjectile projectile = ev.getProjectile();
-        
-        if (!(projectile.getDamageSource() instanceof RoseIvyProjectileDamageSource damageSource)) {
-            return;
-        }
-        
-        if (!(damageSource.getSource() instanceof HariantPlayer player)) {
-            return;
-        }
-        
-        final Location origin = LocationHelper.anchor(projectile.getLocation());
-        
-        player.delegate(new RoseIvyTask(player, origin), DelegateType.PERSISTENT);
-        
-        player.playWorldSound(origin, Sound.ENTITY_CAMEL_SADDLE, 0.0f);
-        player.playWorldSound(origin, Sound.ENTITY_PLAYER_HURT_SWEET_BERRY_BUSH, 0.0f);
-    }
-    
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
     }
     
-    @NotNull
     @Override
-    public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        player.launchProjectile(Snowball.class, new RoseIvyProjectileDamageSource(player), self -> {
-            self.setItem(getIcon().createItem());
-        });
+    public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+        player.launchProjectile(Snowball.class, new RoseIvyProjectileDamageSource(player), RoseIvyProjectile::new);
         
         // Fx
         player.playWorldSound(Sound.ENTITY_SNOWBALL_THROW, 0.75f);
@@ -150,13 +121,40 @@ public final class TalentRoseIvy extends Talent implements Listener {
         return Response.ok();
     }
     
+    private class RoseIvyProjectile extends HariantProjectile {
+        
+        RoseIvyProjectile(@NotNull Snowball projectile, @NotNull DamageSource damageSource) {
+            super(projectile, damageSource);
+            
+            projectile.setItem(getIcon().createItem());
+        }
+        
+        @Override
+        public void onHit(@Nullable HariantEntity entity, @Nullable Block block) {
+            super.onHit(entity, block);
+            
+            final Location origin = LocationHelper.anchor(this.getLocation());
+            final HariantEntity shooter = this.getShooter();
+            
+            shooter.delegate(new RoseIvyTask(shooter, origin), DelegateType.PERSISTENT);
+            
+            // Fx
+            shooter.playWorldSound(origin, Sound.ENTITY_CAMEL_SADDLE, 0.0f);
+            shooter.playWorldSound(origin, Sound.ENTITY_PLAYER_HURT_SWEET_BERRY_BUSH, 0.0f);
+        }
+        
+    }
+    
     private class RoseIvyProjectileDamageSource extends DamageSourceImpl {
+        
         RoseIvyProjectileDamageSource(@Nullable HariantEntity attacker) {
             super(damageSourceIdentity, attacker, DamageType.TALENT, ElementType.PHYSICAL, List.of(), Set.of(), 1, 1);
         }
+        
     }
     
     private class RoseIvyModifier extends AttributeModifier {
+        
         RoseIvyModifier(@NotNull HariantEntity applier) {
             super(modifierKey, TalentRoseIvy.this.getName(), applier, effectDuration.intValue());
             
@@ -172,14 +170,14 @@ public final class TalentRoseIvy extends Talent implements Listener {
         
         private static final BlockData PARTICLE_DATA = Material.SWEET_BERRY_BUSH.createBlockData();
         
-        private final HariantPlayer player;
+        private final HariantEntity player;
         private final Location origin;
         private final DisplayEntity vineEntity;
         
-        RoseIvyTask(@NotNull HariantPlayer player, @NotNull Location origin) {
+        RoseIvyTask(@NotNull HariantEntity entity, @NotNull Location origin) {
             super(Scheduler.ofTimer(1));
             
-            this.player = player;
+            this.player = entity;
             this.origin = origin;
             this.vineEntity = model.spawn(origin, self -> {
                 self.setVisibleByDefault(false);

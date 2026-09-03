@@ -9,12 +9,8 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.WarningType;
-import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
-import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -35,6 +31,7 @@ import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Set;
 
 public final class TalentFirePit extends Talent {
     
@@ -65,11 +62,8 @@ public final class TalentFirePit extends Talent {
     private final @DisplayField Decimal totalStages = Decimal.ofValue(firePitsMaterials.length);
     
     private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 84);
-    private final @DisplayField Decimal damagePeriod = Decimal.ofSeconds(0.5f);
+    private final @DisplayField Decimal damagePeriod = Decimal.ofSeconds(0.25f);
     private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 250);
-    
-    private final @DisplayField Decimal hellburnDuration = Decimal.ofSeconds(5);
-    private final @DisplayField Decimal hellburnElementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 6);
     
     private final int transformationDelayPerStage = transformationDelay.intValue() / totalStages.intValue();
     private final Key damageCooldownKey = Key.ofString("fire_pit_damage");
@@ -98,12 +92,8 @@ public final class TalentFirePit extends Talent {
                          .appendNewline()
                          .append(Component.text("Stepping into fire deals "))
                          .append(ElementType.FIRE.asComponentDamage())
-                         .append(Component.text(" and applies "))
-                         .append(StatusEffectType.HELLBURN.asComponent().color(Colors.EFFECT_HELLBURN))
-                         .append(Component.text(" effect for "))
-                         .append(hellburnDuration)
-                         .append(Component.text(" that rapidly builds up "))
-                         .append(ElementType.FIRE)
+                         .append(Component.text(" and applies large amount of "))
+                         .append(ElementType.FIRE.asComponent())
                          .append(Component.text(" anomaly."))
         );
     }
@@ -126,10 +116,6 @@ public final class TalentFirePit extends Talent {
         return Response.ok();
     }
     
-    public @NotNull Decimal getHellburnElementalApplication() {
-        return hellburnElementalApplication;
-    }
-    
     private class FirePit extends HariantTickingTask {
         
         private final HariantPlayer player;
@@ -147,14 +133,7 @@ public final class TalentFirePit extends Talent {
             this.origin = origin;
             this.boundingBox = LocationHelper.toBoundingBox(origin, 1.5, 1, 1.5);
             this.firePits = Maps.newHashMap();
-            this.damageSource = DamageSource.builder(damageSourceIdentity, damage.getScaledValue(player))
-                                            .source(player)
-                                            .elementalUnits(elementalApplication.doubleValue())
-                                            .elementType(ElementType.FIRE)
-                                            .damageType(DamageType.TALENT)
-                                            .components(DamageComponents.ofCommon())
-                                            .cooldown(damageCooldownKey, damagePeriod.intValue())
-                                            .build();
+            this.damageSource = new FirePitDamageSource(player);
             
             // Prepare fire pit locations
             for (int[] offset : infernoFireOffsets) {
@@ -207,7 +186,6 @@ public final class TalentFirePit extends Talent {
                               // If the fire is lit, deal damage
                               if (isLit) {
                                   entity.damage(damageSource);
-                                  entity.addEffect(StatusEffectType.HELLBURN, hellburnDuration.intValue(), player);
                               }
                               
                               // Always show danger
@@ -232,6 +210,14 @@ public final class TalentFirePit extends Talent {
             // Fx
             player.playWorldSound(origin, Sound.BLOCK_FIRE_EXTINGUISH, 0.25f, 0.75f);
         }
+    }
+    
+    private class FirePitDamageSource extends DamageSourceImpl {
+        
+        FirePitDamageSource(@NotNull HariantPlayer source) {
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.FIRE, DamageComponents.ofTrueDamage(), Set.of(), damage.getScaledValue(source), elementalApplication.doubleValue(), damageCooldownKey, damagePeriod.intValue());
+        }
+        
     }
     
 }

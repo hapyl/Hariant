@@ -81,7 +81,6 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
                             CommonDroppable.CAT_COINS,
                             CommonDroppable.ARTIFACT_ARTIFICER,
                             CommonDroppable.HERO_RECRUIT_VOUCHER,
-                            Droppable.ofItem(ItemRegistry.ARTIFACT_MAGIC_CODEX, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_SHATTERED_SOUL, 50),
                             Droppable.ofItem(ItemRegistry.ARTIFACT_WHOOPEE_CUSHION, 50)
                     ),

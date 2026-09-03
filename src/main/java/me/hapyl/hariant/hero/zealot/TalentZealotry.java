@@ -64,7 +64,7 @@ public final class TalentZealotry extends TalentRechargeable implements Listener
     
     @EventHandler
     public void handleHariantDamageCalculationsEvent(HariantDamageCalculationsEvent ev) {
-        if (!(ev.getAttacker().entity().orElse(null) instanceof HariantPlayer player)) {
+        if (!(ev.getSnapshotAttacker().entityOrNull() instanceof HariantPlayer player)) {
             return;
         }
         
@@ -79,10 +79,10 @@ public final class TalentZealotry extends TalentRechargeable implements Listener
         }
         
         // Change element type to aether
-        ev.getDamageSource().setElementType(ElementType.AETHER);
+        ev.getDamageInstance().setElementType(ElementType.AETHER);
         
         // Ignore N% of enemy DEF
-        ev.getEntity().addModifier(
+        ev.getSnapshotEntity().addModifier(
                 player,
                 AttributeModifier.entry(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, -defenseIgnore.doubleValue())
         );

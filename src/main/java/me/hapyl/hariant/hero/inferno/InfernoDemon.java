@@ -12,12 +12,9 @@ import org.jetbrains.annotations.NotNull;
 
 public interface InfernoDemon extends Pet, Removable, TickDuration {
     
-    @NotNull
-    InfernoDemonType getDemonType();
+    @NotNull InfernoDemonType getDemonType();
     
-    @Override
-    @NotNull
-    HariantEntity owner();
+    @Override @NotNull HariantEntity owner();
     
     void onForm(@NotNull HariantPlayer player, @NotNull HeroDataInferno data);
     

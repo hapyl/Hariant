@@ -16,84 +16,74 @@ import java.util.stream.Stream;
 
 public interface EntityCollector extends Located {
     
-    @NotNull
     @Override
-    Location getLocation();
+    @NotNull Location getLocation();
     
-    @NotNull
-    default Color outlineColor() {
+    default @NotNull Color outlineColor() {
         return Color.ORANGE;
     }
     
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull BoundingBox boundingBox) {
-        return this.getLocation().getWorld().getNearbyEntities(supplyBoundingBox(this, boundingBox))
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull BoundingBox boundingBox) {
+        return streamEntities(this.getWorld(), supplyBoundingBox(this, boundingBox));
+    }
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, double x, double y, double z) {
+        return this.collectNearbyEntities(LocationHelper.toBoundingBox(location, x, y, z));
+    }
+    
+    // *-* Primitives *-* //
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(double x, double y, double z) {
+        return this.collectNearbyEntities(this.getLocation(), x, y, z);
+    }
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, double distance) {
+        return this.collectNearbyEntities(location, distance, distance, distance);
+    }
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(double distance) {
+        return this.collectNearbyEntities(this.getLocation(), distance, distance, distance);
+    }
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Decimal x, @NotNull Decimal y, @NotNull Decimal z) {
+        return this.collectNearbyEntities(LocationHelper.toBoundingBox(location, x.doubleValue(), y.doubleValue(), z.doubleValue()));
+    }
+    
+    // *-* Decimal *-* //
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Decimal x, @NotNull Decimal y, @NotNull Decimal z) {
+        return this.collectNearbyEntities(this.getLocation(), x, y, z);
+    }
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Decimal distance) {
+        return this.collectNearbyEntities(location, distance, distance, distance);
+    }
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Decimal distance) {
+        return this.collectNearbyEntities(this.getLocation(), distance, distance, distance);
+    }
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Number x, @NotNull Number y, @NotNull Number z) {
+        return this.collectNearbyEntities(location, x.doubleValue(), y.doubleValue(), z.doubleValue());
+    }
+    
+    // *-* Generic Numbers *-* //
+    
+    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Number x, @NotNull Number y, @NotNull Number z) {
+        return this.collectNearbyEntities(this.getLocation(), x.doubleValue(), y.doubleValue(), z.doubleValue());
+    }
+    
+    static @NotNull Stream<HariantEntity> streamEntities(@NotNull World world, @NotNull BoundingBox boundingBox) {
+        return world.getNearbyEntities(boundingBox)
                    .stream()
                    .map(Hariant::getEntityOrNull)
                    .filter(Objects::nonNull);
     }
     
-    // *-* Primitives *-* //
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, double x, double y, double z) {
-        return this.collectNearbyEntities(LocationHelper.toBoundingBox(location, x, y, z));
-    }
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(double x, double y, double z) {
-        return this.collectNearbyEntities(this.getLocation(), x, y, z);
-    }
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, double distance) {
-        return this.collectNearbyEntities(location, distance, distance, distance);
-    }
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(double distance) {
-        return this.collectNearbyEntities(this.getLocation(), distance, distance, distance);
-    }
-    
-    // *-* Decimal *-* //
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Decimal x, @NotNull Decimal y, @NotNull Decimal z) {
-        return this.collectNearbyEntities(LocationHelper.toBoundingBox(location, x.doubleValue(), y.doubleValue(), z.doubleValue()));
-    }
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull Decimal x, @NotNull Decimal y, @NotNull Decimal z) {
-        return this.collectNearbyEntities(this.getLocation(), x, y, z);
-    }
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Decimal distance) {
-        return this.collectNearbyEntities(location, distance, distance, distance);
-    }
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull Decimal distance) {
-        return this.collectNearbyEntities(this.getLocation(), distance, distance, distance);
-    }
-    
-    // *-* Generic Numbers *-* //
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Number x, @NotNull Number y, @NotNull Number z) {
-        return this.collectNearbyEntities(location, x.doubleValue(), y.doubleValue(), z.doubleValue());
-    }
-    
-    @NotNull
-    default Stream<HariantEntity> collectNearbyEntities(@NotNull Number x, @NotNull Number y, @NotNull Number z) {
-        return this.collectNearbyEntities(this.getLocation(), x.doubleValue(), y.doubleValue(), z.doubleValue());
-    }
-    
-    @NotNull
-    private static BoundingBox supplyBoundingBox(@NotNull EntityCollector collector, @NotNull BoundingBox boundingBox) {
+    private @NotNull static BoundingBox supplyBoundingBox(@NotNull EntityCollector collector, @NotNull BoundingBox boundingBox) {
         // If debug is enabled, draw the outline
         if (BoundingBoxRenderer.DEBUG_DRAW_BOUNDING_BOX_OUTLINES) {
-            BoundingBoxRenderer.render(boundingBox, collector.getWorld(), collector.outlineColor());
+            BoundingBoxRenderer.render(boundingBox, collector.getWorld(), collector.outlineColor(), 0.5f);
         }
         
         return boundingBox;
@@ -106,7 +96,7 @@ public interface EntityCollector extends Located {
         private BoundingBoxRenderer() {
         }
         
-        public static void render(@NotNull BoundingBox boundingBox, @NotNull World world, @NotNull Color color) {
+        public static void render(@NotNull BoundingBox boundingBox, @NotNull World world, @NotNull Color color, float scale) {
             final double minX = boundingBox.getMinX();
             final double minY = boundingBox.getMinY();
             final double minZ = boundingBox.getMinZ();
@@ -114,35 +104,34 @@ public interface EntityCollector extends Located {
             final double maxY = boundingBox.getMaxY();
             final double maxZ = boundingBox.getMaxZ();
             
-            final double step = 0.15;
+            final Particle.DustOptions dustOptions = new Particle.DustOptions(color, scale);
             
             // Bottom face
-            drawLine(minX, minY, minZ, maxX, minY, minZ, step, world, color);
-            drawLine(maxX, minY, minZ, maxX, minY, maxZ, step, world, color);
-            drawLine(maxX, minY, maxZ, minX, minY, maxZ, step, world, color);
-            drawLine(minX, minY, maxZ, minX, minY, minZ, step, world, color);
+            drawLine(minX, minY, minZ, maxX, minY, minZ, world, dustOptions);
+            drawLine(maxX, minY, minZ, maxX, minY, maxZ, world, dustOptions);
+            drawLine(maxX, minY, maxZ, minX, minY, maxZ, world, dustOptions);
+            drawLine(minX, minY, maxZ, minX, minY, minZ, world, dustOptions);
             
             // Top face
-            drawLine(minX, maxY, minZ, maxX, maxY, minZ, step, world, color);
-            drawLine(maxX, maxY, minZ, maxX, maxY, maxZ, step, world, color);
-            drawLine(maxX, maxY, maxZ, minX, maxY, maxZ, step, world, color);
-            drawLine(minX, maxY, maxZ, minX, maxY, minZ, step, world, color);
+            drawLine(minX, maxY, minZ, maxX, maxY, minZ, world, dustOptions);
+            drawLine(maxX, maxY, minZ, maxX, maxY, maxZ, world, dustOptions);
+            drawLine(maxX, maxY, maxZ, minX, maxY, maxZ, world, dustOptions);
+            drawLine(minX, maxY, maxZ, minX, maxY, minZ, world, dustOptions);
             
             // Vertical edges
-            drawLine(minX, minY, minZ, minX, maxY, minZ, step, world, color);
-            drawLine(maxX, minY, minZ, maxX, maxY, minZ, step, world, color);
-            drawLine(maxX, minY, maxZ, maxX, maxY, maxZ, step, world, color);
-            drawLine(minX, minY, maxZ, minX, maxY, maxZ, step, world, color);
+            drawLine(minX, minY, minZ, minX, maxY, minZ, world, dustOptions);
+            drawLine(maxX, minY, minZ, maxX, maxY, minZ, world, dustOptions);
+            drawLine(maxX, minY, maxZ, maxX, maxY, maxZ, world, dustOptions);
+            drawLine(minX, minY, maxZ, minX, maxY, maxZ, world, dustOptions);
         }
         
-        private static void drawLine(double x1, double y1, double z1, double x2, double y2, double z2, double step, @NotNull World world, @NotNull Color color) {
+        private static void drawLine(double x1, double y1, double z1, double x2, double y2, double z2, @NotNull World world, @NotNull Particle.DustOptions dustOptions) {
             final double dx = x2 - x1;
             final double dy = y2 - y1;
             final double dz = z2 - z1;
             final double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
             
-            final int steps = Math.max(1, (int) (distance / step));
-            final Particle.DustOptions dustOptions = new Particle.DustOptions(color, 0.5f);
+            final int steps = Math.max(1, (int) (distance / 0.15));
             
             for (int i = 0; i <= steps; i++) {
                 double t = (double) i / steps;

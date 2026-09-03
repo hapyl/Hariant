@@ -78,7 +78,7 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
         }
         
         final HeroDataArcher data = player.getHeroData(HeroRegistry.ARCHER, HeroDataArcher::new);
-        final Projectile handle = projectile.getHandle();
+        final Projectile handle = projectile.getProjectile();
         
         if (!(handle instanceof Arrow arrow) || !arrow.isCritical() || !player.getHandle().isSneaking() || !homingChance.chance(player)) {
             // Reset achievement on failed arrow shots
@@ -131,7 +131,7 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
         
         @Override
         public void run(int tick) {
-            final Projectile projectile = this.projectile.getHandle();
+            final Projectile projectile = this.projectile.getProjectile();
             
             if (projectile.isDead()) {
                 this.cancel();

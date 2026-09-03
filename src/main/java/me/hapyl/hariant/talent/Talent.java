@@ -324,11 +324,11 @@ public abstract class Talent
     @OverridingMethodsMustInvokeSuper
     protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
         if (cooldown > 0) {
-            attributeFields.add(new DisplayFieldInstance(Component.text("Cooldown"), this.getCooldownFormatted()));
+            attributeFields.add(DisplayFieldInstance.create(Component.text("Cooldown"), this.getCooldownFormatted()));
         }
         
         if (duration > 0) {
-            attributeFields.add(new DisplayFieldInstance(Component.text("Duration"), this.getDurationFormatted()));
+            attributeFields.add(DisplayFieldInstance.create(Component.text("Duration"), this.getDurationFormatted()));
         }
     }
     
@@ -352,15 +352,12 @@ public abstract class Talent
                     final Object fieldValue = field.get(this);
                     
                     if (!(fieldValue instanceof ComponentFormatter formatter)) {
-                        throw new IllegalArgumentException(
-                                "Field %s (%s) in %s must implement %s!".formatted(field.getName(), clazz.getSimpleName(), field.getType().getSimpleName(), ComponentFormatter.class.getSimpleName()));
+                        throw new IllegalArgumentException("Display field %s (%s) in %s must implement %s!".formatted(field.getName(), field.getType().getSimpleName(), clazz.getSimpleName(), ComponentFormatter.class.getSimpleName()));
                     }
                     
-                    final String fieldName = !displayField.name().isEmpty()
-                                             ? displayField.name()
-                                             : formatFieldName(field);
+                    final String fieldName = !displayField.name().isEmpty() ? displayField.name() : formatFieldName(field);
                     
-                    attributeFields.add(new DisplayFieldInstance(Component.text(fieldName), formatter.format()));
+                    attributeFields.add(DisplayFieldInstance.create(Component.text(fieldName), formatter.format()));
                 }
             }
         }
@@ -369,8 +366,7 @@ public abstract class Talent
         }
     }
     
-    @NotNull
-    private List<Class<?>> getClassHierarchyReversed() {
+    private @NotNull List<Class<?>> getClassHierarchyReversed() {
         final List<Class<?>> hierarchy = Lists.newArrayList();
         Class<?> clazz = this.getClass();
         
@@ -388,8 +384,7 @@ public abstract class Talent
                         .toList();
     }
     
-    @NotNull
-    private static String formatFieldName(@NotNull Field field) {
+    private static @NotNull String formatFieldName(@NotNull Field field) {
         final String fieldName = field.getName();
         final StringBuilder builder = new StringBuilder();
         

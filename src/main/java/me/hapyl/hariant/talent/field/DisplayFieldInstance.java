@@ -12,7 +12,10 @@ public final class DisplayFieldInstance implements ComponentLike {
     
     private final Component component;
     
-    public DisplayFieldInstance(@NotNull Component fieldName, @NotNull Component fieldValue) {
+    /**
+     * {@see #create(Component, Component)}
+     */
+    DisplayFieldInstance(@NotNull Component fieldName, @NotNull Component fieldValue) {
         this.fieldName = fieldName;
         this.fieldValue = fieldValue;
         this.component = Component.empty()
@@ -22,19 +25,21 @@ public final class DisplayFieldInstance implements ComponentLike {
                                   .append(fieldValue.color(Colors.GRAY));
     }
     
-    @NotNull
-    public Component getFieldName() {
+    public @NotNull Component getFieldName() {
         return fieldName;
     }
     
-    @NotNull
-    public Component getFieldValue() {
+    public @NotNull Component getFieldValue() {
         return fieldValue;
     }
     
-    @NotNull
     @Override
-    public Component asComponent() {
+    public @NotNull Component asComponent() {
         return component;
     }
+    
+    public static DisplayFieldInstance create(@NotNull Component fieldName, @NotNull Component fieldValue) {
+        return new DisplayFieldInstance(fieldName, fieldValue);
+    }
+    
 }

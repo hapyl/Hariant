@@ -28,7 +28,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
-import me.hapyl.hariant.entity.mutator.Decay;
+import me.hapyl.hariant.entity.mutator.HealthMutatorDecay;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.player.combat.CombatData;
 import me.hapyl.hariant.entity.player.combat.CombatTracker;
@@ -108,6 +108,7 @@ public final class HariantCommandRegistry {
         register("aggregateStatistic", HariantCommandAggregateStatistic::new);
         register(HariantCommandMenu.COMMAND_NAME, HariantCommandMenu::new);
         register("goto", HariantCommandGoTo::new);
+        register("boundingBoxCreator", HariantCommandBoundingBoxCreator::new);
         
         register("showAttributes", context -> {
             final HariantPlayer player = context.getHariantPlayer();
@@ -259,7 +260,7 @@ public final class HariantCommandRegistry {
                 return;
             }
             
-            player.addHealthMutator(Decay.create(percentage / 100 * player.getMaxHealth(), duration));
+            player.addHealthMutator(HealthMutatorDecay.create(percentage / 100 * player.getMaxHealth(), duration));
             player.messageSuccess(Component.text("Applied decay worth %s%% of max health for %s.".formatted(percentage, Tick.format(duration))));
         });
         
@@ -292,6 +293,13 @@ public final class HariantCommandRegistry {
         });
         
         register("startGameCountdown", context -> {
+            final Player player = context.getPlayer();
+            
+            if (player.getName().equals("DiDenPro")) {
+                player.kick(Component.text("You are not allowed to execute this command!", Colors.DARK_RED));
+                return;
+            }
+            
             Hariant.startCountdown();
         });
         
