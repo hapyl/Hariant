@@ -175,6 +175,7 @@ public class HeroAlchemist extends Hero {
             );
             
             setName(Component.text("Brewing Stick"));
+            setDescription(Component.text("An ordinary yet strong stick."));
         }
     }
     
@@ -187,6 +188,7 @@ public class HeroAlchemist extends Hero {
             );
             
             setName(Component.text("Brewing Stick (Infused)"));
+            setDescription(Component.text("An ordinary yet strong stick infused with a toxic concoction."));
         }
     }
     
@@ -199,6 +201,7 @@ public class HeroAlchemist extends Hero {
             );
             
             setName(Component.text("Brewing Stick (Missing)"));
+            setDescription(Component.text("Your stick is currently brewing a concoction!"));
         }
     }
 }

@@ -12,7 +12,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.handler.HariantProjectile;
+import me.hapyl.hariant.handler.HariantDamageProjectile;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
@@ -42,8 +42,9 @@ public final class TalentTripleShot extends Talent {
     private final @DisplayField Decimal additionalArrowSpread = Decimal.ofAngle(5);
     private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 100);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("triple_shot_damage_source"),
             DeathMessage.create("{player} was triple shot [by {killer}]")
     );
     
@@ -83,10 +84,10 @@ public final class TalentTripleShot extends Talent {
         // we're caching the tick the arrows were shot at ¯\_(ツ)_/¯
         final int localTick = player.localTicks();
         
-        final Arrow middleArrow = launchArrow(localTick, player, damage, null);
+        final TripleShotProjectile projectile = launchArrow(localTick, player, damage, null);
         
-        launchArrow(localTick, player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorLeft(spread)));
-        launchArrow(localTick, player, additionalArrowDamage, middleArrow.getVelocity().add(player.getVectorRight(spread)));
+        launchArrow(localTick, player, additionalArrowDamage, projectile.getVelocity().add(player.getVectorLeft(spread)));
+        launchArrow(localTick, player, additionalArrowDamage, projectile.getVelocity().add(player.getVectorRight(spread)));
         
         // Fx
         player.playWorldSound(Sound.ITEM_CROSSBOW_SHOOT, 0.75f);
@@ -96,12 +97,11 @@ public final class TalentTripleShot extends Talent {
         return Response.ok();
     }
     
-    private @NotNull Arrow launchArrow(int localTick, @NotNull HariantPlayer player, double damage, @Nullable Vector velocity) {
+    private @NotNull TripleShotProjectile launchArrow(int localTick, @NotNull HariantPlayer player, double damage, @Nullable Vector velocity) {
         return player.launchProjectile(
                 Arrow.class,
                 velocity,
-                new DamageSourceTripleShot(damageSourceIdentity, player, damage, elementalApplication.doubleValue()),
-                (projectile, damageSource) -> new TripleShotProjectile(projectile, damageSource, localTick)
+                (projectile, shooter) -> new TripleShotProjectile(projectile, shooter, new DamageSourceTripleShot(damageSourceIdentity, player, damage, elementalApplication.doubleValue()), localTick)
         );
     }
     
@@ -113,12 +113,12 @@ public final class TalentTripleShot extends Talent {
         
     }
     
-    private class TripleShotProjectile extends HariantProjectile implements UniqueId {
+    private class TripleShotProjectile extends HariantDamageProjectile implements UniqueId {
         
         private final int uniqueId;
         
-        TripleShotProjectile(@NotNull Arrow projectile, @NotNull DamageSource damageSource, int uniqueId) {
-            super(projectile, damageSource);
+        TripleShotProjectile(@NotNull Arrow projectile, @NotNull HariantEntity shooter, @NotNull DamageSource damageSource, int uniqueId) {
+            super(projectile, shooter, damageSource);
             
             this.uniqueId = uniqueId;
             
@@ -135,7 +135,7 @@ public final class TalentTripleShot extends Talent {
         public void onHit(@Nullable HariantEntity entity, @Nullable Block block) {
             super.onHit(entity, block);
             
-            if (!(this.getShooter() instanceof HariantPlayer player)) {
+            if (entity == null || !(this.getShooter() instanceof HariantPlayer player)) {
                 return;
             }
             

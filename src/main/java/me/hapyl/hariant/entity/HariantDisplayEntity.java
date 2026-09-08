@@ -63,8 +63,7 @@ public class HariantDisplayEntity extends HariantEntity {
     @Override
     @OverridingMethodsMustInvokeSuper
     public void onDestroy() {
-        // Remove the slime via `remove()` to not spawn particles
-        entity.remove();
+        super.onDestroy();
         
         this.displayEntity.remove();
     }

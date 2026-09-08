@@ -8,8 +8,7 @@ import org.jetbrains.annotations.Range;
 
 public interface SoundFx {
     
-    @NotNull
-    Sound sound();
+    @NotNull Sound sound();
     
     @Range(from = 0, to = 2)
     float pitch();
@@ -18,17 +17,16 @@ public interface SoundFx {
         player.playSound(this.sound(), this.pitch());
     }
     
-    @NotNull
-    static SoundFx create(@NotNull Sound sound, @Range(from = 0, to = 2) float pitch) {
+    static @NotNull SoundFx create(@NotNull Sound sound, @Range(from = 0, to = 2) float pitch) {
         return new SoundFxImpl(sound, pitch);
     }
     
-    @Nullable
-    static SoundFx createNullable(@Nullable Sound sound) {
+    static @Nullable SoundFx createNullable(@Nullable Sound sound) {
         return sound != null ? create(sound, 1.0f) : null;
     }
     
     class SoundFxImpl implements SoundFx {
+        
         private final Sound sound;
         private final float pitch;
         
@@ -37,9 +35,8 @@ public interface SoundFx {
             this.pitch = pitch;
         }
         
-        @NotNull
         @Override
-        public Sound sound() {
+        public @NotNull Sound sound() {
             return sound;
         }
         

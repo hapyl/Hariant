@@ -4,7 +4,7 @@ import me.hapyl.hariant.entity.damage.DamageSource;
 import org.bukkit.entity.Projectile;
 import org.jetbrains.annotations.NotNull;
 
-public interface ProjectileConstructor<P extends Projectile, H extends HariantProjectile> {
+public interface ProjectileConstructor<P extends Projectile, H extends HariantDamageProjectile> {
     
     @NotNull H construct(@NotNull P projectile, @NotNull DamageSource damageSource);
     

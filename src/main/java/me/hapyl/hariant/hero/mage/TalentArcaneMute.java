@@ -12,6 +12,7 @@ import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
+import me.hapyl.hariant.talent.target.TalentTargetEntityRayCast;
 import me.hapyl.hariant.term.Terminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
@@ -47,9 +48,13 @@ public final class TalentArcaneMute extends Talent {
     @NotNull
     @Override
     public TalentTarget target(@NotNull HariantPlayer player) {
-        return TalentTarget.targetEntityRayCast(maxDistance.doubleValue(), lookupRadius.doubleValue(), entity -> {
-            return entity instanceof HariantPlayer && player.canAffect(entity) && player.hasLineOfSight(entity);
-        });
+        return TalentTarget.targetEntity(
+                maxDistance.doubleValue(),
+                lookupRadius.doubleValue(),
+                TalentTargetEntityRayCast.BlockCollision.ALLOW_PASSABLE,
+                TalentTargetEntityRayCast.EntityPriority.FIRST_HIT,
+                entity -> entity instanceof HariantPlayer && player.canAffect(entity) && player.hasLineOfSight(entity)
+        );
     }
     
     @NotNull

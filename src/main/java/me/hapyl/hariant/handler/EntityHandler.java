@@ -16,6 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityUnleashEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
@@ -119,6 +120,11 @@ public final class EntityHandler implements Listener {
     public void handleSlimeSplitEvent(SlimeSplitEvent ev) {
         ev.setCancelled(true);
         ev.setCount(0);
+    }
+    
+    @EventHandler
+    public void handleEntityUnleashEvent(EntityUnleashEvent ev) {
+        ev.setCancelled(true);
     }
     
     @EventHandler

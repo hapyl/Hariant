@@ -7,6 +7,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.*;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
+import me.hapyl.hariant.util.BlockHelper;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -81,7 +82,7 @@ public class TalentWiltBlink extends Talent {
                 // Check whether the location is safe
                 final Block block = location.getBlock();
                 
-                if (block.isPassable() && block.getRelative(BlockFace.UP).isPassable()) {
+                if (BlockHelper.isPassable(block) && BlockHelper.isPassable(block.getRelative(BlockFace.UP))) {
                     return TalentContext.create(location);
                 }
                 

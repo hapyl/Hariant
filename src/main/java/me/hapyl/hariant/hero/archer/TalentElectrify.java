@@ -14,7 +14,7 @@ import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileLaunchEvent;
-import me.hapyl.hariant.handler.HariantProjectile;
+import me.hapyl.hariant.handler.HariantDamageProjectile;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.math.ShapeProperties;
 import me.hapyl.hariant.math.Shapes;
@@ -54,8 +54,9 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
     private final ParticleBuilder particleFx = ParticleBuilder.dustColorTransition(Color.fromRGB(247, 181, 47), Color.fromRGB(250, 224, 170), 1);
     private final ProgressBar progressBar = new ProgressBar("⚡", 20, Style.style(Colors.ELEMENT_ELECTRIC));
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("electrify_damage_source"),
             DeathMessage.create("{player} was electrified [by {killer}]")
     );
     
@@ -92,10 +93,11 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
     
     @EventHandler
     public void handleHariantProjectileLaunchEvent(HariantProjectileLaunchEvent ev) {
-        final HariantProjectile projectile = ev.getProjectile();
-        final HariantEntity attacker = projectile.getDamageSource().getSource();
+        if (!(ev.getProjectile() instanceof HariantDamageProjectile projectile)) {
+            return;
+        }
         
-        if (!(attacker instanceof HariantPlayer player)) {
+        if (!(projectile.getShooter() instanceof HariantPlayer player)) {
             return;
         }
         

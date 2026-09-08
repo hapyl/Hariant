@@ -26,14 +26,14 @@ import org.jetbrains.annotations.NotNull;
 public final class TalentPsionicOverload extends Talent {
     
     private final @DisplayField Decimal ferocityIncrease = Decimal.ofAttribute(AttributeType.FEROCITY, 100);
-    private final @DisplayField Decimal movementSpeedIncrease = Decimal.ofAttribute(AttributeType.MOVEMENT_SPEED, 25);
+    private final @DisplayField Decimal movementSpeedIncrease = Decimal.ofAttribute(AttributeType.MOVEMENT_SPEED, 30);
     
     public TalentPsionicOverload(@NotNull Key key) {
         super(key, Component.text("Psionic Overload"), Icon.ofMaterial(Material.HORN_CORAL_FAN));
         
         setTalentType(TalentType.ENHANCE);
         
-        setDurationSeconds(4);
+        setDurationSeconds(5);
         setCooldownSeconds(14);
         
         setDescription(

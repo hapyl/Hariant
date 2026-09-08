@@ -26,7 +26,7 @@ import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
-import me.hapyl.hariant.task.HariantTickingStepTask;
+import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
@@ -71,7 +71,7 @@ public final class TalentDualVerdict extends Talent {
         setTalentType(TalentType.SUPPORT);
         
         setDurationSeconds(1.5f);
-        setCooldownSeconds(20);
+        setCooldownSeconds(16);
         
         setDescription(
                 Component.empty()
@@ -110,6 +110,9 @@ public final class TalentDualVerdict extends Talent {
                          .append(Component.text(" for "))
                          .append(dropletMaxHealthDecreaseDuration)
                          .append(Component.text("."))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("Cooldown of this talent starts when all orbs are picked up.", Colors.DARK_GRAY))
         );
     }
     
@@ -124,7 +127,11 @@ public final class TalentDualVerdict extends Talent {
         final Location location = player.getLocation();
         
         player.delegate(new DualVerdict(player, heroData, location), DelegateType.INTERRUPTABLE);
-        return Response.ok();
+        return Response.await();
+    }
+    
+    public void onPickupAll(@NotNull HariantPlayer player) {
+        player.setCooldown(this);
     }
     
     private @NotNull Entity createDroplet(@NotNull Location location) {
@@ -142,7 +149,7 @@ public final class TalentDualVerdict extends Talent {
         DISCORD
     }
     
-    private class DualVerdict extends HariantTickingStepTask {
+    private class DualVerdict extends HariantTickingTask {
         
         private final HariantPlayer player;
         private final HeroDataNyx heroData;
@@ -150,7 +157,7 @@ public final class TalentDualVerdict extends Talent {
         private final List<Entity> entities;
         
         DualVerdict(@NotNull HariantPlayer player, @NotNull HeroDataNyx heroData, @NotNull Location location) {
-            super(Scheduler.ofTimer(), 3);
+            super(Scheduler.ofTimer());
             
             this.player = player;
             this.heroData = heroData;
@@ -170,56 +177,57 @@ public final class TalentDualVerdict extends Talent {
         }
         
         @Override
-        public boolean run(int tick, int step) {
+        public void run(int tick) {
             final int duration = getDuration();
             
-            if (tick >= duration) {
-                // Store locations of entities for fx later
-                final List<? extends Location> entityLocations = entities.stream()
-                                                                         .map(entity -> entity.getLocation().add(0, 1, 0))
-                                                                         .toList();
-                
-                this.cancel();
-                this.createDroplets();
-                
-                // Fx
-                player.playWorldSound(location, Sound.ENTITY_WARDEN_DEATH, 0.75f);
-                
-                // Draw lines
-                for (int i = 0; i < entityLocations.size(); i++) {
-                    final Location from = entityLocations.get(i);
-                    final Location to = entityLocations.get((i + 1) % entityLocations.size());
+            for (int i = 0; i < 3; i++) {
+                if (tick >= duration) {
+                    // Store locations of entities for fx later
+                    final List<? extends Location> entityLocations = entities.stream()
+                                                                             .map(entity -> entity.getLocation().add(0, 1, 0))
+                                                                             .toList();
                     
-                    Geometry.drawLine(from, to, 0.5, location -> HeroRegistry.NYX.spawnParticle(player, location));
+                    this.cancel();
+                    this.createDroplets();
+                    
+                    // Fx
+                    player.playWorldSound(location, Sound.ENTITY_WARDEN_DEATH, 0.75f);
+                    
+                    // Draw lines
+                    for (int j = 0; j < entityLocations.size(); j++) {
+                        final Location from = entityLocations.get(j);
+                        final Location to = entityLocations.get((j + 1) % entityLocations.size());
+                        
+                        Geometry.drawLine(from, to, 0.5, location -> HeroRegistry.NYX.spawnParticle(player, location));
+                    }
+                    
+                    this.cancel();
+                    return;
                 }
                 
-                return true;
-            }
-            
-            final double progress = (double) tick / duration;
-            final double radians = Math.toRadians(tick * 10);
-            
-            final double spread = Math.PI * 2 / Math.max(1, entities.size());
-            final double radius = initialRadius.doubleValue() + (maximumRadius.doubleValue() - initialRadius.doubleValue()) * progress;
-            
-            int index = 0;
-            
-            for (Entity entity : entities) {
-                final double x = Math.sin(radians + spread * index) * radius;
-                final double y = Math.atan(Math.PI / 2 * radians) * 0.75 - 1.5;
-                final double z = Math.cos(radians + spread * index) * radius;
+                final double progress = (double) tick / duration;
+                final double radians = Math.toRadians(tick * 10);
                 
-                LocationHelper.offset(location, x, y, z, entity::teleport);
+                final double spread = Math.PI * 2 / Math.max(1, entities.size());
+                final double radius = initialRadius.doubleValue() + (maximumRadius.doubleValue() - initialRadius.doubleValue()) * progress;
                 
-                index++;
+                int index = 0;
+                
+                for (Entity entity : entities) {
+                    final double x = Math.sin(radians + spread * index) * radius;
+                    final double y = Math.atan(Math.PI / 2 * radians) * 0.75 - 1.5;
+                    final double z = Math.cos(radians + spread * index) * radius;
+                    
+                    LocationHelper.offset(location, x, y, z, entity::teleport);
+                    
+                    index++;
+                }
+                
+                // Sfx
+                if (i == 0 && modulo(2)) {
+                    player.playWorldSound(location, Sound.ENTITY_ENDERMAN_HURT, (float) (0.5f + (0.75f * progress)));
+                }
             }
-            
-            // Sfx
-            if (step == 0 && modulo(2)) {
-                player.playWorldSound(location, Sound.ENTITY_ENDERMAN_HURT, (float) (0.5f + (0.75f * progress)));
-            }
-            
-            return false;
         }
         
         private void createDroplets() {

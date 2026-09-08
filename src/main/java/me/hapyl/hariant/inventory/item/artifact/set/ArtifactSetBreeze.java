@@ -24,7 +24,7 @@ public final class ArtifactSetBreeze extends ArtifactSet implements Listener {
     private final ArtifactSetModifier critChanceIncrease = CommonArtifactSetModifiers.CRIT_CHANCE;
     
     private final Decimal healthLostPercentage = Decimal.ofPercentage(5);
-    private final Decimal healthLostLimit = Decimal.ofPercentage(20);
+    private final Decimal healthLostLimit = Decimal.ofPercentage(15);
     
     private final Decimal fourPieceCritDamageIncrease = Decimal.ofAttribute(AttributeType.CRIT_DAMAGE, 10);
     private final Decimal fourPieceCritDamageIncreaseDuration = Decimal.ofSeconds(6f);

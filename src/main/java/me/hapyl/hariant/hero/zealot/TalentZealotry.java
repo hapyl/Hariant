@@ -13,6 +13,7 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.talent.rechargeable.RechargeType;
 import me.hapyl.hariant.talent.rechargeable.RechargeableTalentData;
 import me.hapyl.hariant.talent.rechargeable.TalentRechargeable;
 import me.hapyl.hariant.talent.target.TalentTarget;
@@ -32,7 +33,7 @@ public final class TalentZealotry extends TalentRechargeable implements Listener
     private final @DisplayField Decimal defenseIgnore = Decimal.ofPercentage(100);
     
     public TalentZealotry(@NotNull Key key) {
-        super(key, Component.text("Zealotry"), Icon.ofMaterial(Material.ECHO_SHARD), 2);
+        super(key, Component.text("Zealotry"), Icon.ofMaterial(Material.ECHO_SHARD), 2, RechargeType.ONE_AFTER_ANOTHER);
         
         setTalentType(TalentType.ENHANCE);
         
@@ -58,7 +59,7 @@ public final class TalentZealotry extends TalentRechargeable implements Listener
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("This talent has %s initial uses.".formatted(getMaxCharges()), Colors.DARK_GRAY))
+                         .append(this.getMaximumChargesComponent())
         );
     }
     

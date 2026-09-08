@@ -13,7 +13,6 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.PlayerState;
 import me.hapyl.hariant.entity.effect.status.StatusEffectInstance;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.entity.player.combat.CombatData;
 import me.hapyl.hariant.event.HariantGameInstanceStateEvent;
 import me.hapyl.hariant.experience.ExperienceConstants;
 import me.hapyl.hariant.experience.ExperienceSource;
@@ -448,10 +447,6 @@ public class GameInstanceImpl implements GameInstance {
         }
         
         return sources;
-    }
-    
-    public static void calculateCombatData(@NotNull HariantPlayer player, @NotNull CombatData.Type type) {
-        // FIXME (xanyjl @ Sunday, August 2) ->
     }
     
 }

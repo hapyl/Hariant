@@ -24,7 +24,6 @@ import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
-import me.hapyl.hariant.task.HariantTickingStepTask;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.BoundingBoxBlueprint;
@@ -54,8 +53,9 @@ public final class TalentWitherPath extends Talent {
     
     private final @DisplayField BoundingBoxBlueprint spikeBoundingBox = BoundingBoxBlueprint.define(1, 2, 1);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("wither_path_damage_source"),
             DeathMessage.create("{player} was spiked to death [by {killer}]")
     );
     
@@ -103,7 +103,7 @@ public final class TalentWitherPath extends Talent {
         return Response.ok();
     }
     
-    private class WitherPath extends HariantTickingStepTask {
+    private class WitherPath extends HariantTickingTask {
         
         private final HariantPlayer player;
         private final Location location;
@@ -113,7 +113,7 @@ public final class TalentWitherPath extends Talent {
         private double distance;
         
         WitherPath(@NotNull HariantPlayer player) {
-            super(Scheduler.ofTimer(), 3);
+            super(Scheduler.ofTimer());
             
             this.player = player;
             this.location = player.getLocation();
@@ -122,18 +122,23 @@ public final class TalentWitherPath extends Talent {
         }
         
         @Override
-        public boolean run(int tick, int step) {
-            final double x = direction.getX() * distance;
-            final double y = direction.getY() * distance;
-            final double z = direction.getZ() * distance;
-            
+        public void run(int tick) {
             final boolean playFx = modulo(3);
             
-            LocationHelper.offset(location, x, y, z, () -> {
-                player.delegate(new WitherSpike(player, location, damageSource, playFx), DelegateType.PERSISTENT);
-            });
-            
-            return distance++ > maximumDistance.doubleValue();
+            for (int i = 0; i < 3; i++) {
+                if (distance++ > maximumDistance.doubleValue()) {
+                    this.cancel();
+                    return;
+                }
+                
+                final double x = direction.getX() * distance;
+                final double y = direction.getY() * distance;
+                final double z = direction.getZ() * distance;
+                
+                LocationHelper.offset(location, x, y, z, () -> {
+                    player.delegate(new WitherSpike(player, location, damageSource, playFx), DelegateType.PERSISTENT);
+                });
+            }
         }
         
     }

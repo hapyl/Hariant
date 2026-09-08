@@ -22,6 +22,7 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
     }
     
     public static class Level1 extends StatusEffectAbyssalCorrosion {
+        
         Level1() {
             super(1);
         }

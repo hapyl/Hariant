@@ -258,9 +258,9 @@ public enum EnumTeam implements Prefixed, Named, Styled, Icon, ComponentLike, It
     
     public @NotNull Stream<HariantPlayer> getPlayers() {
         return entries.stream()
-                      .map(entry -> Hariant.getEntity(entry.getUuid(), HariantPlayer.class))
-                      .filter(Optional::isPresent)
-                      .map(Optional::get);
+                      .map(entry -> Hariant.getEntityOrNull(entry.getUuid()))
+                      .filter(HariantPlayer.class::isInstance)
+                      .map(HariantPlayer.class::cast);
     }
     
     public @NotNull Component getFirstLetterFormatted() {

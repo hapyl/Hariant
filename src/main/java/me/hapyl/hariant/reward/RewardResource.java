@@ -11,8 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class RewardResource implements Reward {
     
-    private static final Component SEPARATOR = Component.text(" × ", Colors.DARK_GRAY);
-    
     private final Key key;
     private final Component name;
     private final Resource resource;
@@ -35,8 +33,16 @@ public class RewardResource implements Reward {
         return name;
     }
     
+    public @NotNull Resource getResource() {
+        return resource;
+    }
+    
+    public int getAmount() {
+        return amount;
+    }
+    
     @Override
-    public Adder<? extends AbstractItem, ?> reward(@NotNull PlayerProfile profile) {
+    public @NotNull Adder<? extends AbstractItem, ?> reward(@NotNull PlayerProfile profile) {
         return profile.getDatabase().inventory.adderOfResource(resource, amount);
     }
     

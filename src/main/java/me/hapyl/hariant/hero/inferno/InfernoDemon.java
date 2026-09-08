@@ -31,6 +31,7 @@ public interface InfernoDemon extends Pet, Removable, TickDuration {
     
     void swingArm();
     
+    
     static void drawParticleBox(@NotNull HariantPlayer player, @NotNull Drawable drawable, double height) {
         class Drawable {
             private static void drawEdge(@NotNull Location location, double x, double y, double z, @NotNull me.hapyl.eterna.module.math.geometry.Drawable drawable) {

@@ -114,6 +114,16 @@ public enum EnumBattleground implements Battleground, Selectable {
     }
     
     @Override
+    public @NotNull BattlegroundWeather getWeather() {
+        return battleground.getWeather();
+    }
+    
+    @Override
+    public @NotNull BattlegroundTime getTime() {
+        return battleground.getTime();
+    }
+    
+    @Override
     public void select() {
         Hariant.setSelectedBattleground(this);
     }
@@ -122,5 +132,6 @@ public enum EnumBattleground implements Battleground, Selectable {
     public boolean isSelected() {
         return Hariant.getSelectedBattleground() == this;
     }
+    
     
 }

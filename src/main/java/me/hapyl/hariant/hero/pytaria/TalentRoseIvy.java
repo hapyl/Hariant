@@ -15,7 +15,8 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
-import me.hapyl.hariant.entity.damage.*;
+import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
+import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -43,9 +44,6 @@ import org.bukkit.entity.Snowball;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Set;
-
 public final class TalentRoseIvy extends Talent {
     
     public final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 54);
@@ -63,11 +61,6 @@ public final class TalentRoseIvy extends Talent {
     );
     
     private final int modelParts = 7;
-    
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            this,
-            DeathMessage.create("{player} was spikes to death [by {killer}]")
-    );
     
     public TalentRoseIvy(@NotNull Key key) {
         super(key, Component.text("Rose Ivy"), Icon.ofTexture("41cceb6ee1210e1725ce30a7da3d8e68fc38a7d8b6d30abc030a2601df951d2d"));
@@ -113,7 +106,7 @@ public final class TalentRoseIvy extends Talent {
     
     @Override
     public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        player.launchProjectile(Snowball.class, new RoseIvyProjectileDamageSource(player), RoseIvyProjectile::new);
+        player.launchProjectile(Snowball.class, null, RoseIvyProjectile::new);
         
         // Fx
         player.playWorldSound(Sound.ENTITY_SNOWBALL_THROW, 0.75f);
@@ -123,8 +116,8 @@ public final class TalentRoseIvy extends Talent {
     
     private class RoseIvyProjectile extends HariantProjectile {
         
-        RoseIvyProjectile(@NotNull Snowball projectile, @NotNull DamageSource damageSource) {
-            super(projectile, damageSource);
+        RoseIvyProjectile(@NotNull Snowball projectile, @NotNull HariantEntity shooter) {
+            super(projectile, shooter);
             
             projectile.setItem(getIcon().createItem());
         }
@@ -136,19 +129,13 @@ public final class TalentRoseIvy extends Talent {
             final Location origin = LocationHelper.anchor(this.getLocation());
             final HariantEntity shooter = this.getShooter();
             
+            origin.setYaw(shooter.random.nextFloat() * 180);
+            
             shooter.delegate(new RoseIvyTask(shooter, origin), DelegateType.PERSISTENT);
             
             // Fx
             shooter.playWorldSound(origin, Sound.ENTITY_CAMEL_SADDLE, 0.0f);
             shooter.playWorldSound(origin, Sound.ENTITY_PLAYER_HURT_SWEET_BERRY_BUSH, 0.0f);
-        }
-        
-    }
-    
-    private class RoseIvyProjectileDamageSource extends DamageSourceImpl {
-        
-        RoseIvyProjectileDamageSource(@Nullable HariantEntity attacker) {
-            super(damageSourceIdentity, attacker, DamageType.TALENT, ElementType.PHYSICAL, List.of(), Set.of(), 1, 1);
         }
         
     }

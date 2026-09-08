@@ -37,9 +37,8 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl implements 
     
     private final double burnDamage = 14;
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            Key.ofString("burning"),
-            Component.text("Burning"),
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
+            this, Key.ofString("burning"),
             DeathMessage.createWithDefaultKiller("{player} burnt to death")
     );
     

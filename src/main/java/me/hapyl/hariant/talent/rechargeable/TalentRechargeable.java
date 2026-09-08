@@ -1,8 +1,6 @@
 package me.hapyl.hariant.talent.rechargeable;
 
-import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
@@ -10,46 +8,38 @@ import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
-import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public abstract class TalentRechargeable extends Talent {
     
-    private static final Material DEFAULT_NO_CHARGES_MATERIAL = Material.GRAY_DYE;
+    private final RechargeType rechargeType;
+    private final int maximumCharges;
     
-    private final int maxCharges;
-    private final ItemStack itemNoCharges;
-    
-    public TalentRechargeable(@NotNull Key key, @NotNull Component name, @NotNull Icon icon, final int maxCharges) {
+    public TalentRechargeable(@NotNull Key key, @NotNull Component name, @NotNull Icon icon, int maximumCharges, @NotNull RechargeType rechargeType) {
         super(key, name, icon);
         
-        this.maxCharges = maxCharges;
-        this.itemNoCharges = createItemNoCharges();
+        this.maximumCharges = maximumCharges;
+        this.rechargeType = rechargeType;
     }
     
-    public int getMaxCharges() {
-        return maxCharges;
+    public int getMaximumCharges() {
+        return maximumCharges;
     }
     
-    public final @NotNull ItemStack getItemNoCharges() {
-        return itemNoCharges;
-    }
-    
-    public @NotNull Material getMaterialNoCharges() {
-        return DEFAULT_NO_CHARGES_MATERIAL;
+    public @NotNull Component getMaximumChargesComponent() {
+        return rechargeType.getComponent(maximumCharges);
     }
     
     @Override
     public void onCreate(@NotNull HariantPlayer player) {
-        // Bump data to fix item stacks
-        player.getRechargeableTalentData(this).updateCharges();
+        // Update charges
+        this.onUpdate(player, player.getRechargeableTalentData(this));
     }
     
     @Override
@@ -57,79 +47,61 @@ public abstract class TalentRechargeable extends Talent {
     
     @Override
     public final @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        // Check talent data
-        final RechargeableTalentData data = player.getRechargeableTalentData(this);
+        final RechargeableTalentData rechargeableTalentData = player.getRechargeableTalentData(this);
         
-        // If no more charges, show when the next charge is in
-        if (data.getCharges() == 0) {
-            final int nextChargeIn = player.getCooldownTimeLeft(this);
-            
-            player.playSound(Sound.BLOCK_WOODEN_DOOR_CLOSE, 0.75f);
-            return Response.error("No more charges, next one in %s!".formatted(Tick.format(nextChargeIn)));
+        if (rechargeableTalentData.getCharges() == 0) {
+            return rechargeType.onExecuteNoCharges(player, this, rechargeableTalentData);
         }
         
-        final Response response = this.execute(player, context, data);
+        final Response response = this.execute(player, context, rechargeableTalentData);
         
         if (response.isError()) {
             return response;
         }
         
         // Decrement charges
-        data.decrementCharges();
+        rechargeableTalentData.decrementCharges(1);
         
-        // If the player is currently on cooldown, HOLD, otherwise start the cooldown
-        if (player.hasCooldown(this)) {
-            return Response.hold();
-        }
-        else {
-            return Response.ok();
-        }
+        return rechargeType.onExecute(player, this, rechargeableTalentData);
     }
     
     @Override
-    public boolean respectCooldown() {
-        return false;
+    public final boolean respectCooldown() {
+        // If recharge type is ONE_AFTER_ANOTHER, we have to ignore the cooldown to allow talent execution
+        return rechargeType != RechargeType.ONE_AFTER_ANOTHER;
     }
     
     @Override
     protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
         super.initAttributeFields(attributeFields);
         
-        attributeFields.add(DisplayFieldInstance.create(Component.text("Charges"), Component.text(maxCharges)));
+        attributeFields.add(DisplayFieldInstance.create(Component.text("Maximum Charges"), Component.text(maximumCharges)));
     }
     
-    @Override
-    public final void onCooldownStarted(@NotNull HariantEntity entity, int cooldown) {
-    }
+    public abstract @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext talentContext, @NotNull RechargeableTalentData rechargeableTalentData);
     
     @Override
     public final void onCooldownEnded(@NotNull HariantEntity entity) {
-        if (!(entity instanceof HariantPlayer player) || player.isDead()) {
+        if (!(entity instanceof HariantPlayer player)) {
             return;
         }
         
-        final RechargeableTalentData data = player.getRechargeableTalentData(this);
+        // Pass implementation to recharge type
+        rechargeType.onCooldownEnded(player, this, player.getRechargeableTalentData(this));
+    }
+    
+    public void onUpdate(@NotNull HariantPlayer player, @NotNull RechargeableTalentData rechargeableTalentData) {
+        final PlayerInventory inventory = player.getInventory();
         
-        data.incrementCharges();
+        final int slot = rechargeableTalentData.getTalentIndex().getSlot();
+        final ItemStack itemStack = inventory.getItem(slot);
         
-        // If charges aren't at their maximum, start the cooldown again at the next game tick
-        if (data.getCharges() < maxCharges) {
-            InternalTasks.now(() -> player.setCooldown(this));
+        // If there isn't an item in the data is somehow created for non-active talent, return
+        if (itemStack == null || slot < 0) {
+            return;
         }
         
-        // Fx
-        player.playSound(Sound.ENTITY_CHICKEN_EGG, 2.0f);
+        inventory.setItem(slot, rechargeType.createItem(this, rechargeableTalentData.getCharges()));
     }
-    
-    public abstract @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context, @NotNull RechargeableTalentData talentData);
-    
-    private @NotNull ItemStack createItemNoCharges() {
-        return this.createBuilder()
-                   .setItemModel(this.getMaterialNoCharges())
-                   .addLore()
-                   .addLore(Component.text("No more charges!", Colors.RED))
-                   .asIcon();
-    }
-    
     
 }

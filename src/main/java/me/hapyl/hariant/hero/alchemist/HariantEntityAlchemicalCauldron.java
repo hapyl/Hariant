@@ -286,7 +286,9 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
     }
     
     private class AlchemicalMadnessModifier extends AttributeModifier {
+        
         private static final Key MODIFIER_KEY = Key.ofString("alchemical_madness");
+        private static final Particle.DustTransition DUST_COLOR_TRANSITION = new Particle.DustTransition(Color.fromRGB(63, 188, 54), Color.fromRGB(29, 105, 24), 1f);
         
         AlchemicalMadnessModifier(@NotNull HariantEntity applier) {
             super(MODIFIER_KEY, Component.text("Alchemical Madness"), applier, talent.infusionDuration.intValue());
@@ -298,5 +300,11 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
         public void display(@NotNull Location location) {
             ComponentDisplay.ofAscend(Definition.ALCHEMICAL_MADNESS.asComponent(), location, 40, 1.0f);
         }
+        
+        @Override
+        public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
+            entity.spawnWorldParticle(entity.getMidpointLocation(), Particle.DUST_COLOR_TRANSITION, 2, 0.3, 0.5, 0.3, 0.15f, DUST_COLOR_TRANSITION);
+        }
+        
     }
 }

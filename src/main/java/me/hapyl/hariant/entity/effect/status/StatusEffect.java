@@ -15,12 +15,10 @@ import org.jetbrains.annotations.NotNull;
 public interface StatusEffect extends Effect, Named, Described, DamageSourceIdentity, ComponentLike {
     
     @Override
-    @NotNull
-    Key getKey();
+    @NotNull Key getKey();
     
-    @NotNull
     @Override
-    EffectType getEffectType();
+    @NotNull EffectType getEffectType();
     
     @Override
     void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration);
@@ -32,20 +30,17 @@ public interface StatusEffect extends Effect, Named, Described, DamageSourceIden
     void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration);
     
     @Override
-    @NotNull
-    DeathMessage getDeathMessage();
+    @NotNull DeathMessage getDeathMessage();
     
     @Override
-    @NotNull
-    Component getName();
+    @NotNull Component getName();
     
-    @NotNull
     @Override
-    Component getDescription();
+    @NotNull Component getDescription();
     
-    @NotNull
     @Override
-    default Component asComponent() {
+    default @NotNull Component asComponent() {
         return getName();
     }
+    
 }

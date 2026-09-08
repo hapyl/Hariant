@@ -110,6 +110,7 @@ public class HariantPlayer
     
     private static final Component PREFIX_DEATH = PlayerHandler.createPrefix(Component.text("☠", Colors.DARK_RED));
     private static final Component COMPONENT_YOU_DIED = Component.text("ʏᴏᴜ ᴅɪᴇᴅ", Colors.ERROR, TextDecoration.BOLD);
+    private static final Component PREFIX_INTERRUPTION = Component.text("\uD83D\uDCA5", Colors.ERROR, TextDecoration.BOLD);
     
     private final PlayerProfile profile;
     private final HeroInstance heroInstance;
@@ -173,12 +174,20 @@ public class HariantPlayer
         combatTracker.assist(source);
         
         // Fx
-        playSound(Sound.ENTITY_ELDER_GUARDIAN_CURSE, 2.0f);
-        playSound(Sound.ENCHANT_THORNS_HIT, 0.0f);
+        playWorldSound(Sound.ENTITY_ELDER_GUARDIAN_CURSE, 2.0f);
+        playWorldSound(Sound.ENCHANT_THORNS_HIT, 0.0f);
         
         // Fx when interrupted cancellable
         if (numberOfCancelledDelegates > 0) {
             playWorldSound(Sound.ENTITY_ENDERMAN_HURT, 0.75f);
+            
+            sendMessage(
+                    Component.empty()
+                             .append(PREFIX_INTERRUPTION)
+                             .appendSpace()
+                             .append(source.source().getName().color(Colors.DARK_RED))
+                             .append(Component.text(" has interrupted your action!", Colors.RED))
+            );
         }
         
         // Call event
@@ -544,6 +553,7 @@ public class HariantPlayer
         
         this.resetArtifactModifiers();
         this.updateAttributes();
+        this.resetCooldowns();
         
         // Update health after artifacts and modifiers
         this.health = this.getMaxHealth();
@@ -946,7 +956,7 @@ public class HariantPlayer
     }
     
     public @NotNull RechargeableTalentData getRechargeableTalentData(@NotNull TalentRechargeable talent) {
-        return rechargeableTalentData.computeIfAbsent(talent, _ -> new RechargeableTalentData(this, talent));
+        return rechargeableTalentData.computeIfAbsent(talent, _ -> new RechargeableTalentData(this, talent, heroInstance.getOrigin().getTalentIndex(talent)));
     }
     
     public @NotNull CombatTracker getCombatTracker() {
@@ -984,6 +994,11 @@ public class HariantPlayer
     
     private <H extends Hero, D extends HeroData<H>> @Nullable D touchData0(@NotNull H hero, @NotNull Class<D> heroDataClass) {
         final HeroData<? extends Hero> data = this.heroData.get(hero.getClass());
+        
+        // Early return if data does not exist
+        if (data == null) {
+            return null;
+        }
         
         return heroDataClass.isInstance(data) ? heroDataClass.cast(data) : null;
     }

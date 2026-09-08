@@ -60,13 +60,15 @@ public final class TalentMaintainOrder extends TalentUltimate {
             "/summon block_display ~-0.5 ~-0.5 ~-0.5 {Passengers:[{id:\"minecraft:item_display\",item:{id:\"minecraft:golden_sword\",Count:1},item_display:\"none\",transformation:[2.6043f,3.5194f,-2.4148f,-0.2500f,3.4151f,-3.4151f,-1.2941f,1.2500f,-2.5602f,-0.9753f,-4.1826f,-0.5000f,0.0000f,0.0000f,0.0000f,1.0000f]}]}"
     );
     
-    private final DamageSourceIdentity damageSourceIdentityLanding = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentityLanding = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("maintain_order_slam_damage_source"),
             DeathMessage.create("{player} was killed by a [{killer}'s] massive sword")
     );
     
-    private final DamageSourceIdentity damageSourceIdentityFerocity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentityFerocity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("maintain_order_damage_source"),
             DeathMessage.create("[{killer}] has maintained order over {player}")
     );
     

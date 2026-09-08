@@ -28,6 +28,7 @@ public class DamageSourceImpl implements DamageSource {
     private final @NotNull DamageType damageType;
     
     private final double elementUnits;
+    
     private final @NotNull Key cooldownKey;
     private final int cooldown;
     

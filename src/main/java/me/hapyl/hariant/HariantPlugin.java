@@ -31,6 +31,9 @@ public final class HariantPlugin extends JavaPlugin {
     
     @Override
     public void onDisable() {
+        // Save config
+        config.saveToFile();
+        
         Hariant.HANDLER.onDestroy();
         database.close();
     }
@@ -88,23 +91,19 @@ public final class HariantPlugin extends JavaPlugin {
         Bukkit.getServerTickManager().setTickRate(Hariant.TICK_RATE_NORMAL);
     }
     
-    @NotNull
-    public DatabaseSyncer getDatabaseSyncer() {
+    public @NotNull DatabaseSyncer getDatabaseSyncer() {
         return databaseSyncer;
     }
     
-    @NotNull
-    public HariantConfig config() {
+    public @NotNull HariantConfig config() {
         return config;
     }
     
-    @NotNull
-    public Database getDatabase() {
+    public @NotNull Database getDatabase() {
         return database;
     }
     
-    @NotNull
-    public static RuntimeException severeExceptionShutdownServer(@NotNull RuntimeException ex) {
+    public static @NotNull RuntimeException severeExceptionShutdownServer(@NotNull RuntimeException ex) {
         final Logger logger = Hariant.PLUGIN.getLogger();
         
         logger.severe("");
@@ -179,4 +178,5 @@ public final class HariantPlugin extends JavaPlugin {
         world.setGameRule(GameRules.UNIVERSAL_ANGER, false);
         world.setGameRule(GameRules.WATER_SOURCE_CONVERSION, false);
     }
+    
 }

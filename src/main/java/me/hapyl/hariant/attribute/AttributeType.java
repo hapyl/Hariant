@@ -130,7 +130,7 @@ public enum AttributeType implements Attribute {
             ) {
                 @Override
                 public double defaultValue() {
-                    return 20;
+                    return 15;
                 }
                 
                 @Override
@@ -161,7 +161,7 @@ public enum AttributeType implements Attribute {
             ) {
                 @Override
                 public double defaultValue() {
-                    return 60;
+                    return 30;
                 }
                 
                 @Override

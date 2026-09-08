@@ -20,7 +20,7 @@ public class HeroArcher extends Hero {
                 key,
                 Component.text("Archer"),
                 Attributes.base(1000, 100, 100)
-                          .adjust(AttributeType.MOVEMENT_SPEED, 115),
+                          .adjust(AttributeType.MOVEMENT_SPEED, 120),
                 new WeaponBowOfDestiny()
         );
         

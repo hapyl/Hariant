@@ -14,6 +14,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.HariantPlugin;
+import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.daily.DailyEntry;
@@ -833,6 +834,11 @@ public final class HariantCommandRegistry {
             
             profile.messageInfo(Component.text("Progressing ").append(dailyType.getName()).append(Component.text("...")));
             dailyEntry.progress(dailyType);
+        });
+        
+        register("playAchievementCompleteFx", context -> {
+            assert false;
+            AchievementRegistry.ARCHER_TRIPLET.onComplete(context.getPlayer(), null);
         });
         
         // If this is ever 2000 lines of code, don't add another fucking command and either refactor or delete commands that you haven't used for 10 years

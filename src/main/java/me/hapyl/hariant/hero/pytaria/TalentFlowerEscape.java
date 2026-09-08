@@ -51,8 +51,9 @@ public final class TalentFlowerEscape extends Talent {
     
     private final Color tulipColor = Color.fromRGB(221, 0, 14);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("flower_escape_damage_source"),
             DeathMessage.create("{player} could not escape [{killer}'s grasp]")
     );
     

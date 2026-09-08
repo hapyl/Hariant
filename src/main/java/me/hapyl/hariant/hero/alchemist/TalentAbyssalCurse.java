@@ -60,8 +60,8 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
     private final Style curseStyle = Style.style(Colors.ABYSSAL_CURSE, TextDecoration.BOLD);
     private final Style curseStyleObfuscated = Style.style(Colors.ABYSSAL_CURSE, TextDecoration.BOLD, TextDecoration.OBFUSCATED);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            this,
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
+            this, Key.ofString("abussal_curse_damage_source"),
             DeathMessage.create("{player} was consumed by [{killer}'s] Abyssal Curse")
     );
     
@@ -127,9 +127,8 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                 }, castingDuration.intValue()));
     }
     
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
     }
     
@@ -150,8 +149,7 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
         
     }
     
-    @NotNull
-    public static Component obfuscate(@NotNull String string, int numberOfCharsToObfuscate, @NotNull Style style, @NotNull Style styleObfuscated) {
+    public static @NotNull Component obfuscate(@NotNull String string, int numberOfCharsToObfuscate, @NotNull Style style, @NotNull Style styleObfuscated) {
         final int length = string.length();
         
         if (length < numberOfCharsToObfuscate) {

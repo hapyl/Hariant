@@ -25,7 +25,6 @@ import me.hapyl.hariant.registry.Registrable;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentIndex;
 import me.hapyl.hariant.talent.TalentPassive;
-import me.hapyl.hariant.talent.rechargeable.TalentRechargeable;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.weapon.Weapon;
 import net.kyori.adventure.text.Component;
@@ -133,31 +132,25 @@ public abstract class Hero
     }
     
     @Singleton
-    @NotNull
-    public abstract Talent getFirstTalent();
+    public abstract @NotNull Talent getFirstTalent();
     
     @Singleton
-    @NotNull
-    public abstract Talent getSecondTalent();
+    public abstract @NotNull Talent getSecondTalent();
     
     @Singleton
-    @NotNull
-    public abstract Talent getThirdTalent();
+    public abstract @NotNull Talent getThirdTalent();
     
     @Singleton
-    @NotNull
-    public abstract TalentPassive getPassiveTalent();
+    public abstract @NotNull TalentPassive getPassiveTalent();
     
     @Singleton
-    @NotNull
-    public abstract TalentUltimate getUltimateTalent();
+    public abstract @NotNull TalentUltimate getUltimateTalent();
     
-    @NotNull
-    public Talent getTalent(@NotNull TalentIndex index) {
+    public @NotNull Talent getTalent(@NotNull TalentIndex index) {
         return talentsMapped.get(index);
     }
     
-    public @NotNull TalentIndex getTalentIndex(@NotNull TalentRechargeable talent) {
+    public @NotNull TalentIndex getTalentIndex(@NotNull Talent talent) {
         for (Map.Entry<TalentIndex, Talent> entry : talentsMapped.entrySet()) {
             if (entry.getValue().equals(talent)) {
                 return entry.getKey();

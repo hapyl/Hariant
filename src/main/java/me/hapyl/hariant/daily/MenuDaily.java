@@ -9,6 +9,8 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.inventory.item.ResourceRegistry;
 import me.hapyl.hariant.menu.Menu;
+import me.hapyl.hariant.menu.MenuPlayerProfile;
+import me.hapyl.hariant.menu.MenuReturn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
@@ -24,6 +26,11 @@ public class MenuDaily extends Menu {
         super(player, () -> Component.text("Daily Bonds"), ChestSize.SIZE_6);
         
         this.openMenu();
+    }
+    
+    @Override
+    public @NotNull MenuReturn menuReturn() {
+        return MenuReturn.create(Component.text("Player Profile"), MenuPlayerProfile::new);
     }
     
     @Override

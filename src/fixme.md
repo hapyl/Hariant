@@ -9,7 +9,7 @@
 - Hellburn should really NOT be effect
 - Nyx missing "Wither" talent fx
 - Supply drops
-- 
+
 - ~~Trap cd too big~~
 - ~~Cannot damage while stunned is WHITE~~
  
@@ -17,20 +17,45 @@
 + Sum level rewards?
 
 
-+ Add achievement complete in chat
-+ Add per map time/weather
-+ Cannot press buttons/pressure plates while have player
 + Impl end portal & library teleport
 + Change Stream -> Stream Capture for EntityCollector
 + Remove newline in placements
-+ FUCK THEM CARPETS
-+ Void charges not removed on death
++ ~~FUCK THEM CARPETS~~
 + Add fx to teleport
-+ Inferno nerf and Quazii change
-+ Nerf archer
-+ Reset void on death
-+ Is there config loading problem?
-- Wait why does modifier damage throws concurrent? Removal is done one tick after? And check corrosion
+- Either keep this hack or use another hack for attribute concurrent, either way a fucking hack
+- ~~Fire Pit too weak~~
+- ~~Nerf alchemist~~
+- Buff Zealot
+- ~~Cooldowns are not reset after death~~
+
+- ~~Cauldron not removed after the game?~~
+- ~~Wrong burning DMGer?~~
+- ~~Build mode~~
++ ~~Add achievement complete in chat~~
++ ~~Add per map time/weather~~
++ ~~Cannot press buttons/pressure plates while have player~
++ ~~Void charges not removed on death~~
++ ~~Inferno nerf and Quazii change~~
++ ~~Nerf archer~~
++ ~~Is there config loading problem?~~
+- ~~Projectiles should not be forced to use damage source~~
+- ~~ACH hero wrong color~~
+
+
+- NEXT Tamer
+* Add full inventory warning
+* So is Nyx
+
+
+- ~~Nerf Pytaria~~
+- ~~BK splits cancelled DMG~~
+- ~~Cant differ form own and other mark~~ 
+- ~~Rewards not shown for next level?~~
+- ~~Notifications buttons broke~~
+* ~~BK is weird~~
+* ~~Triplet ACH wrong~~
+* ~~Maybe add cooldown to bee damage because that's~~
+
 
 ---
 

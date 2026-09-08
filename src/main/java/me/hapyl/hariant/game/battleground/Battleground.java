@@ -44,11 +44,9 @@ public interface Battleground extends Icon, Named, Described, Ticking, GameInsta
     }
     
     @Override
-    @NotNull
-    ItemBuilder createBuilder();
+    @NotNull ItemBuilder createBuilder();
     
-    @NotNull
-    DropTable getDropTable();
+    @NotNull DropTable getDropTable();
     
     int getTimeBeforePlayerReveal();
     
@@ -70,5 +68,9 @@ public interface Battleground extends Icon, Named, Described, Ticking, GameInsta
     
     @Override
     void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @Nullable HariantEntity source);
+    
+    @NotNull BattlegroundWeather getWeather();
+    
+    @NotNull BattlegroundTime getTime();
     
 }

@@ -9,11 +9,11 @@ import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializableConstructor;
 import me.hapyl.hariant.menu.Menus;
 import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.hariant.profile.notification.DeclaresNotifaction;
 import me.hapyl.hariant.profile.notification.Notification;
 import me.hapyl.hariant.profile.notification.NotificationListener;
 import me.hapyl.hariant.profile.notification.NotificationType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -23,25 +23,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class AchievementEntry extends PlayerDatabaseEntry {
+public final class AchievementEntry extends PlayerDatabaseEntry implements DeclaresNotifaction {
     
     public static final NotificationListener NOTIFICATION_LISTENER = new NotificationListener() {
-        private final Notification notification = new Notification() {
-            @Override
-            public @NotNull Component getName() {
-                return Component.text("Unclaimed Achievement Rewards");
-            }
-            
-            @Override
-            public @NotNull NotificationType getNotificationType() {
-                return NotificationType.NORMAL;
-            }
-            
-            @Override
-            public @NotNull ClickEvent<?> clickEvent() {
-                return Menus.ACHIEVEMENTS.createClickEvent();
-            }
-        };
+        private final Notification notification = Notification.create(
+                AchievementEntry.class,
+                Component.text("Unclaimed Achievement Rewards"),
+                NotificationType.NORMAL,
+                Menus.ACHIEVEMENTS.createClickEvent()
+        );
         
         @Override
         public @Nullable Notification listen(@NotNull PlayerProfile profile) {

@@ -13,6 +13,7 @@ import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
+import me.hapyl.hariant.util.BlockHelper;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -32,8 +33,8 @@ public final class TalentMetempsychosis extends Talent {
     public TalentMetempsychosis(@NotNull Key key) {
         super(key, Component.text("Metempsychosis"), Icon.ofMaterial(Material.ECHO_SHARD));
         
-        setDurationSeconds(0.5f);
-        setCooldownSeconds(12);
+        setDurationSeconds(0.75f);
+        setCooldownSeconds(16);
         
         setTalentType(TalentType.MOVEMENT);
         
@@ -115,7 +116,7 @@ public final class TalentMetempsychosis extends Talent {
         }
         
         private static boolean isBlockValid(@NotNull Block block) {
-            return block.isSolid() && block.getRelative(BlockFace.UP).isEmpty() && block.getRelative(BlockFace.UP, 2).isEmpty();
+            return block.isSolid() && BlockHelper.isPassable(block.getRelative(BlockFace.UP)) && BlockHelper.isPassable(block.getRelative(BlockFace.UP, 2));
         }
         
         private static @NotNull TalentContext createContext(@NotNull Block block) {

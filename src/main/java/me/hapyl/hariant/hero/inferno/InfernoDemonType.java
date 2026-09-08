@@ -28,7 +28,8 @@ public enum InfernoDemonType implements Named, Icon {
                      .helmet(ItemBuilder.playerHead("16ca145ba435b375f763ff53b4ce04b2a0c873e8ff547e8b14b392fde6fbfd94").asIcon())
                      .chestPlate(Material.CHAINMAIL_CHESTPLATE)
                      .boots(Material.DIAMOND_BOOTS)
-                     .build()
+                     .build(),
+            50
     ),
     
     TYPHOEUS(
@@ -42,7 +43,8 @@ public enum InfernoDemonType implements Named, Icon {
                      .chestPlate(Material.CHAINMAIL_CHESTPLATE)
                      .leggings(ItemBuilder.leatherPants(Color.fromRGB(96, 0, 0)).asIcon())
                      .boots(Material.IRON_BOOTS)
-                     .build()
+                     .build(),
+            50
     );
     
     private final Component name;
@@ -50,28 +52,27 @@ public enum InfernoDemonType implements Named, Icon {
     private final Class<? extends LivingEntity> entityClass;
     private final Material material;
     private final Equipment equipment;
+    private final int elementalApplication;
     
-    InfernoDemonType(@NotNull Component name, @NotNull Component demonName, @NotNull Class<? extends LivingEntity> entityClass, @NotNull Material material, @NotNull Equipment equipment) {
+    InfernoDemonType(@NotNull Component name, @NotNull Component demonName, @NotNull Class<? extends LivingEntity> entityClass, @NotNull Material material, @NotNull Equipment equipment, int elementalApplication) {
         this.name = name;
         this.demonName = demonName;
         this.entityClass = entityClass;
         this.material = material;
         this.equipment = equipment;
+        this.elementalApplication = elementalApplication;
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return name;
     }
     
-    @NotNull
-    public Component getDemonName() {
+    public @NotNull Component getDemonName() {
         return demonName;
     }
     
-    @NotNull
-    public Equipment getEquipment() {
+    public @NotNull Equipment getEquipment() {
         return equipment;
     }
     
@@ -90,10 +91,13 @@ public enum InfernoDemonType implements Named, Icon {
         });
     }
     
-    @NotNull
     @Override
-    public ItemBuilder createBuilder() {
+    public @NotNull ItemBuilder createBuilder() {
         return new ItemBuilder(material);
+    }
+    
+    public int getElementalApplication() {
+        return elementalApplication;
     }
     
 }

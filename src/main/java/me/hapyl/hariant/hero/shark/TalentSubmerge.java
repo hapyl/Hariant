@@ -65,8 +65,9 @@ public final class  TalentSubmerge extends Talent {
             VanillaAttributeModifier.create(Key.ofString("submerge_step_height"), Attribute.STEP_HEIGHT, VanillaAttributeModifier.Operation.ADDITIVE, 0.5)
     );
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("submerge_damage_source"),
             DeathMessage.create("{player} was sharked to death by [{killer}]")
     );
     

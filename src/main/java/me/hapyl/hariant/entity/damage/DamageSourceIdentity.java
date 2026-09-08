@@ -20,8 +20,8 @@ public interface DamageSourceIdentity extends Keyed, Named {
         return new DamageSourceIdentityImpl(key, name, deathMessage);
     }
     
-    static <K extends Keyed & Named> @NotNull DamageSourceIdentity create(@NotNull K keyedNamed, @NotNull DeathMessage deathMessage) {
-        return new DamageSourceIdentityImpl(keyedNamed.getKey(), keyedNamed.getName(), deathMessage);
+    static @NotNull DamageSourceIdentity createOfNamed(@NotNull Named named, @NotNull Key key, @NotNull DeathMessage deathMessage) {
+        return create(key, named.getName(), deathMessage);
     }
     
 }

@@ -144,7 +144,7 @@ public final class PlayerProfile
     }
     
     public @NotNull Optional<HariantPlayer> getHariantPlayer() {
-        return Hariant.getPlayer(this.getPlayer());
+        return Hariant.getPlayer(player);
     }
     
     public @NotNull PlayerDatabase getDatabase() {
@@ -279,9 +279,8 @@ public final class PlayerProfile
         playerUI.tick();
     }
     
-    @NotNull
     @Override
-    public UUID getUuid() {
+    public @NotNull UUID getUuid() {
         return player.getUniqueId();
     }
     
@@ -351,13 +350,13 @@ public final class PlayerProfile
     }
     
     @Override
-    public void handlerInstanceDestroyed(@NotNull GameInstance gameInstance, @NotNull WinResult winResult) {
+    public void handleInstanceDestroyed(@NotNull GameInstance gameInstance, @NotNull WinResult winResult) {
         this.playerUI.getVanillaTeamManager().setStateForAllProfiles(true);
         
         // Stop glowing for all players
         Glowing.stopGlowing(player);
         
-        // Destroy player
+        // Destroy player entity
         Hariant.destroyEntity(this.getUuid());
         
         this.teleportToSpawnAndGiveLobbyItems();
@@ -385,7 +384,6 @@ public final class PlayerProfile
             AchievementRegistry.CHAMPION_4.progressFamily(this);
             DailyType.WIN_GAMES.progress(this);
         }
-        
         
     }
     

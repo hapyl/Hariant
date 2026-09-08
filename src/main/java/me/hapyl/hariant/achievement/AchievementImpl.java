@@ -6,10 +6,14 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.util.ComponentShine;
+import me.hapyl.hariant.util.FireworkHelper;
+import me.hapyl.hariant.util.ShowTextBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -18,10 +22,17 @@ import org.jetbrains.annotations.Nullable;
 @AutoRegisteredListener
 public class AchievementImpl implements Achievement {
     
-    private static final ComponentShine ACHIEVEMENT_MADE = ComponentShine.builder("ᴀᴄʜɪᴇᴠᴇᴍᴇɴᴛ ᴍᴀᴅᴇ")
-                                                                         .style(Style.style(TextColor.color(0xFF8222), TextDecoration.BOLD))
-                                                                         .styleShine(Style.style(TextColor.color(0xFFB90E), TextDecoration.BOLD))
-                                                                         .styleFade(Style.style(TextColor.color(0xFFE418), TextDecoration.BOLD))
+    private static final String STRING_ACHIEVEMENT_MADE = "ᴀᴄʜɪᴇᴠᴇᴍᴇɴᴛ ᴍᴀᴅᴇ";
+    
+    private static final Style STYLE = Style.style(TextColor.color(0xFF8222), TextDecoration.BOLD);
+    private static final Style STYLE_SHINE = Style.style(TextColor.color(0xFFB90E), TextDecoration.BOLD);
+    private static final Style STYLE_FADE = Style.style(TextColor.color(0xFFE418), TextDecoration.BOLD);
+    
+    private static final Component COMPONENT_ACHIEVEMENT_MADE = Component.text(STRING_ACHIEVEMENT_MADE, STYLE);
+    private static final ComponentShine ACHIEVEMENT_MADE = ComponentShine.builder(STRING_ACHIEVEMENT_MADE)
+                                                                         .style(STYLE)
+                                                                         .styleShine(STYLE_SHINE)
+                                                                         .styleFade(STYLE_FADE)
                                                                          .build();
     
     private final Key key;
@@ -134,7 +145,36 @@ public class AchievementImpl implements Achievement {
     public void onComplete(@NotNull Player player, @NotNull AchievementProgress achievementProgress) {
         ACHIEVEMENT_MADE.display(player, this.getName().color(Colors.ORANGE));
         
+        // Also show in chat
+        final Component nameInGold = this.getName().color(Colors.GOLD);
+        
+        player.sendMessage(Component.empty());
+        player.sendMessage(COMPONENT_ACHIEVEMENT_MADE);
+        player.sendMessage(
+                Component.space()
+                         .hoverEvent(
+                                 ShowTextBuilder.builder()
+                                                .append(nameInGold)
+                                                .appendNewline()
+                                                .appendWrapped(this.getDescription())
+                         )
+                         .append(nameInGold)
+        );
+        player.sendMessage(Component.empty());
+        
+        // Sfx
         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 3, 1.0f);
+        
+        // Spawn firework
+        FireworkHelper.detonate(
+                player.getLocation().add(0, player.getHeight() * 0.5, 0),
+                edit -> edit.addEffects(
+                        FireworkEffect.builder()
+                                      .withColor(Color.ORANGE, Color.YELLOW)
+                                      .withFlicker()
+                                      .build()
+                )
+        );
     }
     
     @Override

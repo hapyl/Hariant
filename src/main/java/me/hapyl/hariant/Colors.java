@@ -131,7 +131,7 @@ public final class Colors {
     public static final TextColor ALIEN = TextColor.color(0x18C040);
     public static final TextColor EXPERIENCE = TextColor.color(0x1AFF16);
     public static final TextColor INVULNERABILITY = TextColor.color(0x6A8FD9);
-    
+    public static final TextColor GRAPPLE = TextColor.color(0xD97740);
     
     private Colors() {
     }

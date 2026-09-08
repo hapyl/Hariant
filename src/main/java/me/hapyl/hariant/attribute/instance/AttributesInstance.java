@@ -34,8 +34,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
         this.modifiers = Maps.newLinkedHashMap(); // Keep order, literally just for the display purpose
     }
     
-    @NotNull
-    public HariantEntity getEntity() {
+    public @NotNull HariantEntity getEntity() {
         return entity;
     }
     
@@ -95,20 +94,17 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
         return modifiers.values().stream().anyMatch(modifierClass::isInstance);
     }
     
-    @NotNull
-    public List<? extends AttributeModifier> getModifiers() {
+    public @NotNull List<? extends AttributeModifier> getModifiers() {
         return List.copyOf(modifiers.values());
     }
     
-    @NotNull
     @Override
-    public Optional<AttributeModifier> getModifier(@NotNull Key key) {
+    public @NotNull Optional<AttributeModifier> getModifier(@NotNull Key key) {
         return Optional.ofNullable(modifiers.get(key));
     }
     
-    @NotNull
     @Override
-    public <M extends AttributeModifier> Optional<M> getModifier(@NotNull Class<M> modifierClass) {
+    public <M extends AttributeModifier> @NotNull Optional<M> getModifier(@NotNull Class<M> modifierClass) {
         return modifiers.values()
                         .stream()
                         .filter(modifierClass::isInstance)
@@ -117,8 +113,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     }
     
     @Override
-    @NotNull
-    public Stream<AttributeModifier> streamModifiers() {
+    public @NotNull Stream<AttributeModifier> streamModifiers() {
         return modifiers.values().stream();
     }
     
@@ -128,10 +123,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
         final Iterator<Map.Entry<Key, AttributeModifier>> iterator = modifiers.entrySet().iterator();
         
         while (iterator.hasNext()) {
-            final Map.Entry<Key, AttributeModifier> entry = iterator.next();
-            
-            final Key key = entry.getKey();
-            final AttributeModifier attributeModifier = entry.getValue();
+            final AttributeModifier attributeModifier = iterator.next().getValue();
             
             // Tick modifier
             attributeModifier.tick(entity);

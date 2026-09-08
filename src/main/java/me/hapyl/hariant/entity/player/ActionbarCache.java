@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 public class ActionbarCache implements Streamable<Component> {
     
-    private static final long DURATION = 1_500;
+    public static final long DURATION_MILLIS = 1_000;
     
     private final Map<Class<?>, Entry> cache;
     
@@ -49,7 +49,7 @@ public class ActionbarCache implements Streamable<Component> {
         
         @Override
         public boolean isExpired() {
-            return System.currentTimeMillis() - createdAt >= DURATION;
+            return System.currentTimeMillis() - createdAt >= DURATION_MILLIS;
         }
     }
     

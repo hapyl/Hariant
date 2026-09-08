@@ -11,6 +11,7 @@ import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializableConstructor;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.reward.Reward;
+import me.hapyl.hariant.reward.RewardSummary;
 import me.hapyl.hariant.util.ComponentShine;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -23,7 +24,6 @@ import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -34,7 +34,8 @@ public class LevelEntry extends PlayerDatabaseEntry implements ComponentLike {
                                                                        .styleFade(Style.style(TextColor.color(0x85FF6A), TextDecoration.BOLD))
                                                                        .styleShine(Style.style(TextColor.color(0x44A84D), TextDecoration.BOLD))
                                                                        .build();
-    private static final int REWARDS_DISPLAY_LIMIT = 3;
+    
+    private static final int REWARDS_LIMIT = 3;
     private static final int LEVEL_FEED_LENGTH = 5;
     
     private final @NotNull CachedLevel cachedLevel;
@@ -117,15 +118,23 @@ public class LevelEntry extends PlayerDatabaseEntry implements ComponentLike {
         player.sendMessage(Components.center(Component.text("ʀᴇᴡᴀʀᴅꜱ", Colors.WHITE, TextDecoration.BOLD)));
         
         // Sum up rewards `from + 1` until `to`
-        final List<? extends Reward> rewards = to.getRewards();
-        final List<? extends Reward> upToThreeImportantRewards = rewards.stream().sorted(Comparator.comparingInt(Reward::priority)).limit(REWARDS_DISPLAY_LIMIT).toList();
+        final RewardSummary rewardSummary = Level.getRewardSummary(Level.forLevel(from.getLevel() + 1), to);
+        
+        // Display summed up resource rewards
+        rewardSummary.streamResourceSumsSorted()
+                     .forEach(reward -> {
+                         player.sendMessage(Components.center(reward.asComponent()));
+                     });
+        
+        // Display other rewards
+        final List<? extends Reward> upToThreeImportantRewards = rewardSummary.streamRewardsSorted().limit(REWARDS_LIMIT).toList();
         
         for (Reward reward : upToThreeImportantRewards) {
             player.sendMessage(Components.center(reward.getName()));
         }
         
         // If there are more rewards, display ...n more
-        final int numberOfMoreRewards = rewards.size() - upToThreeImportantRewards.size();
+        final int numberOfMoreRewards = rewardSummary.sizeRewards() - upToThreeImportantRewards.size();
         
         if (numberOfMoreRewards > 0) {
             player.sendMessage(Components.center(Component.text("...and %s more!".formatted(numberOfMoreRewards), Colors.DARK_GRAY)));
@@ -160,9 +169,8 @@ public class LevelEntry extends PlayerDatabaseEntry implements ComponentLike {
         this.experience = document.get("experience", 0L);
     }
     
-    @NotNull
     @Override
-    public Component asComponent() {
+    public @NotNull Component asComponent() {
         return Level.forExperience(experience).asComponent();
     }
     

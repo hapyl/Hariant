@@ -42,9 +42,8 @@ public class BeePet extends HariantEntity implements Pet, Distanced, Located {
         setGlowing(player, PacketTeamColor.GOLD);
     }
     
-    @NotNull
     @Override
-    public HariantEntity owner() {
+    public @NotNull HariantEntity owner() {
         return player;
     }
     
@@ -53,9 +52,8 @@ public class BeePet extends HariantEntity implements Pet, Distanced, Located {
         return damageInstance.getDamageSource() instanceof EnvironmentDamageSource;
     }
     
-    @NotNull
     @Override
-    public Bee getHandle() {
+    public @NotNull Bee getHandle() {
         return (Bee) super.getHandle();
     }
     
@@ -93,7 +91,7 @@ public class BeePet extends HariantEntity implements Pet, Distanced, Located {
     @NotNull
     private static Bee createBee(@NotNull Location location) {
         return Entities.BEE.spawn(location, self -> {
-            Objects.requireNonNull(self.getAttribute(Attribute.SCALE)).setBaseValue(0.25);
+            Objects.requireNonNull(self.getAttribute(Attribute.SCALE)).setBaseValue(0.3); // 0.25
             
             self.setAI(false);
             self.setSilent(true);

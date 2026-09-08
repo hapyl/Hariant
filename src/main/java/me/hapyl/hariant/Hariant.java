@@ -61,16 +61,16 @@ public final class Hariant implements Runnable, Lifecycle {
     
     public static final ZoneOffset TIME_ZONE = ZoneOffset.ofHours(5);
     
-    @Singleton static HariantPlugin PLUGIN;
-    @Singleton static Hariant HANDLER;
+    static @Singleton HariantPlugin PLUGIN;
+    static @Singleton Hariant HANDLER;
     
     private final Map<UUID, PlayerProfile> profiles;
     private final Map<UUID, HariantEntity> entityMap;
     private final Random theRandom;
     private final SecurityManager securityManager;
     
-    @NotNull private EnumBattleground selectedBattleground;
-    @NotNull private EnumGameType selectedGameType;
+    private @NotNull EnumBattleground selectedBattleground;
+    private @NotNull EnumGameType selectedGameType;
     
     private GameInstance currentGameInstance;
     private GameInstanceCountdown countdown;
@@ -202,6 +202,12 @@ public final class Hariant implements Runnable, Lifecycle {
         final ServerTickManager serverTickManager = Bukkit.getServerTickManager();
         final List<? extends HariantPlayer> players = getPlayers().toList();
         
+        // Destroy non-players entities at 0 tick
+        clearEntities();
+        
+        // Due to removal issues, we manually call `onDestroy` for players at the 0 tick
+        // players.forEach(HariantEntity::onDestroy);
+        
         // Schedule instance destroy via a bukkit runnable
         new BukkitRunnable() {
             private int tick;
@@ -225,14 +231,16 @@ public final class Hariant implements Runnable, Lifecycle {
                         gameInstance.setState(GameInstanceState.FINISHED);
                         gameInstance.onFinalize(players, winResult);
                         
+                        // Call `onCreate` on SPAWN to reset time/weather
+                        EnumBattleground.SPAWN.onCreate(List.of());
+                        
                         // Cleanup all tasks
                         HariantTask.cancelAllTasks();
                         
                         // Destroy players via their profiles
-                        getPlayerProfiles().forEach(profile -> profile.handlerInstanceDestroyed(gameInstance, winResult));
-                        
-                        // Destroy non-players entities
-                        clearEntities();
+                        players.forEach(player -> {
+                            player.getProfile().handleInstanceDestroyed(gameInstance, winResult);
+                        });
                         
                         // Nullate instance at the very end
                         HANDLER.currentGameInstance = null;
@@ -424,8 +432,7 @@ public final class Hariant implements Runnable, Lifecycle {
         throw new IllegalStateException("Missing profile for `%s`!".formatted(uniqueId));
     }
     
-    @NotNull
-    public static Stream<PlayerProfile> getPlayerProfiles() {
+    public static @NotNull Stream<PlayerProfile> getPlayerProfiles() {
         return HANDLER.profiles.values().stream();
     }
     
@@ -435,52 +442,39 @@ public final class Hariant implements Runnable, Lifecycle {
      * @param player - The online player whose database to get.
      * @return the player database instance.
      */
-    @NotNull
-    public static PlayerDatabase getPlayerDatabase(@NotNull Player player) {
+    public static @NotNull PlayerDatabase getPlayerDatabase(@NotNull Player player) {
         return getPlayerProfile(player).getDatabase();
     }
     
-    @NotNull
-    public static <E extends HariantEntity> Optional<E> getEntity(@NotNull UUID uuid, @NotNull Class<E> clazz) {
-        final HariantEntity hariantEntity = HANDLER.entityMap.get(uuid);
-        
-        return clazz.isInstance(hariantEntity) ? Optional.of(clazz.cast(hariantEntity)) : Optional.empty();
+    public static @NotNull Optional<HariantEntity> getEntity(@NotNull UUID uuid) {
+        return Optional.ofNullable(HANDLER.entityMap.get(uuid));
     }
     
-    @NotNull
-    public static <E extends HariantEntity> Optional<E> getEntity(@NotNull Entity entity, @NotNull Class<E> clazz) {
-        return getEntity(entity.getUniqueId(), clazz);
+    public static @NotNull Optional<HariantEntity> getEntity(@NotNull Entity entity) {
+        return getEntity(entity.getUniqueId());
     }
     
-    @NotNull
-    public static Optional<HariantEntity> getEntity(@NotNull Entity entity) {
-        return getEntity(entity, HariantEntity.class);
+    public static @Nullable HariantEntity getEntityOrNull(@NotNull UUID uuid) {
+        return HANDLER.entityMap.get(uuid);
     }
     
-    @NotNull
-    public static Optional<HariantEntity> getEntity(@NotNull UUID uuid) {
-        return getEntity(uuid, HariantEntity.class);
+    public static @Nullable HariantEntity getEntityOrNull(@NotNull Entity entity) {
+        return getEntityOrNull(entity.getUniqueId());
     }
     
-    @Nullable
-    public static HariantEntity getEntityOrNull(@NotNull Entity entity) {
-        return HANDLER.entityMap.get(entity.getUniqueId());
+    public static @NotNull Optional<HariantPlayer> getPlayer(@NotNull Player player) {
+        return getEntityOrNull(player) instanceof HariantPlayer hariantPlayer
+               ? Optional.of(hariantPlayer)
+               : Optional.empty();
     }
     
-    @NotNull
-    public static Optional<HariantPlayer> getPlayer(@NotNull Player player) {
-        return getEntity(player, HariantPlayer.class);
-    }
-    
-    @NotNull
-    public static Stream<HariantPlayer> getPlayers() {
+    public static @NotNull Stream<HariantPlayer> getPlayers() {
         // Using profiles as a bridge to get players is faster than iterating over the entities map, because
         // we're just calling get() on uuid
         return getPlayerProfiles().map(PlayerProfile::getHariantPlayer).filter(Optional::isPresent).map(Optional::get);
     }
     
-    @NotNull
-    public static <H extends HariantEntity> H createEntity(@NotNull EntitySpawner<H> spawner) {
+    public static @NotNull <H extends HariantEntity> H createEntity(@NotNull EntitySpawner<H> spawner) {
         final H entity = spawner.spawn();
         HANDLER.entityMap.put(entity.getUuid(), entity);
         entity.onCreate();
@@ -710,6 +704,10 @@ public final class Hariant implements Runnable, Lifecycle {
     
     public static @NotNull World getWorld() {
         return WORLD;
+    }
+    
+    public static @NotNull NamespacedKey createNamespacedKey(String key) {
+        return new NamespacedKey(PLUGIN, key);
     }
     
     private static void clearEntities() {

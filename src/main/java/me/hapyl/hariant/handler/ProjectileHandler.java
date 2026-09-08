@@ -36,6 +36,7 @@ public final class ProjectileHandler implements Listener {
     private static final Map<Projectile, HariantProjectile> PROJECTILES = Maps.newHashMap();
     private static final Set<? extends DamageFlag> FORCE_CRITICAL = Set.of(DamageFlag.FORCE_CRITICAL);
     
+    // This event handles exclusively bukkit projectiles via using the shooter's ranged attack
     @EventHandler(priority = EventPriority.HIGHEST)
     public void handleProjectileLaunchEvent(ProjectileLaunchEvent ev) {
         final Projectile projectile = ev.getEntity();
@@ -69,7 +70,7 @@ public final class ProjectileHandler implements Listener {
         }
         
         // Create natural projectile
-        createProjectile(projectile, builder.build(), HariantProjectileNatural::new);
+        createProjectile(new HariantShotProjectile(projectile, entity, builder.build()));
         
         // Call `onShoot` for naturally shot weapons
         entity.onShoot();
@@ -99,27 +100,24 @@ public final class ProjectileHandler implements Listener {
         projectile.onHit(entity, block);
     }
     
-    public static <P extends Projectile, H extends HariantProjectile> void createProjectile(@NotNull P projectile, @NotNull DamageSource damageSource, @NotNull ProjectileConstructor<P, H> constructor) {
-        final H hariantProjectile = constructor.construct(projectile, damageSource);
+    public static <H extends HariantProjectile> @NotNull H createProjectile(@NotNull H projectile) {
+        // Projectile launch event being cancellable causes many issues and brings zero benefits as of now,
+        // therefore the event is non-cancellable
+        new HariantProjectileLaunchEvent(projectile).callEvent();
         
-        // Call projectile launch event
-        if (new HariantProjectileLaunchEvent(hariantProjectile).callEvent()) {
-            projectile.remove();
-            return;
-        }
-        
-        PROJECTILES.put(projectile, hariantProjectile);
-        hariantProjectile.onLaunch();
+        PROJECTILES.put(projectile.getProjectile(), projectile);
+        projectile.onLaunch();
+        return projectile;
     }
     
     public static void playHitSound(@NotNull HariantEntity entity) {
         entity.playSound(Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f);
     }
     
-    private static class HariantProjectileNatural extends HariantProjectile {
+    private static class HariantShotProjectile extends HariantDamageProjectile {
         
-        HariantProjectileNatural(@NotNull Projectile projectile, @NotNull DamageSource damageSource) {
-            super(projectile, damageSource);
+        HariantShotProjectile(@NotNull Projectile projectile, @NotNull HariantEntity entity, @NotNull DamageSource damageSource) {
+            super(projectile, entity, damageSource);
         }
         
         @Override

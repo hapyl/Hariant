@@ -1,10 +1,12 @@
 package me.hapyl.hariant.hero.mage;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Removable;
+import me.hapyl.hariant.achievement.AchievementMageSoulStorm;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
@@ -24,6 +26,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -43,6 +46,7 @@ public class SoulStorm extends HariantTickingTask {
     private final Vector vector;
     private final DamageSource damageSource;
     private final Set<Soul> souls;
+    private final Map<HariantEntity, Integer> numberOfTimesHit;
     
     private double closestSoul;
     private double furthestSoul;
@@ -61,6 +65,7 @@ public class SoulStorm extends HariantTickingTask {
         this.souls = Sets.newHashSet();
         this.damagePeriod = talent.damagePeriod.intValue();
         this.damagePeriodHalf = damagePeriod / 2;
+        this.numberOfTimesHit = Maps.newHashMap();
     }
     
     @Override
@@ -97,6 +102,9 @@ public class SoulStorm extends HariantTickingTask {
                         // Fx
                         entity.playWorldSound(Sound.BLOCK_SOUL_SAND_BREAK, 0.0f);
                         entity.playWorldSound(Sound.BLOCK_SOUL_SAND_STEP, 0.0f);
+                        
+                        // Achievement
+                        AchievementMageSoulStorm.progress(player, numberOfTimesHit.merge(entity, 1, Integer::sum));
                     }
                     
                     // Warning

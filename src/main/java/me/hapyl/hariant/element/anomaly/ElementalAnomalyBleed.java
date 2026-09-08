@@ -51,8 +51,8 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
             1
     );
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            this,
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
+            this, Key.ofString("bleed_damage_source"),
             DeathMessage.createWithDefaultKiller("{player} bled to death")
     );
     

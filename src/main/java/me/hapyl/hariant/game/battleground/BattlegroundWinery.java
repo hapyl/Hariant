@@ -24,6 +24,8 @@ public final class BattlegroundWinery extends BattlegroundImpl {
         this.setTimeBeforePlayersReveal(Tick.fromSeconds(10));
         
         setSize(Size.LARGE);
+        setBattlegroundWeather(BattlegroundWeather.THUNDER);
+        setBattlegroundTime(BattlegroundTime.SUNSET);
         
         this.setSpawnLocations(
                 ImmutableLocation.create(4976, 68, -1, -45, 0),

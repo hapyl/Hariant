@@ -8,9 +8,11 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.lobby.LobbyItemPlayerProfile;
+import me.hapyl.hariant.menu.MenuPlayerProfile;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.VanillaTeamManager;
 import me.hapyl.hariant.profile.notification.NotificationHandler;
+import me.hapyl.hariant.profile.notification.NotificationResult;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Scoreboard;
@@ -74,28 +76,32 @@ public final class PlayerUI implements Ticking {
             return;
         }
         
-        
-        
-        final int numberOfNotifications = NotificationHandler.getNotifications(profile).sizeFiltered();
+        final NotificationResult notificationResult = NotificationHandler.getNotifications(profile);
+        final int numberOfNotifications = notificationResult.sizeFiltered();
         
         // If player has notifications, blink the player head
         if (numberOfNotifications > 0) {
             updateNotifications = true;
-            LobbyItemPlayerProfile.give(profile, Hariant.currentTickMod20() ? numberOfNotifications : 0);
+            
+            // Pass update to lobby items and player menu
+            final boolean tickMod20 = Hariant.currentTickMod20();
+            
+            LobbyItemPlayerProfile.update(profile, tickMod20 ? numberOfNotifications : 0);
+            MenuPlayerProfile.update(profile, tickMod20 ? notificationResult : null);
         }
         // Otherwise, update the item once
         else {
             if (updateNotifications) {
                 updateNotifications = false;
-                LobbyItemPlayerProfile.give(profile, 0);
+                
+                LobbyItemPlayerProfile.update(profile, 0);
+                MenuPlayerProfile.update(profile, null);
             }
         }
         
-        
     }
     
-    @NotNull
-    public VanillaTeamManager getVanillaTeamManager() {
+    public @NotNull VanillaTeamManager getVanillaTeamManager() {
         return vanillaTeamManager;
     }
     
@@ -125,8 +131,7 @@ public final class PlayerUI implements Ticking {
         tablist.update(formatter);
     }
     
-    @NotNull
-    private String getTodayFormatted() {
+    private @NotNull String getTodayFormatted() {
         final LocalDate localDate = LocalDate.now();
         
         return "%s/%s/%s".formatted(localDate.getDayOfMonth(), localDate.getMonthValue(), localDate.getYear());

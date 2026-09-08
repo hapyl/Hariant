@@ -30,7 +30,7 @@ public final class TalentAlchemicalCauldron extends Talent {
     public final @DisplayField Decimal cauldronElementalApplicationRadius = Decimal.ofValue(1.5);
     
     public final @DisplayField Decimal infusionDuration = Decimal.ofSeconds(15);
-    public final @DisplayField Decimal toxicDamageIncrease = Decimal.ofAttribute(AttributeType.TOXIC_DAMAGE_BONUS, 40);
+    public final @DisplayField Decimal toxicDamageIncrease = Decimal.ofAttribute(AttributeType.TOXIC_DAMAGE_BONUS, 20);
     
     public TalentAlchemicalCauldron(@NotNull Key key) {
         super(key, Component.text("Alchemical Cauldron"), Icon.ofMaterial(Material.CAULDRON));
@@ -61,19 +61,17 @@ public final class TalentAlchemicalCauldron extends Talent {
         );
     }
     
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
     }
     
-    @NotNull
     @Override
-    public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+    public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
         final HeroDataAlchemist heroData = player.getHeroData(HeroRegistry.ALCHEMIST, HeroDataAlchemist::new);
-        final Location location = player.getLocationInFrontFromEyes(2);
+        final Location location = player.getLocationInFrontFromEyes(1);
         
-        location.setYaw(0.0f);
+        location.setYaw(player.random.nextFloat() * 180);
         location.setPitch(0.0f);
         
         heroData.setAlchemicalCauldron(Hariant.createEntity(() -> new HariantEntityAlchemicalCauldron(player, LocationHelper.anchor(location), this)));

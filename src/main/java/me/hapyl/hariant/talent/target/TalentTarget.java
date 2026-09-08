@@ -4,7 +4,6 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,25 +23,20 @@ public interface TalentTarget {
      * @param player - The player for whom to create the context.
      * @return a talent context, or {@code null} if creating failed.
      */
-    @Nullable
-    TalentContext createContext(@NotNull HariantPlayer player);
+    @Nullable TalentContext createContext(@NotNull HariantPlayer player);
     
-    @NotNull
-    Component errorMessage();
+    @NotNull Component errorMessage();
     
-    @NotNull
-    static TalentTarget none() {
+    static @NotNull TalentTarget none() {
         class Holder {
             private static final TalentTarget EMPTY = new TalentTarget() {
-                @NotNull
                 @Override
-                public TalentContext createContext(@NotNull HariantPlayer player) {
+                public @NotNull TalentContext createContext(@NotNull HariantPlayer player) {
                     return TalentContext.empty();
                 }
                 
-                @NotNull
                 @Override
-                public Component errorMessage() {
+                public @NotNull Component errorMessage() {
                     return Component.empty();
                 }
             };
@@ -51,20 +45,12 @@ public interface TalentTarget {
         return Holder.EMPTY;
     }
     
-    @NotNull
-    static TalentTarget targetEntityRayCast(double maxDistance, double lookupRadius, @NotNull Predicate<HariantEntity> filter) {
-        return new TalentTargetEntityRayCast(maxDistance, lookupRadius, filter);
+    static @NotNull TalentTarget targetEntity(double maxDistance, double lookupRadius, @NotNull TalentTargetEntityRayCast.BlockCollision blockCollision, @NotNull TalentTargetEntityRayCast.EntityPriority entityPriority, @NotNull Predicate<HariantEntity> filter) {
+        return new TalentTargetEntityRayCast(maxDistance, lookupRadius, blockCollision, entityPriority, filter);
     }
     
-    @NotNull
-    static TalentTarget targetBlock(int maxDistance, @NotNull Predicate<Block> filter) {
+    static @NotNull TalentTarget targetBlock(int maxDistance, @NotNull Predicate<Block> filter) {
         return new TalentTargetBlock(maxDistance, filter);
-    }
-    
-    @Deprecated // Not implemented
-    @NotNull
-    static TalentTarget targetEntityDotProduct(double maxDistance, double dot, @NotNull Predicate<HariantEntity> filter) throws NotImplementedException {
-        throw new NotImplementedException();
     }
     
 }

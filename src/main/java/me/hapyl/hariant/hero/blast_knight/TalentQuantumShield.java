@@ -45,13 +45,13 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
     
     private final @DisplayField Decimal parryWindow = Decimal.ofSeconds(0.5f);
     private final @DisplayField Decimal parryCooldownReduction = Decimal.ofPercentage(50);
-    private final @DisplayField Decimal parryStunDuration = Decimal.ofSeconds(3f);
+    private final @DisplayField Decimal parryStunDuration = Decimal.ofSeconds(5f);
     private final @DisplayField Decimal parryQuantumEnergyGeneration = Decimal.ofValue(5);
     
     private final @DisplayField Decimal blockingQuantumEnergyGeneration = Decimal.ofValue(1);
     private final @DisplayField HariantCooldown blockingQuantumEnergyGenerationCooldown = HariantCooldown.ofSeconds(Key.ofString("quantum_energy_generation_cooldown"), 0.2f);
     
-    private final @DisplayField BoundingBoxBlueprint parryBoundingBox = BoundingBoxBlueprint.define(1, 2.5, 1);
+    private final @DisplayField BoundingBoxBlueprint parryBoundingBox = BoundingBoxBlueprint.define(1.25, 2.5, 1.25);
     
     public TalentQuantumShield(@NotNull Key key) {
         super(key, Component.text("Quantum Shield"), Icon.ofMaterial(Material.SHIELD));

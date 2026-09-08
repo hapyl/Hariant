@@ -26,6 +26,7 @@ import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
+import me.hapyl.hariant.talent.target.TalentTargetEntityRayCast;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.Icon;
@@ -58,8 +59,9 @@ public final class TalentBubbleTrap extends Talent implements Effect {
     private final double yOffset = 1.2;
     private final double bubbleSize = 1.5;
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("bubble_trap_damage_source"),
             DeathMessage.create("{player} was bubbled to death [by {killer}]")
     );
     
@@ -104,7 +106,13 @@ public final class TalentBubbleTrap extends Talent implements Effect {
     
     @Override
     public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
-        return TalentTarget.targetEntityRayCast(maximumDistance.doubleValue(), 1, player::canAffect);
+        return TalentTarget.targetEntity(
+                maximumDistance.doubleValue(),
+                1,
+                TalentTargetEntityRayCast.BlockCollision.ALLOW_PASSABLE,
+                TalentTargetEntityRayCast.EntityPriority.PLAYER_PRIORITY,
+                player::canAffect
+        );
     }
     
     @Override

@@ -24,6 +24,10 @@ public class HariantProjectileHitEvent extends HariantEvent implements Cancellab
         this.projectile = projectile;
     }
     
+    public @NotNull HariantEntity getShooter() {
+        return projectile.getShooter();
+    }
+    
     public @NotNull HariantProjectile getProjectile() {
         return projectile;
     }

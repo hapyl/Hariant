@@ -62,8 +62,9 @@ public class TalentInfernalWrath extends TalentUltimate {
     private final double halfAngleRadians = Math.toRadians(coneAngle.doubleValue() * 0.5);
     private final double halfAngleRadiansCos = Math.cos(halfAngleRadians);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("infernal_wrath_damage_source"),
             DeathMessage.create("{player} suffered the wrath [of {killer}]")
     );
     

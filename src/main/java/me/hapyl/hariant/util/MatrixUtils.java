@@ -10,8 +10,7 @@ public final class MatrixUtils {
     private MatrixUtils() {
     }
     
-    @NotNull
-    public static Transformation scale(final float scale) {
+    public static @NotNull Transformation scale(final float scale) {
         return new Transformation(
                 new Vector3f(0, 0, 0),
                 new AxisAngle4f(0, 0, 0, 0),

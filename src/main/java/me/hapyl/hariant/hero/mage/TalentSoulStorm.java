@@ -26,12 +26,12 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentSoulStorm extends TalentUltimate {
     
-    public final @DisplayField Decimal castingDuration = Decimal.ofSeconds(1.25f);
+    public final @DisplayField Decimal castingDuration = Decimal.ofSeconds(0.75f);
     
-    public final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 75);
+    public final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 90);
     
     public final @DisplayField Decimal distance = Decimal.ofValue(30);
-    public final @DisplayField Decimal radius = Decimal.ofValue(1.5f);
+    public final @DisplayField Decimal radius = Decimal.ofValue(2f);
     public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 100);
     public final @DisplayField Decimal damagePeriod = Decimal.ofSeconds(0.5f);
     

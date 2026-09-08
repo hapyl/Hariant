@@ -37,8 +37,9 @@ public final class TalentReckoning extends TalentPassive implements Listener {
     private final @DisplayField Decimal resetThreshold = Decimal.ofSeconds(5);
     private final @DisplayField Decimal ferocityHits = Decimal.ofValue(1);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("reckoning_damage_source"),
             DeathMessage.create("{player} was reckoned [by {killer}]")
     );
     

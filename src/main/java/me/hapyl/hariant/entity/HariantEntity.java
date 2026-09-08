@@ -47,7 +47,6 @@ import me.hapyl.hariant.entity.trap.Trappable;
 import me.hapyl.hariant.event.*;
 import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import me.hapyl.hariant.handler.HariantProjectile;
-import me.hapyl.hariant.handler.ProjectileConstructor;
 import me.hapyl.hariant.handler.ProjectileHandler;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamEntry;
@@ -74,6 +73,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
@@ -1004,6 +1004,7 @@ public class HariantEntity
      */
     public final void removeForcefully() {
         this.onRemove(RemovalReason.REMOVAL);
+        this.onDestroy();
     }
     
     /**
@@ -1055,9 +1056,17 @@ public class HariantEntity
         }
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public <P extends Projectile, H extends HariantProjectile> @NotNull P launchProjectile(@NotNull Class<P> projectileClass, @Nullable Vector velocity, @NotNull DamageSource damageSource, @NotNull ProjectileConstructor<P, H> constructor) {
-        return entity.launchProjectile(projectileClass, velocity, self -> ProjectileHandler.createProjectile(self, damageSource, constructor));
+    public <P extends Projectile, H extends HariantProjectile> @NotNull H launchProjectile(@NotNull Class<P> projectileClass, @Nullable Vector velocity, @NotNull ProjectileLauncher.ProjectileCreator<P, H> creator) {
+        final Object[] uglyStinkyObjectReference = new Object[1];
+        
+        entity.launchProjectile(projectileClass, velocity, self -> {
+            // We must create a projectile here to not trigger the handler creation
+            uglyStinkyObjectReference[0] = ProjectileHandler.createProjectile(creator.create(self, this));
+        });
+        
+        return (H) uglyStinkyObjectReference[0];
     }
     
     @Override
@@ -1186,7 +1195,7 @@ public class HariantEntity
     public boolean hasEffectResistance(@NotNull AssistSource assistSource) {
         final HariantEntity source = assistSource.source();
         
-        // FIXME (xanyjl @ Saturday, August 22) -> This and triggerEffect is kinda of onfusing
+        // FIXME (xanyjl @ Saturday, August 22) -> This and triggerEffect is kinda of confusing
         
         // Make sure we never resist self-debuffs
         if (this.equals(source)) {
@@ -1302,7 +1311,7 @@ public class HariantEntity
     }
     
     public void addVanillaEffect(@NotNull PotionEffectType potionEffectType, int amplifier, int duration) {
-        entity.addPotionEffect(potionEffectType.createEffect(duration, amplifier));
+        entity.addPotionEffect(new PotionEffect(potionEffectType, duration, amplifier, false, false, false));
     }
     
     public void removeVanillaEffect(@NotNull PotionEffectType potionEffectType) {
@@ -1550,6 +1559,18 @@ public class HariantEntity
         final Map.Entry<Class<? extends HealthMutator>, HealthMutator> lastMutatorEntry = healthMutators.lastEntry();
         
         return lastMutatorEntry != null ? lastMutatorEntry.getValue() : DEFAULT_HEALTH_STYLE;
+    }
+    
+    public double getHeight() {
+        return entity.getHeight();
+    }
+    
+    public void swingHand() {
+        entity.swingMainHand();
+    }
+    
+    public void swingOffHand() {
+        entity.swingOffHand();
     }
     
     protected void playDamageFx(@NotNull Supplier<@Nullable SoundFx> supplier) {

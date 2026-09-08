@@ -98,7 +98,7 @@ public class DamageInstance implements MutatesDamage, DamageFlagged, ElementSour
     
     @Override
     public @Nullable HariantEntity getSource() {
-        return null;
+        return damageSource.getSource();
     }
     
     @Override

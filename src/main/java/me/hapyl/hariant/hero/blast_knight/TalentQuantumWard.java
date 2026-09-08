@@ -13,8 +13,10 @@ import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
+import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageComputeEvent;
+import me.hapyl.hariant.event.HariantDeathEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.talent.Response;
@@ -23,6 +25,7 @@ import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
+import me.hapyl.hariant.talent.target.TalentTargetEntityRayCast;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
@@ -36,6 +39,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public final class TalentQuantumWard extends Talent implements Listener {
     
@@ -52,6 +57,8 @@ public final class TalentQuantumWard extends Talent implements Listener {
     
     private final @DisplayField Decimal splitDamageReductionPercentage = Decimal.ofPercentage(10);
     private final @DisplayField Decimal splitDamageReductionPercentageLimit = Decimal.ofPercentage(50);
+    
+    private final @DisplayField Decimal healingOfDefense = Decimal.ofPercentage(50);
     
     public TalentQuantumWard(@NotNull Key key) {
         super(key, Component.text("Quantum Ward"), Icon.ofMaterial(Material.POPPED_CHORUS_FRUIT));
@@ -94,13 +101,26 @@ public final class TalentQuantumWard extends Talent implements Listener {
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
+                         .append(Component.text("Additionally, whenever the warded teammate kills an enemy, heal for "))
+                         .append(healingOfDefense)
+                         .append(Component.text(" of "))
+                         .append(AttributeType.DEFENSE)
+                         .append(Component.text("."))
+                         .appendNewline()
+                         .appendNewline()
                          .append(Component.text("Cooldown of this talent starts after the ward is broken.", Colors.DARK_GRAY))
         );
     }
     
     @Override
     public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
-        return TalentTarget.targetEntityRayCast(maxDistance.doubleValue(), 1.25, player::isTeammate);
+        return TalentTarget.targetEntity(
+                maxDistance.doubleValue(),
+                1.25,
+                TalentTargetEntityRayCast.BlockCollision.ALLOW,
+                TalentTargetEntityRayCast.EntityPriority.PLAYER_PRIORITY,
+                player::isTeammate
+        );
     }
     
     @Override
@@ -126,7 +146,26 @@ public final class TalentQuantumWard extends Talent implements Listener {
         return Response.await();
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
+    public void handleHariantDeathEvent(HariantDeathEvent ev) {
+        final HariantEntity source = ev.getDamageInstance().getSource();
+        
+        if (source == null) {
+            return;
+        }
+        
+        final StoneCastle stoneCastle = getStoneCastle(source);
+        
+        if (stoneCastle == null) {
+            return;
+        }
+        
+        final HariantPlayer player = stoneCastle.player;
+        
+        player.heal(HealingSource.create(player.getAttributes().get(AttributeType.DEFENSE) * healingOfDefense.doubleValue(), TalentQuantumWard.this, player));
+    }
+    
+    @EventHandler(ignoreCancelled = true)
     public void handleHariantDamageComputeEvent(HariantDamageComputeEvent ev) {
         final HariantEntity entity = ev.getEntity();
         final EnumTeam team = entity.getTeam().orElse(null);
@@ -192,6 +231,22 @@ public final class TalentQuantumWard extends Talent implements Listener {
                 splitDamageReductionPercentageLimit.doubleValue()
         );
         
+    }
+    
+    private @Nullable StoneCastle getStoneCastle(@NotNull HariantEntity entity) {
+        final EnumTeam team = entity.getTeam().orElse(null);
+        
+        if (team == null) {
+            return null;
+        }
+        
+        // Search for a teammate with castle
+        return team.getPlayers()
+                   .map(player -> player.touchHeroData(HeroRegistry.BLAST_KNIGHT, HeroDataBlastKnight.class, HeroDataBlastKnight::getStoneCastle))
+                   .filter(Optional::isPresent)
+                   .map(Optional::get)
+                   .findFirst()
+                   .orElse(null);
     }
     
     public static class DamageSourceStoneCastle extends DamageSourceImpl {

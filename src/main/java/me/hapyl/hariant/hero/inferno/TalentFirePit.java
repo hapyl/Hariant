@@ -61,15 +61,16 @@ public final class TalentFirePit extends Talent {
     private final @DisplayField Decimal transformationDelay = Decimal.ofSeconds(1f);
     private final @DisplayField Decimal totalStages = Decimal.ofValue(firePitsMaterials.length);
     
-    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 84);
+    private final @DisplayField AttributeScaling damage = AttributeScaling.create(AttributeType.ATTACK, 67.2);
     private final @DisplayField Decimal damagePeriod = Decimal.ofSeconds(0.25f);
-    private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 250);
+    private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 500);
     
     private final int transformationDelayPerStage = transformationDelay.intValue() / totalStages.intValue();
     private final Key damageCooldownKey = Key.ofString("fire_pit_damage");
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("fire_pit_damage_source"),
             DeathMessage.createWithDefaultKiller("{player} was hellburnt to death")
     );
     

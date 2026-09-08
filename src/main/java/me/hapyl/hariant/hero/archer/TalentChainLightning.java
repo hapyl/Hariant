@@ -12,11 +12,10 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.handler.HariantProjectile;
+import me.hapyl.hariant.handler.HariantDamageProjectile;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -47,8 +46,9 @@ public final class TalentChainLightning extends Talent {
     private final @DisplayField Decimal maxChainReaction = Decimal.ofValue(2);
     private final @DisplayField Decimal maxChainReactionDistance = Decimal.ofValue(6);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("chain_lightning_damage_source"),
             DeathMessage.create("{player} was shocked to death [by {killer}]")
     );
     
@@ -81,7 +81,7 @@ public final class TalentChainLightning extends Talent {
     
     @Override
     public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        player.launchProjectile(Arrow.class, new ChainLightningArrowDamageSource(player, damage.getScaledValue(player)), ChainLightningProjectile::new);
+        player.launchProjectile(Arrow.class, null, ChainLightningProjectile::new);
         
         // Fx
         player.playWorldSound(Sound.ENTITY_ARROW_SHOOT, 0.75f);
@@ -90,10 +90,10 @@ public final class TalentChainLightning extends Talent {
         return Response.ok();
     }
     
-    private class ChainLightningProjectile extends HariantProjectile {
+    private class ChainLightningProjectile extends HariantDamageProjectile {
         
-        ChainLightningProjectile(@NotNull Arrow projectile, @NotNull DamageSource damageSource) {
-            super(projectile, damageSource);
+        ChainLightningProjectile(@NotNull Arrow projectile, @NotNull HariantEntity shooter) {
+            super(projectile, shooter, new ChainLightningArrowDamageSource(shooter, damage.getScaledValue(shooter)));
             
             projectile.setColor(ARROW_COLOR);
         }
@@ -131,7 +131,7 @@ public final class TalentChainLightning extends Talent {
             }
             
             // Trigger achievement
-            if (entity instanceof HariantPlayer player && targetsSize == (maxChainReaction.intValue() + 1)) {
+            if (shooter instanceof HariantPlayer player && targetsSize == (maxChainReaction.intValue() + 1)) {
                 AchievementRegistry.ARCHER_CHAIN_LIGHTNING.progress(player.getProfile());
             }
         }

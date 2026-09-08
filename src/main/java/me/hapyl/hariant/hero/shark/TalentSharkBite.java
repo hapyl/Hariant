@@ -44,8 +44,9 @@ public final class TalentSharkBite extends Talent {
     
     private final @DisplayField BoundingBoxBlueprint boundingBox = BoundingBoxBlueprint.define(1.5, 3, 1.5);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("shark_bite_damage_source"),
             DeathMessage.create("{player} got their toe bitten off [by {killer}]")
     );
     

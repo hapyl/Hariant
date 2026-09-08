@@ -44,7 +44,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
-import java.util.List;
 import java.util.Set;
 
 public final class TalentSoulFog extends Talent {
@@ -64,8 +63,9 @@ public final class TalentSoulFog extends Talent {
     
     private final @DisplayField AttributeScaling soulFogExplosionDamage = AttributeScaling.create(AttributeType.ATTACK, 144);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("soul_fog_damage_source"),
             DeathMessage.create("{player} lost their way in the soul fog [created by {killer}]")
     );
     
@@ -86,7 +86,7 @@ public final class TalentSoulFog extends Talent {
                          .append(Component.text("Throw a projectile concentrated with lost souls forward."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("On collision, the souls combine into "))
+                         .append(Component.text("On landing, the souls combine into "))
                          .append(Component.text("Fog of Lost Souls", Colors.SOUL))
                          .append(Component.text(" that constantly pulls nearby "))
                          .append(Component.text("enemies", Colors.RED))
@@ -112,7 +112,7 @@ public final class TalentSoulFog extends Talent {
     
     @Override
     public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        player.launchProjectile(Snowball.class, new SoulFogDamageSource(player), SoulFogProjectile::new);
+        player.launchProjectile(Snowball.class, null, SoulFogProjectile::new);
         
         // Fx
         player.playWorldSound(Sound.ENTITY_EGG_THROW, 0.5f);
@@ -212,32 +212,24 @@ public final class TalentSoulFog extends Talent {
     
     private class SoulFogProjectile extends HariantProjectile {
         
-        SoulFogProjectile(@NotNull ThrowableProjectile projectile, @NotNull DamageSource damageSource) {
-            super(projectile, damageSource);
+        SoulFogProjectile(@NotNull ThrowableProjectile projectile, @NotNull HariantEntity shooter) {
+            super(projectile, shooter);
             
             projectile.setItem(SKULL_TEXTURE);
         }
         
         @Override
         public void onHit(@Nullable HariantEntity entity, @Nullable Block block) {
-            super.onHit(entity, block);
-            
             final HariantEntity shooter = this.getShooter();
             final Location location = LocationHelper.anchor(this.getLocation());
+            
+            location.setYaw(shooter.random.nextFloat() * 180);
             
             // Don't delegate soul fog
             new SoulFog(shooter, location);
             
             // Fx
             shooter.playWorldSound(location, Sound.BLOCK_SCULK_SPREAD, 0.0f);
-        }
-        
-    }
-    
-    private class SoulFogDamageSource extends DamageSourceImpl {
-        
-        SoulFogDamageSource(@NotNull HariantEntity source) {
-            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.AETHER, List.of(), Set.of(), 1, 0);
         }
         
     }

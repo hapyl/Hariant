@@ -5,6 +5,7 @@ import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
+import me.hapyl.hariant.talent.TalentRegistry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -50,6 +51,11 @@ public class HeroDataNyx extends HeroData<HeroNyx> {
             
             droplet.remove();
             iterator.remove();
+            
+            // If after picking up an orb the count is 0, call the onPickupAll
+            if (droplets.isEmpty()) {
+                TalentRegistry.DUAL_VERDICT.onPickupAll(player);
+            }
             
             // Achievement
             pickedUpDroplets.add(tickResult);

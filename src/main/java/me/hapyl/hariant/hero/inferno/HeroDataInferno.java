@@ -13,7 +13,7 @@ import java.util.List;
 
 public class HeroDataInferno extends HeroData<HeroInferno> implements ActionbarSupplier {
     
-    @Nullable public InfernoDemon currentDemon;
+    public @Nullable InfernoDemon currentDemon;
     
     public HeroDataInferno(@NotNull HeroInferno hero, @NotNull HariantPlayer player) {
         super(hero, player);

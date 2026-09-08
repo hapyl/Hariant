@@ -14,7 +14,7 @@ public class StatusEffectFallDamageResistance extends StatusEffectImpl implement
     StatusEffectFallDamageResistance() {
         super(Key.ofString("status_effect_fall_damage_resistance"), Component.text("Fall Damage Resistance"), EffectType.BUFF);
         
-        setDescription(Component.text("Resists a single instance of fall damage."));
+        setDescription(Component.text("Negates a single instance of fall damage."));
     }
     
     @EventHandler

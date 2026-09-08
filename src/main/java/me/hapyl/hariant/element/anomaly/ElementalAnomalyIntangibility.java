@@ -30,7 +30,8 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
     private final Decimal resistanceReductionDuration = Decimal.ofSeconds(10);
     
     private final DamageSourceIdentity damageIdentity = DamageSourceIdentity.create(
-            this,
+            Key.ofString("intangibility_damage_source"),
+            this.getName(),
             DeathMessage.createWithDefaultKiller("{player} drifted from the plane of reality")
     );
     

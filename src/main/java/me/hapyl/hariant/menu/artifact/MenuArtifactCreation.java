@@ -8,6 +8,7 @@ import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantLogger;
+import me.hapyl.hariant.achievement.ComponentUtils;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.inventory.HariantInventory;
@@ -26,7 +27,6 @@ import me.hapyl.hariant.shop.transaction.Transaction;
 import me.hapyl.hariant.shop.transaction.TransactionException;
 import me.hapyl.hariant.util.BooleanExplained;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -56,8 +56,6 @@ public final class MenuArtifactCreation extends Menu {
     
     private static final String TEXTURE_CAN_ARTIFICE = "4312ca4632def5ffaf2eb0d9d7cc7b55a50c4e3920d90372aab140781f5dfbc4";
     private static final String TEXTURE_CANNOT_ARTIFICE = "beb588b21a6f98ad1ff4e085c552dcb050efc9cab427f46048f18fc803475f7";
-    
-    private static final Style LORE_STYLE_NO_ITALIC = Style.style(Colors.GRAY).decoration(TextDecoration.ITALIC, false);
     
     private final HariantInventory inventory;
     
@@ -123,7 +121,7 @@ public final class MenuArtifactCreation extends Menu {
                 final List<Component> lore = Lists.newArrayList();
                 
                 lore.add(Component.empty());
-                lore.add(Component.text("Designated Slot:", LORE_STYLE_NO_ITALIC));
+                lore.add(Component.text("Designated Slot:", ComponentUtils.LORE_STYLE));
                 lore.add(
                         Component.empty()
                                  .appendSpace()
@@ -131,11 +129,11 @@ public final class MenuArtifactCreation extends Menu {
                 );
                 
                 lore.add(Component.empty());
-                lore.add(Component.text("Designated Attribute:", LORE_STYLE_NO_ITALIC));
+                lore.add(Component.text("Designated Attribute:", ComponentUtils.LORE_STYLE));
                 lore.add(Component.text(" ").append(attributeTypeCycle.currentValue().asComponent().decoration(TextDecoration.ITALIC, false)));
                 
                 lore.add(Component.empty());
-                lore.add(Component.text("Designated Set:", LORE_STYLE_NO_ITALIC));
+                lore.add(Component.text("Designated Set:", ComponentUtils.LORE_STYLE));
                 
                 lore.addAll(
                         Objects.requireNonNullElseGet(meta.lore(), Lists::<Component>newArrayList)

@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 public final class DamageComponentElementalResistance implements DamageComponent {
     
-    private static final double MULTIPLIER_0 = 0.5;   // RES below 0 gets halved
-    private static final double MULTIPLIER_75 = 0.25; // RES above 75 gets quartered
+    private static final double RESISTANCE_FALL_OFF_THRESHOLD = 60;
+    private static final double RESISTANCE_FALL_OFF_COEFFICIENT = 1 / (1 - RESISTANCE_FALL_OFF_THRESHOLD / 100);
     
     DamageComponentElementalResistance() {
     }
@@ -28,18 +28,22 @@ public final class DamageComponentElementalResistance implements DamageComponent
             return 1;
         }
         
-        // In order to balance elemental resistance, it uses conditional formula, where if the value of resistance is lower than 0,
-        // it is halved, at the same time, it the value is higher than 75, it is quartered instead
-        double value = entity.get(defensiveAttribute);
-        
-        if (value < 0) {
-            value *= MULTIPLIER_0;
+        return resistanceMultiplier(entity.get(defensiveAttribute));
+    }
+    
+    public static double resistanceMultiplier(final double resistance) {
+        // For negative values, resistance is halved
+        if (resistance < 0) {
+            return 1 - resistance / 100 * 0.5;
         }
-        else if (value > 75) {
-            value *= MULTIPLIER_75;
+        // For values below falloff threshold, the resistance is as is
+        else if (resistance < RESISTANCE_FALL_OFF_THRESHOLD) {
+            return 1 - resistance / 100;
         }
-        
-        return 1 - value / 100;
+        // For values above the falloff threshold, the resistance is using diminishings returns
+        else {
+            return 1 / (RESISTANCE_FALL_OFF_COEFFICIENT * resistance / 100 + 1);
+        }
     }
     
 }

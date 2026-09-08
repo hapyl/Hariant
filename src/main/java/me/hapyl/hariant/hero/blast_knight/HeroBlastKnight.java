@@ -26,7 +26,7 @@ public final class HeroBlastKnight extends Hero {
         super(
                 key,
                 Component.text("Blast Knight"),
-                Attributes.base(900, 100, 300)
+                Attributes.base(1000, 100, 300)
                           .adjust(AttributeType.MOVEMENT_SPEED, 90)
                           .adjust(AttributeType.KNOCKBACK_RESISTANCE, 50),
                 new WeaponRoyalSword()

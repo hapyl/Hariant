@@ -24,6 +24,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -107,6 +108,15 @@ public class HeroInferno extends Hero implements Listener {
         });
     }
     
+    private @Nullable InfernoDemon getDemon(@NotNull HariantEntity attacker) {
+        if (!(attacker instanceof HariantPlayer player) || !player.getHero().equals(this)) {
+            return null;
+        }
+        
+        // This is guaranteed to be called by player using Inferno, so just get the real data
+        return player.getHeroData(this, HeroDataInferno::new).currentDemon;
+    }
+    
     private static class WeaponDemonhand extends WeaponMelee {
         WeaponDemonhand() {
             super(
@@ -139,9 +149,14 @@ public class HeroInferno extends Hero implements Listener {
         
         @Override
         public @NotNull DamageSource.Builder createDamageSource(@NotNull HariantEntity attacker) {
+            final InfernoDemon currentDemon = HeroRegistry.INFERNO.getDemon(attacker);
+            final int elementalApplication = currentDemon != null ? currentDemon.getDemonType().getElementalApplication() : 0;
+            
             return super.createDamageSource(attacker)
                         // Inferno always deals True Damage, so set the components
-                        .damageComponents(DamageComponents.ofTrueDamage(), DamageSource.Strategy.REPLACE);
+                        .damageComponents(DamageComponents.ofTrueDamage(), DamageSource.Strategy.REPLACE)
+                        // If using a demon, set that demon elemental application
+                        .elementalUnits(elementalApplication);
         }
     }
     
