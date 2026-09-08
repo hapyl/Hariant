@@ -9,10 +9,10 @@ import me.hapyl.eterna.module.player.tablist.EntryTexture;
 import me.hapyl.eterna.module.text.TimeFormat;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.daily.DailyType;
+import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.PlayerState;
 import me.hapyl.hariant.entity.effect.status.StatusEffectInstance;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.entity.player.combat.CombatData;
 import me.hapyl.hariant.event.HariantGameInstanceStateEvent;
 import me.hapyl.hariant.experience.ExperienceConstants;
 import me.hapyl.hariant.experience.ExperienceSource;
@@ -40,6 +40,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -132,10 +133,17 @@ public class GameInstanceImpl implements GameInstance {
     
     @Override
     public void onCreate(@NotNull Iterable<? extends HariantPlayer> players) {
+        // Pass to battleground & game type
+        battleground.onCreate(players);
+        gameType.onCreate(players);
     }
     
     @Override
     public void onDestroy(@NotNull Iterable<? extends HariantPlayer> players, @NotNull WinResult result) {
+        // Pass to battleground & game type
+        battleground.onDestroy(players, result);
+        gameType.onDestroy(players, result);
+        
         final Component componentDuration = Components.centerText(TimeFormat.format((gameType.getTimeLimit() - timeLeft) * 50L, TimeFormat.Part.MINUTES, TimeFormat.Part.SECONDS), Colors.GRAY);
         final List<? extends Component> winners = result.createWinnerCenterComponents();
         
@@ -164,6 +172,10 @@ public class GameInstanceImpl implements GameInstance {
     
     @Override
     public void onFinalize(@NotNull List<? extends HariantPlayer> players, @NotNull WinResult result) {
+        // Pass to battleground & game type
+        battleground.onFinalize(players, result);
+        gameType.onFinalize(players, result);
+        
         final int minutesPlayed = Math.max(1, (gameType.getTimeLimit() - timeLeft) / TICKS_IN_MINUTE);
         
         for (HariantPlayer player : players) {
@@ -276,6 +288,29 @@ public class GameInstanceImpl implements GameInstance {
     }
     
     @Override
+    public void onKill(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
+        // Pass to battleground & game type
+        battleground.onKill(gameInstance, player, victim);
+        gameType.onKill(gameInstance, player, victim);
+        
+        teamDataMap.getData(player.getPlayerTeam()).kills++;
+        
+        // Progress first blood
+        if (totalKills() == 1) {
+            DailyType.FIRST_BLOOD.progress(player.getProfile());
+        }
+    }
+    
+    @Override
+    public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @Nullable HariantEntity killer) {
+        // Pass to battleground & game type
+        battleground.onDeath(gameInstance, player, killer);
+        gameType.onDeath(gameInstance, player, killer);
+        
+        teamDataMap.getData(player.getPlayerTeam()).deaths++;
+    }
+    
+    @Override
     public void tick() {
         // Only tick when the state is IN_PROGRESS
         if (state != GameInstanceState.IN_PROGRESS) {
@@ -290,25 +325,6 @@ public class GameInstanceImpl implements GameInstance {
     @Override
     public int getTimeLeft() {
         return timeLeft;
-    }
-    
-    @Override
-    public void onKill(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
-        teamDataMap.getData(player.getPlayerTeam()).kills++;
-        
-        gameType.onKill(gameInstance, player, victim);
-        
-        // Progress first blood
-        if (totalKills() == 1) {
-            DailyType.FIRST_BLOOD.progress(player.getProfile());
-        }
-    }
-    
-    @Override
-    public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player) {
-        teamDataMap.getData(player.getPlayerTeam()).deaths++;
-        
-        gameType.onDeath(gameInstance, player);
     }
     
     @Override
@@ -431,10 +447,6 @@ public class GameInstanceImpl implements GameInstance {
         }
         
         return sources;
-    }
-    
-    public static void calculateCombatData(@NotNull HariantPlayer player, @NotNull CombatData.Type type) {
-        // FIXME (xanyjl @ Sunday, August 2) ->
     }
     
 }

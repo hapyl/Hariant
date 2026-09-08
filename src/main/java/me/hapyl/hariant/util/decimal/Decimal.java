@@ -199,8 +199,8 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
     }
     
     /**
-     * A static factory method for creating a {@link Decimal} that holds a scaled value for entity velocity, which upon applying it, the entity will travel
-     * the designed blocks per second.
+     * A static factory method for creating a {@link Decimal} that holds a scaled value for entity velocity, which upon applying it,
+     * the entity will travel the designed blocks per second.
      *
      * @param blocksPerSecond - The number of blocks per second to travel.
      * @return a new decimal.
@@ -209,8 +209,8 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
         return new DecimalBlocksPerSecondImpl(blocksPerSecond);
     }
     
-    public static @NotNull Decimal ofAngle(double angle) {
-        return new DecimalAngleImpl(angle);
+    public static @NotNull Decimal ofAngle(double angleDegrees) {
+        return new DecimalAngleImpl(angleDegrees);
     }
     
 }

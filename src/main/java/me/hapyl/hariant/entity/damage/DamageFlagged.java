@@ -7,9 +7,7 @@ import java.util.Set;
 
 public interface DamageFlagged {
     
-    @NotNull
-    @Unmodifiable
-    Set<? extends DamageFlag> getDamageFlags();
+    @NotNull @Unmodifiable Set<? extends DamageFlag> getDamageFlags();
     
     default boolean isFlagged(@NotNull DamageFlag damageFlag) {
         return getDamageFlags().contains(damageFlag);

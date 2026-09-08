@@ -11,11 +11,9 @@ public interface ShapeProperties {
     
     double step();
     
-    @NotNull
-    Vector3 rotation();
+    @NotNull Vector3 rotation();
     
-    @NotNull
-    default Vector rotate(@NotNull @Mutates Vector vector) {
+    default @NotNull Vector rotate(@NotNull @Mutates Vector vector) {
         final Vector3 rotation = rotation();
         
         if (rotation.x() != 0) {
@@ -33,13 +31,11 @@ public interface ShapeProperties {
         return vector;
     }
     
-    @NotNull
-    static ShapeProperties create(double scale, double step, @NotNull Vector3 rotation) {
+    static @NotNull ShapeProperties create(double scale, double step, @NotNull Vector3 rotation) {
         return new ShapePropertiesImpl(scale, step, rotation);
     }
     
-    @NotNull
-    static ShapeProperties create(double scale, double step) {
+    static @NotNull ShapeProperties create(double scale, double step) {
         return new ShapePropertiesImpl(scale, step, Vector3.zero());
     }
     

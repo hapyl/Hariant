@@ -39,6 +39,7 @@ public final class ArtifactSetSwornOath extends ArtifactSet implements Listener 
                          .append(Component.text("Dealing "))
                          .append(DamageType.FEROCITY)
                          .append(Component.text(" increases "))
+                         .appendNewline()
                          .append(ElementType.AETHER.asComponentDamage())
                          .append(Component.text(" dealt by "))
                          .append(fourPieceAetherDamageBonus)
@@ -56,13 +57,13 @@ public final class ArtifactSetSwornOath extends ArtifactSet implements Listener 
         return ElementType.AETHER;
     }
     
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void handleHariantDamageEvent(HariantDamageEvent ev) {
         if (!(ev.getAttacker() instanceof HariantPlayer player)) {
             return;
         }
         
-        if (ev.getDamageSource().getDamageType() != DamageType.FEROCITY) {
+        if (ev.getDamageType() != DamageType.FEROCITY) {
             return;
         }
         
@@ -92,7 +93,7 @@ public final class ArtifactSetSwornOath extends ArtifactSet implements Listener 
         
         ModifierFourPiece(@NotNull HariantEntity applier) {
             super(ArtifactSetSwornOath.this, PieceCount.FOUR_PIECE, applier, fourPieceAetherDamageBonusDuration.intValue());
-         
+            
             of(AttributeType.AETHER_DAMAGE_BONUS, AttributeModifierType.FLAT, fourPieceAetherDamageBonus.doubleValue());
         }
         

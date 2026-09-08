@@ -18,8 +18,6 @@ import me.hapyl.hariant.util.Hoverable;
 import me.hapyl.hariant.util.ShowTextBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bson.Document;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 public final class DailyInstance implements Described, MongoSerializable, Hoverable, ItemCreator {
     
     private static final MongoCodec<DailyType, String> CODEC_DAILY_TYPE = MongoCodecs.ofEnum(DailyType.class);
-    private static final Style LORE_STYLE = Style.style(Colors.GRAY).decoration(TextDecoration.ITALIC, false);
     
     private final DailyType daily;
     private final int goal;
@@ -93,12 +90,7 @@ public final class DailyInstance implements Described, MongoSerializable, Hovera
         builder.append(daily.getTier().getName().color(Colors.DARK_GRAY));
         builder.appendNewline();
         
-        builder.append(
-                Components.wrap(this.getDescription(), 40)
-                          .stream()
-                          .map(c -> Components.normalizeStyle(c, LORE_STYLE))
-                          .toList()
-        );
+        builder.appendWrapped(this.getDescription());
         
         return builder.createHoverEvent();
     }

@@ -33,6 +33,9 @@ public class BeeSwarm extends HariantTickingTask {
     private final TalentFeelTheBreeze talent;
     private final Promise promise;
     
+    private final double damage;
+    private final double damageIvy;
+    
     private final Set<BeePet> bees;
     
     public BeeSwarm(@NotNull HariantPlayer player, @NotNull TalentFeelTheBreeze talent, @NotNull Promise promise) {
@@ -41,6 +44,8 @@ public class BeeSwarm extends HariantTickingTask {
         this.player = player;
         this.talent = talent;
         this.promise = promise;
+        this.damage = talent.beeDamage.getScaledValue(player);
+        this.damageIvy = talent.beeDamageIvy.getScaledValue(player);
         
         this.bees = Sets.newHashSet();
         
@@ -113,7 +118,7 @@ public class BeeSwarm extends HariantTickingTask {
                 }
             }
             
-            // Randomize the destination
+            // Bee movement
             final Location destination = bee.target != null ? bee.target.getEntity().getMidpointLocation() : player.getMidpointLocation();
             final double distanceToSquared = bee.distanceToSquared(destination);
             
@@ -124,48 +129,47 @@ public class BeeSwarm extends HariantTickingTask {
                 // If the target exists, deal damage and FUCKING DIE
                 if (bee.target != null) {
                     final boolean isTargetInRoseIvy = bee.target.getEntity().hasEffect(StatusEffectType.ROSE_IVY);
-                    final double damage = isTargetInRoseIvy ? talent.beeDamageIvy.getScaledValue(player) : talent.beeDamage.getScaledValue(player);
                     
-                    bee.target.getEntity().damage(new BeeSwarmDamageSource(player, damage));
-                    
-                    bee.remove();
-                    iterator.remove();
-                    
-                    // Trigger achievement
-                    if (isTargetInRoseIvy) {
-                        AchievementRegistry.PYTARIA_HUNGRY_BEE.progress(player.getProfile());
+                    // If the damage is successful, delete the bee
+                    if (!bee.target.getEntity().damage(new BeeSwarmDamageSource(player, isTargetInRoseIvy ? damageIvy : damage, talent)).isImmune()) {
+                        bee.remove();
+                        iterator.remove();
+                        
+                        // Trigger achievement
+                        if (isTargetInRoseIvy) {
+                            AchievementRegistry.PYTARIA_HUNGRY_BEE.progress(player.getProfile());
+                        }
+                        
+                        // Fx
+                        player.playWorldSound(location, Sound.ENTITY_BEE_DEATH, 0.5f, 2.0f);
+                        player.playWorldSound(location, Sound.ENTITY_BEE_STING, 0.5f, 0.0f);
+                        
+                        player.spawnWorldParticle(location, Particle.POOF, 5, 0.25, 0.25, 0.25, 0.05f);
                     }
-                    
-                    // Fx
-                    player.playWorldSound(location, Sound.ENTITY_BEE_DEATH, 0.5f, 2.0f);
-                    player.playWorldSound(location, Sound.ENTITY_BEE_STING, 0.5f, 0.0f);
-                    
-                    player.spawnWorldParticle(location, Particle.POOF, 5, 0.25, 0.25, 0.25, 0.05f);
                 }
                 // Otherwise, fly around the player because they smell nice
                 else {
                     bee.floatAround(destination, spread, beeIndex, tick);
+                    continue;
                 }
             }
-            // If not close enough, fly towards destination
-            else {
-                // Randomize the location a little so bees are not inside each other
-                destination.add(random.nextSignedDouble(2), random.nextSignedDouble(0.75), random.nextSignedDouble(2));
-                
-                // Fly towards the destination
-                final Vector direction = destination.toVector().subtract(location.toVector()).normalize();
-                final double interpolation = Math.min(0.5, Math.sqrt(distanceToSquared) * 0.1);
-                
-                // If we're close enough
-                direction.multiply(interpolation);
-                
-                // Look towards destination
-                final float yaw = (float) Math.toDegrees(Math.atan2(-direction.getX(), direction.getZ()));
-                location.setYaw(yaw);
-                
-                bee.setLocation(location.add(direction));
-                bee.setAngry(bee.target != null);
-            }
+            
+            // Randomize the location a little so bees are not inside each other
+            destination.add(random.nextSignedDouble(2), random.nextSignedDouble(0.75), random.nextSignedDouble(2));
+            
+            // Fly towards the destination
+            final Vector direction = destination.toVector().subtract(location.toVector()).normalize();
+            final double interpolation = Math.min(talent.maximumBeeSpeed.doubleValue(), Math.sqrt(distanceToSquared) * 0.1);
+            
+            // If we're close enough
+            direction.multiply(interpolation);
+            
+            // Look towards destination
+            final float yaw = (float) Math.toDegrees(Math.atan2(-direction.getX(), direction.getZ()));
+            location.setYaw(yaw);
+            
+            bee.setLocation(location.add(direction));
+            bee.setAngry(bee.target != null);
         }
     }
     
@@ -175,10 +179,12 @@ public class BeeSwarm extends HariantTickingTask {
         this.bees.clear();
     }
     
-    class BeeSwarmDamageSource extends DamageSourceImpl {
-        BeeSwarmDamageSource(@Nullable HariantEntity source, double damage) {
-            super(talent.damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponents.ofCommon(), Set.of(), damage, talent.elementalApplication.doubleValue());
+    public static class BeeSwarmDamageSource extends DamageSourceImpl {
+        
+        BeeSwarmDamageSource(@Nullable HariantEntity source, double damage, @NotNull TalentFeelTheBreeze talent) {
+            super(talent.damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponents.ofCommon(), Set.of(), damage, talent.elementalApplication.doubleValue(), talent.cooldownKey, talent.cooldown);
         }
+        
     }
     
 }

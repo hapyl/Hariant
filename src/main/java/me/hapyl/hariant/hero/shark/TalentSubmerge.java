@@ -61,12 +61,13 @@ public final class  TalentSubmerge extends Talent {
     );
     
     private final List<? extends VanillaAttributeModifier> vanillaModifiers = List.of(
-            VanillaAttributeModifier.create(Key.ofString("submerge_scale"), Attribute.SCALE, VanillaAttributeModifier.Operation.FLAT, -100),
-            VanillaAttributeModifier.create(Key.ofString("submerge_step_height"), Attribute.STEP_HEIGHT, VanillaAttributeModifier.Operation.FLAT, 0.5)
+            VanillaAttributeModifier.create(Key.ofString("submerge_scale"), Attribute.SCALE, VanillaAttributeModifier.Operation.ADDITIVE, -100),
+            VanillaAttributeModifier.create(Key.ofString("submerge_step_height"), Attribute.STEP_HEIGHT, VanillaAttributeModifier.Operation.ADDITIVE, 0.5)
     );
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("submerge_damage_source"),
             DeathMessage.create("{player} was sharked to death by [{killer}]")
     );
     

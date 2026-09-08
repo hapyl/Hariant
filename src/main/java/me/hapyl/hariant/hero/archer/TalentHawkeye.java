@@ -11,7 +11,7 @@ import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.event.HariantProjectileLaunchEvent;
-import me.hapyl.hariant.handler.HariantProjectile;
+import me.hapyl.hariant.handler.HariantDamageProjectile;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.field.DisplayField;
@@ -68,7 +68,10 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
     
     @EventHandler
     public void handleHariantProjectileLaunchEvent(HariantProjectileLaunchEvent ev) {
-        final HariantProjectile projectile = ev.getProjectile();
+        if (!(ev.getProjectile() instanceof HariantDamageProjectile projectile)) {
+            return;
+        }
+        
         final DamageSource damageSource = projectile.getDamageSource();
         final HariantEntity attacker = damageSource.getSource();
         
@@ -78,7 +81,7 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
         }
         
         final HeroDataArcher data = player.getHeroData(HeroRegistry.ARCHER, HeroDataArcher::new);
-        final Projectile handle = projectile.getHandle();
+        final Projectile handle = projectile.getProjectile();
         
         if (!(handle instanceof Arrow arrow) || !arrow.isCritical() || !player.getHandle().isSneaking() || !homingChance.chance(player)) {
             // Reset achievement on failed arrow shots
@@ -101,7 +104,9 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
     
     @EventHandler
     public void handleHariantProjectileHitEvent(HariantProjectileHitEvent ev) {
-        final HariantProjectile projectile = ev.getProjectile();
+        if (!(ev.getProjectile() instanceof HariantDamageProjectile projectile)) {
+            return;
+        }
         
         if (!(projectile.getShooter() instanceof HariantPlayer player)) {
             return;
@@ -120,10 +125,10 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
     
     private class Hawkeye extends HariantTickingTask {
         
-        private final HariantProjectile projectile;
+        private final HariantDamageProjectile projectile;
         private final HariantPlayer player;
         
-        Hawkeye(@NotNull HariantPlayer player, @NotNull HariantProjectile projectile) {
+        Hawkeye(@NotNull HariantPlayer player, @NotNull HariantDamageProjectile projectile) {
             super(Scheduler.ofTimer(1));
             this.player = player;
             this.projectile = projectile;
@@ -131,7 +136,7 @@ public final class TalentHawkeye extends TalentPassive implements Listener {
         
         @Override
         public void run(int tick) {
-            final Projectile projectile = this.projectile.getHandle();
+            final Projectile projectile = this.projectile.getProjectile();
             
             if (projectile.isDead()) {
                 this.cancel();

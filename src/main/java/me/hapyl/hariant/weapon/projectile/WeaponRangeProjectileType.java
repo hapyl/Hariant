@@ -18,7 +18,7 @@ public abstract class WeaponRangeProjectileType implements Named, Described {
     
     private static final double DEFAULT_DISTANCE = 50;
     private static final double DEFAULT_STEP = 0.5;
-    private static final double DEFAULT_RADIUS = 0.1;
+    private static final double DEFAULT_RADIUS = 0.15;
     
     private static final DamageSourceIdentity DEFAULT_DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(
             Key.ofString("ranged_projectile"),
@@ -33,8 +33,8 @@ public abstract class WeaponRangeProjectileType implements Named, Described {
     protected double projectileStep;
     protected double projectileRadius;
     
-    @NotNull protected CollisionMode collisionMode;
-    @NotNull protected DamageSourceIdentity damageSourceIdentity;
+    protected @NotNull CollisionMode collisionMode;
+    protected @NotNull DamageSourceIdentity damageSourceIdentity;
     
     WeaponRangeProjectileType(@NotNull Component name, @NotNull Component description) {
         this.name = name;

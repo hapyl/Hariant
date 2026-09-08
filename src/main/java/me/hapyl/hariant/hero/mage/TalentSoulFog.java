@@ -4,24 +4,22 @@ import me.hapyl.eterna.module.block.display.BDEngine;
 import me.hapyl.eterna.module.block.display.DisplayEntity;
 import me.hapyl.eterna.module.block.display.DisplayModel;
 import me.hapyl.eterna.module.block.display.DisplayPart;
+import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.achievement.AchievementMageSoulHarvested;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.modifier.AttributeModifier;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.PullSource;
 import me.hapyl.hariant.entity.WarningType;
-import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
-import me.hapyl.hariant.entity.damage.DamageType;
-import me.hapyl.hariant.entity.damage.DeathMessage;
+import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.hero.HeroRegistry;
+import me.hapyl.hariant.handler.HariantProjectile;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -31,19 +29,26 @@ import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.Counter;
-import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Snowball;
+import org.bukkit.entity.ThrowableProjectile;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import java.util.Set;
+
 public final class TalentSoulFog extends Talent {
+    
+    private static final ItemStack SKULL_TEXTURE = ItemBuilder.playerHead("c7513a587d075f1475b1181874d0dd77eccee3690b9cbf024ad6b885fc3faa57").asIcon();
     
     private final @DisplayField Decimal soulFogDelay = Decimal.ofSeconds(0.1f);
     private final @DisplayField Decimal soulFogRadius = Decimal.ofValue(2.5);
@@ -53,12 +58,14 @@ public final class TalentSoulFog extends Talent {
     private final @DisplayField Decimal soulFogExplosionAetherAnomalyApplication = Decimal.ofElementalApplication(ElementType.AETHER, 200);
     private final @DisplayField Decimal soulFogExplosionSoulGenerationPerEnemyHit = Decimal.ofValue(2);
     
-    private final @DisplayField Decimal speedDecrease = Decimal.ofPercentage(30);
+    private final @DisplayField Decimal pullStrength = Decimal.ofValue(0.2);
+    private final @DisplayField Decimal pullResistance = Decimal.ofValue(0.6);
     
     private final @DisplayField AttributeScaling soulFogExplosionDamage = AttributeScaling.create(AttributeType.ATTACK, 144);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("soul_fog_damage_source"),
             DeathMessage.create("{player} lost their way in the soul fog [created by {killer}]")
     );
     
@@ -76,69 +83,69 @@ public final class TalentSoulFog extends Talent {
         
         setDescription(
                 Component.empty()
-                         .append(Component.text("Create a "))
-                         .append(Component.text("Fog of Souls", Colors.GRAY, TextDecoration.UNDERLINED))
-                         .append(Component.text(" in front of you that slows "))
+                         .append(Component.text("Throw a projectile concentrated with lost souls forward."))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("On landing, the souls combine into "))
+                         .append(Component.text("Fog of Lost Souls", Colors.SOUL))
+                         .append(Component.text(" that constantly pulls nearby "))
                          .append(Component.text("enemies", Colors.RED))
-                         .append(Component.text(" and constantly applies "))
+                         .append(Component.text(" and applies "))
                          .append(ElementType.AETHER)
                          .append(Component.text(" anomaly."))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After "))
                          .append(this.getDurationFormatted())
-                         .append(Component.text(", the fog explodes violently, dealing "))
+                         .append(Component.text(", the fog releases the souls, dealing "))
                          .append(ElementType.AETHER.asComponentAreaOfEffectDamage())
-                         .append(Component.text(", applies high amount of "))
+                         .append(Component.text(" and applies a high amount of "))
                          .append(ElementType.AETHER)
-                         .append(Component.text(" anomaly and generates "))
-                         .append(soulFogExplosionSoulGenerationPerEnemyHit)
-                         .appendSpace()
-                         .append(Definition.SOUL_FRAGMENT)
-                         .append(Component.text(" per enemy hit."))
+                         .append(Component.text(" anomaly."))
         );
     }
     
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return TalentTarget.none();
     }
     
     @Override
     public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
-        final Location location = LocationHelper.anchor(player.getLocationInFront(2));
-        location.setYaw(0);
-        location.setPitch(0);
-        
-        new SoulFog(player, location);
+        player.launchProjectile(Snowball.class, null, SoulFogProjectile::new);
         
         // Fx
-        player.spawnWorldParticle(location, Particle.SCULK_SOUL, 20, 1, 0.2, 1, 0.1f);
+        player.playWorldSound(Sound.ENTITY_EGG_THROW, 0.5f);
+        player.playWorldSound(Sound.ENTITY_WARDEN_TENDRIL_CLICKS, 0.75f);
         
         return Response.ok();
     }
     
     private class SoulFog extends HariantTickingTask {
         
-        private final HariantPlayer player;
+        private final HariantEntity entity;
         private final Location location;
         private final DisplayEntity displayEntity;
+        private final ElementSource elementSource;
+        private final PullSource pullSource;
         
-        SoulFog(@NotNull HariantPlayer player, @NotNull Location location) {
+        SoulFog(@NotNull HariantEntity entity, @NotNull Location location) {
             super(Scheduler.ofTimer(soulFogDelay.intValue(), 1));
             
-            this.player = player;
+            this.entity = entity;
             this.location = location;
             this.displayEntity = model.spawn(location);
+            this.elementSource = ElementSource.create(ElementType.AETHER, entity, soulFogAetherAnomalyApplication.doubleValue());
+            this.pullSource = new PullSourceSoulFog(entity, location);
             
             // Fx
-            player.playWorldSound(location, Sound.ENTITY_WARDEN_ROAR, 0.75f);
+            entity.playWorldSound(location, Sound.ENTITY_WARDEN_ROAR, 0.75f);
         }
         
         @Override
         public void onCancel() {
             displayEntity.remove();
+            pullSource.cancel();
         }
         
         @Override
@@ -151,19 +158,17 @@ public final class TalentSoulFog extends Talent {
             
             final double progress = (double) tick / getDuration();
             
-            player.collectNearbyEntities(location, soulFogRadius)
-                  .filter(player::canAffect)
+            entity.collectNearbyEntities(location, soulFogRadius)
+                  .filter(entity::canAffect)
                   .forEach(entity -> {
-                      entity.getAttributes().addModifier(new SoulFogModifier(player));
-                      
-                      entity.applyElement(ElementSource.create(ElementType.AETHER, player, soulFogAetherAnomalyApplication.doubleValue()));
+                      entity.applyElement(elementSource);
                       entity.showWarning(WarningType.DANGER, 5);
                   });
             
             // Fx
             final double radius = soulFogRadius.doubleValue() * 0.5;
             
-            player.spawnWorldParticle(location, Particle.GLOW, 10, radius, radius * 0.5, radius, 0.25f);
+            entity.spawnWorldParticle(location, Particle.GLOW, 10, radius, radius * 0.5, radius, 0.25f);
             
             int count = 0;
             final double spread = Math.PI / Math.max(1, displayEntity.size());
@@ -181,46 +186,67 @@ public final class TalentSoulFog extends Talent {
         }
         
         public void explode() {
-            final DamageSource damageSource = DamageSource.builder(damageSourceIdentity, soulFogExplosionDamage.getScaledValue(player))
-                                                          .source(player)
-                                                          .damageType(DamageType.TALENT)
-                                                          .elementType(ElementType.AETHER)
-                                                          .components(DamageComponents.ofCommon())
-                                                          .build();
-            
-            final ElementSource elementSource = ElementSource.create(ElementType.AETHER, player, soulFogExplosionAetherAnomalyApplication.doubleValue());
+            final DamageSource damageSource = new SoulFogExplosionDamageSource(entity);
+            final ElementSource elementSource = ElementSource.create(ElementType.AETHER, entity, soulFogExplosionAetherAnomalyApplication.doubleValue());
             final Counter numberOfEnemiesHit = Counter.counter();
             
-            player.collectNearbyEntities(location, soulFogExplosionRadius)
-                  .filter(player::canAffect)
+            entity.collectNearbyEntities(location, soulFogExplosionRadius)
+                  .filter(entity::canAffect)
                   .forEach(entity -> {
                       entity.damage(damageSource);
                       entity.applyElement(elementSource);
-                      
-                      // Increment souls
-                      player.getHeroData(HeroRegistry.MAGE, HeroDataMage::new).incrementSouls(soulFogExplosionSoulGenerationPerEnemyHit.intValue());
                       
                       numberOfEnemiesHit.increment();
                   });
             
             // Fx
-            player.playWorldSound(location, Sound.ENTITY_WARDEN_SONIC_BOOM, 1.25f);
-            player.spawnWorldParticle(location, Particle.EXPLOSION_EMITTER, 1, 0);
+            entity.playWorldSound(location, Sound.ENTITY_WARDEN_SONIC_BOOM, 1.25f);
+            entity.spawnWorldParticle(location, Particle.EXPLOSION_EMITTER, 1, 0);
             
             // Achievement
-            AchievementMageSoulHarvested.progress(player.getProfile(), numberOfEnemiesHit);
+            if (entity instanceof HariantPlayer player) {
+                AchievementMageSoulHarvested.progress(player.getProfile(), numberOfEnemiesHit);
+            }
         }
     }
     
-    private class SoulFogModifier extends AttributeModifier {
-        SoulFogModifier(@NotNull HariantPlayer player) {
-            super(TalentSoulFog.this, player, 5);
+    private class SoulFogProjectile extends HariantProjectile {
+        
+        SoulFogProjectile(@NotNull ThrowableProjectile projectile, @NotNull HariantEntity shooter) {
+            super(projectile, shooter);
             
-            of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.ADDITIVE, -speedDecrease.doubleValue());
+            projectile.setItem(SKULL_TEXTURE);
         }
         
         @Override
-        public void display(@NotNull Location location) {
+        public void onHit(@Nullable HariantEntity entity, @Nullable Block block) {
+            final HariantEntity shooter = this.getShooter();
+            final Location location = LocationHelper.anchor(this.getLocation());
+            
+            location.setYaw(shooter.random.nextFloat() * 180);
+            
+            // Don't delegate soul fog
+            new SoulFog(shooter, location);
+            
+            // Fx
+            shooter.playWorldSound(location, Sound.BLOCK_SCULK_SPREAD, 0.0f);
+        }
+        
+    }
+    
+    private class SoulFogExplosionDamageSource extends DamageSourceImpl {
+        
+        SoulFogExplosionDamageSource(@NotNull HariantEntity source) {
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), soulFogExplosionDamage.getScaledValue(source), 0);
         }
     }
+    
+    private class PullSourceSoulFog extends PullSource {
+        
+        PullSourceSoulFog(@NotNull HariantEntity source, @NotNull Location centre) {
+            super(source, centre, TalentSoulFog.this.getName(), TalentSoulFog.this.getDuration(), soulFogRadius.doubleValue(), pullStrength.doubleValue(), pullResistance.doubleValue());
+        }
+        
+    }
+    
 }

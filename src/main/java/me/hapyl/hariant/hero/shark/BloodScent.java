@@ -7,7 +7,7 @@ import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.task.HariantTickingStepTask;
+import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.Cancellable;
 import me.hapyl.hariant.util.Definition;
@@ -92,17 +92,21 @@ public class BloodScent implements Ticking, Cancellable, ComponentLike {
     }
     
     private void drawPath(@NotNull Queue<? extends Location> path) {
-        new HariantTickingStepTask(Scheduler.ofTimer(), path.size() / 4) {
+        final int steps = path.size() / 4;
+        
+        new HariantTickingTask(Scheduler.ofTimer()) {
             @Override
-            public boolean run(int tick, int step) {
-                final Location location = path.poll();
-                
-                if (location == null) {
-                    return true;
+            public void run(int tick) {
+                for (int i = 0; i < steps; i++) {
+                    final Location location = path.poll();
+                    
+                    if (location == null) {
+                        this.cancel();
+                        return;
+                    }
+                    
+                    player.spawnParticle(location, Particle.DUST_COLOR_TRANSITION, 1, 0.1, 0.1, 0.1, 0, DUST_TRANSITION);
                 }
-                
-                player.spawnParticle(location, Particle.DUST_COLOR_TRANSITION, 1, 0.1, 0.1, 0.1, 0, DUST_TRANSITION);
-                return false;
             }
         };
     }

@@ -3,7 +3,7 @@ package me.hapyl.hariant.event;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
-import me.hapyl.hariant.entity.damage.DamageSource;
+import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -28,30 +28,24 @@ import org.jetbrains.annotations.NotNull;
  *
  * @see AttributesInstanceSnapshot
  */
-public class HariantDamageCalculationsEvent extends HariantEvent {
+public class HariantDamageCalculationsEvent extends AbstractHariantDamageEvent {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
-    
-    private final DamageSource damageSource;
     
     private final AttributesInstanceSnapshot snapshotEntity;
     private final AttributesInstanceSnapshot snapshotAttacker;
     
-    public HariantDamageCalculationsEvent(@NotNull DamageSource damageSource, @NotNull AttributesInstanceSnapshot snapshotEntity, @NotNull AttributesInstanceSnapshot snapshotAttacker) {
-        this.damageSource = damageSource;
+    public HariantDamageCalculationsEvent(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot snapshotEntity, @NotNull AttributesInstanceSnapshot snapshotAttacker) {
+        super(damageInstance);
         this.snapshotEntity = snapshotEntity;
         this.snapshotAttacker = snapshotAttacker;
     }
     
-    public @NotNull DamageSource getDamageSource() {
-        return damageSource;
-    }
-    
-    public @NotNull AttributesInstanceSnapshot getEntity() {
+    public @NotNull AttributesInstanceSnapshot getSnapshotEntity() {
         return snapshotEntity;
     }
     
-    public @NotNull AttributesInstanceSnapshot getAttacker() {
+    public @NotNull AttributesInstanceSnapshot getSnapshotAttacker() {
         return snapshotAttacker;
     }
     

@@ -15,6 +15,7 @@ import me.hapyl.hariant.menu.Menu;
 import me.hapyl.hariant.menu.MenuPlayerProfile;
 import me.hapyl.hariant.menu.MenuReturn;
 import me.hapyl.hariant.reward.Reward;
+import me.hapyl.hariant.reward.RewardSummary;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -34,8 +35,7 @@ public class MenuLevelling extends Menu {
             { Material.RED_STAINED_GLASS_PANE, Material.REDSTONE_BLOCK }
     };
     
-    private static final int[] LEVEL_SLOTS = { 19, 20, 21, 22, 23 };
-    private static final int MAX_REWARDS_DISPLAY = 10;
+    private static final int[] LEVEL_SLOTS = { 20, 21, 22, 23, 24 };
     
     private static final ProgressBar PROGRESS_BAR_BUILDER = new ProgressBar("|", 40, Style.style(Colors.EXPERIENCE));
     private static final ComponentStyler PRESTIGE_STYLER = ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(1).build();
@@ -44,7 +44,7 @@ public class MenuLevelling extends Menu {
     private final int currentLevel;
     
     public MenuLevelling(@NotNull Player player) {
-        super(player, () -> Component.text("Levelling"), ChestSize.SIZE_5);
+        super(player, () -> Component.text("Levelling"), ChestSize.SIZE_6);
         
         this.levelEntry = profile.getDatabase().level;
         this.currentLevel = levelEntry.getLevel();
@@ -69,7 +69,7 @@ public class MenuLevelling extends Menu {
         final List<? extends Reward> unclaimedRewards = levelEntry.getUnclaimedRewards();
         
         setItem(
-                25,
+                31,
                 this.createItemClaimRewards(unclaimedRewards),
                 PlayerMenuAction.of(player -> {
                     if (unclaimedRewards.isEmpty()) {
@@ -193,19 +193,10 @@ public class MenuLevelling extends Menu {
         builder.setName(Component.text("Claim Rewards"));
         builder.addLore();
         
-        if (hasUnclaimedRewards) {
-            builder.addLore(Component.text("Rewards to Claim:"));
-            
-            int count = 0;
-            
-            for (Reward reward : unclaimedRewards) {
-                if (count++ >= MAX_REWARDS_DISPLAY) {
-                    builder.addLore(Component.text("...and %s more!".formatted(unclaimedRewards.size() - MAX_REWARDS_DISPLAY), Colors.DARK_GRAY));
-                    break;
-                }
-                
-                builder.addLore(Component.space().append(reward.getName()));
-            }
+        final RewardSummary rewardSummary = RewardSummary.create(unclaimedRewards);
+        
+        if (!rewardSummary.isEmpty()) {
+            rewardSummary.supplyLore(builder);
             
             builder.addLore();
             builder.addLore(ButtonComponents.left("claim"));

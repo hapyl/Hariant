@@ -9,21 +9,21 @@ import me.hapyl.hariant.game.type.EnumGameType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletableFuture;
+
 public class HariantConfigImpl extends JsonResourceLoader implements HariantConfig {
     
     public HariantConfigImpl(@NotNull Plugin plugin) {
         super(plugin, "config.json");
     }
     
-    @NotNull
     @Override
-    public String databaseConnectionLink() {
+    public @NotNull String databaseConnectionLink() {
         return get("database_connection_link").getAsString();
     }
     
-    @NotNull
     @Override
-    public EnumBattleground getSelectedBattleground() {
+    public @NotNull EnumBattleground getSelectedBattleground() {
         return getEnumValue("selected_battleground", EnumBattleground.class, EnumBattleground.ARENA);
     }
     
@@ -43,16 +43,15 @@ public class HariantConfigImpl extends JsonResourceLoader implements HariantConf
         this.set("selected_game_type", new JsonPrimitive(gameType.name().toLowerCase()));
     }
     
-    @NotNull
-    private <E extends Enum<E>> E getEnumValue(@NotNull String key, @NotNull Class<E> enumClass, @NotNull E defaultValue) {
-        final JsonElement jsonElement = get(key);
-        
-        if (jsonElement.isJsonNull()) {
-            return defaultValue;
-        }
-        
-        final String string = jsonElement.getAsString();
-        
-        return Enums.byName(enumClass, string, defaultValue);
+    @Override
+    public @NotNull CompletableFuture<Void> saveToFile() {
+        return super.saveToFile();
     }
+    
+    private <E extends Enum<E>> @NotNull E getEnumValue(@NotNull String key, @NotNull Class<E> enumClass, @NotNull E defaultValue) {
+        final JsonElement jsonElement = this.get(key);
+        
+        return jsonElement.isJsonNull() ? defaultValue : Enums.byName(enumClass, jsonElement.getAsString(), defaultValue);
+    }
+    
 }

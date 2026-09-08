@@ -51,10 +51,9 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
     
     @EventHandler
     public void handleHariantDamageCalculationsEvent(HariantDamageCalculationsEvent ev) {
-        final AttributesInstanceSnapshot attacker = ev.getAttacker();
-        final HariantEntity entity = attacker.entity().orElse(null);
+        final AttributesInstanceSnapshot attacker = ev.getSnapshotAttacker();
         
-        if (!(entity instanceof HariantPlayer player)) {
+        if (!(attacker.entityOrNull() instanceof HariantPlayer player)) {
             return;
         }
         
@@ -64,7 +63,7 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
             return;
         }
         
-        attacker.addModifier(player, AttributeModifier.entry(AttributeType.AETHER_RESISTANCE, AttributeModifierType.FLAT, -aetherResistanceIgnore.doubleValue()));
+        ev.getSnapshotEntity().addModifier(player, AttributeModifier.entry(AttributeType.AETHER_RESISTANCE, AttributeModifierType.FLAT, -aetherResistanceIgnore.doubleValue()));
     }
     
     @Override

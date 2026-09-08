@@ -6,6 +6,6 @@ public interface GameInstanceHandler {
     
     void handleInstanceCreated(@NotNull GameInstance gameInstance);
     
-    void handlerInstanceDestroyed(@NotNull GameInstance gameInstance, @NotNull WinResult winResult);
+    void handleInstanceDestroyed(@NotNull GameInstance gameInstance, @NotNull WinResult winResult);
     
 }

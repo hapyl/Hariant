@@ -10,14 +10,15 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.inventory.item.ResourceRegistry;
 import me.hapyl.hariant.menu.Menus;
 import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.hariant.profile.notification.DeclaresNotifaction;
 import me.hapyl.hariant.profile.notification.Notification;
 import me.hapyl.hariant.profile.notification.NotificationListener;
 import me.hapyl.hariant.profile.notification.NotificationType;
 import me.hapyl.hariant.reward.Reward;
+import me.hapyl.hariant.reward.RewardSummary;
 import me.hapyl.hariant.util.ComparableOrdinal;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -30,25 +31,16 @@ import java.util.NavigableMap;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public final class Level implements Styled, ComponentLike, ComparableOrdinal<Level> {
+public final class Level implements Styled, ComponentLike, ComparableOrdinal<Level>, DeclaresNotifaction {
     
     public static final NotificationListener NOTIFICATION_LISTENER = new NotificationListener() {
-        private final Notification notification = new Notification() {
-            @Override
-            public @NotNull Component getName() {
-                return Component.text("Unclaimed Level Rewards");
-            }
-            
-            @Override
-            public @NotNull NotificationType getNotificationType() {
-                return NotificationType.NORMAL;
-            }
-            
-            @Override
-            public @NotNull ClickEvent<?> clickEvent() {
-                return Menus.LEVELLING.createClickEvent();
-            }
-        };
+        
+        private final Notification notification = Notification.create(
+                Level.class,
+                Component.text("Unclaimed Level Rewards"),
+                NotificationType.NORMAL,
+                Menus.LEVELLING.createClickEvent()
+        );
         
         @Override
         public @Nullable Notification listen(@NotNull PlayerProfile profile) {
@@ -56,10 +48,12 @@ public final class Level implements Styled, ComponentLike, ComparableOrdinal<Lev
         }
     };
     
+    public static final Component COMPONENT_PREFIX = Component.text("◆", Colors.EXPERIENCE);
+    
+    private static final Prefix PREFIX = Prefix.create(COMPONENT_PREFIX, Component.space());
+    
     private static final Component BRACKET_LEFT = Component.text("[", Colors.DARK_GRAY);
     private static final Component BRACKET_RIGHT = Component.text("]", Colors.DARK_GRAY);
-    
-    private static final Prefix PREFIX = Prefix.create(Component.text("◆", Colors.EXPERIENCE), Component.space());
     
     private static final double CAT_COIN_REWARD_PER_LEVEL = 100;
     private static final double RUBY_REWARD_PER_FIVE_LEVELS = 5;
@@ -112,6 +106,7 @@ public final class Level implements Styled, ComponentLike, ComparableOrdinal<Lev
                     );
                 }
         );
+        
     }
     
     private final int level;
@@ -197,6 +192,20 @@ public final class Level implements Styled, ComponentLike, ComparableOrdinal<Lev
     
     public static @NotNull Prefix getPrefix() {
         return PREFIX;
+    }
+    
+    public static @NotNull RewardSummary getRewardSummary(@NotNull Level from, @NotNull Level to) {
+        final List<Reward> rewards = Lists.newArrayList();
+        
+        for (int i = from.getLevel() - 1; i < to.getLevel() - 1; i++) {
+            if (i < 0 || i >= LEVELS.size()) {
+                break;
+            }
+            
+            rewards.addAll(LEVELS.get(i).getRewards());
+        }
+        
+        return RewardSummary.create(rewards);
     }
     
     private static @NotNull Style defaultStyle(int level) {

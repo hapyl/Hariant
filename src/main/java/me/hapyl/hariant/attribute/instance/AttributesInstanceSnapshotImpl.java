@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.entity.HariantEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,11 @@ public final class AttributesInstanceSnapshotImpl extends AttributesInstance imp
     @Override
     public Optional<HariantEntity> entity() {
         return Optional.of(entity);
+    }
+    
+    @Override
+    public @Nullable HariantEntity entityOrNull() {
+        return entity;
     }
     
     @Override

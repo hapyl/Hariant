@@ -1,6 +1,7 @@
 package me.hapyl.hariant.profile.notification;
 
 import com.google.common.collect.Lists;
+import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.player.sequencer.Sequencer;
 import me.hapyl.eterna.module.player.sequencer.Track;
 import me.hapyl.hariant.Colors;
@@ -11,13 +12,13 @@ import me.hapyl.hariant.experience.Level;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.profile.setting.Settings;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,6 +52,8 @@ public class NotificationHandler {
                  .where('f', Sound.ENTITY_CHICKEN_EGG, 1.0f)
     );
     
+    private static final String EXCLAMATION_TEXTURE = "51b826917d2da6d8d7516f30181a958c27503f949a0e5394975c13284e12fd";
+    
     private NotificationHandler() {
     }
     
@@ -79,9 +82,9 @@ public class NotificationHandler {
         return new NotificationResult(notifications, totalSize, notifications.size());
     }
     
-    public static @NotNull List<? extends Notification> getNotificationsNotify(@NotNull PlayerProfile profile) {
+    public static @NotNull NotificationResult getNotificationsNotify(@NotNull PlayerProfile profile) {
         final NotificationResult notificationResult = getNotifications(profile);
-        final List<? extends Notification> notifications = notificationResult.notifications;
+        final List<? extends Notification> notifications = notificationResult.notifications();
         
         if (!notifications.isEmpty()) {
             profile.sendMessage(Component.empty());
@@ -114,18 +117,17 @@ public class NotificationHandler {
             SEQUENCER.play(profile.getPlayer());
         }
         
-        return notifications;
+        return notificationResult;
     }
     
-    public record NotificationResult(@NotNull List<? extends Notification> notifications, int sizeTotal, int sizeFiltered) implements ComponentLike {
-        
-        @Override
-        public @NotNull Component asComponent() {
-            return sizeTotal == sizeFiltered
-                   ? Component.text("(%s)".formatted(sizeTotal))
-                   : Component.text("(%s/%s)".formatted(sizeFiltered, sizeTotal));
+    public static @NotNull ItemBuilder setTexture(@NotNull ItemBuilder builder, int numberOfNotifications) {
+        if (numberOfNotifications == 0) {
+            return builder;
         }
         
+        return builder.setType(Material.PLAYER_HEAD)
+                      .setHeadTexture(EXCLAMATION_TEXTURE)
+                      .setAmount(numberOfNotifications);
     }
     
 }

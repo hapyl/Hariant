@@ -33,13 +33,18 @@ public final class TalentFeelTheBreeze extends TalentUltimate {
     public final @DisplayField Decimal stingDistance = Decimal.ofValue(1.5);
     public final @DisplayField Decimal enemyLookupRadius = Decimal.ofValue(5);
     
-    public final @DisplayField AttributeScaling beeDamage = AttributeScaling.create(AttributeType.ATTACK, 164);
-    public final @DisplayField AttributeScaling beeDamageIvy = AttributeScaling.create(AttributeType.ATTACK, 204);
+    public final @DisplayField AttributeScaling beeDamage = AttributeScaling.create(AttributeType.ATTACK, 131.2);
+    public final @DisplayField AttributeScaling beeDamageIvy = AttributeScaling.create(AttributeType.ATTACK, 163.2);
     
     public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 100);
+    public final @DisplayField Decimal maximumBeeSpeed = Decimal.ofBlocksPerSecond(15);
     
-    public final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    public final Key cooldownKey = Key.ofString("feel_the_breeze_icd");
+    public final int cooldown = 5;
+    
+    public final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
+            Key.ofString("feel_the_breeze_damage_source"),
             DeathMessage.create("{player} felt [{killer}'s] breeze")
     );
     

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.game.Placement;
@@ -15,6 +16,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
@@ -74,7 +76,7 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
     }
     
     @Override
-    public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player) {
+    public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @Nullable HariantEntity killer) {
         final boolean isWinConditionMet = gameInstance.endIfWinConditionMet();
         
         if (!isWinConditionMet) {

@@ -11,7 +11,7 @@ import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantDamageEvent;
+import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ArtifactSetSearingInferno extends ArtifactSet implements Listener {
     
     private final ArtifactSetModifier elementalMasteryIncrease = CommonArtifactSetModifiers.ELEMENTAL_MASTERY;
-    private final Decimal burningDamageIncreaseOfElementalMastery = Decimal.ofPercentage(20);
+    private final Decimal burningDamageIncreaseOfElementalMastery = Decimal.ofPercentage(15);
     
     ArtifactSetSearingInferno(@NotNull Key key) {
         super(key, Component.text("Searing Inferno"));
@@ -61,7 +61,7 @@ public final class ArtifactSetSearingInferno extends ArtifactSet implements List
     }
     
     @EventHandler
-    public void handleHariantDamageEvent(HariantDamageEvent ev) {
+    public void handleHariantDamageComputeEvent(HariantDamageComputeEvent ev) {
         final DamageSource damageSource = ev.getDamageSource();
         
         if (!(ev.getAttacker() instanceof HariantPlayer player)) {

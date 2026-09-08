@@ -17,13 +17,10 @@ public class NormalAttackRanged extends NormalAttack {
     }
     
     @Override
-    public @NotNull DamageSource createDamageSource(@NotNull HariantEntity attacker) {
-        final DamageSource damageSource = super.createDamageSource(attacker);
-        
-        // Very important that the damage type is set to RANGED, especially for bows
-        damageSource.setDamageType(DamageType.RANGED);
-        
-        return damageSource;
+    public @NotNull DamageSource.Builder createDamageSource(@NotNull HariantEntity attacker) {
+        return super.createDamageSource(attacker)
+                    // Very important we change the damage type to RANGED
+                    .damageType(DamageType.RANGED);
     }
     
     @NotNull

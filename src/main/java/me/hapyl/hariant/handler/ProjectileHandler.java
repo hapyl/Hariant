@@ -2,12 +2,10 @@ package me.hapyl.hariant.handler;
 
 import com.google.common.collect.Maps;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.damage.DamageFlag;
 import me.hapyl.hariant.entity.damage.DamageSource;
-import me.hapyl.hariant.entity.damage.KnockbackSource;
 import me.hapyl.hariant.event.HariantProjectileHitEvent;
 import me.hapyl.hariant.event.HariantProjectileLaunchEvent;
 import org.bukkit.Sound;
@@ -36,7 +34,9 @@ import java.util.Set;
 public final class ProjectileHandler implements Listener {
     
     private static final Map<Projectile, HariantProjectile> PROJECTILES = Maps.newHashMap();
+    private static final Set<? extends DamageFlag> FORCE_CRITICAL = Set.of(DamageFlag.FORCE_CRITICAL);
     
+    // This event handles exclusively bukkit projectiles via using the shooter's ranged attack
     @EventHandler(priority = EventPriority.HIGHEST)
     public void handleProjectileLaunchEvent(ProjectileLaunchEvent ev) {
         final Projectile projectile = ev.getEntity();
@@ -47,7 +47,7 @@ public final class ProjectileHandler implements Listener {
             return;
         }
         
-        @Nullable final HariantEntity entity = shooter instanceof LivingEntity livingShooter ? Hariant.getEntity(livingShooter).orElse(null) : null;
+        final @Nullable HariantEntity entity = shooter instanceof LivingEntity livingShooter ? Hariant.getEntity(livingShooter).orElse(null) : null;
         
         // If shooter is null, it means either non-game entity or lobby player, don't care either way nor wrap projectile
         if (entity == null) {
@@ -62,17 +62,18 @@ public final class ProjectileHandler implements Listener {
             return;
         }
         
-        final DamageSource damageSource = rangedAttack.createDamageSource(entity);
+        final DamageSource.Builder builder = rangedAttack.createDamageSource(entity);
         
         // If the project is an arrow, and it's fully charged (critical), add `FORCE_CRITICAL` tag
         if (projectile instanceof Arrow arrow && arrow.isCritical()) {
-            damageSource.setDamageFlags(Set.of(DamageFlag.FORCE_CRITICAL));
+            builder.damageFlags(FORCE_CRITICAL, DamageSource.Strategy.MERGE);
         }
         
-        // Build damage source, create projectile and call entity `onShoot`
-        createProjectile(projectile, damageSource);
+        // Create natural projectile
+        createProjectile(new HariantShotProjectile(projectile, entity, builder.build()));
         
-        entity.onShoot(damageSource);
+        // Call `onShoot` for naturally shot weapons
+        entity.onShoot();
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -89,37 +90,48 @@ public final class ProjectileHandler implements Listener {
         
         final Entity bukkitEntity = ev.getHitEntity();
         final HariantEntity entity = bukkitEntity != null ? Hariant.getEntity(bukkitEntity).orElse(null) : null;
-        
         final Block block = ev.getHitBlock();
         
-        if (new HariantProjectileHitEvent(entity, block, projectile).callEvent()) {
+        if (new HariantProjectileHitEvent(projectile, entity, block).callEvent()) {
             ev.setCancelled(true);
             return;
         }
         
-        // If hit entity, handle damage
-        if (entity != null) {
-            final HariantEntity attacker = projectile.getShooter();
-            
-            attacker.attack(entity, projectile.getDamageSource(), KnockbackSource.create(projectile, HariantConstants.RANGE_KNOCKBACK_STRENGTH));
-            playHitSound(attacker);
-        }
+        projectile.onHit(entity, block);
     }
     
-    public static <P extends Projectile> void createProjectile(@NotNull P projectile, @NotNull DamageSource damageSource) {
-        final HariantProjectile hariantProjectile = new HariantProjectile(projectile, damageSource);
+    public static <H extends HariantProjectile> @NotNull H createProjectile(@NotNull H projectile) {
+        // Projectile launch event being cancellable causes many issues and brings zero benefits as of now,
+        // therefore the event is non-cancellable
+        new HariantProjectileLaunchEvent(projectile).callEvent();
         
-        // Call projectile launch event, and, if cancelled, remove the projectile
-        if (new HariantProjectileLaunchEvent(hariantProjectile).callEvent()) {
-            projectile.remove();
-            return;
-        }
-        
-        PROJECTILES.put(projectile, hariantProjectile);
+        PROJECTILES.put(projectile.getProjectile(), projectile);
+        projectile.onLaunch();
+        return projectile;
     }
     
     public static void playHitSound(@NotNull HariantEntity entity) {
         entity.playSound(Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f);
+    }
+    
+    private static class HariantShotProjectile extends HariantDamageProjectile {
+        
+        HariantShotProjectile(@NotNull Projectile projectile, @NotNull HariantEntity entity, @NotNull DamageSource damageSource) {
+            super(projectile, entity, damageSource);
+        }
+        
+        @Override
+        public void onHit(@Nullable HariantEntity entity, @Nullable Block block) {
+            final HariantEntity shooter = this.getShooter();
+            
+            if (entity != null) {
+                // Natural projectiles deal damage via `attack`, instead of `damage`
+                shooter.attack(entity, this.getDamageSource(), this.createKnockbackSource());
+                
+                playHitSound(shooter);
+            }
+        }
+        
     }
     
 }

@@ -154,7 +154,6 @@ public class HeroInstance implements Instance<Hero>, MongoSerializable, Hoverabl
     }
     
     public @NotNull ArtifactFilter getArtifactFilter() {
-        // FIXME (xanyjl @ Saturday, July 4) -> Remove this from impl just keep it here and call hero#getArtifactFilter()
         return artifactFilter;
     }
     

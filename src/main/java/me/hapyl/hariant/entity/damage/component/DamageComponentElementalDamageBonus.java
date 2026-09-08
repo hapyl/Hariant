@@ -11,15 +11,14 @@ public final class DamageComponentElementalDamageBonus implements DamageComponen
     DamageComponentElementalDamageBonus() {
     }
     
-    @NotNull
     @Override
-    public String identify() {
+    public @NotNull String identify() {
         return "Elemental DMG";
     }
     
     @Override
     public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot entity, @NotNull AttributesInstanceSnapshot attacker) {
-        final ElementType elementType = damageInstance.getDamageSource().getElementType();
+        final ElementType elementType = damageInstance.getElementType();
         final AttributeType attributeType = elementType.getOffensiveAttribute();
         
         if (attributeType == null) {

@@ -64,7 +64,7 @@ public final class TalentImpalement extends TalentUltimateOvercharge {
     
     private final @DisplayField BoundingBoxBlueprint portalBoundingBox = BoundingBoxBlueprint.define(radius.doubleValue(), 10, radius.doubleValue());
     
-    private final DamageSourceIdentity damageSourceImpalement = DamageSourceIdentity.create(this, DeathMessage.create("{player} was impaled to death [by {killer}]"));
+    private final DamageSourceIdentity damageSourceImpalement = DamageSourceIdentity.createOfNamed(this, Key.ofString("impalement_damage_source"), DeathMessage.create("{player} was impaled to death [by {killer}]"));
     private final int portalClosingDuration = 10;
     
     public DisplayModel model = BDEngine.parse(

@@ -1,36 +1,26 @@
 package me.hapyl.hariant.event;
 
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.ferocity.FerocitySource;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class HariantFerocityEvent extends HariantEntityEvent implements Cancellable {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
-    private final HariantEntity source;
-    private int ferocityStrikes;
+    private final FerocitySource ferocitySource;
     private boolean cancel;
     
-    public HariantFerocityEvent(@NotNull HariantEntity entity, @Nullable HariantEntity source, int ferocityStrikes) {
+    public HariantFerocityEvent(@NotNull HariantEntity entity,@NotNull FerocitySource ferocitySource) {
         super(entity);
         
-        this.source = source;
-        this.ferocityStrikes = ferocityStrikes;
+        this.ferocitySource = ferocitySource;
     }
     
-    public @Nullable HariantEntity getSource() {
-        return source;
-    }
-    
-    public int getFerocityStrikes() {
-        return ferocityStrikes;
-    }
-    
-    public void setFerocityStrikes(int ferocityStrikes) {
-        this.ferocityStrikes = Math.max(1, ferocityStrikes);
+    public @NotNull FerocitySource getFerocitySource() {
+        return ferocitySource;
     }
     
     @Override

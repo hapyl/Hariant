@@ -40,13 +40,6 @@ public enum Affiliation implements Prefixed, Named, Described, Styled, Component
             Style.style(Colors.THE_JUNGLE)
     ),
     
-    MERCENARY(
-            Component.text("\uD83D\uDD74"),
-            Component.text("The Mercenaries"),
-            Component.text("A group of mercenaries and bounty hunters."),
-            Style.style(Colors.MERCENARY)
-    ),
-    
     CHATEAU(
             Component.text("🦇"),
             Component.text("Château"),
@@ -66,6 +59,13 @@ public enum Affiliation implements Prefixed, Named, Described, Styled, Component
             Component.text("Hell"),
             Component.text("A barren land of the underworld."),
             Style.style(Colors.HELL)
+    ),
+    
+    MERCENARIES(
+            Component.text("\uD83D\uDD74"),
+            Component.text("The Mercenaries"),
+            Component.text("A somehow legal group of mercenaries and bounty hunters."),
+            Style.style(Colors.MERCENARY)
     ),
     
     ;

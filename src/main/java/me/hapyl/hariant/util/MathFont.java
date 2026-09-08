@@ -25,15 +25,13 @@ public final class MathFont {
     private MathFont() {
     }
     
-    @NotNull
-    public static String format(final int value) {
+    public static @NotNull String format(final int value) {
         return digitsOf(value).stream()
                               .map(DIGITS_MAPPED::get)
                               .collect(Collectors.joining());
     }
     
-    @NotNull
-    public static List<Integer> digitsOf(final int value) {
+    public static @NotNull List<Integer> digitsOf(final int value) {
         final List<Integer> digits = Lists.newArrayList();
         int absoluteValue = Math.abs(value);
         

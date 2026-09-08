@@ -2,6 +2,10 @@ package me.hapyl.hariant.game.battleground;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.game.GameInstance;
+import me.hapyl.hariant.game.WinResult;
 import me.hapyl.hariant.game.battleground.clouds.BattlegroundClouds;
 import me.hapyl.hariant.game.battleground.feature.BattlegroundFeature;
 import me.hapyl.hariant.game.battleground.japan.BattlegroundJapan;
@@ -10,6 +14,7 @@ import me.hapyl.hariant.util.ImmutableLocation;
 import me.hapyl.hariant.util.Selectable;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -27,25 +32,24 @@ public enum EnumBattleground implements Battleground, Selectable {
     RAILWAY(new BattlegroundRailway()),
     WINERY(new BattlegroundWinery()),
     CLOUDS(new BattlegroundClouds()),
+    LIBRARY(new BattlegroundLibrary()),
+    THE_VAULT(new BattlegroundTheVault()),
     
     ;
     
-    private final Battleground battleground;
+    public final Battleground battleground;
     
     EnumBattleground(@NotNull Battleground battleground) {
         this.battleground = battleground;
     }
     
-    
     @Override
-    @NotNull
-    public Component getName() {
+    public @NotNull Component getName() {
         return battleground.getName();
     }
     
-    @NotNull
     @Override
-    public Component getDescription() {
+    public @NotNull Component getDescription() {
         return battleground.getDescription();
     }
     
@@ -54,9 +58,8 @@ public enum EnumBattleground implements Battleground, Selectable {
         return battleground.getSize();
     }
     
-    @NotNull
     @Override
-    public List<? extends ImmutableLocation> getSpawnLocations() {
+    public @NotNull List<? extends ImmutableLocation> getSpawnLocations() {
         return battleground.getSpawnLocations();
     }
     
@@ -65,15 +68,13 @@ public enum EnumBattleground implements Battleground, Selectable {
         return battleground.getFeatures();
     }
     
-    @NotNull
     @Override
-    public ItemBuilder createBuilder() {
+    public @NotNull ItemBuilder createBuilder() {
         return battleground.createBuilder();
     }
     
-    @NotNull
     @Override
-    public DropTable getDropTable() {
+    public @NotNull DropTable getDropTable() {
         return battleground.getDropTable();
     }
     
@@ -88,6 +89,41 @@ public enum EnumBattleground implements Battleground, Selectable {
     }
     
     @Override
+    public void onCreate(@NotNull Iterable<? extends HariantPlayer> players) {
+        battleground.onCreate(players);
+    }
+    
+    @Override
+    public void onDestroy(@NotNull Iterable<? extends HariantPlayer> players, @NotNull WinResult result) {
+        battleground.onDestroy(players, result);
+    }
+    
+    @Override
+    public void onFinalize(@NotNull List<? extends HariantPlayer> players, @NotNull WinResult result) {
+        battleground.onFinalize(players, result);
+    }
+    
+    @Override
+    public void onKill(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
+        battleground.onKill(gameInstance, player, victim);
+    }
+    
+    @Override
+    public void onDeath(@NotNull GameInstance gameInstance, @NotNull HariantPlayer player, @Nullable HariantEntity source) {
+        battleground.onDeath(gameInstance, player, source);
+    }
+    
+    @Override
+    public @NotNull BattlegroundWeather getWeather() {
+        return battleground.getWeather();
+    }
+    
+    @Override
+    public @NotNull BattlegroundTime getTime() {
+        return battleground.getTime();
+    }
+    
+    @Override
     public void select() {
         Hariant.setSelectedBattleground(this);
     }
@@ -96,5 +132,6 @@ public enum EnumBattleground implements Battleground, Selectable {
     public boolean isSelected() {
         return Hariant.getSelectedBattleground() == this;
     }
+    
     
 }

@@ -13,6 +13,7 @@ import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
+import me.hapyl.hariant.util.BlockHelper;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -26,14 +27,14 @@ import org.jetbrains.annotations.Nullable;
 
 public final class TalentMetempsychosis extends Talent {
     
-    @DisplayField private final Decimal maxRadius = Decimal.ofValue(30);
-    @DisplayField private final Decimal transmigrationDuration = Decimal.ofSeconds(0.5f);
+    private final @DisplayField Decimal maxRadius = Decimal.ofValue(30);
+    private final @DisplayField Decimal transmigrationDuration = Decimal.ofSeconds(0.5f);
     
     public TalentMetempsychosis(@NotNull Key key) {
         super(key, Component.text("Metempsychosis"), Icon.ofMaterial(Material.ECHO_SHARD));
         
-        setDurationSeconds(1f);
-        setCooldownSeconds(12);
+        setDurationSeconds(0.75f);
+        setCooldownSeconds(16);
         
         setTalentType(TalentType.MOVEMENT);
         
@@ -53,15 +54,13 @@ public final class TalentMetempsychosis extends Talent {
         );
     }
     
-    @NotNull
     @Override
-    public TalentTarget target(@NotNull HariantPlayer player) {
+    public @NotNull TalentTarget target(@NotNull HariantPlayer player) {
         return new TalentTargetMetempsychosis();
     }
     
-    @NotNull
     @Override
-    public Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
+    public @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context) {
         final Location targetLocation = context.retrieve(Location.class);
         
         player.delegate(new Metempsychosis(player, targetLocation), DelegateType.INTERRUPTABLE);
@@ -117,7 +116,7 @@ public final class TalentMetempsychosis extends Talent {
         }
         
         private static boolean isBlockValid(@NotNull Block block) {
-            return block.isSolid() && block.getRelative(BlockFace.UP).isEmpty() && block.getRelative(BlockFace.UP, 2).isEmpty();
+            return block.isSolid() && BlockHelper.isPassable(block.getRelative(BlockFace.UP)) && BlockHelper.isPassable(block.getRelative(BlockFace.UP, 2));
         }
         
         private static @NotNull TalentContext createContext(@NotNull Block block) {

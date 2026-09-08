@@ -5,6 +5,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyBurn;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.mutator.HealthMutatorDecay;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDeathEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
@@ -13,7 +14,6 @@ import me.hapyl.hariant.hero.inferno.TalentDemonsplitQuazii;
 import me.hapyl.hariant.hero.inferno.TalentDemonsplitTyphoeus;
 import me.hapyl.hariant.hero.inferno.TalentInfernalWrath;
 import me.hapyl.hariant.talent.TalentRegistry;
-import me.hapyl.hariant.util.Definition;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,7 +34,7 @@ public final class AchievementInfernoFullIgnition extends AchievementHeroImpl im
                          .append(Component.text(", while they are affected by "))
                          .append(InfernoDemonType.QUAZII.getName())
                          .append(Component.text("'s "))
-                         .append(Definition.DECAY)
+                         .append(HealthMutatorDecay.COMPONENT)
                          .append(Component.text(" or "))
                          .append(InfernoDemonType.TYPHOEUS.getName())
                          .append(Component.text("'s "))

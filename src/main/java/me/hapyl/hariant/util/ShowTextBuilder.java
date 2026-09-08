@@ -1,6 +1,8 @@
 package me.hapyl.hariant.util;
 
 import me.hapyl.eterna.module.annotate.SelfReturn;
+import me.hapyl.eterna.module.component.Components;
+import me.hapyl.hariant.achievement.ComponentUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
@@ -10,9 +12,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.UnaryOperator;
 
+@ThisClassShouldNeMovedToEternaAPI
 public final class ShowTextBuilder implements Hoverable, HoverEventSource<Component> {
     
+    private static final int WRAP_LIMIT = 50;
+    
     private final TextComponent.Builder builder;
+    private int count;
     
     ShowTextBuilder() {
         this.builder = Component.text();
@@ -63,8 +69,20 @@ public final class ShowTextBuilder implements Hoverable, HoverEventSource<Compon
     }
     
     @SelfReturn
+    public ShowTextBuilder appendWrapped(@NotNull Component component) {
+        Components.wrap(component, WRAP_LIMIT).stream().map(ComponentUtils::normalizeLore).forEach(this::append0);
+        
+        return this;
+    }
+    
+    @SelfReturn
     private ShowTextBuilder append0(@NotNull Component component) {
-        this.builder.append(component).appendNewline();
+        if (this.count++ != 0) {
+            this.builder.appendNewline();
+        }
+        
+        this.builder.append(component);
+        
         return this;
     }
     

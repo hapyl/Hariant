@@ -2,52 +2,37 @@ package me.hapyl.hariant.handler;
 
 import me.hapyl.eterna.module.location.Coordinates;
 import me.hapyl.eterna.module.location.Distanced;
-import me.hapyl.eterna.module.location.LocationHelper;
-import me.hapyl.eterna.module.util.Handle;
+import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.DamageSource;
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Projectile;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-
-public final class HariantProjectile implements Handle<Projectile>, Coordinates, EntityCollector, Distanced {
+public class HariantProjectile implements Coordinates, EntityCollector, Distanced, Removable {
     
-    private final Projectile projectile;
-    private DamageSource damageSource;
+    protected final Projectile projectile;
+    protected final HariantEntity shooter;
     
-    HariantProjectile(@NotNull Projectile projectile, @NotNull DamageSource damageSource) {
+    public HariantProjectile(@NotNull Projectile projectile, @NotNull HariantEntity shooter) {
         this.projectile = projectile;
-        this.damageSource = validateDamageSource(damageSource);
+        this.shooter = shooter;
     }
     
-    @Override
-    public @NotNull Color outlineColor() {
-        return Color.AQUA;
+    public @NotNull Vector getVelocity() {
+        return projectile.getVelocity();
     }
     
-    @NotNull
-    @Override
-    public Projectile getHandle() {
+    public @NotNull Projectile getProjectile() {
         return projectile;
     }
     
-    @NotNull
-    public HariantEntity getShooter() {
-        return Objects.requireNonNull(damageSource.getSource(), "DamageSource missing shooter somehow!");
-    }
-    
-    @NotNull
-    public DamageSource getDamageSource() {
-        return damageSource;
-    }
-    
-    public void setDamageSource(@NotNull DamageSource damageSource) {
-        this.damageSource = validateDamageSource(damageSource);
+    public @NotNull HariantEntity getShooter() {
+        return shooter;
     }
     
     @Override
@@ -65,22 +50,26 @@ public final class HariantProjectile implements Handle<Projectile>, Coordinates,
         return projectile.getZ();
     }
     
-    @NotNull
     @Override
-    public Location getLocation() {
-        return LocationHelper.defaultLocation(this.x(), this.y(), this.z());
+    public @NotNull Location getLocation() {
+        return new Location(projectile.getWorld(), this.x(), this.y(), this.z());
     }
     
-    @NotNull
-    private static DamageSource validateDamageSource(@Nullable DamageSource damageSource) {
-        if (damageSource == null) {
-            throw new IllegalArgumentException("DamageSource cannot be null!");
-        }
-        else if (damageSource.getSource() == null) {
-            throw new IllegalArgumentException("DamageSource must have a source!");
-        }
-        
-        return damageSource;
+    @Override
+    public @NotNull Color outlineColor() {
+        return Color.AQUA;
+    }
+    
+    public void onLaunch() {
+        this.getShooter().onProjectileLaunched(this);
+    }
+    
+    public void onHit(@Nullable HariantEntity entity, @Nullable Block block) {
+    }
+    
+    @Override
+    public void remove() {
+        projectile.remove();
     }
     
 }

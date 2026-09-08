@@ -32,10 +32,10 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
     
     private final Decimal vitalityReduction = Decimal.ofAttribute(AttributeType.VITALITY, 50);
     
-    private final int bleedDuration = Tick.fromSeconds(6);
+    private final int bleedDuration = Tick.fromSeconds(4);
     private final int bleedPeriod = Tick.fromSeconds(0.75f);
     
-    private final double bleedDamage = 25;
+    private final double bleedDamage = 20;
     
     private final Component componentBleeding = Component.empty()
                                                          .append(Component.text("\uD83E\uDE78 ", Colors.EFFECT_BLEED, TextDecoration.BOLD))
@@ -51,8 +51,8 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
             1
     );
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            this,
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
+            this, Key.ofString("bleed_damage_source"),
             DeathMessage.createWithDefaultKiller("{player} bled to death")
     );
     
@@ -163,16 +163,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         private final ElementalAnomalySource anomalySource;
         
         ElementalAnomalyBleedDamageSource(@Nullable HariantEntity source, double damage, @NotNull ElementalAnomalySource anomalySource) {
-            super(
-                    damageSourceIdentity,
-                    source,
-                    DamageType.ANOMALY,
-                    ElementType.PHYSICAL,
-                    DamageComponents.ofAnomaly(),
-                    Set.of(),
-                    damage,
-                    0
-            );
+            super(damageSourceIdentity, source, DamageType.ANOMALY, ElementType.PHYSICAL, DamageComponents.ofAnomaly(), Set.of(), damage, 0);
             
             this.anomalySource = anomalySource;
         }

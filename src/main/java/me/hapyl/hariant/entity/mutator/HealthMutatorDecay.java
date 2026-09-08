@@ -11,7 +11,11 @@ import org.bukkit.Sound;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-public class Decay extends HealthMutatorImpl {
+public class HealthMutatorDecay extends HealthMutatorImpl {
+    
+    public static final Component COMPONENT = Component.empty()
+                                                       .append(Component.text("\uD83D\uDC94", Colors.DECAY))
+                                                       .append(Component.text(" Decay", Colors.DECAY));
     
     private static final Component MUTATOR_NAME = Component.text("Decay");
     
@@ -23,7 +27,7 @@ public class Decay extends HealthMutatorImpl {
     private double decay;
     private int tick;
     
-    public Decay(double amount, int duration) {
+    public HealthMutatorDecay(double amount, int duration) {
         super(MUTATOR_NAME, HEALTH_STYLE, HEART_STYLE);
         
         this.decay = amount;
@@ -65,12 +69,12 @@ public class Decay extends HealthMutatorImpl {
     }
     
     public @NotNull
-    static Decay create(double amount, int duration) {
-        return new Decay(amount, duration);
+    static HealthMutatorDecay create(double amount, int duration) {
+        return new HealthMutatorDecay(amount, duration);
     }
     
     public @NotNull
-    static Decay create(double amount, @NotNull Decimal duration) {
+    static HealthMutatorDecay create(double amount, @NotNull Decimal duration) {
         return create(amount, duration.intValue());
     }
     

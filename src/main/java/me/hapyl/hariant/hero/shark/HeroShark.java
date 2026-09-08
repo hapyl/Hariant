@@ -26,7 +26,7 @@ public final class HeroShark extends Hero {
     private final VanillaAttributeModifier vanillaAttributeModifier = VanillaAttributeModifier.create(
             Key.ofString("shark_modifier"),
             Attribute.WATER_MOVEMENT_EFFICIENCY,
-            VanillaAttributeModifier.Operation.FLAT,
+            VanillaAttributeModifier.Operation.ADDITIVE,
             2.5
     );
     
@@ -95,7 +95,11 @@ public final class HeroShark extends Hero {
     
     private static class WeaponClaws extends WeaponMelee {
         public WeaponClaws() {
-            super(Key.ofString("claws"), Icon.ofMaterial(Material.QUARTZ), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 60, 10));
+            super(
+                    Key.ofString("claws"),
+                    Icon.ofMaterial(Material.QUARTZ),
+                    NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 54, 10)
+            );
             
             setName(Component.text("Jaws"));
             setDescription(Component.text("Jaws of an apex predator."));

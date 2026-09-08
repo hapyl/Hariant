@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface Notification extends Named {
     
+    @NotNull Class<? extends DeclaresNotifaction> declaringClass();
+    
     @Override
     @NotNull Component getName();
     
@@ -17,8 +19,8 @@ public interface Notification extends Named {
         return null;
     }
     
-    static @NotNull Notification create(@NotNull Component name, @NotNull NotificationType notificationType) {
-        return new NotificationImpl(name, notificationType);
+    static @NotNull Notification create(@NotNull Class<? extends DeclaresNotifaction> declaringClass, @NotNull Component name, @NotNull NotificationType notificationType, @Nullable ClickEvent<?> clickEvent) {
+        return new NotificationImpl(declaringClass, name, notificationType, clickEvent);
     }
     
 }

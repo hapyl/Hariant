@@ -12,17 +12,14 @@ import java.util.function.Consumer;
 
 public interface Icon extends ItemCreator {
     
-    @NotNull
     @Override
-    ItemBuilder createBuilder();
+    @NotNull ItemBuilder createBuilder();
     
-    @NotNull
-    static Icon ofMaterial(@NotNull Material material) {
+    static @NotNull Icon ofMaterial(@NotNull Material material) {
         return () -> createBuilder(material);
     }
     
-    @NotNull
-    static Icon ofMaterial(@NotNull Material material, @NotNull Consumer<ItemBuilder> consumer) {
+    static @NotNull Icon ofMaterial(@NotNull Material material, @NotNull Consumer<ItemBuilder> consumer) {
         return () -> {
             final ItemBuilder builder = createBuilder(material);
             consumer.accept(builder);
@@ -31,17 +28,15 @@ public interface Icon extends ItemCreator {
         };
     }
     
-    @NotNull
-    static Icon ofTexture(@NotNull String texture) {
+    static @NotNull Icon ofTexture(@NotNull String texture) {
         return () -> ItemBuilder.playerHead(texture).unsetComponents();
     }
     
     /**
      * @deprecated discouraged, only use for testing.
      */
-    @NotNull
     @Deprecated
-    static Icon ofTemporaryTexture() {
+    static @NotNull Icon ofTemporaryTexture() {
         class Holder {
             private static final String TEXTURE = "c807442b3643f5585cbd2229bc1a7788f6f25662bd765b9eab28b6eb6bdb82a4";
         }

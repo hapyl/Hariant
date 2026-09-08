@@ -179,7 +179,7 @@ public class HariantEntityDummy extends HariantDisplayEntity {
     
     private static class DamagePerRotation implements ComponentLike, Resettable {
         
-        private static final int RESET_THRESHOLD = Tick.fromSeconds(10);
+        private static final int RESET_THRESHOLD = Tick.fromSeconds(5);
         
         private double damage;
         private int lastDamageAt;

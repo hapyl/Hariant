@@ -7,20 +7,16 @@ import org.jetbrains.annotations.NotNull;
 
 public interface AssistSource extends Named {
     
-    @NotNull
-    HariantEntity source();
+    @NotNull HariantEntity source();
     
     @Override
-    @NotNull
-    Component getName();
+    @NotNull Component getName();
     
-    @NotNull
-    static AssistSource create(@NotNull HariantEntity source, @NotNull Component name) {
+    static @NotNull AssistSource create(@NotNull HariantEntity source, @NotNull Component name) {
         return new AssistSourceImpl(source, name);
     }
     
-    @NotNull
-    static AssistSource create(@NotNull HariantEntity source, @NotNull Named named) {
+    static @NotNull AssistSource create(@NotNull HariantEntity source, @NotNull Named named) {
         return create(source, named.getName());
     }
     

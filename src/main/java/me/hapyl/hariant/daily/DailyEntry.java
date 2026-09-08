@@ -4,18 +4,20 @@ import io.papermc.paper.registry.keys.SoundEventKeys;
 import me.hapyl.eterna.module.util.Enums;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.achievement.ComponentUtils;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.database.PlayerDatabaseEntry;
 import me.hapyl.hariant.database.problem.ProblemReporter;
 import me.hapyl.hariant.database.serialize.MongoSerializableConstructor;
 import me.hapyl.hariant.menu.Menus;
 import me.hapyl.hariant.profile.PlayerProfile;
+import me.hapyl.hariant.profile.notification.DeclaresNotifaction;
 import me.hapyl.hariant.profile.notification.Notification;
 import me.hapyl.hariant.profile.notification.NotificationListener;
 import me.hapyl.hariant.profile.notification.NotificationType;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
@@ -24,34 +26,25 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-public class DailyEntry extends PlayerDatabaseEntry {
+public class DailyEntry extends PlayerDatabaseEntry implements DeclaresNotifaction {
     
     public static final NotificationListener NOTIFICATION_LISTENER = new NotificationListener() {
-        private final Notification notification = new Notification() {
-            @Override
-            public @NotNull Component getName() {
-                return Component.text("Unclaimed Bond Rewards");
-            }
-            
-            @Override
-            public @NotNull NotificationType getNotificationType() {
-                return NotificationType.IMPORTANT;
-            }
-            
-            @Override
-            public @NotNull ClickEvent<?> clickEvent() {
-                return Menus.DAILY.createClickEvent();
-            }
-        };
+        final Notification notification = Notification.create(
+                DailyEntry.class,
+                Component.text("Unclaimed Daily Rewards"),
+                NotificationType.IMPORTANT,
+                Menus.DAILY.createClickEvent()
+        );
         
         @Override
         public @Nullable Notification listen(@NotNull PlayerProfile profile) {
             return profile.getDatabase().daily.hasUnclaimedRewards() ? notification : null;
         }
     };
+    
     public static final int NUMBER_OF_DAILIES = 3;
     
-    private static final Component COMPONENT_NEW_DAILY_BONDS = Component.text("ɴᴇᴡ ᴅᴀɪʟʏ ʙᴏɴᴅꜱ", Colors.GREEN, TextDecoration.BOLD);
+    private static final Component COMPONENT_NEW_DAILY_BONDS = ComponentUtils.sparkly(Component.text("ɴᴇᴡ ᴅᴀɪʟʏ ʙᴏɴᴅꜱ", Colors.DARK_GREEN, TextDecoration.BOLD), Style.style(Colors.GREEN));
     private static final Component COMPONENT_DAILY_BOND_COMPLETE = Component.text("ᴅᴀɪʟʏ ʙᴏɴᴅ ᴄᴏᴍᴘʟᴇᴛᴇ", Colors.GREEN, TextDecoration.BOLD);
     
     private final DailyInstance[] dailyInstances;
@@ -71,12 +64,36 @@ public class DailyEntry extends PlayerDatabaseEntry {
     
     public boolean hasUnclaimedRewards() {
         for (DailyInstance dailyInstance : dailyInstances) {
-            if (dailyInstance.isCompleted() && !dailyInstance.isClaimedRewards()) {
+            if (dailyInstance.isCompleteNotClaimed()) {
                 return true;
             }
         }
         
         return false;
+    }
+    
+    public int countUnclaimedRewards() {
+        int count = 0;
+        
+        for (DailyInstance dailyInstance : dailyInstances) {
+            if (dailyInstance.isCompleteNotClaimed()) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    
+    public int countCompleteDailies() {
+        int count = 0;
+        
+        for (DailyInstance dailyInstance : dailyInstances) {
+            if (dailyInstance.isCompleted()) {
+                count++;
+            }
+        }
+        
+        return count;
     }
     
     public int getCurrentDay() {

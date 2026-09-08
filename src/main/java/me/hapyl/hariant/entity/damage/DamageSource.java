@@ -1,5 +1,6 @@
 package me.hapyl.hariant.entity.damage;
 
+import me.hapyl.eterna.module.annotate.NotEmpty;
 import me.hapyl.eterna.module.annotate.SelfReturn;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Buildable;
@@ -8,136 +9,178 @@ import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Range;
-import org.jetbrains.annotations.Unmodifiable;
+import me.hapyl.hariant.util.ImmutableCollectionMerger;
+import org.jetbrains.annotations.*;
 
 import java.util.List;
 import java.util.Set;
 
-public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSource, Cloneable {
+/**
+ * {@link DamageSource} is the base interface used for damage calculations, it stores an <b>immutable</b> base information about the damage,
+ * which includes {@link DamageSourceIdentity}, base damage, {@link DamageComponent}, etc.
+ *
+ * <p>
+ * It is then fed to {@link DamageInstance}, which creates a "copy" of the source, allowing mutating the damage instance when needed, while
+ * preserving the immutability of damage source.
+ * </p>
+ *
+ * <p>
+ * It is recommended to create a single damage source when multiple damage instances must deal the same "type" of damage, which will introduce
+ * a "snapshot" mechanic that stores the damage information once.
+ * </p>
+ */
+
+public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSource {
     
     @NotNull DamageSourceIdentity getIdentity();
     
     @Override
     @NotNull ElementType getElementType();
     
-    void setElementType(@NotNull ElementType elementType);
-    
     @Override
     @Nullable HariantEntity getSource();
-    
-    void setSource(@Nullable HariantEntity source);
     
     @Range(from = 0, to = Integer.MAX_VALUE)
     @Override
     double getElementUnits();
-    
-    void setElementUnits(double units);
     
     @NotNull Key getCooldownKey();
     
     @Override
     int getCooldown();
     
-    void setCooldown(@NotNull Key key, int cooldown);
-    
     @NotNull DamageType getDamageType();
     
-    void setDamageType(@NotNull DamageType damageType);
-    
     @NotNull List<? extends DamageComponent> getDamageComponents();
-    
-    void setDamageComponents(@NotNull List<? extends DamageComponent> damageComponents);
     
     @Unmodifiable
     @NotNull Set<? extends DamageFlag> getDamageFlags();
     
-    void setDamageFlags(@NotNull Set<? extends DamageFlag> damageFlags);
-    
     double getDamage();
     
-    @NotNull DamageSource clone();
-    
-    default void startCooldownIfExists(@NotNull HariantEntity hariantEntity) {
-        if (hasCooldown()) {
-            // Set the damage cooldown, which isn't scaled by any attribute
-            hariantEntity.setCooldown(this, getCooldown(), null);
-        }
+    static @NotNull DamageSource death(@NotNull DamageSourceIdentity damageSourceIdentity, @Nullable HariantEntity source) {
+        return new DamageSourceImpl(damageSourceIdentity, source, DamageType.MELEE, ElementType.PHYSICAL, List.of(), Set.of(), 1, 0);
     }
     
-    default boolean canTriggerFerocity() {
-        final DamageType damageType = this.getDamageType();
-        
-        return damageType == DamageType.MELEE || damageType == DamageType.RANGED;
+    static @NotNull DamageSource death(@NotNull DamageSourceIdentity damageSourceIdentity) {
+        return death(damageSourceIdentity, null);
     }
     
-    @NotNull
-    static Builder builder(@NotNull DamageSourceIdentity identity, final double damage) {
-        return new Builder(identity, damage);
+    /**
+     * Creates a new clean, mutable {@link Builder} instance that allows mutation of the underlying {@link DamageSource}.
+     *
+     * <p>
+     * Note that the only initial values of the builder are {@link DamageSourceIdentity} and {@code damage}, everything else is assigned
+     * to either {@code null} or {@code empty} collection; therefore, you must manually set all the fields, including {@link DamageComponent}.
+     * </p>
+     *
+     * @param damageSourceIdentity - The damage source identity.
+     * @param damage               - The initial damage.
+     * @return a new builder.
+     * @apiNote Note that using the builder has one major downside - {@code instanceof} are impossible since it builds a generic {@link DamageSource},
+     * therefore, using builder should generally be avoided in favor of a statically named class that can be instanced when needed.
+     */
+    @ApiStatus.Experimental
+    static @NotNull Builder builder(@NotNull DamageSourceIdentity damageSourceIdentity, final double damage) {
+        return new Builder(damageSourceIdentity, damage);
     }
     
-    @NotNull
-    static Builder death(@NotNull DamageSourceIdentity identity) {
-        return new Builder(identity, 1);
-    }
-    
+    @ApiStatus.Experimental
     class Builder implements Buildable<DamageSource> {
         
-        private final DamageSource damageSource;
+        private final DamageSourceIdentity damageSourceIdentity;
+        private final double damage;
         
-        Builder(@NotNull DamageSourceIdentity identity, final double damage) {
-            this.damageSource = new DamageSourceImpl(identity, damage);
+        private @Nullable HariantEntity source;
+        
+        private @NotNull DamageType damageType;
+        private @NotNull ElementType elementType;
+        
+        private @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents;
+        private @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags;
+        
+        private double units;
+        
+        private @NotNull Key cooldownKey;
+        private int cooldown;
+        
+        Builder(@NotNull DamageSourceIdentity damageSourceIdentity, final double damage) {
+            this.damageSourceIdentity = damageSourceIdentity;
+            this.damage = damage;
+            this.source = null;
+            this.damageType = DamageType.MELEE;
+            this.elementType = ElementType.PHYSICAL;
+            this.damageComponents = List.of();
+            this.damageFlags = Set.of();
+            this.units = 0;
+            this.cooldownKey = Key.empty();
         }
         
         @SelfReturn
-        public Builder source(@Nullable HariantEntity source) {
-            this.damageSource.setSource(source);
+        public Builder source(@NotNull HariantEntity source) {
+            this.source = source;
             return this;
         }
         
         @SelfReturn
         public Builder damageType(@NotNull DamageType damageType) {
-            this.damageSource.setDamageType(damageType);
+            this.damageType = damageType;
             return this;
         }
         
         @SelfReturn
         public Builder elementType(@NotNull ElementType elementType) {
-            this.damageSource.setElementType(elementType);
+            this.elementType = elementType;
             return this;
         }
         
         @SelfReturn
-        public Builder components(@NotNull List<? extends DamageComponent> components) {
-            this.damageSource.setDamageComponents(components);
+        public Builder damageComponents(@NotNull @Unmodifiable List<? extends DamageComponent> damageComponents, @NotNull Strategy strategy) {
+            this.damageComponents = strategy == Strategy.MERGE ? ImmutableCollectionMerger.merge(this.damageComponents, damageComponents) : damageComponents;
             return this;
         }
         
         @SelfReturn
-        public Builder damageFlags(@NotNull DamageFlag... flags) {
-            this.damageSource.setDamageFlags(Set.of(flags));
+        public Builder damageFlags(@NotNull Set<? extends DamageFlag> damageFlags, @NotNull Strategy strategy) {
+            this.damageFlags = strategy == Strategy.MERGE ? ImmutableCollectionMerger.merge(this.damageFlags, damageFlags) : damageFlags;
             return this;
         }
         
         @SelfReturn
-        public Builder elementalUnits(double units) {
-            this.damageSource.setElementUnits(units);
+        public Builder elementalUnits(final double units) {
+            this.units = units;
             return this;
         }
         
         @SelfReturn
-        public Builder cooldown(@NotNull Key cooldownKey, int cooldown) {
-            this.damageSource.setCooldown(cooldownKey, cooldown);
+        public Builder cooldown(@NotNull @NotEmpty Key cooldownKey, final int cooldown) {
+            this.cooldownKey = cooldownKey;
+            this.cooldown = cooldown;
             return this;
         }
         
-        @NotNull
         @Override
-        public DamageSource build() {
-            return damageSource;
+        public @NotNull DamageSource build() {
+            return new DamageSourceImpl(damageSourceIdentity, source, damageType, elementType, damageComponents, damageFlags, damage, units, cooldownKey, cooldown);
         }
+        
+    }
+    
+    /**
+     * Represents a strategy for {@link DamageSource.Builder} damage components and damage flags setter.
+     */
+    enum Strategy {
+        
+        /**
+         * Defines that the given argument replaces the existing one.
+         */
+        REPLACE,
+        
+        /**
+         * Defines that the given arguments is merged with the existing one.
+         */
+        MERGE
+        
     }
     
 }

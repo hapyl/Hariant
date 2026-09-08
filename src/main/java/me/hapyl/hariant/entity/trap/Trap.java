@@ -48,8 +48,8 @@ public class Trap implements Ticking, AssistSource, Prioritable {
     private static final Key MODIFIER_KEY = Key.ofString("trap");
     
     private static final List<? extends VanillaAttributeModifier> ATTRIBUTES = List.of(
-            VanillaAttributeModifier.create(MODIFIER_KEY, Attribute.JUMP_STRENGTH, VanillaAttributeModifier.Operation.FLAT, -100),
-            VanillaAttributeModifier.create(MODIFIER_KEY, Attribute.MOVEMENT_SPEED, VanillaAttributeModifier.Operation.FLAT, -100)
+            VanillaAttributeModifier.create(MODIFIER_KEY, Attribute.JUMP_STRENGTH, VanillaAttributeModifier.Operation.ADDITIVE, -100),
+            VanillaAttributeModifier.create(MODIFIER_KEY, Attribute.MOVEMENT_SPEED, VanillaAttributeModifier.Operation.ADDITIVE, -100)
     );
     
     private static final long KEY_COOLDOWN = 50;

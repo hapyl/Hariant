@@ -10,12 +10,22 @@ public enum DamageType implements Named, Terminology {
     MELEE(
             Component.text("Melee DMG"),
             Component.text("Damage caused by a melee attack.")
-    ),
+    ) {
+        @Override
+        public boolean canTriggerFerocity() {
+            return true;
+        }
+    },
     
     RANGED(
             Component.text("Ranged DMG"),
             Component.text("Damage caused by a ranged attack or a projectile.")
-    ),
+    ) {
+        @Override
+        public boolean canTriggerFerocity() {
+            return true;
+        }
+    },
     
     TALENT(
             Component.text("Talent DMG"),
@@ -52,15 +62,18 @@ public enum DamageType implements Named, Terminology {
         this.explanation = explanation;
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return name;
     }
     
-    @NotNull
     @Override
-    public Component explainTerm() {
+    public @NotNull Component explainTerm() {
         return explanation;
     }
+    
+    public boolean canTriggerFerocity() {
+        return false;
+    }
+    
 }

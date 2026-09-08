@@ -8,8 +8,7 @@ import java.util.function.Consumer;
 
 public interface Executable extends Cancellable {
     
-    @NotNull
-    Promise execute();
+    @NotNull Promise execute();
     
     @Override
     void cancel();

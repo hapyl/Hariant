@@ -32,14 +32,13 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl implements 
     
     private final Decimal attackDecrease = Decimal.ofPercentage(20);
     
-    private final int burnDuration = Tick.fromSeconds(5);
+    private final int burnDuration = Tick.fromSeconds(3);
     private final int burnPeriod = Tick.fromSeconds(0.5f);
     
-    private final double burnDamage = 20;
+    private final double burnDamage = 14;
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            Key.ofString("burning"),
-            Component.text("Burning"),
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
+            this, Key.ofString("burning"),
             DeathMessage.createWithDefaultKiller("{player} burnt to death")
     );
     

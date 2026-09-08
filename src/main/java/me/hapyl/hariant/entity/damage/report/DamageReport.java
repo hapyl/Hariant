@@ -71,15 +71,15 @@ public class DamageReport implements Hoverable {
         
         builder.append(
                 Component.empty()
-                         .append(Component.text("ELM ", Colors.GRAY))
-                         .append(damageSource.getElementType().getName().color(Colors.WHITE))
+                         .append(Component.text("Element ", Colors.GRAY))
+                         .append(damageInstance.getElementType().getName().color(Colors.WHITE))
                          .appendNewline()
         );
         
         builder.append(
                 Component.empty()
                          .append(Component.text("Damage Type ", Colors.GRAY))
-                         .append(damageSource.getDamageType().getName().color(Colors.WHITE))
+                         .append(damageInstance.getDamageType().getName().color(Colors.WHITE))
                          .appendNewline()
         );
         
@@ -87,14 +87,10 @@ public class DamageReport implements Hoverable {
                 Component.empty()
                          .append(Component.text("Damage Flags ", Colors.GRAY))
                          .append(
-                                 (Component) damageSource.getDamageFlags()
-                                                         .stream()
-                                                         .map(Capitalizable::capitalize)
-                                                         .collect(
-                                                                 Collectors.collectingAndThen(Collectors.joining(", "), then -> then.isEmpty()
-                                                                                                                                ? Component.text("None!", Colors.DARK_GRAY)
-                                                                                                                                : Component.text(then, Colors.WHITE))
-                                                         )
+                                 (Component) damageInstance.getDamageFlags()
+                                                           .stream()
+                                                           .map(Capitalizable::capitalize)
+                                                           .collect(Collectors.collectingAndThen(Collectors.joining(", "), then -> then.isEmpty() ? Component.text("None!", Colors.DARK_GRAY) : Component.text(then, Colors.WHITE)))
                          )
         );
         

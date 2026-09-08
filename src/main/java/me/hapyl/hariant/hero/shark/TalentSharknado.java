@@ -56,8 +56,9 @@ public final class TalentSharknado extends TalentUltimate {
     private final @DisplayField Decimal riptideRadius = Decimal.ofValue(1.5);
     private final @DisplayField Decimal castingTime = Decimal.ofSeconds(0.3f);
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             TalentSharknado.this,
+            Key.ofString("sharknado_damage_source"),
             DeathMessage.create("{player} was consumed by [{killer}'s] Sharknado")
     );
     
@@ -103,6 +104,12 @@ public final class TalentSharknado extends TalentUltimate {
         return TalentTarget.none();
     }
     
+    public static class SharknadoAnomalySource extends ElementalAnomalySourceImpl {
+        SharknadoAnomalySource(@Nullable HariantEntity source) {
+            super(ElementalAnomalyType.BLEED, source);
+        }
+    }
+    
     public class Sharknado extends HariantTickingTask implements EntityCollector {
         
         private static final double INITIAL_SCALE = 0.125;
@@ -131,10 +138,6 @@ public final class TalentSharknado extends TalentUltimate {
             player.playWorldSound(location, Sound.ENTITY_BREEZE_INHALE, 6, 0.0f);
         }
         
-        private @NotNull Stream<HariantEntity> stream() {
-            return collectNearbyEntities(location, riptideRadius).filter(player::canAffect);
-        }
-        
         @Override
         public void run(int tick) {
             final double progress = (double) tick / castingTime.intValue();
@@ -160,7 +163,7 @@ public final class TalentSharknado extends TalentUltimate {
                 
                 // Damage
                 if (modulo(damagePeriod)) {
-                    final boolean applyBleed = totalHits++ % eachNHitAppliesBleed.intValue() == 0;
+                    final boolean applyBleed = totalHits++ > 0 && totalHits % eachNHitAppliesBleed.intValue() == 0;
                     
                     this.stream().forEach(entity -> {
                         entity.damage(damageSource);
@@ -180,6 +183,25 @@ public final class TalentSharknado extends TalentUltimate {
                         player.playWorldSound(location, Sound.ENTITY_BREEZE_DEATH, 0.75f);
                     }
                 }
+                
+                // Fx
+                final double limit = Math.PI * 2 * 5;
+                final double radians = Math.toRadians(tick * 10);
+                double theta = 0;
+                
+                while (theta < limit) {
+                    final double thetaProgress = theta / limit;
+                    final double radius = riptideRadius.doubleValue() * thetaProgress;
+                    
+                    final double x = Math.sin(radians * thetaProgress) * radius;
+                    final double y = thetaProgress * 3 - 1;
+                    final double z = Math.cos(radians * thetaProgress) * radius;
+                    
+                    LocationHelper.offset(location, x, y, z, this::spawnSlashParticle);
+                    LocationHelper.offset(location, -x, y, -z, this::spawnSlashParticle);
+                    
+                    theta += Math.PI * 0.2;
+                }
             }
             
         }
@@ -194,6 +216,14 @@ public final class TalentSharknado extends TalentUltimate {
             riptideFx.remove();
             pullSource.cancel();
         }
+        
+        private @NotNull Stream<HariantEntity> stream() {
+            return collectNearbyEntities(location, riptideRadius).filter(player::canAffect);
+        }
+        
+        private void spawnSlashParticle(@NotNull Location location) {
+            player.spawnWorldParticle(location, Particle.SPLASH, 1, 0);
+        }
     }
     
     private class SharknadoPullSource extends PullSource {
@@ -205,12 +235,6 @@ public final class TalentSharknado extends TalentUltimate {
     private class SharknadoDamageSource extends DamageSourceImpl {
         SharknadoDamageSource(@Nullable HariantEntity source, double damage) {
             super(damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.WATER, DamageComponents.ofCommon(), Set.of(), damage, 0);
-        }
-    }
-    
-    public static class SharknadoAnomalySource extends ElementalAnomalySourceImpl {
-        SharknadoAnomalySource(@Nullable HariantEntity source) {
-            super(ElementalAnomalyType.BLEED, source);
         }
     }
     

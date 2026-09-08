@@ -31,8 +31,8 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
     private final double explosionRadius = 3;
     private final double baseDamage = 30;
     
-    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
-            this,
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
+            this, Key.ofString("shock_damage_source"),
             DeathMessage.createWithDefaultKiller("{player} was shocked to death")
     );
     

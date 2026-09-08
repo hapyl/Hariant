@@ -6,7 +6,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.damage.DamageFlag;
-import me.hapyl.hariant.entity.damage.DamageSource;
+import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.environment.EnvironmentDamageSource;
 import me.hapyl.hariant.event.HariantShieldRemoveEvent;
 import me.hapyl.hariant.ui.ComponentDisplay;
@@ -72,14 +72,14 @@ public class Shield implements Ticking, TickDuration, ComponentLike, Identified,
         return duration;
     }
     
-    public boolean canShield(@NotNull DamageSource damageSource) {
+    public boolean canShield(@NotNull DamageInstance damageInstance) {
         // If damage source is flagged as PIERCING_DAMAGE damage, the shield cannot shield
-        if (damageSource.isFlagged(DamageFlag.PIERCING_DAMAGE)) {
+        if (damageInstance.isFlagged(DamageFlag.PIERCING_DAMAGE)) {
             return false;
         }
         
         // By defaults, shield prevent any damage except FALL damage
-        if (damageSource instanceof EnvironmentDamageSource environmentDamageSource) {
+        if (damageInstance.getDamageSource() instanceof EnvironmentDamageSource environmentDamageSource) {
             return !environmentDamageSource.isFall();
         }
         
@@ -97,9 +97,9 @@ public class Shield implements Ticking, TickDuration, ComponentLike, Identified,
         return this.capacity -= damage;
     }
     
-    public final @NotNull ShieldResult shield0(double damage, @NotNull DamageSource damageSource) {
+    public final @NotNull ShieldResult shield0(double damage, @NotNull DamageInstance damageInstance) {
         // Scale damage to strength
-        final double damageScaled = damage / strength.strength(damageSource.getElementType());
+        final double damageScaled = damage / strength.strength(damageInstance.getElementType());
         
         final double capacityBeforeHit = capacity;
         final double capacityAfterHit = this.shield(damageScaled);

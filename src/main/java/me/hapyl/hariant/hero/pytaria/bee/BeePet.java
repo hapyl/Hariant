@@ -6,9 +6,8 @@ import me.hapyl.eterna.module.location.Located;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.ImmunityResult;
 import me.hapyl.hariant.entity.Pet;
-import me.hapyl.hariant.entity.damage.DamageSource;
+import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.environment.EnvironmentDamageSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import net.kyori.adventure.text.Component;
@@ -43,21 +42,18 @@ public class BeePet extends HariantEntity implements Pet, Distanced, Located {
         setGlowing(player, PacketTeamColor.GOLD);
     }
     
-    @NotNull
     @Override
-    public HariantEntity owner() {
+    public @NotNull HariantEntity owner() {
         return player;
     }
     
-    @NotNull
     @Override
-    public ImmunityResult isImmuneTo(@NotNull DamageSource source) {
-        return ImmunityResult.ofBooleanSilent(source instanceof EnvironmentDamageSource);
+    public boolean isImmuneTo(@NotNull DamageInstance damageInstance) {
+        return damageInstance.getDamageSource() instanceof EnvironmentDamageSource;
     }
     
-    @NotNull
     @Override
-    public Bee getHandle() {
+    public @NotNull Bee getHandle() {
         return (Bee) super.getHandle();
     }
     
@@ -95,7 +91,7 @@ public class BeePet extends HariantEntity implements Pet, Distanced, Located {
     @NotNull
     private static Bee createBee(@NotNull Location location) {
         return Entities.BEE.spawn(location, self -> {
-            Objects.requireNonNull(self.getAttribute(Attribute.SCALE)).setBaseValue(0.25);
+            Objects.requireNonNull(self.getAttribute(Attribute.SCALE)).setBaseValue(0.3); // 0.25
             
             self.setAI(false);
             self.setSilent(true);

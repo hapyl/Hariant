@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public interface UniquelyIdentified {
     
-    @NotNull
-    UUID getUuid();
+    @NotNull UUID getUuid();
     
 }

@@ -14,8 +14,8 @@ import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageSource;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.event.HariantHealEvent;
-import me.hapyl.hariant.event.HariantMonitorDamageEvent;
 import me.hapyl.hariant.hero.Hero;
 import me.hapyl.hariant.hero.HeroInstance;
 import me.hapyl.hariant.profile.PlayerProfile;
@@ -28,6 +28,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Switch;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -149,36 +150,29 @@ public final class PlayerHandler implements Listener {
     @EventHandler
     public void handlePlayerSwapHandItemsEvent(PlayerSwapHandItemsEvent ev) {
         final Player bukkitPlayer = ev.getPlayer();
+        boolean cancel = false;
         
-        // Always cancel swaps unless in creative
-        if (bukkitPlayer.getGameMode() != GameMode.CREATIVE) {
-            ev.setCancelled(true);
-        }
-        
-        Hariant.getPlayer(bukkitPlayer).ifPresent(player -> {
+        // If player exists, cancel the event and pass to hero
+        if (Hariant.getEntityOrNull(bukkitPlayer) instanceof HariantPlayer player) {
+            cancel = true;
+            
             final HeroInstance heroInstance = player.getHeroInstance();
             
             heroInstance.getOrigin().handleSwapHandItemsEvent(player, heroInstance, ev);
-        });
+        }
+        // Else if player is not in creative, cancel the event
+        else if (bukkitPlayer.getGameMode() != GameMode.CREATIVE) {
+            cancel = true;
+        }
+        
+        if (cancel) {
+            ev.setCancelled(true);
+        }
     }
     
     @EventHandler
     public void handleFoodLevelChangeEvent(FoodLevelChangeEvent ev) {
         ev.setCancelled(true);
-    }
-    
-    @EventHandler
-    public void handleBlockBreakEvent(BlockBreakEvent ev) {
-        if (ev.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ev.setCancelled(true);
-        }
-    }
-    
-    @EventHandler
-    public void handleBlockPlaceEvent(BlockPlaceEvent ev) {
-        if (ev.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ev.setCancelled(true);
-        }
     }
     
     @EventHandler
@@ -208,6 +202,11 @@ public final class PlayerHandler implements Listener {
         final boolean isCreative = player.getGameMode() == GameMode.CREATIVE;
         
         if (clickedBlock == null || isCreative) {
+            return;
+        }
+        
+        // While in-game, players are allowed to click at buttons/pressure plates
+        if (Hariant.entityExists(player.getUniqueId()) && isButtonOrPressurePlate(clickedBlock)) {
             return;
         }
         
@@ -275,7 +274,7 @@ public final class PlayerHandler implements Listener {
     }
     
     @EventHandler
-    public void handleHariantMonitorDamageEvent(HariantMonitorDamageEvent ev) {
+    public void handleHariantDamageEvent(HariantDamageEvent ev) {
         final DamageInstance damageInstance = ev.getDamageInstance();
         final DamageSource damageSource = damageInstance.getDamageSource();
         
@@ -316,6 +315,20 @@ public final class PlayerHandler implements Listener {
         }
         else if (entity instanceof HariantPlayer player && player.getSetting(Settings.COMBAT_FEEDBACK)) {
             this.sendHealingFeedback(player, healingSource, entity, healer, actualHealing, false);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void handleBlockBreakEvent(BlockBreakEvent ev) {
+        if (isDisallowedToBuild(ev.getPlayer())) {
+            ev.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void handleBlockPlaceEvent(BlockPlaceEvent ev) {
+        if (isDisallowedToBuild(ev.getPlayer())) {
+            ev.setCancelled(true);
         }
     }
     
@@ -386,6 +399,35 @@ public final class PlayerHandler implements Listener {
                         .append(Component.text("[", Colors.DARK_GRAY))
                         .append(component)
                         .append(Component.text("]", Colors.DARK_GRAY));
+    }
+    
+    private static boolean isDisallowedToBuild(@NotNull Player player) {
+        return player.getGameMode() != GameMode.CREATIVE;
+    }
+    
+    private static boolean isButtonOrPressurePlate(@NotNull Block block) {
+        // Pressures plates implement generic `Powerable` interface; buttons implement `Switch`,
+        // but so do levers... fuck me
+        return switch (block.getType()) {
+            case ACACIA_PRESSURE_PLATE,
+                 BAMBOO_PRESSURE_PLATE,
+                 BIRCH_PRESSURE_PLATE,
+                 CHERRY_PRESSURE_PLATE,
+                 CRIMSON_PRESSURE_PLATE,
+                 DARK_OAK_PRESSURE_PLATE,
+                 HEAVY_WEIGHTED_PRESSURE_PLATE,
+                 JUNGLE_PRESSURE_PLATE,
+                 LIGHT_WEIGHTED_PRESSURE_PLATE,
+                 MANGROVE_PRESSURE_PLATE,
+                 OAK_PRESSURE_PLATE,
+                 PALE_OAK_PRESSURE_PLATE,
+                 POLISHED_BLACKSTONE_PRESSURE_PLATE,
+                 SPRUCE_PRESSURE_PLATE,
+                 STONE_PRESSURE_PLATE,
+                 WARPED_PRESSURE_PLATE -> true;
+            case LEVER -> false;
+            default -> block.getBlockData() instanceof Switch;
+        };
     }
     
     private static class FeedbackBuilder implements ComponentLike {

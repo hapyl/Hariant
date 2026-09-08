@@ -67,7 +67,7 @@ public class WeaponRangeProjectileTypeRayCast extends WeaponRangeProjectileType 
             if (hitEntity != null) {
                 // Deal damage to the entity
                 final NormalAttack rangedAttack = weapon.getRangedAttack();
-                final DamageSource damageSource = rangedAttack.createDamageSource(player);
+                final DamageSource damageSource = rangedAttack.createDamageSource(player).build();
                 
                 hitEntity.damage(damageSource);
                 

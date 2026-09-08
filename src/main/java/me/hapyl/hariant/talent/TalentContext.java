@@ -4,11 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 public interface TalentContext {
     
-    @NotNull
-    <T> T retrieve(@NotNull Class<T> clazz);
+    <T> @NotNull T retrieve(@NotNull Class<T> clazz);
     
-    @NotNull
-    static TalentContext empty() {
+    static @NotNull TalentContext empty() {
         class Holder {
             private static final TalentContext EMPTY = new TalentContextImpl(new Object());
         }
@@ -16,8 +14,7 @@ public interface TalentContext {
         return Holder.EMPTY;
     }
     
-    @NotNull
-    static TalentContext create(@NotNull Object object) {
+    static @NotNull TalentContext create(@NotNull Object object) {
         return new TalentContextImpl(object);
     }
     

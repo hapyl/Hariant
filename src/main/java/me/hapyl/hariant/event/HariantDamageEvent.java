@@ -1,95 +1,23 @@
 package me.hapyl.hariant.event;
 
-import me.hapyl.eterna.module.component.Named;
-import me.hapyl.hariant.element.ElementType;
-import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.damage.*;
-import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
-import me.hapyl.hariant.util.Identified;
-import me.hapyl.hariant.util.decimal.Decimal;
-import net.kyori.adventure.text.Component;
-import org.bukkit.event.Cancellable;
+import me.hapyl.hariant.entity.damage.DamageInstance;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
-
-public class HariantDamageEvent extends HariantEvent implements Cancellable, DamageFlagged, MutatesDamage {
+/**
+ * Represents a damage event, which is called <b>after</b> the damage has been successfully dealt, regardless if entity has died or not.
+ *
+ * <p>
+ * This event exists purely for listening to the final outcome of the damage, and should not mutate the {@link DamageInstance}, as it does
+ * nothing for the damage and might break other listeners.
+ * </p>
+ */
+public class HariantDamageEvent extends AbstractHariantDamageEvent {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
-    private final DamageInstance damageInstance;
-    private @Nullable Cancel cancel;
-    
     public HariantDamageEvent(@NotNull DamageInstance damageInstance) {
-        this.damageInstance = damageInstance;
-    }
-    
-    public @NotNull DamageSource getDamageSource() {
-        return damageInstance.getDamageSource();
-    }
-    
-    public @NotNull HariantEntity getEntity() {
-        return damageInstance.getEntity();
-    }
-    
-    public @Nullable HariantEntity getAttacker() {
-        return damageInstance.getAttacker();
-    }
-    
-    public boolean isCritical() {
-        return damageInstance.isCritical();
-    }
-    
-    public @NotNull ElementType getElementType() {
-        return damageInstance.getDamageSource().getElementType();
-    }
-    
-    public @NotNull DamageType getDamageType() {
-        return damageInstance.getDamageSource().getDamageType();
-    }
-    
-    @Override
-    public @NotNull Set<? extends DamageFlag> getDamageFlags() {
-        return damageInstance.getDamageSource().getDamageFlags();
-    }
-    
-    @Override
-    public boolean isFlagged(@NotNull DamageFlag damageFlag) {
-        return damageInstance.getDamageSource().isFlagged(damageFlag);
-    }
-    
-    public double getDamage() {
-        return damageInstance.getDamage();
-    }
-    
-    @Override
-    public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final double value) {
-        damageInstance.mutateDamage(identity, mutator, value);
-    }
-    
-    @Override
-    public void mutateDamage(@NotNull Identified identity, @NotNull DamageMutator mutator, final @NotNull Decimal value) {
-        damageInstance.mutateDamage(identity, mutator, value);
-    }
-    
-    @Override
-    public boolean isCancelled() {
-        return cancel != null;
-    }
-    
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancel = cancel ? Cancel.INSTANCE : null;
-    }
-    
-    public @Nullable Cancel cancel() {
-        return cancel;
-    }
-    
-    public void cancel(@NotNull Cancel cancel) {
-        this.cancel = cancel;
+        super(damageInstance);
     }
     
     @Override
@@ -97,33 +25,8 @@ public class HariantDamageEvent extends HariantEvent implements Cancellable, Dam
         return HANDLER_LIST;
     }
     
-    public @NotNull static HandlerList getHandlerList() {
+    public static @NotNull HandlerList getHandlerList() {
         return HANDLER_LIST;
-    }
-    
-    public static @NotNull Cancel cancel(@NotNull Component name) {
-        return new Cancel(name);
-    }
-    
-    public static @NotNull Cancel cancel(@NotNull Named named) {
-        return cancel(named.getName());
-    }
-    
-    public static class Cancel implements Named {
-        
-        private static final Cancel INSTANCE = new Cancel(Component.empty());
-        
-        private final Component name;
-        
-        Cancel(@NotNull Component name) {
-            this.name = name;
-        }
-        
-        @Override
-        public @NotNull Component getName() {
-            return name;
-        }
-        
     }
     
 }

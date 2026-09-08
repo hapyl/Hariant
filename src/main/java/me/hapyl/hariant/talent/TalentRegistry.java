@@ -6,6 +6,7 @@ import me.hapyl.hariant.hero.blast_knight.TalentNaniteRush;
 import me.hapyl.hariant.hero.alchemist.*;
 import me.hapyl.hariant.hero.archer.*;
 import me.hapyl.hariant.hero.blast_knight.*;
+import me.hapyl.hariant.hero.bounty_hunter.*;
 import me.hapyl.hariant.hero.inferno.*;
 import me.hapyl.hariant.hero.mage.*;
 import me.hapyl.hariant.hero.nyx.*;
@@ -116,6 +117,15 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentReckoning RECKONING;
     public static final TalentMaintainOrder MAINTAIN_ORDER;
     
+    /**
+     * {@link HeroBountyHunter}
+     */
+    public static final TalentShorty SHORTY;
+    public static final TalentGrapple GRAPPLE;
+    public static final TalentBloodBounty BLOOD_BOUNTY;
+    public static final TalentSeverance SEVERANCE;
+    public static final TalentBackstabber BACKSTABBER;
+    
     // Private fields
     private static final StaticRegistryMap<Talent> REGISTRY;
     private static final TalentUltimate DUMMY_ULTIMATE;
@@ -183,15 +193,19 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         MALEVOLENT_HITSHIELD = REGISTRY.register("malevolent_hitshield", TalentMalevolentHitshield::new);
         RECKONING = REGISTRY.register("reckoning", TalentReckoning::new);
         MAINTAIN_ORDER = REGISTRY.register("maintain_order", TalentMaintainOrder::new);
+        
+        SHORTY = REGISTRY.register("shorty", TalentShorty::new);
+        GRAPPLE = REGISTRY.register("grapple", TalentGrapple::new);
+        BLOOD_BOUNTY = REGISTRY.register("blood_bounty", TalentBloodBounty::new);
+        SEVERANCE = REGISTRY.register("severance", TalentSeverance::new);
+        BACKSTABBER = REGISTRY.register("backstabber", TalentBackstabber::new);
     }
     
-    @NotNull
-    public static StaticRegistryMap<Talent> getRegistry() {
+    public static @NotNull StaticRegistryMap<Talent> getRegistry() {
         return REGISTRY;
     }
     
-    @NotNull
-    public static TalentUltimate dummyUltimate() {
+    public static @NotNull TalentUltimate dummyUltimate() {
         return DUMMY_ULTIMATE;
     }
     

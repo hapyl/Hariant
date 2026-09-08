@@ -39,7 +39,7 @@ public final class TalentQuantumDischarge extends Talent {
     
     private final @DisplayField AttributeScaling damagePerQuantumEnergyConsumed = AttributeScaling.create(AttributeType.ATTACK, 27);
     private final @DisplayField Decimal elementalApplicationPerQuantumEnergyConsumer = Decimal.ofElementalApplication(ElementType.AETHER, 40);
-    private final @DisplayField Decimal delayPerQuantumEnergyConsumed = Decimal.ofSeconds(0.2f);
+    private final @DisplayField Decimal delayPerQuantumEnergyConsumed = Decimal.ofSeconds(0.15f);
     
     private final @DisplayField Decimal novaExplosionKnockbackStrength = Decimal.ofValue(1.85);
     private final @DisplayField Decimal novaExplosionBoundingRadius = Decimal.ofValue(5);

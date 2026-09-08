@@ -5,6 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DamageSourceCreator {
     
-    @NotNull DamageSource createDamageSource(@NotNull HariantEntity attacker);
+    @NotNull DamageSource.Builder createDamageSource(@NotNull HariantEntity attacker);
     
 }

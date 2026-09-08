@@ -13,7 +13,6 @@ import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
-import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.term.EnumTerminology;
@@ -34,15 +33,14 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
     public static final Key HELLFIRE_AURA_MODIFIER_KEY = Key.ofString("hellfire_aura");
     public static final Component HELLFIRE_AURA_NAME = Component.text("Hellfire Aura");
     
-    private final @DisplayField Decimal fireResistanceReduction = Decimal.ofAttribute(AttributeType.FIRE_RESISTANCE, 20);
-    private final @DisplayField Decimal fireResistanceReductionDuration = Decimal.ofSeconds(6);
+    private final @DisplayField Decimal fireResistanceReduction = Decimal.ofAttribute(AttributeType.FIRE_RESISTANCE, 25);
+    private final @DisplayField Decimal fireResistanceReductionDuration = Decimal.ofSeconds(8);
     
     private final @DisplayField Decimal hellfireAuraRadius = Decimal.ofValue(3);
     
     private final @DisplayField Decimal repeatWindow = Decimal.ofSeconds(5);
-    private final @DisplayField Decimal repeatMultiplier = Decimal.ofPercentage(30);
+    private final @DisplayField Decimal repeatMultiplier = Decimal.ofPercentage(50);
     private final @DisplayField Decimal repeatRadius = Decimal.ofValue(3);
-    
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.create(
             Key.ofString("repeat"),
@@ -56,15 +54,13 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
         setTalentType(TalentType.DAMAGE);
     }
     
-    @NotNull
     @Override
-    public InfernoDemonEntity newInstance(@NotNull HariantPlayer player, InfernoDemonType infernoDemonType) {
+    public @NotNull InfernoDemonEntity newInstance(@NotNull HariantPlayer player, InfernoDemonType infernoDemonType) {
         return new InfernoDemonEntityTyphoeus(player);
     }
     
-    @NotNull
     @Override
-    public Component describeAbility() {
+    public @NotNull Component describeAbility() {
         return Component.empty()
                         .append(Component.text("Radiates a hellfire aura that reduces "))
                         .append(AttributeType.FIRE_RESISTANCE)
@@ -77,9 +73,8 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
                         .append(Component.text("."));
     }
     
-    @NotNull
     @Override
-    public Component describeReform() {
+    public @NotNull Component describeReform() {
         return Component.empty()
                         .append(Component.text("Repeat the "))
                         .append(Component.text("DMG", Colors.DARK_RED))
@@ -92,32 +87,17 @@ public final class TalentDemonsplitTyphoeus extends TalentDemonsplit implements 
                         .append(Component.text("."));
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void handleHariantDamageEvent(HariantDamageEvent ev) {
-        final HariantEntity attacker = ev.getAttacker();
-        
-        if (!(attacker instanceof HariantPlayer player)) {
+        if (!(demonEntityFromDamageEventOrNull(ev) instanceof InfernoDemonEntityTyphoeus typhoeus)) {
             return;
         }
         
-        if (!player.getHero().equals(HeroRegistry.INFERNO)) {
-            return;
-        }
-        
-        if (ev.getDamageType() != DamageType.MELEE) {
-            return;
-        }
-        
-        player.touchHeroData(HeroRegistry.INFERNO, HeroDataInferno.class, data -> {
-            if (!(data.currentDemon instanceof InfernoDemonEntityTyphoeus typhoeus)) {
-                return;
-            }
-            
-            typhoeus.damageDealt.add(new TyphoeusDamageData(ev.getDamage(), System.currentTimeMillis()));
-        });
+        typhoeus.damageDealt.add(new TyphoeusDamageData(ev.getDamage(), System.currentTimeMillis()));
     }
     
     public class InfernoDemonEntityTyphoeus extends InfernoDemonEntity {
+        
         private final Set<TyphoeusDamageData> damageDealt;
         
         InfernoDemonEntityTyphoeus(@NotNull HariantPlayer player) {

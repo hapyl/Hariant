@@ -52,7 +52,7 @@ public class WinResult {
         
         return teamPlacements.entrySet()
                              .stream()
-                             .sorted(Map.Entry.comparingByKey())
+                             .sorted(Map.Entry.comparingByValue())
                              .map(entry -> {
                                  final EnumTeam team = entry.getKey();
                                  final Placement placement = entry.getValue();

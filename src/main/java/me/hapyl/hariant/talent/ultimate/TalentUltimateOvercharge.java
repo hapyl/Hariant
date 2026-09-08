@@ -131,7 +131,7 @@ public abstract class TalentUltimateOvercharge extends TalentUltimate {
     protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
         super.initAttributeFields(attributeFields);
         
-        attributeFields.add(new DisplayFieldInstance(
+        attributeFields.add(DisplayFieldInstance.create(
                 getUltimateResourceType().getName().append(Component.text(" Overcharge Cost")),
                 Component.text("%.0f".formatted(overchargeCost))
         ));

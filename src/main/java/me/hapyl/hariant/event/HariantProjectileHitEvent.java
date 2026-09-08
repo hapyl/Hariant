@@ -12,16 +12,24 @@ public class HariantProjectileHitEvent extends HariantEvent implements Cancellab
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
+    private final HariantProjectile projectile;
     private final HariantEntity entity;
     private final Block block;
-    private final HariantProjectile projectile;
     
     private boolean cancel;
     
-    public HariantProjectileHitEvent(@Nullable HariantEntity entity, @Nullable Block block, @NotNull HariantProjectile projectile) {
+    public HariantProjectileHitEvent(@NotNull HariantProjectile projectile, @Nullable HariantEntity entity, @Nullable Block block) {
         this.entity = entity;
         this.block = block;
         this.projectile = projectile;
+    }
+    
+    public @NotNull HariantEntity getShooter() {
+        return projectile.getShooter();
+    }
+    
+    public @NotNull HariantProjectile getProjectile() {
+        return projectile;
     }
     
     public @Nullable HariantEntity getEntity() {
@@ -30,10 +38,6 @@ public class HariantProjectileHitEvent extends HariantEvent implements Cancellab
     
     public @Nullable Block getBlock() {
         return block;
-    }
-    
-    public @NotNull HariantProjectile getProjectile() {
-        return projectile;
     }
     
     @Override

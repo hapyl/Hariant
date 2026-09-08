@@ -26,9 +26,13 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TalentLastLaugh extends TalentPassive implements Listener {
     
-    @DisplayField private final BaseChance chance = BaseChance.baseChance(1);
+    private final @DisplayField BaseChance chance = BaseChance.baseChance(1);
     
-    private final DeathMessage deathMessage = DeathMessage.create("{player} was trolled to death [by {killer}]");
+    private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
+            this,
+            Key.ofString("last_laugh_damage_source"),
+            DeathMessage.create("{player} was trolled to death [by {killer}]")
+    );
     
     public TalentLastLaugh(@NotNull Key key) {
         super(key, Component.text("Last Laugh"), Icon.ofMaterial(Material.BLAZE_POWDER));
@@ -65,7 +69,7 @@ public final class TalentLastLaugh extends TalentPassive implements Listener {
         
         final HariantEntity entity = ev.getEntity();
         
-        entity.die(DamageSource.death(DamageSourceIdentity.create(this, deathMessage)).source(player).build());
+        entity.die(DamageSource.death(damageSourceIdentity, player));
         
         // Progress achievement
         AchievementRegistry.TROLL_LAUGHING_OUT_LOUD.progress(player.getProfile());
@@ -73,7 +77,7 @@ public final class TalentLastLaugh extends TalentPassive implements Listener {
         // Fx
         player.playWorldSound(Sound.ENTITY_EVOKER_PREPARE_WOLOLO, 2.0f);
         
-        FireworkHelper.explode(entity.getMidpointLocation(), meta -> {
+        FireworkHelper.detonate(entity.getMidpointLocation(), meta -> {
             meta.setPower(1);
             meta.addEffect(
                     FireworkEffect.builder()

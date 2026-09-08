@@ -4,7 +4,6 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.event.HariantGameInstanceStateEvent;
-import me.hapyl.hariant.game.GameInstance;
 import me.hapyl.hariant.game.GameInstanceState;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -55,6 +54,9 @@ public class DatabaseSyncer implements Runnable, Listener {
         Hariant.getPlayerProfiles().forEach(profile -> {
             profile.getDatabase().save();
         });
+        
+        // Also sync config
+        Hariant.getPlugin().config().saveToFile();
         
         // Cannot throw
         final long millisTookToSync = System.currentTimeMillis() - startSyncAt;

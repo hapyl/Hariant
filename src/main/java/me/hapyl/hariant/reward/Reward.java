@@ -16,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Reward extends Keyed, Named {
     
+    @NotNull Component SEPARATOR = Component.text(" × ", Colors.DARK_GRAY);
+    
     @Override
     @NotNull Key getKey();
     
@@ -23,7 +25,7 @@ public interface Reward extends Keyed, Named {
     @NotNull Component getName();
     
     @ApiStatus.OverrideOnly
-    Adder<? extends AbstractItem, ?> reward(@NotNull PlayerProfile profile);
+    @NotNull Adder<? extends AbstractItem, ?> reward(@NotNull PlayerProfile profile);
     
     default int priority() {
         return 0;

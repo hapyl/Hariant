@@ -216,7 +216,7 @@ public abstract class TalentUltimate extends Talent implements Duration {
     protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
         super.initAttributeFields(attributeFields);
         
-        attributeFields.add(new DisplayFieldInstance(
+        attributeFields.add(DisplayFieldInstance.create(
                 ultimateResourceType.getName().append(Component.text(" Cost")),
                 Component.text("%.0f".formatted(cost))
         ));

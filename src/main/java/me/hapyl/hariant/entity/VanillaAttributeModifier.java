@@ -41,8 +41,7 @@ public final class VanillaAttributeModifier {
     }
     
     public enum Operation {
-        FLAT(AttributeModifier.Operation.ADD_NUMBER),
-        ADDITIVE(AttributeModifier.Operation.ADD_SCALAR),
+        ADDITIVE(AttributeModifier.Operation.ADD_NUMBER),
         MULTIPLICATIVE(AttributeModifier.Operation.MULTIPLY_SCALAR_1);
         
         private final AttributeModifier.Operation bukkit;
@@ -63,7 +62,7 @@ public final class VanillaAttributeModifier {
         Builder(@NotNull Key key, @NotNull Attribute attribute) {
             this.key = key;
             this.attribute = attribute;
-            this.operation = Operation.FLAT;
+            this.operation = Operation.ADDITIVE;
             this.value = 0;
         }
         
