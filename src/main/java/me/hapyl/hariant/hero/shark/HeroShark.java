@@ -37,7 +37,7 @@ public final class HeroShark extends Hero {
         profile.setElementType(ElementType.WATER);
         profile.setArchetype(Archetype.DAMAGE);
         profile.setGender(Gender.FEMALE);
-        profile.setRace(Race.SHARK);
+        profile.setRace(Race.AETHERION);
         
         final HeroEquipment equipment = getEquipment();
         equipment.setHeadTexture("3447e7e8271f573969f2da734c4125f93b2864fb51db69da5ecba7487cf882b0");

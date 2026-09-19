@@ -10,7 +10,7 @@ public final class ItemArtifactCuirass extends ItemArtifact {
     public ItemArtifactCuirass(@NotNull Key key) {
         super(
                 key,
-                Icon.ofTemporaryTexture(),
+                Icon.ofTexture("bdb218b8f6a29f87fae6381173eb70f8872bffab706c78b80fa6bda937a86c6b"),
                 ArtifactSetRegistry.BULWARK,
                 Component.text("Kingdom's Cuirass"),
                 Component.text("A piece of advanced heavy armor issued by the Kingdom.")

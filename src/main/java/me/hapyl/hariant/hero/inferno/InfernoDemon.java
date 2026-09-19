@@ -6,11 +6,11 @@ import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.Pet;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.util.TickDuration;
+import me.hapyl.hariant.util.TickingDown;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
-public interface InfernoDemon extends Pet, Removable, TickDuration {
+public interface InfernoDemon extends Pet, Removable, TickingDown {
     
     @NotNull InfernoDemonType getDemonType();
     

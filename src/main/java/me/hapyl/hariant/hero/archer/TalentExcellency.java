@@ -13,7 +13,7 @@ import me.hapyl.hariant.event.HariantHealthChangeEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.hero.pytaria.HeroDataPytaria;
 import me.hapyl.hariant.talent.TalentPassive;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;

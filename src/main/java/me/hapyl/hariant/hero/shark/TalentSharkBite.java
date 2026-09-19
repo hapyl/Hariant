@@ -16,7 +16,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
@@ -127,7 +127,7 @@ public final class TalentSharkBite extends Talent {
         private void bite(@NotNull Stream<? extends HariantEntity> entities) {
             entities.forEach(entity -> {
                 entity.damage(damageSource);
-                entity.triggerAnomaly(new SharkBiteAnomalySource(player));
+                entity.triggerAnomaly(new SharkBiteAnomalySource(player), true);
             });
         }
         

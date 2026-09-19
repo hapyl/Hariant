@@ -9,7 +9,7 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayFieldInstance;
+import me.hapyl.hariant.util.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.executor.Executable;
 import me.hapyl.hariant.util.Icon;
@@ -128,8 +128,8 @@ public abstract class TalentUltimateOvercharge extends TalentUltimate {
     }
     
     @Override
-    protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
-        super.initAttributeFields(attributeFields);
+    public void initDisplayFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
+        super.initDisplayFields(attributeFields);
         
         attributeFields.add(DisplayFieldInstance.create(
                 getUltimateResourceType().getName().append(Component.text(" Overcharge Cost")),

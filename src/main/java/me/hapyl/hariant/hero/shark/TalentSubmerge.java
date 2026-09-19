@@ -1,8 +1,6 @@
 package me.hapyl.hariant.hero.shark;
 
-import me.hapyl.eterna.module.block.display.BDEngine;
 import me.hapyl.eterna.module.block.display.DisplayEntity;
-import me.hapyl.eterna.module.block.display.DisplayModel;
 import me.hapyl.eterna.module.component.Keybind;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
@@ -22,11 +20,12 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.Icon;
+import me.hapyl.hariant.util.Models;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -55,10 +54,6 @@ public final class  TalentSubmerge extends Talent {
     private final @DisplayField Decimal radius = Decimal.ofValue(0.8);
     private final @DisplayField Decimal damagePeriod = Decimal.ofSeconds(0.5f);
     private final @DisplayField Decimal knockbackStrength = Decimal.ofValue(0.6);
-    
-    private final DisplayModel model = BDEngine.parse(
-            "/summon block_display ~-0.5 ~ ~-0.5 {Passengers:[{id:\"minecraft:item_display\",item:{id:\"minecraft:prismarine_shard\",Count:1},item_display:\"none\",transformation:[0f,0f,1f,0f,0.8660254038f,0.5f,0f,0.3125f,-0.5f,0.8660254038f,0f,0.0625f,0f,0f,0f,1f]}]}"
-    );
     
     private final List<? extends VanillaAttributeModifier> vanillaModifiers = List.of(
             VanillaAttributeModifier.create(Key.ofString("submerge_scale"), Attribute.SCALE, VanillaAttributeModifier.Operation.ADDITIVE, -100),
@@ -127,7 +122,7 @@ public final class  TalentSubmerge extends Talent {
             super(Scheduler.ofTimer());
             
             this.player = player;
-            this.displayEntity = model.spawnInterpolated(player.getLocation());
+            this.displayEntity = Models.SHARK_FIN.spawn(player.getLocation());
             this.damageSource = new SubmergeDamageSource(player, damage.getScaledValue(player));
             
             // Prepare player

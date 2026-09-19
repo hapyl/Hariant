@@ -1,6 +1,5 @@
 package me.hapyl.hariant.talent;
 
-import com.google.common.collect.Lists;
 import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
@@ -20,21 +19,21 @@ import me.hapyl.hariant.entity.player.LifecyclePlayer;
 import me.hapyl.hariant.event.HariantTalentEvent;
 import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import me.hapyl.hariant.inventory.item.ItemCreator;
+import me.hapyl.hariant.inventory.item.ItemDetailsCreator;
 import me.hapyl.hariant.profile.setting.Settings;
 import me.hapyl.hariant.registry.Registrable;
-import me.hapyl.hariant.talent.field.DisplayField;
-import me.hapyl.hariant.talent.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
-import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.util.Duration;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.Identified;
+import me.hapyl.hariant.util.field.DisplayFieldInstance;
+import me.hapyl.hariant.util.field.DisplayFieldProvider;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.IntFunction;
@@ -46,15 +45,15 @@ public abstract class Talent
         implements
         Named, Described, Keyed, ItemCreator,
         Registrable, HariantCooldown, Duration, Identified,
-        LifecyclePlayer, SmallCapsLike {
-    
-    private final List<DisplayFieldInstance> attributeFields;
+        LifecyclePlayer, SmallCapsLike, DisplayFieldProvider, ItemDetailsCreator {
     
     private final Key key;
     private final Component name;
     private final String identity;
     private final Icon icon;
     private final Component smallCaps;
+    
+    private @Unmodifiable List<DisplayFieldInstance> displayFields;
     
     private @NotNull Component description;
     private @NotNull TalentType talentType;
@@ -69,8 +68,8 @@ public abstract class Talent
         this.icon = icon;
         this.description = Described.defaultValue();
         this.talentType = TalentType.DAMAGE;
-        this.attributeFields = Lists.newArrayList();
         this.smallCaps = SmallCapsLike.asSmallCaps(name);
+        this.displayFields = List.of();
         
         AutoRegisteredListener.Registry.register(this);
         StrictNamingConvention.Validator.validate(this);
@@ -81,20 +80,17 @@ public abstract class Talent
         return smallCaps;
     }
     
-    @NotNull
     @Override
-    public String identify() {
+    public @NotNull String identify() {
         return identity;
     }
     
-    @NotNull
-    public Icon getIcon() {
+    public @NotNull Icon getIcon() {
         return icon;
     }
     
-    @NotNull
     @Override
-    public Key getCooldownKey() {
+    public @NotNull Key getCooldownKey() {
         return key;
     }
     
@@ -109,6 +105,11 @@ public abstract class Talent
     }
     
     @Override
+    public @NotNull Component asComponent() {
+        return name.color(Colors.GOLD);
+    }
+    
+    @Override
     public int getDuration() {
         return duration;
     }
@@ -119,8 +120,7 @@ public abstract class Talent
     }
     
     @Override
-    @NotNull
-    public ItemBuilder createBuilder() {
+    public @NotNull ItemBuilder createBuilder() {
         final ItemBuilder builder = icon.createBuilder();
         
         // Set the cooldown key for display purposes
@@ -138,27 +138,24 @@ public abstract class Talent
         return builder;
     }
     
-    @NotNull
-    public ItemBuilder createDetailsBuilder() {
+    @Override
+    public @NotNull ItemBuilder createDetailsBuilder() {
         final ItemBuilder builder = icon.createBuilder();
         
         builder.setName(getName());
-        
         builder.addLore(Component.text("Details", Colors.DARK_GRAY));
-        builder.addLore();
         
         // Append talent type description
+        builder.addLore();
         builder.addLore(this.talentType.getName().color(Colors.GOLD));
         builder.addWrappedLore(this.talentType.getDescription(), HariantConstants.COMPONENT_STYLER_DESCRIPTION_PADDING_2);
-        builder.addLore();
         
-        // Append attribute fields
-        if (!attributeFields.isEmpty()) {
+        // Append display fields
+        if (!displayFields.isEmpty()) {
+            builder.addLore();
             builder.addLore(Component.text("Attributes", Colors.GOLD));
             
-            attributeFields.forEach(instance -> {
-                builder.addLore(instance.asComponent());
-            });
+            displayFields.forEach(instance -> builder.addLore(instance.asComponent()));
         }
         
         return builder;
@@ -167,11 +164,7 @@ public abstract class Talent
     @OverridingMethodsMustInvokeSuper
     @Override
     public void onRegister() {
-        this.initAttributeFields0();
-    }
-    
-    @Override
-    public void onUnregister() {
+        this.displayFields = DisplayFieldInstance.parse(this);
     }
     
     @Override
@@ -183,19 +176,12 @@ public abstract class Talent
     }
     
     @Override
-    public @NotNull Component asComponent() {
-        return name.color(Colors.GOLD);
-    }
-    
-    @NotNull
-    @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return name;
     }
     
-    @NotNull
     @Override
-    public Component getDescription() {
+    public @NotNull Component getDescription() {
         return description;
     }
     
@@ -204,8 +190,7 @@ public abstract class Talent
         this.description = description;
     }
     
-    @NotNull
-    public TalentType getTalentType() {
+    public @NotNull TalentType getTalentType() {
         return talentType;
     }
     
@@ -214,8 +199,7 @@ public abstract class Talent
     }
     
     @Override
-    @NotNull
-    public final Key getKey() {
+    public final @NotNull Key getKey() {
         return key;
     }
     
@@ -234,11 +218,9 @@ public abstract class Talent
         return Objects.equals(this.key, that.key);
     }
     
-    @NotNull
-    public abstract TalentTarget target(@NotNull HariantPlayer player);
+    public abstract @NotNull TalentTarget target(@NotNull HariantPlayer player);
     
-    @NotNull
-    public abstract Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context);
+    public abstract @NotNull Response execute(@NotNull HariantPlayer player, @NotNull TalentContext context);
     
     public boolean respectCooldown() {
         return true;
@@ -311,18 +293,16 @@ public abstract class Talent
         return true;
     }
     
-    @NotNull
-    public String getTalentClassName() {
+    public @NotNull String getTalentClassName() {
         return "Talent";
     }
     
-    @NotNull
-    public final Component getTalentTypeWithClassName() {
+    public final @NotNull Component getTalentTypeWithClassName() {
         return talentType.getName().appendSpace().append(Component.text(this.getTalentClassName()));
     }
     
     @OverridingMethodsMustInvokeSuper
-    protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
+    public void initDisplayFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
         if (cooldown > 0) {
             attributeFields.add(DisplayFieldInstance.create(Component.text("Cooldown"), this.getCooldownFormatted()));
         }
@@ -332,86 +312,10 @@ public abstract class Talent
         }
     }
     
-    private void initAttributeFields0() {
-        if (!attributeFields.isEmpty()) {
-            throw new IllegalStateException("Attribute fields already initiated!");
-        }
-        
-        this.initAttributeFields(attributeFields);
-        
-        try {
-            for (Class<?> clazz : getClassHierarchyReversed()) {
-                for (Field field : clazz.getDeclaredFields()) {
-                    final DisplayField displayField = field.getAnnotation(DisplayField.class);
-                    
-                    if (displayField == null) {
-                        continue;
-                    }
-                    
-                    field.setAccessible(true);
-                    final Object fieldValue = field.get(this);
-                    
-                    if (!(fieldValue instanceof ComponentFormatter formatter)) {
-                        throw new IllegalArgumentException("Display field %s (%s) in %s must implement %s!".formatted(field.getName(), field.getType().getSimpleName(), clazz.getSimpleName(), ComponentFormatter.class.getSimpleName()));
-                    }
-                    
-                    final String fieldName = !displayField.name().isEmpty() ? displayField.name() : formatFieldName(field);
-                    
-                    attributeFields.add(DisplayFieldInstance.create(Component.text(fieldName), formatter.format()));
-                }
-            }
-        }
-        catch (IllegalAccessException e) {
-            throw new RuntimeException("Error parsing attribute fields in %s: %s".formatted(this.getClass().getSimpleName(), e.getMessage()), e);
-        }
-    }
-    
-    private @NotNull List<Class<?>> getClassHierarchyReversed() {
-        final List<Class<?>> hierarchy = Lists.newArrayList();
-        Class<?> clazz = this.getClass();
-        
-        while (clazz != Talent.class) {
-            hierarchy.addFirst(clazz);
-            clazz = clazz.getSuperclass();
-        }
-        
-        return hierarchy;
-    }
-    
     public static @NotNull List<? extends Component> createSubloreComponent(@NotNull IntFunction<Component> prefixSupplier, @NotNull Component... components) {
         return IntStream.range(0, components.length)
                         .mapToObj(i -> prefixSupplier.apply(i).append(components[i]))
                         .toList();
-    }
-    
-    private static @NotNull String formatFieldName(@NotNull Field field) {
-        final String fieldName = field.getName();
-        final StringBuilder builder = new StringBuilder();
-        
-        final int length = fieldName.length();
-        
-        for (int i = 0; i < length; i++) {
-            final char ch = fieldName.charAt(i);
-            
-            // First char is always uppercase
-            if (i == 0) {
-                builder.append(Character.toUpperCase(ch));
-            }
-            else {
-                builder.append(ch);
-                
-                // If there is a next char, and it's either uppercase or a digit, append a space
-                if (i + 1 < length) {
-                    final char nextCh = fieldName.charAt(i + 1);
-                    
-                    if (Character.isUpperCase(nextCh) || Character.isDigit(nextCh)) {
-                        builder.append(" ");
-                    }
-                }
-            }
-        }
-        
-        return builder.toString();
     }
     
 }

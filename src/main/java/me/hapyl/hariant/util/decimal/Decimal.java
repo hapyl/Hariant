@@ -202,6 +202,10 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
      * A static factory method for creating a {@link Decimal} that holds a scaled value for entity velocity, which upon applying it,
      * the entity will travel the designed blocks per second.
      *
+     * <p>
+     * Note that values above {@code 20} might cause collision checks to pass through block corners, since you'd be adding {@code 20 * 0.05 = 1} to vector every tick.
+     * </p>
+     *
      * @param blocksPerSecond - The number of blocks per second to travel.
      * @return a new decimal.
      */

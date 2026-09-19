@@ -12,7 +12,7 @@ import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
@@ -82,7 +82,8 @@ public final class TalentAlchemistPotionExplosion extends TalentAlchemistPotion 
         @Override
         public boolean tick() {
             super.tick();
-            final Stream<HariantEntity> entities = this.collectNearbyEntities(radius).filter(player::canAffect);
+            
+            final Stream<? extends HariantEntity> entities = this.collectNearbyEntities(radius).filter(player::canAffect);
             
             if (currentTick() == 0) {
                 final KnockbackSource knockbackSource = KnockbackSource.create(player, knockbackStrength.doubleValue());

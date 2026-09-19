@@ -1,6 +1,7 @@
 package me.hapyl.hariant.element.anomaly;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
@@ -23,11 +24,12 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
     
     private final Key attributeKey = Key.ofString("anomaly_intangibility");
     
-    private final Decimal damagePercentOfMaxHealth = Decimal.ofPercentage(5);
-    private final double damageAdditional = 35;
+    private final AttributeScaling damage = AttributeScaling.create(AttributeType.MAX_HEALTH, 5, 35);
     
     private final Decimal resistanceReduction = Decimal.ofValue(40, DecimalFormat.PERCENTAGE);
     private final Decimal resistanceReductionDuration = Decimal.ofSeconds(10);
+    
+    private final int duration = 30;
     
     private final DamageSourceIdentity damageIdentity = DamageSourceIdentity.create(
             Key.ofString("intangibility_damage_source"),
@@ -36,16 +38,14 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
     );
     
     ElementalAnomalyIntangibility() {
-        super(Key.ofString("intangibility"), Component.text("Intangibility"), ElementType.AETHER);
+        super(Key.ofString("intangibility"), ElementType.AETHER, Component.text("Intangibility"), new ElementalPotency(0.8, 0.2));
         
         this.setDescription(
                 Component.empty()
                          .append(Component.text("Causes the affected entity to drift from the plane of reality, taking "))
                          .append(ElementType.AETHER.asComponentDamage())
                          .append(Component.text(" equal to "))
-                         .append(damagePercentOfMaxHealth)
-                         .append(Component.text(" of their "))
-                         .append(AttributeType.MAX_HEALTH)
+                         .append(damage)
                          .append(Component.text(" and reduces "))
                          .append(EnumTerminology.ALL_TYPE_RESISTANCE)
                          .append(Component.text(" by "))
@@ -56,32 +56,34 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
         );
     }
     
-    public double calculateDamage(@NotNull HariantEntity entity) {
-        final double maxHealth = entity.getMaxHealth();
-        
-        return damagePercentOfMaxHealth.doubleValue() * maxHealth + damageAdditional;
+    @Override
+    public @NotNull ElementalAnomalyInstance newInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source) {
+        return new ElementalAnomalyIntangibilityInstance(anomalySource, entity, source);
     }
     
-    @Override
-    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
-        // Deal damage
-        final HariantEntity source = anomalySource.getSource();
-        final DamageResult damageResult = entity.damage(new IntangibilityDamageSource(source, calculateDamage(entity), anomalySource));
+    public class ElementalAnomalyIntangibilityInstance extends ElementalAnomalyInstance {
         
-        // If the entity has died after taking the damage, don't add the modifier
-        if (damageResult == DamageResult.DEAD) {
-            return;
+        ElementalAnomalyIntangibilityInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source) {
+            super(anomalySource, entity, source, duration);
         }
         
-        entity.getAttributes().addModifier(new ElementalAnomalyIntangibilityModifier(source != null ? source : entity));
-    }
-    
-    @Override
-    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
-        return entity.getAttributes().hasModifier(attributeKey);
+        @Override
+        public void onStart() {
+            super.onStart();
+            
+            // Deal damage based on entity max hp
+            if (entity.damage(new IntangibilityDamageSource(source, damage.getScaledValue(entity), anomalySource)) == DamageResult.DEAD) {
+                return;
+            }
+            
+            // If entity survived, apply modifier
+            entity.getAttributes().addModifier(new ElementalAnomalyIntangibilityModifier(source != null ? source : entity));
+        }
+        
     }
     
     public class ElementalAnomalyIntangibilityModifier extends AttributeModifier {
+        
         ElementalAnomalyIntangibilityModifier(@NotNull HariantEntity applier) {
             super(attributeKey, ElementalAnomalyIntangibility.this.getName(), applier, resistanceReductionDuration.intValue());
             
@@ -91,6 +93,7 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
         @Override
         public void display(@NotNull Location location) {
         }
+        
     }
     
     public class IntangibilityDamageSource extends DamageSourceImpl {
@@ -99,6 +102,7 @@ public final class ElementalAnomalyIntangibility extends ElementalAnomalyImpl {
         
         IntangibilityDamageSource(@Nullable HariantEntity source, double damage, @NotNull ElementalAnomalySource anomalySource) {
             super(damageIdentity, source, DamageType.ANOMALY, ElementType.AETHER, DamageComponents.ofAnomaly(), Set.of(), damage, 0);
+            
             this.anomalySource = anomalySource;
         }
         

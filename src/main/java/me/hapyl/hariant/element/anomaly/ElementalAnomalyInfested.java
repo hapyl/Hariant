@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.attribute.Attributable;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
@@ -14,7 +15,6 @@ import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
-import me.hapyl.hariant.talent.field.DisplayField;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.decimal.Decimal;
@@ -29,8 +29,8 @@ import java.util.Set;
 
 public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     
-    private final @DisplayField Decimal defenseReduction = Decimal.ofPercentage(40);
-    private final @DisplayField Decimal defenseReductionDuration = Decimal.ofSeconds(10);
+    private final Decimal defenseReduction = Decimal.ofPercentage(40);
+    private final Decimal defenseReductionDuration = Decimal.ofSeconds(10);
     
     private final int cloudDuration = Tick.fromSeconds(8);
     private final int cloudDamagePeriod = 15;
@@ -45,7 +45,7 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     );
     
     ElementalAnomalyInfested() {
-        super(Key.ofString("infested"), Component.text("Infested"), ElementType.TOXIC);
+        super(Key.ofString("infested"), ElementType.TOXIC, Component.text("Infested"), new ElementalPotency(1, 0.15));
         
         setDescription(
                 Component.empty()
@@ -67,47 +67,60 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
-        final HariantEntity source = anomalySource.getSource();
+    public @NotNull ElementalAnomalyInstance newInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source) {
+        final int duration = this.calculateDuration(source);
+        final double damage = this.calculateDamage(source);
         
-        // Calculate cloud duration and damage
-        final int duration = calculateDuration(source);
-        final double damage = calculateDamage(source);
-        
-        new InfestedCloud(entity, source, duration, new InfestedDamageSource(source != null ? source : entity, damage));
+        return new ElementalAnomalyInfestedInstance(anomalySource, entity, source, duration, damage);
     }
     
-    @Override
-    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
-        return false;
-    }
-    
-    public int calculateDuration(@Nullable HariantEntity source) {
-        if (source == null) {
+    public int calculateDuration(@Nullable Attributable attributable) {
+        if (attributable == null) {
             return cloudDuration;
         }
         
-        final double elementalMastery = source.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
+        final double elementalMastery = attributable.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
         
         return (int) (cloudDuration * (1 + elementalMastery / 1000));
     }
     
-    public double calculateDamage(@Nullable HariantEntity source) {
-        if (source == null) {
+    public double calculateDamage(@Nullable Attributable attributable) {
+        if (attributable == null) {
             return cloudDamage;
         }
         
-        final double elementalMastery = source.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
+        final double elementalMastery = attributable.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
         
         return cloudDamage * (1 + elementalMastery / 50);
     }
     
+    public class ElementalAnomalyInfestedInstance extends ElementalAnomalyInstance {
+        
+        private final DamageSource damageSource;
+        
+        ElementalAnomalyInfestedInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source, int duration, double damage) {
+            super(anomalySource, entity, source, duration);
+            
+            this.damageSource = new InfestedDamageSource(source != null ? source : entity, damage);
+        }
+        
+        @Override
+        public void onStart() {
+            super.onStart();
+            
+            new InfestedCloud(entity, source, duration(), damageSource);
+        }
+        
+    }
+    
     public class AttributeModifierInfested extends AttributeModifier {
+        
         AttributeModifierInfested(@NotNull HariantEntity applier) {
             super(ElementalAnomalyInfested.this.getKey(), ElementalAnomalyInfested.this.getName(), applier, defenseReductionDuration.intValue());
             
             of(AttributeType.DEFENSE, AttributeModifierType.ADDITIVE, -defenseReduction.doubleValue());
         }
+        
     }
     
     private class InfestedDamageSource extends DamageSourceImpl {
@@ -117,9 +130,12 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
         InfestedDamageSource(@NotNull HariantEntity source, double damage) {
             super(damageSourceIdentity, source, DamageType.ANOMALY, ElementType.TOXIC, DamageComponents.ofAnomaly(), DAMAGE_FLAGS, damage, 0);
         }
+        
     }
     
     private class InfestedCloud extends HariantTickingTask implements EntityCollector {
+        
+        private static final Particle.DustTransition DUST_TRANSITION = new Particle.DustTransition(Color.fromRGB(161, 237, 128), Color.fromRGB(40, 125, 4), 1);
         
         private final HariantEntity entity;
         private final Location location;
@@ -184,18 +200,7 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
         }
         
         private void drawParticle(@NotNull Location location) {
-            entity.spawnWorldParticle(
-                    location,
-                    Particle.DUST_COLOR_TRANSITION,
-                    10,
-                    0, 0, 0,
-                    0.25f,
-                    new Particle.DustTransition(
-                            Color.fromRGB(161, 237, 128),
-                            Color.fromRGB(40, 125, 4),
-                            1
-                    )
-            );
+            entity.spawnWorldParticle(location, Particle.DUST_COLOR_TRANSITION, 10, 0, 0, 0, 0.25f, DUST_TRANSITION);
         }
         
     }

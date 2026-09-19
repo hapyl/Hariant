@@ -52,7 +52,7 @@ import java.util.stream.Stream;
 public final class Hariant implements Runnable, Lifecycle {
     
     public static final Component GAME_NAME = Component.text("ʜᴀʀɪᴀɴᴛ", Colors.BRAND_COLOR, TextDecoration.BOLD);
-    public static final Component UPDATE_TOPIC = Component.text("👽 Alien Invasion!", Colors.ALIEN);
+    public static final Component UPDATE_TOPIC = Component.text("\uD83D\uDC79 Orc Invasion!?", Colors.ORC);
     
     public static final World WORLD = Objects.requireNonNull(Bukkit.getWorlds().getFirst(), "Unloaded world!");
     

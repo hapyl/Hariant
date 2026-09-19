@@ -142,9 +142,4 @@ public abstract class AbstractItem implements Keyed, Named, Described, FlavorTex
     public void onRegister() {
     }
     
-    @Override
-    public final void onUnregister() {
-        throw new IllegalStateException("Cannot unregister %s!".formatted(this.getClass().getSimpleName()));
-    }
-    
 }

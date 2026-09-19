@@ -29,7 +29,6 @@ public final class HeroBountyHunter extends Hero {
         profile.setAffiliation(Affiliation.MERCENARIES);
         profile.setElementType(ElementType.PHYSICAL);
         profile.setGender(Gender.FEMALE);
-        profile.setRace(Race.HUMAN);
         
         final HeroEquipment equipment = getEquipment();
         equipment.setHeadTexture("cf4f866f1432f324e31b0a502e6e9ebccd7a66f474f1ca9cb0cfab879ea22ce0");

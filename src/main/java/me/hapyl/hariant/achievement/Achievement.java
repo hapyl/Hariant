@@ -51,9 +51,6 @@ public interface Achievement extends Keyed, Named, Described, Registrable, ItemC
     @Override
     void onRegister();
     
-    @Override
-    void onUnregister();
-    
     boolean isHidden();
     
     boolean isProgressCapped();

@@ -23,64 +23,58 @@ public interface EntityCollector extends Located {
         return Color.ORANGE;
     }
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull BoundingBox boundingBox) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(@NotNull BoundingBox boundingBox) {
         return streamEntities(this.getWorld(), supplyBoundingBox(this, boundingBox));
     }
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, double x, double y, double z) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(@NotNull Location location, double x, double y, double z) {
         return this.collectNearbyEntities(LocationHelper.toBoundingBox(location, x, y, z));
     }
     
     // *-* Primitives *-* //
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(double x, double y, double z) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(double x, double y, double z) {
         return this.collectNearbyEntities(this.getLocation(), x, y, z);
     }
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, double distance) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(@NotNull Location location, double distance) {
         return this.collectNearbyEntities(location, distance, distance, distance);
     }
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(double distance) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(double distance) {
         return this.collectNearbyEntities(this.getLocation(), distance, distance, distance);
     }
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Decimal x, @NotNull Decimal y, @NotNull Decimal z) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Decimal x, @NotNull Decimal y, @NotNull Decimal z) {
         return this.collectNearbyEntities(LocationHelper.toBoundingBox(location, x.doubleValue(), y.doubleValue(), z.doubleValue()));
     }
     
     // *-* Decimal *-* //
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Decimal x, @NotNull Decimal y, @NotNull Decimal z) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(@NotNull Decimal x, @NotNull Decimal y, @NotNull Decimal z) {
         return this.collectNearbyEntities(this.getLocation(), x, y, z);
     }
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Decimal distance) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Decimal distance) {
         return this.collectNearbyEntities(location, distance, distance, distance);
     }
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Decimal distance) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(@NotNull Decimal distance) {
         return this.collectNearbyEntities(this.getLocation(), distance, distance, distance);
     }
     
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Number x, @NotNull Number y, @NotNull Number z) {
+    default @NotNull Stream<? extends HariantEntity> collectNearbyEntities(@NotNull Location location, @NotNull Number x, @NotNull Number y, @NotNull Number z) {
         return this.collectNearbyEntities(location, x.doubleValue(), y.doubleValue(), z.doubleValue());
     }
     
-    // *-* Generic Numbers *-* //
-    
-    default @NotNull Stream<HariantEntity> collectNearbyEntities(@NotNull Number x, @NotNull Number y, @NotNull Number z) {
-        return this.collectNearbyEntities(this.getLocation(), x.doubleValue(), y.doubleValue(), z.doubleValue());
-    }
-    
-    static @NotNull Stream<HariantEntity> streamEntities(@NotNull World world, @NotNull BoundingBox boundingBox) {
+    static @NotNull Stream<? extends HariantEntity> streamEntities(@NotNull World world, @NotNull BoundingBox boundingBox) {
         return world.getNearbyEntities(boundingBox)
-                   .stream()
-                   .map(Hariant::getEntityOrNull)
-                   .filter(Objects::nonNull);
+                    .stream()
+                    .map(Hariant::getEntityOrNull)
+                    .filter(Objects::nonNull);
     }
     
-    private @NotNull static BoundingBox supplyBoundingBox(@NotNull EntityCollector collector, @NotNull BoundingBox boundingBox) {
+    private static @NotNull BoundingBox supplyBoundingBox(@NotNull EntityCollector collector, @NotNull BoundingBox boundingBox) {
         // If debug is enabled, draw the outline
         if (BoundingBoxRenderer.DEBUG_DRAW_BOUNDING_BOX_OUTLINES) {
             BoundingBoxRenderer.render(boundingBox, collector.getWorld(), collector.outlineColor(), 0.5f);

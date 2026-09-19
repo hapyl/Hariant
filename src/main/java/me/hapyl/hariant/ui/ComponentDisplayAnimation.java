@@ -1,18 +1,15 @@
 package me.hapyl.hariant.ui;
 
+import me.hapyl.hariant.util.MatrixUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.TextDisplay;
-import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
-import org.joml.AxisAngle4f;
-import org.joml.Vector3f;
 
 public interface ComponentDisplayAnimation {
     
     void animate(@NotNull TextDisplay textDisplay, final ComponentOrigin origin, final int currentTick, final int maxTick);
     
-    @NotNull
-    static ComponentDisplayAnimation ofFalloff() {
+    static @NotNull ComponentDisplayAnimation ofFalloff() {
         class Holder {
             private static final double RAD_200 = Math.toRadians(200);
         }
@@ -27,12 +24,7 @@ public interface ComponentDisplayAnimation {
             final float newScale = (float) (origin.scale() * (1 - progress));
             
             textDisplay.setTextOpacity(opacity);
-            textDisplay.setTransformation(new Transformation(
-                    new Vector3f(0, 0, 0),
-                    new AxisAngle4f(0, 0, 0, 0),
-                    new Vector3f(newScale, newScale, newScale),
-                    new AxisAngle4f(0, 0, 0, 0)
-            ));
+            textDisplay.setTransformation(MatrixUtils.scale(newScale));
             
             final Location location = textDisplay.getLocation();
             location.setY(y);
@@ -41,18 +33,15 @@ public interface ComponentDisplayAnimation {
         };
     }
     
-    @NotNull
-    static ComponentDisplayAnimation ofSineAscend() {
+    static @NotNull ComponentDisplayAnimation ofSineAscend() {
         return ofSine0(true);
     }
     
-    @NotNull
-    static ComponentDisplayAnimation ofSineDescend() {
+    static @NotNull ComponentDisplayAnimation ofSineDescend() {
         return ofSine0(false);
     }
     
-    @NotNull
-    private static ComponentDisplayAnimation ofSine0(boolean ascend) {
+    private static @NotNull ComponentDisplayAnimation ofSine0(boolean ascend) {
         return (textDisplay, origin, currentTick, maxTick) -> {
             final Location location = textDisplay.getLocation();
             

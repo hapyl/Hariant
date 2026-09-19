@@ -4,6 +4,4 @@ public interface Registrable {
     
     void onRegister();
     
-    void onUnregister();
-    
 }

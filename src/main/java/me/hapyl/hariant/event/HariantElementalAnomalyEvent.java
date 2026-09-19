@@ -1,39 +1,21 @@
 package me.hapyl.hariant.event;
 
-import me.hapyl.hariant.element.ElementalAnomalySource;
-import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyInstance;
 import me.hapyl.hariant.entity.HariantEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class HariantElementalAnomalyEvent extends HariantEntityEvent implements Cancellable {
+public class HariantElementalAnomalyEvent extends AbstractHariantAnomalyEvent implements Cancellable {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
-    private final ElementalAnomalySource source;
-    
     private boolean cancel;
     
-    public HariantElementalAnomalyEvent(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource source) {
-        super(entity);
-        
-        this.source = source;
+    public HariantElementalAnomalyEvent(@NotNull HariantEntity entity, @NotNull ElementalAnomalyInstance instance) {
+        super(entity, instance);
     }
-    
-    public @NotNull ElementalAnomalySource getAnomalySource() {
-        return source;
-    }
-    
-    public @NotNull ElementalAnomalyType getElementalAnomaly() {
-        return source.getElementalAnomaly();
-    }
-    
-    public @Nullable HariantEntity getSource() {
-        return source.getSource();
-    }
-    
+
     @Override
     public @NotNull HandlerList getHandlers() {
         return HANDLER_LIST;

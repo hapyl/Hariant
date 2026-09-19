@@ -24,9 +24,8 @@ public enum AbilityType implements Keyed, ComponentLike {
         this.component = component;
     }
     
-    @NotNull
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return key;
     }
     
@@ -36,7 +35,7 @@ public enum AbilityType implements Keyed, ComponentLike {
     }
     
     private static @NotNull Component createComponent(@NotNull String string) {
-        return Component.text(string, Colors.ORANGE, TextDecoration.BOLD);
+        return Component.text(string, Colors.YELLOW, TextDecoration.BOLD);
     }
     
 }

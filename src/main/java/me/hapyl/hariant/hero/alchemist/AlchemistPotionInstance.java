@@ -1,12 +1,12 @@
 package me.hapyl.hariant.hero.alchemist;
 
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.util.TickDuration;
+import me.hapyl.hariant.util.TickingDown;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
-public class AlchemistPotionInstance implements TickDuration {
+public class AlchemistPotionInstance implements TickingDown {
     
     protected final HariantPlayer player;
     

@@ -23,9 +23,9 @@ public class NormalAttackRanged extends NormalAttack {
                     .damageType(DamageType.RANGED);
     }
     
-    @NotNull
     @Override
-    public KnockbackSource createKnockbackCause(@NotNull HariantEntity attacker) {
+    public @NotNull KnockbackSource createKnockbackCause(@NotNull HariantEntity attacker) {
         return KnockbackSource.create(attacker, HariantConstants.RANGE_KNOCKBACK_STRENGTH);
     }
+    
 }

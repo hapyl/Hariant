@@ -34,18 +34,25 @@ public enum Race implements Prefixed, Named, Described, Styled, ComponentLike {
             Colors.SKIN_COLOR_0
     ),
     
-    SHARK(
-            Component.text("\uD83E\uDD88"),
-            Component.text("Shark"),
-            Component.text("An apex predator."),
-            Colors.SHARK
+    AETHERION(
+            Component.text("\uD83E\uDEAC"),
+            Component.text("Ætherion"),
+            Component.text("A creature created using ancient Alchemy and Æther."),
+            Colors.AETHERION
     ),
     
     ALIEN(
             Component.text("👽"),
             Component.text("Alien"),
-            Component.text("A creation from beyong this world."),
+            Component.text("A creation from beyond this world."),
             Colors.ALIEN
+    ),
+    
+    ORC(
+            Component.text("\uD83D\uDC79"),
+            Component.text("Orc"),
+            Component.text("A race of nomads, who live for the thrill of war."),
+            Colors.ORC
     ),
     
     ;

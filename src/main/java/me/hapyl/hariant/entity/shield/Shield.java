@@ -13,14 +13,14 @@ import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.util.Identified;
 import me.hapyl.hariant.util.Prioritable;
 import me.hapyl.hariant.util.Priority;
-import me.hapyl.hariant.util.TickDuration;
+import me.hapyl.hariant.util.TickingDown;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
-public class Shield implements Ticking, TickDuration, ComponentLike, Identified, Prioritable {
+public class Shield implements Ticking, TickingDown, ComponentLike, Identified, Prioritable {
     
     public static final Component SHIELD_CHARACTER = HariantConstants.CHARACTER_SHIELDED_DAMAGE.color(Colors.YELLOW);
     

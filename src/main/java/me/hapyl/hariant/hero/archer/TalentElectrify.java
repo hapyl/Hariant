@@ -19,7 +19,7 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.math.ShapeProperties;
 import me.hapyl.hariant.math.Shapes;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;

@@ -12,8 +12,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class AttributeModifierArtifactSet extends AttributeModifier {
     
+    public AttributeModifierArtifactSet(@NotNull ModifierKey modifierKey, @NotNull HariantEntity applier, int duration) {
+        super(modifierKey.key, modifierKey.name, applier, duration);
+    }
+    
     public AttributeModifierArtifactSet(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount, @NotNull HariantEntity applier, int duration) {
-        super(createModifierKey(artifactSet, pieceCount), createModifierName(artifactSet, pieceCount), applier, duration);
+        this(ModifierKey.create(artifactSet, pieceCount), applier, duration);
     }
     
     public AttributeModifierArtifactSet(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount, @NotNull HariantEntity applier, @NotNull ArtifactSetModifier modifier) {
@@ -22,14 +26,36 @@ public class AttributeModifierArtifactSet extends AttributeModifier {
         this.of(modifier.getAttributeType(), modifier.getModifierType(), modifier.getValue());
     }
     
-    @NotNull
-    private static Key createModifierKey(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount) {
-        return Key.ofString("%s_%s".formatted(artifactSet.getKey(), pieceCount.name().toLowerCase()));
-    }
-    
-    @NotNull
-    private static Component createModifierName(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount) {
-        return artifactSet.getName().append(Component.text(" (%s)".formatted(Capitalizable.capitalize(pieceCount))));
+    public static final class ModifierKey {
+        
+        private final Key key;
+        private final Component name;
+        
+        ModifierKey(@NotNull Key key, @NotNull Component name) {
+            this.key = key;
+            this.name = name;
+        }
+        
+        public @NotNull Key key() {
+            return key;
+        }
+        
+        public @NotNull Component name() {
+            return name;
+        }
+        
+        public static @NotNull ModifierKey create(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount) {
+            return new ModifierKey(createModifierKey(artifactSet, pieceCount), createModifierName(artifactSet, pieceCount));
+        }
+        
+        private static @NotNull Key createModifierKey(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount) {
+            return Key.ofString("%s_%s".formatted(artifactSet.getKey(), pieceCount.name().toLowerCase()));
+        }
+        
+        private static @NotNull Component createModifierName(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount) {
+            return artifactSet.getName().append(Component.text(" (%s)".formatted(Capitalizable.capitalize(pieceCount))));
+        }
+        
     }
     
 }

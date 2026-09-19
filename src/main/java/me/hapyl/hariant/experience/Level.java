@@ -197,7 +197,7 @@ public final class Level implements Styled, ComponentLike, ComparableOrdinal<Lev
     public static @NotNull RewardSummary getRewardSummary(@NotNull Level from, @NotNull Level to) {
         final List<Reward> rewards = Lists.newArrayList();
         
-        for (int i = from.getLevel() - 1; i < to.getLevel() - 1; i++) {
+        for (int i = from.getLevel() - 1; i < to.getLevel(); i++) {
             if (i < 0 || i >= LEVELS.size()) {
                 break;
             }

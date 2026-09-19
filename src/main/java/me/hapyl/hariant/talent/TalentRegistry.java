@@ -2,7 +2,6 @@ package me.hapyl.hariant.talent;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.hero.blast_knight.TalentNaniteRush;
 import me.hapyl.hariant.hero.alchemist.*;
 import me.hapyl.hariant.hero.archer.*;
 import me.hapyl.hariant.hero.blast_knight.*;
@@ -10,6 +9,7 @@ import me.hapyl.hariant.hero.bounty_hunter.*;
 import me.hapyl.hariant.hero.inferno.*;
 import me.hapyl.hariant.hero.mage.*;
 import me.hapyl.hariant.hero.nyx.*;
+import me.hapyl.hariant.hero.orc.*;
 import me.hapyl.hariant.hero.pytaria.*;
 import me.hapyl.hariant.hero.shark.*;
 import me.hapyl.hariant.hero.troll.*;
@@ -126,6 +126,15 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentSeverance SEVERANCE;
     public static final TalentBackstabber BACKSTABBER;
     
+    /**
+     * {@link HeroOrc}
+     */
+    public static final TalentOrcGrowl ORC_GROWL;
+    public static final TalentPoleaxeDash POLEAXE_DASH;
+    public static final TalentPoleaxeSpin POLEAXE_SPIN;
+    public static final TalentAngerIssues ANGER_ISSUES;
+    public static final TalentBerserk BERSERK;
+    
     // Private fields
     private static final StaticRegistryMap<Talent> REGISTRY;
     private static final TalentUltimate DUMMY_ULTIMATE;
@@ -199,6 +208,12 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         BLOOD_BOUNTY = REGISTRY.register("blood_bounty", TalentBloodBounty::new);
         SEVERANCE = REGISTRY.register("severance", TalentSeverance::new);
         BACKSTABBER = REGISTRY.register("backstabber", TalentBackstabber::new);
+        
+        ORC_GROWL = REGISTRY.register("orc_growl", TalentOrcGrowl::new);
+        POLEAXE_DASH = REGISTRY.register("poleaxe_dash", TalentPoleaxeDash::new);
+        POLEAXE_SPIN = REGISTRY.register("poleaxe_spin", TalentPoleaxeSpin::new);
+        ANGER_ISSUES = REGISTRY.register("anger_issues", TalentAngerIssues::new);
+        BERSERK = REGISTRY.register("berserk", TalentBerserk::new);
     }
     
     public static @NotNull StaticRegistryMap<Talent> getRegistry() {

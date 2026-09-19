@@ -16,7 +16,7 @@ import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
@@ -63,7 +63,7 @@ public final class TalentReckoning extends TalentPassive implements Listener {
                          .append(Component.text(" attack."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("Resets after %s of not attacking or after attacking another enemy.".formatted(Tick.round(resetThreshold.intValue())), Colors.DARK_GRAY))
+                         .append(Component.text("Resets after %s of not attacking or after attacking a different enemy.".formatted(Tick.round(resetThreshold.intValue())), Colors.DARK_GRAY))
         );
         
     }

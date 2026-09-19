@@ -41,7 +41,7 @@ public class Ferocity extends HariantTickingTask {
             return;
         }
         
-        // Damage the entity; FerocitySource#getDamageInstance() gets a prepared copy of the original damage intsance
+        // Damage the entity; FerocitySource#getDamageInstance() gets a prepared copy of the original damage instance
         entity.damage0(ferocitySource.getDamageInstance());
         
         // Fx

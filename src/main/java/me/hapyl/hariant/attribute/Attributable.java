@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Attributable {
     
-    @NotNull
-    Attributes getAttributes();
+    @NotNull Attributes getAttributes();
     
 }

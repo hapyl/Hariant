@@ -40,8 +40,4 @@ public class HariantNpc extends Npc implements Keyed, Registrable {
     public void onRegister() {
     }
     
-    @Override
-    public void onUnregister() {
-    }
-    
 }

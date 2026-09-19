@@ -16,7 +16,7 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantDurationTask;
 import me.hapyl.hariant.util.Icon;
@@ -56,6 +56,8 @@ public final class TalentFlowerBreeze extends Talent {
             new ItemStack(Material.LILAC),
             new ItemStack(Material.ROSE_BUSH)
     };
+
+    private final Key modifierKey = Key.ofString("flower_breeze_modifier");
     
     public TalentFlowerBreeze(@NotNull Key key) {
         super(key, Component.text("Flower Breeze"), Icon.ofMaterial(Material.RED_DYE));
@@ -160,7 +162,7 @@ public final class TalentFlowerBreeze extends Talent {
     private class ModifierFlowerBreeze extends AttributeModifier {
         
         ModifierFlowerBreeze(@NotNull HariantEntity applier) {
-            super(TalentFlowerBreeze.this, applier, TalentFlowerBreeze.this.getDuration());
+            super(modifierKey, TalentFlowerBreeze.this, applier, TalentFlowerBreeze.this.getDuration());
             
             of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue());
             of(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, defenseIncrease.doubleValue());

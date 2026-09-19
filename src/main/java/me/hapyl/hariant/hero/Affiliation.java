@@ -14,15 +14,15 @@ public enum Affiliation implements Prefixed, Named, Described, Styled, Component
     
     NONE(
             Component.text("❌"),
-            Component.text("None"),
-            Component.text("This hero is not affiliated with anything."),
+            Component.text("No Affiliation"),
+            Component.text("This hero is not affiliated with anything or anyone."),
             Style.style(Colors.ERROR)
     ),
     
     THE_KINGDOM(
             Component.text("🏰"),
             Component.text("The Kingdom"),
-            Component.text("A royal kingdom, that is the capital."),
+            Component.text("A royal kingdom, that is the capital; stands tall and mighty."),
             Style.style(Colors.THE_KINGDOM)
     ),
     
@@ -57,7 +57,7 @@ public enum Affiliation implements Prefixed, Named, Described, Styled, Component
     HELL(
             Component.text("⛓"),
             Component.text("Hell"),
-            Component.text("A barren land of the underworld."),
+            Component.text("A barren land of the underworld; a place Demons call home."),
             Style.style(Colors.HELL)
     ),
     
@@ -66,6 +66,13 @@ public enum Affiliation implements Prefixed, Named, Described, Styled, Component
             Component.text("The Mercenaries"),
             Component.text("A somehow legal group of mercenaries and bounty hunters."),
             Style.style(Colors.MERCENARY)
+    ),
+    
+    THE_STRONGHOLD(
+            Component.text("⛰"),
+            Component.text("The Stronghold"),
+            Component.text("A stronghold located in the North; used as a hub by nomads and localfolk."),
+            Style.style(Colors.THE_STRONGHOLD)
     ),
     
     ;

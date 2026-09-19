@@ -14,7 +14,7 @@ import me.hapyl.hariant.event.HariantProjectileLaunchEvent;
 import me.hapyl.hariant.handler.HariantDamageProjectile;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.BaseChance;

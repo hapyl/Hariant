@@ -13,11 +13,9 @@ import java.util.function.BiFunction;
 @Target({ ElementType.TYPE })
 public @interface StrictNamingConvention {
     
-    @NotNull
-    String startsWith() default "";
+    @NotNull String startsWith() default "";
     
-    @NotNull
-    String endsWith() default "";
+    @NotNull String endsWith() default "";
     
     interface StrictNamingConventionFunction {
         boolean apply(@NotNull String className, @NotNull String string);
@@ -65,8 +63,7 @@ public @interface StrictNamingConvention {
             validateOrThrowException(className, endsWith, StrictNamingConventionFunction.create(String::endsWith, "Class name `%s` must end with `%s`!".formatted(className, endsWith)));
         }
         
-        @NotNull
-        private static Class<?> getSuperClass(@NotNull Object object) {
+        private static @NotNull Class<?> getSuperClass(@NotNull Object object) {
             Class<?> next = object.getClass();
             
             while (next.getSuperclass() != Object.class) {
@@ -76,8 +73,7 @@ public @interface StrictNamingConvention {
             return next;
         }
         
-        @NotNull
-        private static StrictNamingConventionViolationException exception(@NotNull String reason) {
+        private static @NotNull StrictNamingConventionViolationException exception(@NotNull String reason) {
             return new StrictNamingConventionViolationException(reason);
         }
         

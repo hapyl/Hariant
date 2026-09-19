@@ -22,28 +22,28 @@ public enum Archetype implements Prefixed, Named, Described, Styled, ComponentLi
     STRATEGY(
             Component.text("💡"),
             Component.text("Strategist"),
-            Component.text("Strategists rely on their quick thinking to win."),
+            Component.text("Strategists rely on their quick thinking, rather than brute force, to win."),
             Style.style(Colors.YELLOW)
     ),
     
     SUPPORT(
             Component.text("🍀"),
             Component.text("Support"),
-            Component.text("Provides buffs and healing."),
+            Component.text("Provides buffs and heals for teammates or self."),
             Style.style(Colors.GREEN)
     ),
     
     HEXBANE(
             Component.text("🕷"),
             Component.text("Hexbane"),
-            Component.text("Excels at debuffing and hindering enemies."),
+            Component.text("Excels at debuffing and hindering enemies' every step."),
             Style.style(Colors.ARCHETYPE_HEXBANE)
     ),
     
     DEFENSE(
             Component.text("🛡"),
             Component.text("Defense"),
-            Component.text("Protects allies through defensive force."),
+            Component.text("Protects allies through defensive means, keeping them alive."),
             Style.style(Colors.ARCHETYPE_DEFENSE)
     ),
     

@@ -180,7 +180,7 @@ public enum AttributeType implements Attribute {
     MOVEMENT_SPEED(
             new AttributeImpl(
                     Component.text("\uD83D\uDC3E"),
-                    Component.text("Movement Speed"),
+                    Component.text("Movement SPD"),
                     Component.text("The movement speed multiplier."),
                     Colors.ATTRIBUTE_MOVEMENT_SPEED,
                     DecimalFormat.PERCENTAGE

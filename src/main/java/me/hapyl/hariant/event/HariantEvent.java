@@ -8,8 +8,8 @@ import org.bukkit.plugin.PluginManager;
 public abstract class HariantEvent extends Event {
     
     /**
-     * Calls this {@link Event} and gets the cancel status, where {@code true} if the event
-     * was cancelled, {@code false} otherwise.
+     * Calls this {@link Event} and gets the cancel status, where {@code true} means the event
+     * was cancelled; {@code false} otherwise.
      *
      * @return {@code true} if this event is {@link Cancellable} and it was cancelled; {@code false} otherwise.
      */

@@ -11,7 +11,7 @@ public final class ItemArtifactVoidRift extends ItemArtifact {
     public ItemArtifactVoidRift(@NotNull Key key) {
         super(
                 key,
-                Icon.ofTemporaryTexture(),
+                Icon.ofTexture("d95784d518f601d62db289dfdf9f80595d2fafca760712eb9278afe3784082d7"),
                 ArtifactSetRegistry.ECLIPSE,
                 Component.text("Void Rift"),
                 Component.text("A crystallized Ætheric matter that seems to enhance ones abilities.")

@@ -12,7 +12,7 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.util.Icon;
@@ -27,6 +27,8 @@ public final class TalentPsionicOverload extends Talent {
     
     private final @DisplayField Decimal ferocityIncrease = Decimal.ofAttribute(AttributeType.FEROCITY, 100);
     private final @DisplayField Decimal movementSpeedIncrease = Decimal.ofAttribute(AttributeType.MOVEMENT_SPEED, 30);
+
+    private final Key modifierKey = Key.ofString("psionic_overload_modifier");
     
     public TalentPsionicOverload(@NotNull Key key) {
         super(key, Component.text("Psionic Overload"), Icon.ofMaterial(Material.HORN_CORAL_FAN));
@@ -70,7 +72,7 @@ public final class TalentPsionicOverload extends Talent {
     public class ModifierPsionicOverload extends AttributeModifier {
         
         ModifierPsionicOverload(@NotNull HariantEntity applier) {
-            super(TalentPsionicOverload.this, applier, TalentPsionicOverload.this.getDuration());
+            super(modifierKey, TalentPsionicOverload.this, applier, TalentPsionicOverload.this.getDuration());
             
             of(AttributeType.FEROCITY, AttributeModifierType.FLAT, ferocityIncrease);
             of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.FLAT, movementSpeedIncrease);

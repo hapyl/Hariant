@@ -3,8 +3,7 @@ package me.hapyl.hariant.hero.zealot;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.modifier.AttributeModifier;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
+import me.hapyl.hariant.attribute.instance.snapshot.AttributeModifierSnapshot;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageCalculationsEvent;
@@ -12,7 +11,7 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.rechargeable.RechargeType;
 import me.hapyl.hariant.talent.rechargeable.RechargeableTalentData;
 import me.hapyl.hariant.talent.rechargeable.TalentRechargeable;
@@ -65,7 +64,7 @@ public final class TalentZealotry extends TalentRechargeable implements Listener
     
     @EventHandler
     public void handleHariantDamageCalculationsEvent(HariantDamageCalculationsEvent ev) {
-        if (!(ev.getSnapshotAttacker().entityOrNull() instanceof HariantPlayer player)) {
+        if (!(ev.getAttackerSnapshot().entityOrNull() instanceof HariantPlayer player)) {
             return;
         }
         
@@ -83,10 +82,7 @@ public final class TalentZealotry extends TalentRechargeable implements Listener
         ev.getDamageInstance().setElementType(ElementType.AETHER);
         
         // Ignore N% of enemy DEF
-        ev.getSnapshotEntity().addModifier(
-                player,
-                AttributeModifier.entry(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, -defenseIgnore.doubleValue())
-        );
+        ev.getEntitySnapshot().addModifier(AttributeModifierSnapshot.create(AttributeType.DEFENSE, -defenseIgnore.doubleValue()));
         
         heroData.setZealotMarkActive(false);
         

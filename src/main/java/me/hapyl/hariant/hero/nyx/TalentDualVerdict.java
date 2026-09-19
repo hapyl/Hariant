@@ -23,7 +23,7 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.task.HariantTickingTask;
@@ -64,6 +64,8 @@ public final class TalentDualVerdict extends Talent {
     private final int dropletNoPickupTick = 10;
     
     private final ItemStack dropletItem = ItemBuilder.playerHead("ed5d46bafb21727276d202ccd130f598a6956c79a4cf07a143f74c97b1be918c").asItemStack();
+    
+    private final Key modifierKey = Key.ofString("dual_verdict_modifier");
     
     public TalentDualVerdict(@NotNull Key key) {
         super(key, Component.text("Dual Verdict"), Icon.ofMaterial(Material.CHORUS_FRUIT));
@@ -343,7 +345,7 @@ public final class TalentDualVerdict extends Talent {
     
     private class AttributeModifierDualVerdict extends AttributeModifier {
         AttributeModifierDualVerdict(@NotNull HariantPlayer player) {
-            super(TalentDualVerdict.this, player, dropletMaxHealthDecreaseDuration.intValue());
+            super(modifierKey, TalentDualVerdict.this, player, dropletMaxHealthDecreaseDuration.intValue());
             
             of(AttributeType.MAX_HEALTH, AttributeModifierType.ADDITIVE, -dropletMaxHealthDecrease.doubleValue());
         }

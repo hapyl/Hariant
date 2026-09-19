@@ -25,33 +25,28 @@ public enum ElementType implements Element {
         this.element = element;
     }
     
-    @NotNull
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return element.getKey();
     }
     
-    @NotNull
     @Override
-    public Component getPrefix() {
+    public @NotNull Component getPrefix() {
         return element.getPrefix();
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return element.getName();
     }
     
     @Override
-    @NotNull
-    public Style getStyle() {
+    public @NotNull Style getStyle() {
         return element.getStyle();
     }
     
-    @NotNull
     @Override
-    public Component format(double value) {
+    public @NotNull Component format(double value) {
         return element.format(value);
     }
     

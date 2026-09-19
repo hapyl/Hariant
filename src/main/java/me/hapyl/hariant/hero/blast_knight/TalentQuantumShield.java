@@ -13,7 +13,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.util.BoundingBoxBlueprint;
 import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
@@ -70,7 +70,8 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
         
         setDescription(
                 Component.empty()
-                         .append(Component.text("Raise your shield to block incoming damage, converting it into "))
+                         .append(Component.text("Raise your shield to block incoming attacks, converting them into "))
+                         .appendNewline()
                          .append(Definition.QUANTUM_ENERGY)
                          .append(Component.text("."))
                          .appendNewline()
@@ -79,7 +80,7 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
                          .appendNewline()
                          .append(Component.text("Releasing the shield within a "))
                          .append(Component.text("brief window", Colors.AQUA))
-                         .append(Component.text(" after raising it while blocking damage triggers a "))
+                         .append(Component.text(" after raising it while blocking an attack triggers a "))
                          .append(Component.text("parry", Colors.GOLD))
                          .append(Component.text(" that stuns enemies and generates "))
                          .append(parryQuantumEnergyGeneration)

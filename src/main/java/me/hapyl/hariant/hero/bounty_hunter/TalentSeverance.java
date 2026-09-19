@@ -12,7 +12,7 @@ import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.target.TalentTargetEntityRayCast;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
@@ -60,6 +60,7 @@ public final class TalentSeverance extends TalentUltimate {
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("If the damage is lethal, gain a "))
+                         .appendNewline()
                          .append(AttributeType.MOVEMENT_SPEED)
                          .append(Component.text(" buff for "))
                          .append(movementSpeedIncreaseDuration)

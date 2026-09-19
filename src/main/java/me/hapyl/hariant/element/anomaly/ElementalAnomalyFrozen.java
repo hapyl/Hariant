@@ -3,6 +3,7 @@ package me.hapyl.hariant.element.anomaly;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.attribute.Attributable;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.element.ElementalAnomalySource;
@@ -25,16 +26,16 @@ public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implement
     private final Decimal damageMultiplier = Decimal.ofPercentage(200);
     
     ElementalAnomalyFrozen() {
-        super(Key.ofString("frozen"), Component.text("Frozen"), ElementType.ICE);
+        super(Key.ofString("frozen"), ElementType.ICE, Component.text("Frozen"), new ElementalPotency(0.9, 0.15));
         
         setDescription(
                 Component.empty()
-                         .append(Component.text("Causes the affected entity to freeze, unable to act or move."))
+                         .append(Component.text("Causes the affected entity to freeze, unable to attack or move."))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("Frozen entities take "))
                          .append(Component.text("%sx".formatted(damageMultiplier.doubleValue()), Colors.RED))
-                         .append(Component.text(" DMG."))
+                         .append(Component.text(" DMG from all sources."))
         );
     }
     
@@ -53,26 +54,36 @@ public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implement
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
-        final HariantEntity source = anomalySource.getSource();
+    public @NotNull ElementalAnomalyInstance newInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source) {
         final int duration = this.calculateFrozenDuration(source);
         
-        entity.trap(new TrapFrozen(entity, source != null ? source : entity, duration));
+        return new ElementalAnomalyFrozenInstance(anomalySource, entity, source, duration);
     }
     
-    @Override
-    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
-        return entity.getTrap() instanceof TrapFrozen;
-    }
-    
-    public int calculateFrozenDuration(@Nullable HariantEntity source) {
-        if (source == null) {
+    public int calculateFrozenDuration(@Nullable Attributable attributes) {
+        if (attributes == null) {
             return frozenDuration;
         }
         
-        final double elementalMastery = source.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
+        final double elementalMastery = attributes.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
         
         return (int) (frozenDuration * (1 + (elementalMastery / (elementalMastery + 500))));
+    }
+    
+    public class ElementalAnomalyFrozenInstance extends ElementalAnomalyInstance {
+        
+        ElementalAnomalyFrozenInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source, int duration) {
+            super(anomalySource, entity, source, duration);
+        }
+        
+        @Override
+        public void onStart() {
+            super.onStart();
+            
+            // Trap the entity
+            entity.trap(new TrapFrozen(entity, source != null ? source : entity, duration()));
+        }
+        
     }
     
 }

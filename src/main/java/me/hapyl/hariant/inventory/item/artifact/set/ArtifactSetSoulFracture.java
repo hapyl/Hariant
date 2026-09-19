@@ -2,10 +2,9 @@ package me.hapyl.hariant.inventory.item.artifact.set;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
-import me.hapyl.hariant.attribute.modifier.AttributeModifier;
+import me.hapyl.hariant.attribute.instance.snapshot.AttributeModifierSnapshot;
+import me.hapyl.hariant.attribute.instance.snapshot.AttributesSnapshot;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
-import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -51,7 +50,7 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
     
     @EventHandler
     public void handleHariantDamageCalculationsEvent(HariantDamageCalculationsEvent ev) {
-        final AttributesInstanceSnapshot attacker = ev.getSnapshotAttacker();
+        final AttributesSnapshot attacker = ev.getAttackerSnapshot();
         
         if (!(attacker.entityOrNull() instanceof HariantPlayer player)) {
             return;
@@ -63,7 +62,7 @@ public final class ArtifactSetSoulFracture extends ArtifactSet implements Listen
             return;
         }
         
-        ev.getSnapshotEntity().addModifier(player, AttributeModifier.entry(AttributeType.AETHER_RESISTANCE, AttributeModifierType.FLAT, -aetherResistanceIgnore.doubleValue()));
+        ev.getEntitySnapshot().addModifier(AttributeModifierSnapshot.create(AttributeType.AETHER_RESISTANCE, -aetherResistanceIgnore.doubleValue()));
     }
     
     @Override

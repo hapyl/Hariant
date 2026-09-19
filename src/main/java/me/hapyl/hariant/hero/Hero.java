@@ -95,8 +95,7 @@ public abstract class Hero
     }
     
     @Override
-    @NotNull
-    public ItemBuilder createBuilder() {
+    public @NotNull ItemBuilder createBuilder() {
         final ItemBuilder builder = ItemBuilder.playerHead(equipment.getCachedHeadTexture().textureUrl());
         builder.setName(name);
         builder.addLore();
@@ -125,9 +124,8 @@ public abstract class Hero
         return builder;
     }
     
-    @NotNull
     @Override
-    public Component asSmallCaps() {
+    public @NotNull Component asSmallCaps() {
         return smallCaps;
     }
     
@@ -160,31 +158,26 @@ public abstract class Hero
         throw new IllegalArgumentException("Talent %s does not belong to %s!".formatted(talent.getClass().getSimpleName(), this.getClass().getSimpleName()));
     }
     
-    @NotNull
-    public HeroProfile getProfile() {
+    public @NotNull HeroProfile getProfile() {
         return profile;
     }
     
-    @NotNull
-    public HeroEquipment getEquipment() {
+    public @NotNull HeroEquipment getEquipment() {
         return equipment;
     }
     
-    @NotNull
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return key;
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return name;
     }
     
-    @NotNull
     @Override
-    public Component getDescription() {
+    public @NotNull Component getDescription() {
         return description;
     }
     
@@ -193,9 +186,8 @@ public abstract class Hero
         this.description = description;
     }
     
-    @NotNull
     @Override
-    public Attributes getAttributes() {
+    public @NotNull Attributes getAttributes() {
         return attributes;
     }
     
@@ -214,28 +206,24 @@ public abstract class Hero
         return Objects.equals(this.key, that.key);
     }
     
-    @NotNull
     @Override
-    public Component asComponent() {
+    public @NotNull Component asComponent() {
         return Component.empty()
                         .append(profile.getArchetype().getPrefixStyled())
                         .appendSpace()
                         .append(smallCaps);
     }
     
-    @NotNull
     @Override
-    public Component asHeadComponent() {
+    public @NotNull Component asHeadComponent() {
         return equipment.asHeadComponent();
     }
     
-    @NotNull
-    public Weapon getWeapon() {
+    public @NotNull Weapon getWeapon() {
         return weapon;
     }
     
-    @NotNull
-    public Weapon getWeapon(@NotNull HariantPlayer player) {
+    public @NotNull Weapon getWeapon(@NotNull HariantPlayer player) {
         return weapon;
     }
     
@@ -278,9 +266,8 @@ public abstract class Hero
         getUltimateTalent().execute0(player);
     }
     
-    @NotNull
     @Override
-    public List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
         return List.of();
     }
     
@@ -290,10 +277,7 @@ public abstract class Hero
     
     @Override
     public void onRegister() {
-    }
-    
-    @Override
-    public void onUnregister() {
+        weapon.onRegister();
     }
     
     @OverridingMethodsMustInvokeSuper

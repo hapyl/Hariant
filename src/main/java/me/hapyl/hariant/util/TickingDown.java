@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Represents an interface for ticking objects that tick down.
  */
-public interface TickDuration {
+public interface TickingDown {
     
     int currentTick();
     
@@ -22,15 +22,13 @@ public interface TickDuration {
         return !this.isIndefinite() && this.currentTick() <= 0;
     }
     
-    @NotNull
-    default Component currentTickFormatted() {
+    default @NotNull Component currentTickFormatted() {
         return this.isIndefinite()
                ? HariantConstants.CHARACTER_INFINITY
                : Component.text(Tick.format(this.currentTick()));
     }
     
-    @NotNull
-    default Component durationFormatted() {
+    default @NotNull Component durationFormatted() {
         return Component.text(Tick.format(this.duration()));
     }
     

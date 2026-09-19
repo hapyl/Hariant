@@ -22,7 +22,7 @@ import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
@@ -173,7 +173,7 @@ public class TalentInfernalWrath extends TalentUltimate {
                 this.collectEntities().forEach(entity -> {
                     // Deal damage, and if entity has survived, trigger BURN
                     if (entity.damage(damageSource) == DamageResult.OK) {
-                        entity.triggerAnomaly(new InfernalWrathAnomalySource(player));
+                        entity.triggerAnomaly(new InfernalWrathAnomalySource(player), true);
                     }
                 });
                 

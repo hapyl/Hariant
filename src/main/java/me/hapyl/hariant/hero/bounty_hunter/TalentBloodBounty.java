@@ -15,7 +15,8 @@ import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.talent.TalentType;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.target.TalentTargetEntityRayCast;
 import me.hapyl.hariant.task.HariantTickingTask;
@@ -61,6 +62,8 @@ public final class TalentBloodBounty extends Talent implements Listener {
         
         setDurationSeconds(30);
         setCooldownSeconds(30);
+        
+        setTalentType(TalentType.IMPAIR);
         
         setDescription(
                 Component.empty()
@@ -184,6 +187,8 @@ public final class TalentBloodBounty extends Talent implements Listener {
             this.textDisplay = createTextDisplay(getTextDisplayLocation());
             this.componentEntityToPlayer = createComponent(entity, true);
             this.componentPlayerToEntity = createComponent(player, false);
+            
+            entity.getHandle().addPassenger(textDisplay);
         }
         
         @Override
@@ -194,11 +199,10 @@ public final class TalentBloodBounty extends Talent implements Listener {
                 return;
             }
             
-            // Sync text display
-            final float scale = (float) (2f + Math.sin(Math.toRadians(tick * 15)));
+            // Scale text display
+            final float scale = (float) (2f + 0.5f * (1f + Math.sin(Math.toRadians(tick * 5))) / 2f);
             
             textDisplay.setTransformation(MatrixUtils.scale(scale));
-            textDisplay.teleport(getTextDisplayLocation());
             
             if (tick % 5 == 0) {
                 final Component timeLeft = Component.space().append(Component.text(Tick.format(getDuration() - tick), Colors.NUMBER));
@@ -238,7 +242,7 @@ public final class TalentBloodBounty extends Talent implements Listener {
                 self.setDefaultBackground(false);
                 self.setBackgroundColor(NO_BACKGROUND);
                 
-                self.text(COMPONENT_SPRITE);
+                self.text(COMPONENT_SPRITE.appendNewline());
             });
         }
         

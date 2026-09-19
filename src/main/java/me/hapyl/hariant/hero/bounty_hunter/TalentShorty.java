@@ -15,7 +15,7 @@ import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.rechargeable.RechargeType;
 import me.hapyl.hariant.talent.rechargeable.RechargeableTalentData;
 import me.hapyl.hariant.talent.rechargeable.TalentRechargeable;
@@ -40,7 +40,7 @@ public final class TalentShorty extends TalentRechargeable {
     private final @DisplayField Decimal horizontalSpread = Decimal.ofAngle(10);
     private final @DisplayField Decimal verticalSpread = Decimal.ofAngle(6);
     
-    private final @DisplayField AttributeScaling damagePerPellet = AttributeScaling.create(AttributeType.ATTACK, 10);
+    private final @DisplayField AttributeScaling damagePerPellet = AttributeScaling.create(AttributeType.ATTACK, 6);
     private final @DisplayField Decimal elementalApplicationPerPellet = Decimal.ofElementalApplication(ElementType.PHYSICAL, 40);
     
     private final @DisplayField Decimal knockbackMagnitude = Decimal.ofValue(0.6);
@@ -61,7 +61,7 @@ public final class TalentShorty extends TalentRechargeable {
     public TalentShorty(@NotNull Key key) {
         super(key, Component.text("Shorty"), Icon.ofMaterial(Material.CROSSBOW), 2, RechargeType.DEPLETE_ALL);
         
-        setCooldownSeconds(3);
+        setCooldownSeconds(6);
         
         setDescription(
                 Component.empty()

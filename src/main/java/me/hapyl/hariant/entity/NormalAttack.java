@@ -1,6 +1,7 @@
 package me.hapyl.hariant.entity;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.Singleton;
 import me.hapyl.hariant.attribute.AttributeScalingSingle;
@@ -16,6 +17,8 @@ public class NormalAttack extends AttributeScalingSingle implements DamageSource
     
     private static final DamageSourceIdentity DEFAULT_DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(Key.ofString("normal_attack"), Component.text("Normal Attack"), DeathMessage.DEFAULT);
     private static final NormalAttack COMMON = new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 100, 10);
+    
+    private static final Component COMPONENT_NONE = Component.text("None!", Colors.DARK_GRAY);
     
     protected final ElementType elementType;
     protected final int attackCooldown;
@@ -48,12 +51,16 @@ public class NormalAttack extends AttributeScalingSingle implements DamageSource
                            .damageType(DamageType.MELEE)
                            // Default the element type to the scaling's element type
                            .elementType(elementType)
-                           // Default the damage components common
+                           // Default the damage components to common
                            .damageComponents(DamageComponents.ofCommon(), DamageSource.Strategy.REPLACE);
     }
     
     public @NotNull KnockbackSource createKnockbackCause(@NotNull HariantEntity attacker) {
         return KnockbackSource.create(attacker, HariantConstants.MELEE_KNOCKBACK_STRENGTH);
+    }
+    
+    public @NotNull Component formatAttackSpeed() {
+        return attackCooldown == 0 ? COMPONENT_NONE : Component.text("%.1f/s".formatted((double) 20 / attackCooldown));
     }
     
     public static @NotNull NormalAttack melee(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, int attackCooldown) {
