@@ -20,6 +20,8 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.element.*;
+import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
+import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
 import me.hapyl.hariant.entity.cooldown.HariantCooldown;
@@ -299,120 +301,18 @@ public class HariantEntity
         return false;
     }
     
-    public @NotNull DamageResult damage0(@NotNull DamageInstance damageInstance) {
-        // Do not deal damage to dead entities
-        if (damageInstance.getDamage() <= 0 || this.isDead()) {
-            return DamageResult.IMMUNE;
-        }
-        
-        // Check for internal immunity
-        if (this.isImmuneTo(damageInstance)) {
-            return DamageResult.IMMUNE;
-        }
-        
-        // Check for damage cooldown, if exists
-        if (damageInstance.cooldownExistsEntityOnCooldownElseStartCooldown(this)) {
-            return DamageResult.IMMUNE;
-        }
-        
-        // Check for invulnerability
-        if (this.invulnerability != null && !damageInstance.isFlagged(DamageFlag.IGNORES_INVULNERABILITY)) {
-            // Call invulnerability event
-            final HariantInvulnerabilityEvent hariantInvulnerabilityEvent = new HariantInvulnerabilityEvent(this, invulnerability, damageInstance);
-            
-            if (!hariantInvulnerabilityEvent.callEvent()) {
-                this.invulnerability.display(getMidpointLocation());
-                return DamageResult.IMMUNE;
-            }
-        }
-        
-        // *-* Below this point, the damage cannot be cancelled *-* //
-        
-        final HariantEntity attacker = damageInstance.getAttacker();
-        
-        // This one is a little weird, but we have to calculate Ferocity because mutations
-        // to DamageInstance are made... so do it here
-        @Nullable FerocitySource ferocitySource = null;
-        
-        if (attacker != null && damageInstance.getDamageType().canTriggerFerocity()) {
-            final int ferocityStrikes = attacker.calculateFerocityStrikes();
-            
-            if (ferocityStrikes > 0) {
-                ferocitySource = FerocitySource.create(attacker, damageInstance, ferocityStrikes);
-            }
-        }
-        
-        // Process shields
-        if (shield != null && shield.canShield(damageInstance)) {
-            final double damage = damageInstance.getDamage();
-            final ShieldResult shieldResult = shield.shield0(damage, damageInstance);
-            
-            // Always mark shielded, regardless if the shield broke or not
-            damageInstance.markShielded();
-            
-            // Decrement the damage
-            damageInstance.mutateDamage(shield, DamageMutator.subtract(), shieldResult.decrement());
-            
-            // Display the damage shielded
-            if (shieldResult.shielded() > 0) {
-                shield.display(shieldResult.shielded(), this.getMidpointLocation());
-            }
-            
-            // If capacity is lower or equals to 0, the shield broke
-            if (shieldResult.capacityAfterHit() <= 0) {
-                shield.onRemove0(Shield.Cause.BROKE);
-                shield = null;
-            }
-        }
-        
-        final double damage = damageInstance.getDamage();
-        final double health = getFinalHealth();
-        
-        final boolean isLethal = health - damage <= 0.0 && !damageInstance.isFlagged(DamageFlag.CANNOT_KILL);
-        
-        if (isLethal) {
-            damageInstance.markLethal();
-        }
-        
-        // Set last attacker so we know who to credit for the kill
-        if (attacker != null) {
-            this.lastAttacker = attacker;
-            this.lastAttacker.onDamageDealt(damageInstance, this);
-        }
-        
-        // Call EventLike method
-        this.onDamageTaken(damageInstance, attacker);
-        
-        // Call damage event
-        new HariantDamageEvent(damageInstance).callEvent();
-        
-        // Broadcast hurt
-        this.broadcastHurt(damageInstance, !isLethal);
-        
-        // Check whether damage can kill and call death event
-        if (isLethal) {
-            if (new HariantDeathEvent(this, damageInstance).callEvent()) {
-                return DamageResult.IMMUNE;
-            }
-            
-            this.die(damageInstance.getDamageSource());
-            return DamageResult.DEAD;
-        }
-        
-        // Decrement health
-        this.decrementHealth(damage);
-        
-        // Apply element
-        this.applyElement(damageInstance);
-        
-        // Execute ferocity
-        if (ferocitySource != null) {
-            this.damageFerocity(ferocitySource, false);
-        }
-        
-        return DamageResult.OK;
-    }
-    
+    /**
+     * Internal method for damaging the entity with the given, already-compiled {@link DamageInstance}.
+     *
+     * <p><b>
+     *     Note that the given damage instance will be mutated by either the {@link HariantDamageComputeEvent} or other internal methods, therefore,
+     *     a {@link DamageInstance#copyOf(DamageInstance)} must be provided for proper function.
+     * </b></p>
+     *
+     * @param damageInstance - The damage instance to damage with.
+     * @return the damage result.
+     */
+    @ApiStatus.Internal
     public final @NotNull DamageResult damage(@NotNull DamageInstance damageInstance) {
         // Call computation event
         final HariantDamageComputeEvent hariantDamageComputeEvent = new HariantDamageComputeEvent(damageInstance);
@@ -430,8 +330,7 @@ public class HariantEntity
         return this.damage(createDamageInstance(source));
     }
     
-    @NotNull
-    public Set<? extends Entity> listGarbage() {
+    public @NotNull Set<? extends Entity> listGarbage() {
         return Set.of(entity);
     }
     
@@ -590,7 +489,13 @@ public class HariantEntity
     public void onHeal(double healthBeforeHealing, double healthAfterHealing, double actualHealing) {
         // Show healing display
         if (actualHealing > 1) {
-            ComponentDisplay.ofAscend(Component.text("+" + MathFont.format((int) actualHealing), Colors.GREEN), this.getMidpointLocation(), 20, 1.75f);
+            ComponentDisplay.ofAscend(
+                    Component.empty()
+                             .append(Component.text("+", Colors.GREEN))
+                             .append(DigitStyle.STYLE.asComponent((int) actualHealing).color(Colors.GREEN)),
+                    this.getMidpointLocation(),
+                    20, 1.75f
+            );
             
             this.spawnWorldParticle(this.getEyeLocation().add(0, 0.5, 0), Particle.HEART, (int) Math.clamp(actualHealing / 100, 1, 10), 0.45, 0.2, 0.45, 0.015f);
             this.playSound(Sound.ENTITY_ZOMBIE_INFECT, 2.0f);
@@ -776,13 +681,11 @@ public class HariantEntity
             return;
         }
         
-        entity.setVelocity(
-                new Vector(
-                        velocity.getX() * 0.5 + dx * strength,
-                        entity.isOnGround() ? Math.min(0.4, velocity.getY() * 0.5 + strength) : velocity.getX(),
-                        velocity.getZ() * 0.5 + dz * strength
-                )
-        );
+        entity.setVelocity(new Vector(
+                velocity.getX() * 0.5 + dx * strength,
+                entity.isOnGround() ? Math.min(0.4, velocity.getY() * 0.5 + strength) : velocity.getX(),
+                velocity.getZ() * 0.5 + dz * strength
+        ));
     }
     
     @NotNull
@@ -844,8 +747,28 @@ public class HariantEntity
         this.tickTrap();
         this.tickLiquid();
         this.tickInvulnerability();
+        this.tickPortal();
         
         return true;
+    }
+    
+    public void setFreezeTicks(int freezeTicks) {
+        entity.setFreezeTicks(freezeTicks);
+    }
+    
+    public void setOutline(@NotNull Outline outline) {
+    }
+    
+    public double getYaw() {
+        return entity.getYaw();
+    }
+    
+    public double getPitch() {
+        return entity.getPitch();
+    }
+    
+    private void tickPortal() {
+        // TODO (xanyjl @ Tuesday, September 15) -> I think this is the only way to keep portals
     }
     
     public final boolean compareEntity(@NotNull Entity entity) {
@@ -1407,8 +1330,8 @@ public class HariantEntity
     }
     
     @Override
-    public boolean triggerAnomaly(@NotNull ElementalAnomalySource anomalySource) {
-        return elementData.triggerAnomaly(anomalySource);
+    public boolean triggerAnomaly(@NotNull ElementalAnomalySource anomalySource, boolean force) {
+        return elementData.triggerAnomaly(anomalySource, force);
     }
     
     @Override
@@ -1419,6 +1342,26 @@ public class HariantEntity
     @Override
     public @Nullable ElementType lastAppliedElement() {
         return elementData.lastAppliedElement();
+    }
+    
+    @Override
+    public @Nullable ElementalAnomalyType lastTriggeredAnomaly() {
+        return elementData.lastTriggeredAnomaly();
+    }
+    
+    @Override
+    public boolean isElementalAnomalyActive(@NotNull ElementalAnomaly elementalAnomaly) {
+        return elementData.isElementalAnomalyActive(elementalAnomaly);
+    }
+    
+    @Override
+    public boolean endElementalAnomaly(@NotNull ElementalAnomaly elementalAnomaly) {
+        return elementData.endElementalAnomaly(elementalAnomaly);
+    }
+    
+    @Override
+    public int getElementalAnomalyQueueLength(@NotNull ElementalAnomaly elementalAnomaly) {
+        return elementData.getElementalAnomalyQueueLength(elementalAnomaly);
     }
     
     public @NotNull Component getHealthFormatted() {
@@ -1571,6 +1514,121 @@ public class HariantEntity
     
     public void swingOffHand() {
         entity.swingOffHand();
+    }
+    
+    @NotNull
+    public DamageResult damage0(@NotNull DamageInstance damageInstance) {
+        // Do not deal damage to dead entities
+        if (damageInstance.getDamage() <= 0 || this.isDead()) {
+            return DamageResult.IMMUNE;
+        }
+        
+        // Check for internal immunity
+        if (this.isImmuneTo(damageInstance)) {
+            return DamageResult.IMMUNE;
+        }
+        
+        // Check for damage cooldown, if exists
+        if (damageInstance.cooldownExistsEntityOnCooldownElseStartCooldown(this)) {
+            return DamageResult.IMMUNE;
+        }
+        
+        // Check for invulnerability
+        if (this.invulnerability != null && !damageInstance.isFlagged(DamageFlag.IGNORES_INVULNERABILITY)) {
+            // Call invulnerability event
+            final HariantInvulnerabilityEvent hariantInvulnerabilityEvent = new HariantInvulnerabilityEvent(this, invulnerability, damageInstance);
+            
+            if (!hariantInvulnerabilityEvent.callEvent()) {
+                this.invulnerability.display(getMidpointLocation());
+                return DamageResult.IMMUNE;
+            }
+        }
+        
+        // *-* Below this point, the damage cannot be cancelled *-* //
+        
+        final HariantEntity attacker = damageInstance.getAttacker();
+        
+        // This one is a little weird, but we have to calculate Ferocity because mutations
+        // to DamageInstance are made... so do it here
+        @Nullable FerocitySource ferocitySource = null;
+        
+        if (attacker != null && damageInstance.getDamageType().canTriggerFerocity()) {
+            final int ferocityStrikes = attacker.calculateFerocityStrikes();
+            
+            if (ferocityStrikes > 0) {
+                ferocitySource = FerocitySource.create(attacker, damageInstance, ferocityStrikes);
+            }
+        }
+        
+        // Process shields
+        if (shield != null && shield.canShield(damageInstance)) {
+            final double damage = damageInstance.getDamage();
+            final ShieldResult shieldResult = shield.shield0(damage, damageInstance);
+            
+            // Always mark shielded, regardless if the shield broke or not
+            damageInstance.markShielded();
+            
+            // Decrement the damage
+            damageInstance.mutateDamage(shield, DamageMutator.subtract(), shieldResult.decrement());
+            
+            // Display the damage shielded
+            if (shieldResult.shielded() > 0) {
+                shield.display(shieldResult.shielded(), this.getMidpointLocation());
+            }
+            
+            // If capacity is lower or equals to 0, the shield broke
+            if (shieldResult.capacityAfterHit() <= 0) {
+                shield.onRemove0(Shield.Cause.BROKE);
+                shield = null;
+            }
+        }
+        
+        final double damage = damageInstance.getDamage();
+        final double health = getFinalHealth();
+        
+        final boolean isLethal = health - damage <= 0.0 && !damageInstance.isFlagged(DamageFlag.CANNOT_KILL);
+        
+        if (isLethal) {
+            damageInstance.markLethal();
+        }
+        
+        // Set last attacker so we know who to credit for the kill
+        if (attacker != null) {
+            this.lastAttacker = attacker;
+            this.lastAttacker.onDamageDealt(damageInstance, this);
+        }
+        
+        // Call EventLike method
+        this.onDamageTaken(damageInstance, attacker);
+        
+        // Call damage event
+        new HariantDamageEvent(damageInstance).callEvent();
+        
+        // Broadcast hurt
+        this.broadcastHurt(damageInstance, !isLethal);
+        
+        // Check whether damage can kill and call death event
+        if (isLethal) {
+            if (new HariantDeathEvent(this, damageInstance).callEvent()) {
+                return DamageResult.IMMUNE;
+            }
+            
+            this.die(damageInstance.getDamageSource());
+            return DamageResult.DEAD;
+        }
+        
+        // Decrement health
+        this.decrementHealth(damage);
+        
+        // Apply element
+        this.applyElement(damageInstance);
+        
+        // Execute ferocity
+        if (ferocitySource != null) {
+            this.damageFerocity(ferocitySource, false);
+        }
+        
+        return DamageResult.OK;
     }
     
     protected void playDamageFx(@NotNull Supplier<@Nullable SoundFx> supplier) {

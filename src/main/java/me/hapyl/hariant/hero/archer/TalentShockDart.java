@@ -21,7 +21,7 @@ import me.hapyl.hariant.handler.HariantDamageProjectile;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTask;
 import me.hapyl.hariant.task.HariantTickingTask;
@@ -139,7 +139,7 @@ public final class TalentShockDart extends Talent {
                 @Override
                 public void run(int tick) {
                     // Create explosion
-                    final Stream<HariantEntity> entitiesInRange = collectNearbyEntities(explosionRadius.doubleValue()).filter(shooter::canAffect);
+                    final Stream<? extends HariantEntity> entitiesInRange = collectNearbyEntities(explosionRadius.doubleValue()).filter(shooter::canAffect);
                     
                     if (tick > explosionDelayInTicks) {
                         entitiesInRange.forEach(entity -> {

@@ -19,7 +19,7 @@ import me.hapyl.hariant.event.effect.HariantEffectEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
@@ -52,6 +52,8 @@ public final class TalentReverberation extends TalentPassive implements Listener
     private final ShieldStrength shieldStrength = ShieldStrength.builder()
                                                                 .ofElement(ElementType.AETHER, voidShieldAetherStrength.doubleValue())
                                                                 .build();
+    
+    private final Key modifierKey = Key.ofString("reverberation_modifier");
     
     public TalentReverberation(@NotNull Key key) {
         super(key, Component.text("Reverberation"), Icon.ofMaterial(Material.SHULKER_SHELL));
@@ -179,7 +181,7 @@ public final class TalentReverberation extends TalentPassive implements Listener
     
     public class AttributeModifierReverberation extends AttributeModifier {
         AttributeModifierReverberation(@NotNull HariantEntity applier) {
-            super(TalentReverberation.this, applier, effectResistanceDuration.intValue());
+            super(modifierKey, TalentReverberation.this, applier, effectResistanceDuration.intValue());
             
             of(AttributeType.EFFECT_RESISTANCE, AttributeModifierType.FLAT, effectResistanceIncrease);
         }

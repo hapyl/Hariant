@@ -5,20 +5,22 @@ import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.component.Styled;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.registry.Keyed;
+import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.ui.ComponentDisplayable;
 import me.hapyl.hariant.util.Prefixed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.Style;
-import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public interface ElementalAnomaly extends Keyed, Prefixed, Named, Described, Styled, ComponentLike, ComponentDisplayable {
+public interface ElementalAnomaly extends Keyed, Prefixed, Named, Described, Styled, ComponentLike {
     
     @Override
     @NotNull Key getKey();
+    
+    @NotNull ElementType getElementType();
     
     @Override
     @NotNull Component getPrefix();
@@ -37,11 +39,8 @@ public interface ElementalAnomaly extends Keyed, Prefixed, Named, Described, Sty
     @Override
     @NotNull Style getStyle();
     
-    void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource);
+    @NotNull ElementalPotency getPotency();
     
-    @Override
-    void display(@NotNull Location location);
-    
-    boolean isAnomalyActive(@NotNull HariantEntity entity);
+    @NotNull ElementalAnomalyInstance newInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source);
     
 }

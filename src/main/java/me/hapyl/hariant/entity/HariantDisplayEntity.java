@@ -2,11 +2,11 @@ package me.hapyl.hariant.entity;
 
 import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.block.display.DisplayEntity;
-import me.hapyl.eterna.module.block.display.DisplayModel;
 import me.hapyl.eterna.module.entity.Entities;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageType;
+import me.hapyl.hariant.util.Models;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
@@ -21,14 +21,14 @@ public class HariantDisplayEntity extends HariantEntity {
     
     protected final DisplayEntity displayEntity;
     
-    public HariantDisplayEntity(@NotNull DisplayModel displayModel, @NotNull Location location, double size, @NotNull Attributes attributes) {
+    public HariantDisplayEntity(@NotNull Models model, @NotNull Location location, double size, @NotNull Attributes attributes) {
         super(createHitboxEntity(location), attributes);
         
         this.setHurtSound(null);
         this.setDeathSound(null);
         
         this.setSize(size);
-        this.displayEntity = displayModel.spawn(location);
+        this.displayEntity = model.spawn(location);
     }
     
     public void setSize(double size) {

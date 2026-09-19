@@ -1,8 +1,9 @@
 package me.hapyl.hariant.element.anomaly;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.attribute.Attributable;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.instance.AttributesInstance;
+import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -31,13 +32,15 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
     private final double explosionRadius = 3;
     private final double baseDamage = 30;
     
+    private final int duration = 15;
+    
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this, Key.ofString("shock_damage_source"),
             DeathMessage.createWithDefaultKiller("{player} was shocked to death")
     );
     
     ElementalAnomalyShock() {
-        super(Key.ofString("shock"), Component.text("Shocked"), ElementType.ELECTRIC);
+        super(Key.ofString("shock"), ElementType.ELECTRIC, Component.text("Shocked"), new ElementalPotency(1.25, 0.15));
         
         setDescription(
                 Component.empty()
@@ -62,74 +65,92 @@ public final class ElementalAnomalyShock extends ElementalAnomalyImpl {
         );
     }
     
-    @Override
-    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
-        final HariantEntity source = anomalySource.getSource();
-        final Iterator<HariantEntity> iterator = entity.collectNearbyEntities(explosionRadius)
-                                                       .filter(_entity -> source == null || source.canAffect(_entity))
-                                                       .iterator();
-        
-        final double damage = calculateDamage(source);
-        final DamageSource damageSource = new ShockDamageSource(source, damage);
-        
-        double totalEnergyDrained = 0;
-        
-        while (iterator.hasNext()) {
-            final HariantEntity affectedEntity = iterator.next();
-            
-            affectedEntity.damage(damageSource);
-            
-            // Decrement energy if entity is a player
-            if (affectedEntity instanceof HariantPlayer player) {
-                final TalentUltimate ultimateTalent = player.getHero().getUltimateTalent();
-                final UltimateResourceType ultimateResourceType = ultimateTalent.getUltimateResourceType();
-                
-                if (ultimateResourceType != UltimateResourceType.ENERGY) {
-                    continue;
-                }
-                
-                final double ultimateDrain = Math.min(player.getUltimateResource(), ultimateTalent.getMaximumCost() * energyDrainOfMaxEnergy.doubleValue());
-                totalEnergyDrained += ultimateDrain;
-                
-                player.decrementUltimateResource(ultimateDrain);
-                
-                // Fx
-                player.playWorldSound(Sound.BLOCK_CHAIN_BREAK, 0.5f);
-                player.playWorldSound(Sound.BLOCK_CHAIN_BREAK, 0.75f);
-                player.playWorldSound(Sound.BLOCK_CHAIN_BREAK, 2.0f);
-            }
-        }
-        
-        // Transfer energy if the source is a player
-        if (totalEnergyDrained > 0 && anomalySource instanceof HariantPlayer player && player.getHero().getUltimateTalent().getUltimateResourceType() == UltimateResourceType.ENERGY) {
-            player.incrementUltimateResource(totalEnergyDrained * energyPlayerTransferPercentOfDrainedEnergy.doubleValue());
-            
-            // Fx
-            player.playSound(Sound.BLOCK_BEACON_POWER_SELECT, 1.25f);
-        }
-        
-        // Fx
-        final Location location = entity.getMidpointLocation();
-        
-        entity.spawnWorldParticle(location, Particle.WAX_ON, 50, 0, 0, 0, 0.75f);
-        entity.playWorldSound(location, Sound.ENTITY_COPPER_GOLEM_DEATH, 1.25f);
-    }
-    
-    @Override
-    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
-        return false;
-    }
-    
-    public double calculateDamage(@Nullable HariantEntity source) {
-        if (source == null) {
+    public double calculateDamage(@Nullable Attributable attributable) {
+        if (attributable == null) {
             return baseDamage;
         }
         
-        final AttributesInstance attributes = source.getAttributes();
+        final Attributes attributes = attributable.getAttributes();
+        
         final double attack = attributes.get(AttributeType.ATTACK);
         final double elementalMastery = attributes.get(AttributeType.ELEMENTAL_MASTERY);
         
         return baseDamage * (1 + (attack / 500 + elementalMastery / 1000));
+    }
+    
+    @Override
+    public @NotNull ElementalAnomalyInstance newInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source) {
+        final double damage = this.calculateDamage(source);
+        
+        return new ElementalAnomalyShockInstance(anomalySource, entity, source, damage);
+    }
+    
+    public class ElementalAnomalyShockInstance extends ElementalAnomalyInstance {
+        
+        private final DamageSource damageSource;
+        
+        ElementalAnomalyShockInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source, double damage) {
+            super(anomalySource, entity, source, duration);
+            
+            this.damageSource = new ShockDamageSource(source, damage);
+        }
+        
+        @Override
+        public void onStart() {
+            super.onStart();
+            
+            // Create explosion
+            final Iterator<? extends HariantEntity> iterator = entity.collectNearbyEntities(explosionRadius)
+                                                           .filter(_entity -> source == null || source.canAffect(_entity))
+                                                           .iterator();
+            
+            double totalEnergyDrained = 0;
+            
+            while (iterator.hasNext()) {
+                final HariantEntity affectedEntity = iterator.next();
+                
+                affectedEntity.damage(damageSource);
+                
+                // Decrement energy if entity is a player
+                if (affectedEntity instanceof HariantPlayer player) {
+                    final TalentUltimate ultimateTalent = player.getHero().getUltimateTalent();
+                    final UltimateResourceType ultimateResourceType = ultimateTalent.getUltimateResourceType();
+                    
+                    if (ultimateResourceType != UltimateResourceType.ENERGY) {
+                        continue;
+                    }
+                    
+                    final double ultimateDrain = Math.min(player.getUltimateResource(), ultimateTalent.getMaximumCost() * energyDrainOfMaxEnergy.doubleValue());
+                    totalEnergyDrained += ultimateDrain;
+                    
+                    player.decrementUltimateResource(ultimateDrain);
+                    
+                    // Fx
+                    player.playWorldSound(Sound.BLOCK_CHAIN_BREAK, 0.5f);
+                    player.playWorldSound(Sound.BLOCK_CHAIN_BREAK, 0.75f);
+                    player.playWorldSound(Sound.BLOCK_CHAIN_BREAK, 2.0f);
+                }
+            }
+            
+            // Transfer energy if the source is a player
+            if (totalEnergyDrained > 0 && anomalySource instanceof HariantPlayer player && player.getHero().getUltimateTalent().getUltimateResourceType() == UltimateResourceType.ENERGY) {
+                player.incrementUltimateResource(totalEnergyDrained * energyPlayerTransferPercentOfDrainedEnergy.doubleValue());
+                
+                // Fx
+                player.playSound(Sound.BLOCK_BEACON_POWER_SELECT, 1.25f);
+            }
+            
+            // Fx
+            final Location location = entity.getMidpointLocation();
+            
+            entity.spawnWorldParticle(location, Particle.WAX_ON, 25, 0, 0, 0, 40f);
+            entity.spawnWorldParticle(location, Particle.WAX_OFF, 25, 0, 0, 0, 40f);
+            entity.spawnWorldParticle(location, Particle.ELECTRIC_SPARK, 10, 2, 1, 2, 0.5f);
+            
+            entity.playWorldSound(location, Sound.ENTITY_COPPER_GOLEM_DEATH, 1.25f);
+        }
+        
+        
     }
     
     private class ShockDamageSource extends DamageSourceImpl {

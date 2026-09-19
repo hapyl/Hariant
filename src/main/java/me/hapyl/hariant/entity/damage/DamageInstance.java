@@ -2,7 +2,7 @@ package me.hapyl.hariant.entity.damage;
 
 import me.hapyl.hariant.annotate.CopyConstructor;
 import me.hapyl.hariant.annotate.Stale;
-import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
+import me.hapyl.hariant.attribute.instance.snapshot.AttributesSnapshot;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -39,7 +39,7 @@ public class DamageInstance implements MutatesDamage, DamageFlagged, ElementSour
     private boolean lethal;
     
     @CopyConstructor
-    public DamageInstance(@NotNull DamageInstance damageInstance) {
+    private DamageInstance(@NotNull DamageInstance damageInstance) {
         this.entity = damageInstance.entity;
         this.damageSource = damageInstance.damageSource;
         this.damageReport = new DamageReport(this, damageInstance.damageReport);
@@ -196,8 +196,8 @@ public class DamageInstance implements MutatesDamage, DamageFlagged, ElementSour
     
     private void calculateDamage() {
         // Snapshot attributes so we can modify them in the event without mutating the actual entity attributes
-        final AttributesInstanceSnapshot snapshotEntity = AttributesInstanceSnapshot.snapshot(entity);
-        final AttributesInstanceSnapshot snapshotAttacker = AttributesInstanceSnapshot.snapshot(damageSource.getSource());
+        final AttributesSnapshot snapshotEntity = AttributesSnapshot.snapshot(entity);
+        final AttributesSnapshot snapshotAttacker = AttributesSnapshot.snapshot(damageSource.getSource());
         
         // Call calculations event, which can be used to modify attributes or damage source
         final HariantDamageCalculationsEvent event = new HariantDamageCalculationsEvent(this, snapshotEntity, snapshotAttacker);
@@ -214,6 +214,10 @@ public class DamageInstance implements MutatesDamage, DamageFlagged, ElementSour
             this.damage *= multiplier;
             this.damageReport.report(component, DamageMutator.multiply(), multiplier, damageBeforeMultiplier, damage);
         }
+    }
+    
+    public static @NotNull DamageInstance copyOf(@NotNull DamageInstance damageInstance) {
+        return new DamageInstance(damageInstance);
     }
     
 }

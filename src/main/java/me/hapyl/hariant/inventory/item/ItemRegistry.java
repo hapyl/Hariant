@@ -23,6 +23,8 @@ public final class ItemRegistry extends StaticRegistry<Item> {
     public static final ItemArtifact ARTIFACT_CANNONBALL;
     public static final ItemArtifact ARTIFACT_GREAT_WHITE_SHARK_TOOTH;
     public static final ItemArtifact ARTIFACT_ZEALOT_MEDALLION;
+    public static final ItemArtifact ARTIFACT_WANTED_POSTER;
+    public static final ItemArtifact ARTIFACT_SNOWY_BEADS;
     
     private static final StaticRegistryMap<Item> REGISTRY;
     
@@ -45,19 +47,16 @@ public final class ItemRegistry extends StaticRegistry<Item> {
         ARTIFACT_CANNONBALL = REGISTRY.register("artifact_cannonball", ItemArtifactCannonball::new);
         ARTIFACT_GREAT_WHITE_SHARK_TOOTH = REGISTRY.register("artifact_great_white_shark_tooth", ItemArtifactGreatWhiteSharkTooth::new);
         ARTIFACT_ZEALOT_MEDALLION = REGISTRY.register("artifact_zealot_medallion", ItemArtifactZealotMedallion::new);
+        ARTIFACT_WANTED_POSTER = REGISTRY.register("artifact_wanted_poster", ItemArtifactWantedPoster::new);
+        ARTIFACT_SNOWY_BEADS = REGISTRY.register("artifact_snowy_beads", ItemArtifactSnowyBeads::new);
     }
     
-    @NotNull
-    public static StaticRegistryMap<Item> getRegistry() {
+    public static @NotNull StaticRegistryMap<Item> getRegistry() {
         return REGISTRY;
     }
     
-    @NotNull
-    public static <I extends Item> Stream<I> streamOfType(@NotNull Class<I> itemClass) {
-        return REGISTRY.values()
-                       .stream()
-                       .filter(itemClass::isInstance)
-                       .map(itemClass::cast);
+    public static <I extends Item> @NotNull Stream<I> streamOfType(@NotNull Class<I> itemClass) {
+        return REGISTRY.values().stream().filter(itemClass::isInstance).map(itemClass::cast);
     }
     
 }

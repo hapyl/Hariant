@@ -24,7 +24,7 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.target.TalentTargetEntityRayCast;
 import me.hapyl.hariant.task.HariantTickingTask;
@@ -100,7 +100,7 @@ public final class TalentBubbleTrap extends Talent implements Effect {
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("The bubble pops instantly if no enemies were trapped or the trapped entity has died.", Colors.DARK_GRAY))
+                         .append(Component.text("The bubble pops instantly if no enemies were trapped or the trapped entity escapes.", Colors.DARK_GRAY))
         );
     }
     

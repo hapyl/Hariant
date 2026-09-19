@@ -235,6 +235,11 @@ public interface HariantConstants {
      */
     long MILLIS_IN_DAY = 86_400_000;
     
+    /**
+     * Defines the absolute minimum elemental potency value.
+     */
+    double ABSOLUTE_MINIMUM_ELEMENTAL_POTENCY = 0.5;
+    
     private static @NotNull ComponentStyler createStylerWithPadding(int padding) {
         return ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(padding).build();
     }

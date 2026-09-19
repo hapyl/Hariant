@@ -132,6 +132,10 @@ public final class Colors {
     public static final TextColor EXPERIENCE = TextColor.color(0x1AFF16);
     public static final TextColor INVULNERABILITY = TextColor.color(0x6A8FD9);
     public static final TextColor GRAPPLE = TextColor.color(0xD97740);
+    public static final TextColor AETHERION = TextColor.color(0xB48CE0);
+    public static final TextColor ORC = TextColor.color(0x1B700B);
+    public static final TextColor THE_STRONGHOLD = TextColor.color(0xD7D7D7);
+    public static final TextColor BERSERK = TextColor.color(0x9E0D0D);
     
     private Colors() {
     }

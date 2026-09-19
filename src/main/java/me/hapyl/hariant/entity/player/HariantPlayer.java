@@ -586,6 +586,9 @@ public class HariantPlayer
         
         this.rechargeableTalentData.clear();
         this.combatTracker.reset();
+        
+        // Clear outline
+        setOutline(Outline.CLEAR);
     }
     
     @Override
@@ -881,6 +884,14 @@ public class HariantPlayer
         builder.append(this.getHealthFormatted());
         builder.append(hero.getUltimateTalent().getComponent(this));
         
+        // Append weapon primary ability cooldown if the weapon is on cooldown
+        final Weapon weapon = hero.getWeapon(this);
+        final Component primaryAbilityCooldown = weapon.getPrimaryAbilityCooldown(this);
+        
+        if (primaryAbilityCooldown != null) {
+            builder.append(primaryAbilityCooldown);
+        }
+        
         // Append hero actionbar
         final List<Component> heroComponents = hero.supplyActionbar(this);
         
@@ -1027,4 +1038,10 @@ public class HariantPlayer
             }
         }
     }
+    
+    @Override
+    public void setOutline(@NotNull Outline outline) {
+        outline.setOutline(this.getHandle());
+    }
+    
 }

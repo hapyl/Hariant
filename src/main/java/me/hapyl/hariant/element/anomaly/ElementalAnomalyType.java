@@ -1,12 +1,13 @@
 package me.hapyl.hariant.element.anomaly;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.HariantEntity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
-import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public enum ElementalAnomalyType implements ElementalAnomaly {
     
@@ -24,60 +25,53 @@ public enum ElementalAnomalyType implements ElementalAnomaly {
         this.anomaly = anomaly;
     }
     
-    @NotNull
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return anomaly.getKey();
     }
     
-    @NotNull
     @Override
-    public Component getPrefix() {
+    public @NotNull ElementType getElementType() {
+        return anomaly.getElementType();
+    }
+    
+    @Override
+    public @NotNull Component getPrefix() {
         return anomaly.getPrefix();
     }
     
-    @NotNull
     @Override
-    public Component getPrefixStyled() {
+    public @NotNull Component getPrefixStyled() {
         return anomaly.getPrefixStyled();
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return anomaly.getName();
     }
     
-    @NotNull
     @Override
-    public Component getDescription() {
+    public @NotNull Component getDescription() {
         return anomaly.getDescription();
     }
     
-    @NotNull
     @Override
-    public Style getStyle() {
+    public @NotNull Style getStyle() {
         return anomaly.getStyle();
     }
     
     @Override
-    public void trigger(@NotNull HariantEntity entity, @NotNull ElementalAnomalySource anomalySource) {
-        anomaly.trigger(entity, anomalySource);
+    public @NotNull ElementalPotency getPotency() {
+        return anomaly.getPotency();
     }
     
     @Override
-    public void display(@NotNull Location location) {
-        anomaly.display(location);
+    public @NotNull ElementalAnomalyInstance newInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source) {
+        return anomaly.newInstance(anomalySource, entity, source);
     }
     
     @Override
-    public boolean isAnomalyActive(@NotNull HariantEntity entity) {
-        return anomaly.isAnomalyActive(entity);
-    }
-    
-    @NotNull
-    @Override
-    public Component asComponent() {
+    public @NotNull Component asComponent() {
         return anomaly.asComponent();
     }
 }

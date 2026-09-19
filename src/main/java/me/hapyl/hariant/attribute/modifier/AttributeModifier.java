@@ -3,7 +3,6 @@ package me.hapyl.hariant.attribute.modifier;
 import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.eterna.module.registry.Keyed;
 import me.hapyl.eterna.module.util.Streamable;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -14,7 +13,7 @@ import me.hapyl.hariant.entity.effect.Effect;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.ui.ComponentDisplayable;
-import me.hapyl.hariant.util.TickDuration;
+import me.hapyl.hariant.util.TickingDown;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -26,7 +25,7 @@ import java.util.stream.Stream;
 
 public class AttributeModifier
         implements
-        Effect, TickDuration, TickingEntity, Streamable<AttributeModifier.Entry>,
+        Effect, TickingDown, TickingEntity, Streamable<AttributeModifier.Entry>,
         AttributeModifierAdder, ComponentDisplayable, AssistSource {
     
     protected final Set<Entry> entries;
@@ -47,25 +46,22 @@ public class AttributeModifier
         this.entries = Sets.newLinkedHashSet();
     }
     
-    public <K extends Keyed & Named> AttributeModifier(@NotNull K k, @NotNull HariantEntity applier, int duration) {
-        this(k.getKey(), k.getName(), applier, duration);
+    public AttributeModifier(@NotNull Key key, @NotNull Named named, @NotNull HariantEntity applier, int duration) {
+        this(key, named.getName(), applier, duration);
     }
     
-    @NotNull
     @Override
-    public HariantEntity source() {
+    public @NotNull HariantEntity source() {
         return applier;
     }
     
     @Override
-    @NotNull
-    public final Component getName() {
+    public final @NotNull Component getName() {
         return name;
     }
     
-    @NotNull
     @Override
-    public final Key getKey() {
+    public final @NotNull Key getKey() {
         return key;
     }
     
@@ -82,9 +78,8 @@ public class AttributeModifier
      * It is recommended to override this method for unique modifiers and simply returns the effect type.
      * </p>
      */
-    @NotNull
     @Override
-    public EffectType getEffectType() {
+    public @NotNull EffectType getEffectType() {
         for (Entry entry : entries) {
             if (entry.isBuff()) {
                 return EffectType.BUFF;
@@ -109,14 +104,12 @@ public class AttributeModifier
     public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
     }
     
-    @NotNull
-    public HariantEntity getApplier() {
+    public @NotNull HariantEntity getApplier() {
         return applier;
     }
     
     @Override
-    @NotNull
-    public Stream<Entry> stream() {
+    public @NotNull Stream<Entry> stream() {
         return entries.stream();
     }
     

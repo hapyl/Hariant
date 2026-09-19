@@ -8,13 +8,11 @@ public interface ItemCreator {
     
     @NotNull ItemBuilder createBuilder();
     
-    @NotNull
-    default ItemStack createItem() {
+    default @NotNull ItemStack createItem() {
         return createBuilder().asIcon();
     }
     
-    @NotNull
-    default ItemStack createIcon() {
+    default @NotNull ItemStack createIcon() {
         return createBuilder().setHideTooltip(true).asIcon();
     }
     

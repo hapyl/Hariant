@@ -9,7 +9,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.util.ComponentFormatter;
 import me.hapyl.hariant.util.Contains;
 import me.hapyl.hariant.util.Icon;

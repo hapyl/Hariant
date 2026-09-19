@@ -12,7 +12,7 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayFieldInstance;
+import me.hapyl.hariant.util.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Particle;
@@ -126,8 +126,8 @@ public abstract class TalentDemonsplit extends Talent {
     }
     
     @Override
-    protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
-        super.initAttributeFields(attributeFields);
+    public void initDisplayFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
+        super.initDisplayFields(attributeFields);
         
         attributeFields.add(DisplayFieldInstance.create(Component.text("Demon Reach"), Component.text("%.1f blocks".formatted(REACH_INCREASE))));
     }

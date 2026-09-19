@@ -7,6 +7,7 @@ import me.hapyl.hariant.hero.bounty_hunter.HeroBountyHunter;
 import me.hapyl.hariant.hero.inferno.HeroInferno;
 import me.hapyl.hariant.hero.mage.HeroMage;
 import me.hapyl.hariant.hero.nyx.HeroNyx;
+import me.hapyl.hariant.hero.orc.HeroOrc;
 import me.hapyl.hariant.hero.pytaria.HeroPytaria;
 import me.hapyl.hariant.hero.shark.HeroShark;
 import me.hapyl.hariant.hero.troll.HeroTroll;
@@ -30,6 +31,7 @@ public final class HeroRegistry extends StaticRegistry<Hero> {
     public static final HeroShark SHARK;
     public static final HeroZealot ZEALOT;
     public static final HeroBountyHunter BOUNTY_HUNTER;
+    public static final HeroOrc ORC;
     
     private static final StaticRegistryMap<Hero> REGISTRY;
     private static final List<Hero> DEFAULT_HEROES;
@@ -48,21 +50,23 @@ public final class HeroRegistry extends StaticRegistry<Hero> {
         SHARK = REGISTRY.register("shark", HeroShark::new);
         ZEALOT = REGISTRY.register("zealot", HeroZealot::new);
         BOUNTY_HUNTER = REGISTRY.register("bounty_hunter", HeroBountyHunter::new);
+        ORC = REGISTRY.register("orc", HeroOrc::new);
         
         // Assign default heroes, which are: [ ARCHER, PYTARIA, ALCHEMIST, MAGE ]
         DEFAULT_HEROES = List.of(ARCHER, PYTARIA, ALCHEMIST, MAGE);
+        
+        // Call `onRegister` methods
+        REGISTRY.forEach(Hero::onRegister);
     }
     
     private HeroRegistry() {
     }
     
-    @NotNull
-    public static StaticRegistryMap<Hero> getRegistry() {
+    public static @NotNull StaticRegistryMap<Hero> getRegistry() {
         return REGISTRY;
     }
     
-    @NotNull
-    public static List<Hero> defaultHeroes() {
+    public static @NotNull List<Hero> defaultHeroes() {
         return DEFAULT_HEROES;
     }
     

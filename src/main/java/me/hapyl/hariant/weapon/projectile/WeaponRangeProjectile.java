@@ -6,6 +6,7 @@ import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.util.Icon;
+import me.hapyl.hariant.util.field.DisplayFieldInstance;
 import me.hapyl.hariant.weapon.NormalAttackRanged;
 import me.hapyl.hariant.weapon.WeaponRange;
 import me.hapyl.hariant.weapon.ability.Ability;
@@ -13,6 +14,8 @@ import me.hapyl.hariant.weapon.ability.AbilityType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class WeaponRangeProjectile extends WeaponRange {
     
@@ -31,9 +34,15 @@ public class WeaponRangeProjectile extends WeaponRange {
         return projectileType;
     }
     
-    @NotNull
-    public Response shootResponse(@NotNull HariantPlayer player) {
+    public @NotNull Response shootResponse(@NotNull HariantPlayer player) {
         return Response.ok();
+    }
+    
+    @Override
+    public void initDisplayFields(@NotNull List<? super DisplayFieldInstance> displayFields) {
+        super.initDisplayFields(displayFields);
+        
+        // Append projectile details
     }
     
     public static class WeaponProjectileAbility extends Ability {

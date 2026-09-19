@@ -14,7 +14,7 @@ import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.GeometryExtras;
 import me.hapyl.hariant.util.decimal.Decimal;

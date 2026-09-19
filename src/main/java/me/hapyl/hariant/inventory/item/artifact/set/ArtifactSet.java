@@ -52,10 +52,6 @@ public abstract class ArtifactSet implements Keyed, Named, Registrable, Componen
     public void onRegister() {
     }
     
-    @Override
-    public void onUnregister() {
-    }
-    
     public @Nullable ElementType getEffectiveElementType() {
         return null;
     }

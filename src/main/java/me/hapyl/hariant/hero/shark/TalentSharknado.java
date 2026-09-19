@@ -2,7 +2,7 @@ package me.hapyl.hariant.hero.shark;
 
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.eterna.module.text.NumberToWord;
+import me.hapyl.eterna.module.text.Strings;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -17,7 +17,7 @@ import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
@@ -62,6 +62,8 @@ public final class TalentSharknado extends TalentUltimate {
             DeathMessage.create("{player} was consumed by [{killer}'s] Sharknado")
     );
     
+    private final Component sharknadoStyled = Component.text("Sharknado", Colors.SHARK);
+    
     public TalentSharknado(@NotNull Key key) {
         super(key, Component.text("Sharknado"), Icon.ofMaterial(Material.HEART_OF_THE_SEA), UltimateResourceType.ENERGY, 60);
         
@@ -71,22 +73,25 @@ public final class TalentSharknado extends TalentUltimate {
         setDescription(
                 Component.empty()
                          .append(Component.text("Summon a "))
-                         .append(Component.text("Sharknado", Colors.SHARK))
+                         .append(sharknadoStyled)
                          .append(Component.text(" from the depth within in front you."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("The Sharknado constantly pulls nearby "))
+                         .append(Component.text("The "))
+                         .append(sharknadoStyled)
+                         .append(Component.text(" constantly pulls nearby "))
                          .append(Component.text("enemies", Colors.RED))
-                         .append(Component.text(" towards and deals "))
+                         .append(Component.text(" towards itself and deals "))
+                         .appendNewline()
                          .append(ElementType.WATER.asComponentAreaOfEffectDamage())
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("Additionally, every "))
-                         .append(Component.text(NumberToWord.toWord(eachNHitAppliesBleed.intValue()).toLowerCase(), Colors.NUMBER))
-                         .append(Component.text(" hits, it "))
+                         .append(Component.text("Each "))
+                         .append(Component.text(Strings.stNdTh(eachNHitAppliesBleed.intValue()), Colors.NUMBER))
+                         .append(Component.text(" hit "))
                          .append(Component.text("forcefully", Style.style(TextDecoration.UNDERLINED)))
-                         .append(Component.text(" triggers "))
+                         .append(Component.text(" triggers one instance of "))
                          .append(ElementalAnomalyType.BLEED)
                          .append(Component.text("."))
         );
@@ -169,7 +174,7 @@ public final class TalentSharknado extends TalentUltimate {
                         entity.damage(damageSource);
                         
                         if (applyBleed) {
-                            entity.triggerAnomaly(new SharknadoAnomalySource(player));
+                            entity.triggerAnomaly(new SharknadoAnomalySource(player), true);
                         }
                     });
                     
@@ -217,7 +222,7 @@ public final class TalentSharknado extends TalentUltimate {
             pullSource.cancel();
         }
         
-        private @NotNull Stream<HariantEntity> stream() {
+        private @NotNull Stream<? extends HariantEntity> stream() {
             return collectNearbyEntities(location, riptideRadius).filter(player::canAffect);
         }
         

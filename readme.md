@@ -1,4 +1,4 @@
-# Code Style
+# ✒️ Code Style
 
 ## Class Naming Convention
 
@@ -7,7 +7,7 @@ must follow the parent (`Hero`) and always start with it.
 
 <b><u>Note that this pattern is explicitly enforced for Hero and Talent and must be strictly followed.</u></b>
 
-#### Examples:
+### Examples:
 
 * `HeroArcher`
     * ✅ Perfectly named class.
@@ -16,16 +16,14 @@ must follow the parent (`Hero`) and always start with it.
 * `ArcherHero`
     * ❌ Backwards
 
----
-
 ## Talent Ordering
 
 It is advised, though not required, to follow the talent order, which should be:
 
-* **Signature Talent** - Something that defines the playstyle of the hero should be on the first slot.
-* **Movement Talent** - If hero has a movement talent, it should be on the second slot, which will feel better for the
+* [1] **Signature Talent** - Something that defines the playstyle of the hero should be on the first slot.
+* [2] **Movement Talent** - If hero has a movement talent, it should be on the second slot, which will feel better for the
   player when using different heroes with movement talents.
-* **Additional Talent** - An additional talent goes to the third slot.
+* [3] **Additional Talent** - An additional talent goes to the third slot.
 
 ## Class Packages
 
@@ -38,11 +36,21 @@ The project must only use **JetBrains** annotations for nullability, (eg: `@Null
 
 ## Finalization
 
-All singleton classes (Talents, Items, etc), must be finalized (have `final` modifier on them).
+All singleton classes (Talents, Items, etc), should generally be finalized (have `final` modifier on them).
 
-------------------------------------------------------------------------
+## Comments
 
-# Descriptions & Lore
+The following should always be commented:
+
+* Effects, be it particles, sounds or anything else. (eg: `// Fx, // Effects, // Sfx`, etc.)
+
+## Explicit Types
+
+All types must be explicitly specified. Using `var` keyword or raw-types is prohibited.
+
+---
+
+# 📃 Descriptions & Lore
 
 ## Descriptions
 
@@ -58,33 +66,25 @@ any other information other than what's necessary for the object description.
 * `Shoots magical arrows that was was forged from the heart of an ancient dragon.`
     * ❌ Pointless lore integration in description.
 
----
-
 ## Flavor Text
 
 Flavor text is a **short** description displayed below the description, which describe
 the lore significance of an object.
 
-#### Examples:
+### Examples:
 
 * `A shiny golden coin with a face of a legendary cat engraved onto it.`
     * ✅ Perfect flavor text.
 * `There was once a legendary cat, who fought fiercely through every battle victorious, until one day...`
     * ❌ Too long, this is lore, not flavor text.
 
----
-
 ## Lore
 
-* Lore is extended version of flavor text, that describes the story of an object. Lore can only be viewed from the
-  Archive.
+* Lore is extended version of flavor text, that describes the story of an object; Lore can only be viewed from the Archive.
 
 ---
 
-## Comments
+# 🤖 AI Contents
 
-The following should always be commented:
+Fully AI-generated code is <u>not</u> allowed; however, AI can be used for help or prototyping. 
 
-* Effects, be it particles, sounds or anything else. (eg: `// Fx, // Effects, // Sfx`, etc) 
-
----

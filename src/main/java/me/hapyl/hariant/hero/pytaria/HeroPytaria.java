@@ -47,43 +47,38 @@ public final class HeroPytaria extends Hero {
         setRecommendedAttributes(Set.of(AttributeType.ATTACK, AttributeType.CRIT_DAMAGE, AttributeType.ENERGY_RECHARGE, AttributeType.PHYSICAL_DAMAGE_BONUS));
     }
     
-    @NotNull
     @Override
-    public TalentFlowerBreeze getFirstTalent() {
+    public @NotNull TalentFlowerBreeze getFirstTalent() {
         return TalentRegistry.FLOWER_BREEZE;
     }
     
-    @NotNull
     @Override
-    public TalentFlowerEscape getSecondTalent() {
+    public @NotNull TalentFlowerEscape getSecondTalent() {
         return TalentRegistry.FLOWER_ESCAPE;
     }
     
-    @NotNull
     @Override
-    public TalentRoseIvy getThirdTalent() {
+    public @NotNull TalentRoseIvy getThirdTalent() {
         return TalentRegistry.ROSE_IVY;
     }
     
-    @NotNull
     @Override
-    public TalentExcellency getPassiveTalent() {
+    public @NotNull TalentExcellency getPassiveTalent() {
         return TalentRegistry.EXCELLENCY;
     }
     
-    @NotNull
     @Override
-    public TalentFeelTheBreeze getUltimateTalent() {
+    public @NotNull TalentFeelTheBreeze getUltimateTalent() {
         return TalentRegistry.FEEL_THE_BREEZE;
     }
     
-    @NotNull
     @Override
-    public List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
         return player.getHeroData(HeroRegistry.PYTARIA, HeroDataPytaria::new).supplyActionbar(player);
     }
     
     public static class WeaponAnnihilallium extends WeaponMelee {
+        
         WeaponAnnihilallium() {
             super(
                     Key.ofString("annihilallium"),
@@ -101,6 +96,7 @@ public final class HeroPytaria extends Hero {
                              .append(Component.text("It said to be a gift from a loving person."))
             );
         }
+        
     }
     
 }

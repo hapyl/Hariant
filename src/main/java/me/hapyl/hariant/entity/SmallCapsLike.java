@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface SmallCapsLike {
     
-    @NotNull
-    Component asSmallCaps();
+    @NotNull Component asSmallCaps();
     
     static @NotNull Component asSmallCaps(@NotNull String string) {
         return Component.text(SmallCaps.format(string));

@@ -5,13 +5,13 @@ import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.util.TickDuration;
+import me.hapyl.hariant.util.TickingDown;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class StatusEffectInstance implements Ticking, TickDuration, Removable, ComponentLike {
+public class StatusEffectInstance implements Ticking, TickingDown, Removable, ComponentLike {
     
     private final StatusEffectType effect;
     private final HariantEntity entity;

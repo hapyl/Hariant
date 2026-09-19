@@ -120,10 +120,6 @@ public class AchievementImpl implements Achievement {
     }
     
     @Override
-    public void onUnregister() {
-    }
-    
-    @Override
     public boolean isHidden() {
         return hidden;
     }

@@ -17,7 +17,7 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentRegistry;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
@@ -143,7 +143,7 @@ public final class TalentQuantumDischarge extends Talent {
         
         @Override
         public void run(int tick) {
-            final Stream<HariantEntity> entities = collectNearbyEntities(novaExplosionBoundingRadius).filter(player::canAffect);
+            final Stream<? extends HariantEntity> entities = collectNearbyEntities(novaExplosionBoundingRadius).filter(player::canAffect);
             
             // Create explosion
             if (tick > delay) {

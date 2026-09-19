@@ -14,7 +14,7 @@ import me.hapyl.hariant.event.HariantTalentUltimateEvent;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayFieldInstance;
+import me.hapyl.hariant.util.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.executor.Executable;
 import me.hapyl.hariant.task.executor.ExecutorService;
@@ -213,8 +213,8 @@ public abstract class TalentUltimate extends Talent implements Duration {
     }
     
     @Override
-    protected void initAttributeFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
-        super.initAttributeFields(attributeFields);
+    public void initDisplayFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
+        super.initDisplayFields(attributeFields);
         
         attributeFields.add(DisplayFieldInstance.create(
                 ultimateResourceType.getName().append(Component.text(" Cost")),

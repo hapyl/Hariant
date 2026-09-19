@@ -4,6 +4,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import org.jetbrains.annotations.NotNull;
 
 public interface AttributesBase {
+    
     double get(@NotNull AttributeType attributeType);
     
     default double normalized(@NotNull AttributeType attributeType) {
@@ -19,4 +20,5 @@ public interface AttributesBase {
     default void subtract(@NotNull AttributeType attributeType, double value) {
         add(attributeType, -value);
     }
+    
 }

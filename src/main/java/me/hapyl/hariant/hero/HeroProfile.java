@@ -7,11 +7,11 @@ public final class HeroProfile {
     
     private final Hero hero;
     
-    @NotNull private Archetype archetype;
-    @NotNull private ElementType elementType;
-    @NotNull private Affiliation affiliation;
-    @NotNull private Gender gender;
-    @NotNull private Race race;
+    private @NotNull Archetype archetype;
+    private @NotNull ElementType elementType;
+    private @NotNull Affiliation affiliation;
+    private @NotNull Gender gender;
+    private @NotNull Race race;
     
     HeroProfile(@NotNull Hero hero) {
         this.hero = hero;
@@ -22,13 +22,11 @@ public final class HeroProfile {
         this.race = Race.HUMAN;
     }
     
-    @NotNull
-    public Hero getHero() {
+    public @NotNull Hero getHero() {
         return hero;
     }
     
-    @NotNull
-    public Archetype getArchetype() {
+    public @NotNull Archetype getArchetype() {
         return archetype;
     }
     
@@ -36,8 +34,7 @@ public final class HeroProfile {
         this.archetype = archetype;
     }
     
-    @NotNull
-    public ElementType getElementType() {
+    public @NotNull ElementType getElementType() {
         return elementType;
     }
     
@@ -45,8 +42,7 @@ public final class HeroProfile {
         this.elementType = elementType;
     }
     
-    @NotNull
-    public Affiliation getAffiliation() {
+    public @NotNull Affiliation getAffiliation() {
         return affiliation;
     }
     
@@ -54,8 +50,7 @@ public final class HeroProfile {
         this.affiliation = affiliation;
     }
     
-    @NotNull
-    public Gender getGender() {
+    public @NotNull Gender getGender() {
         return gender;
     }
     
@@ -63,8 +58,7 @@ public final class HeroProfile {
         this.gender = gender;
     }
     
-    @NotNull
-    public Race getRace() {
+    public @NotNull Race getRace() {
         return race;
     }
     

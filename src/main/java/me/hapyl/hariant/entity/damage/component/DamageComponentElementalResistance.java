@@ -1,7 +1,7 @@
 package me.hapyl.hariant.entity.damage.component;
 
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.attribute.instance.AttributesInstanceSnapshot;
+import me.hapyl.hariant.attribute.instance.snapshot.AttributesSnapshot;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +20,7 @@ public final class DamageComponentElementalResistance implements DamageComponent
     }
     
     @Override
-    public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesInstanceSnapshot entity, @NotNull AttributesInstanceSnapshot attacker) {
+    public double multiplier(@NotNull DamageInstance damageInstance, @NotNull AttributesSnapshot entity, @NotNull AttributesSnapshot attacker) {
         final ElementType elementType = damageInstance.getElementType();
         final AttributeType defensiveAttribute = elementType.getDefensiveAttribute();
         

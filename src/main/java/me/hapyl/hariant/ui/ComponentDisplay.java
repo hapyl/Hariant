@@ -5,10 +5,11 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.entity.EntityGarbageCollector;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
-import me.hapyl.hariant.util.MathFont;
+import me.hapyl.hariant.util.DigitStyle;
 import me.hapyl.hariant.util.MatrixUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
@@ -24,7 +25,8 @@ import java.util.Random;
 
 public class ComponentDisplay implements ComponentDisplayable {
     
-    public static final ShadowColor NO_SHADOW = ShadowColor.shadowColor(0, 0, 0, 255);
+    private static final ShadowColor NO_SHADOW = ShadowColor.shadowColor(0, 0, 0, 255);
+    private static final Color NO_BACKGROUND = Color.fromARGB(0, 0, 0, 0);
     
     private final Component component;
     private final ComponentDisplayAnimation animation;
@@ -51,9 +53,12 @@ public class ComponentDisplay implements ComponentDisplayable {
             self.setInterpolationDuration(1);
             self.setTransformation(MatrixUtils.scale(scale));
             self.text(component.shadowColor(NO_SHADOW));
-            self.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
+            self.setBackgroundColor(NO_BACKGROUND);
             self.setViewRange(16f);
         });
+        
+        // Mark as garbage entity
+        EntityGarbageCollector.add(textDisplay);
         
         final ComponentOrigin origin = new ComponentOrigin(textDisplay.getX(), textDisplay.getY(), textDisplay.getZ(), scale);
         
@@ -91,7 +96,7 @@ public class ComponentDisplay implements ComponentDisplayable {
         
         new ComponentDisplay(
                 Component.empty()
-                         .append(Component.text(MathFont.format((int) damage), style))
+                         .append(DigitStyle.STYLE.asComponent((int) damage).style(style))
                          .append(critical ? HariantConstants.CHARACTER_CRITICAL_DAMAGE.style(style) : Component.empty()),
                 ComponentDisplayAnimation.ofFalloff(),
                 20,

@@ -3,11 +3,9 @@ package me.hapyl.hariant.element.anomaly;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
-import me.hapyl.hariant.element.Element;
-import me.hapyl.hariant.ui.ComponentDisplay;
+import me.hapyl.hariant.element.ElementType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
-import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -16,66 +14,60 @@ import java.util.Objects;
 public abstract class ElementalAnomalyImpl implements ElementalAnomaly {
     
     private final Key key;
+    private final ElementType elementType;
     
     private final Component prefix;
     private final Component name;
     private final Style style;
+    private final ElementalPotency potency;
     
     private Component description;
     
-    public ElementalAnomalyImpl(@NotNull Key key, @NotNull Component prefix, @NotNull Component name, @NotNull Style style) {
+    ElementalAnomalyImpl(@NotNull Key key, @NotNull ElementType element, @NotNull Component name, @NotNull ElementalPotency potency) {
         this.key = key;
-        this.prefix = prefix;
+        this.elementType = element;
+        this.prefix = element.getPrefix();
         this.name = name;
         this.description = Described.defaultValue();
-        this.style = style;
+        this.style = element.getStyle();
+        this.potency = potency;
         
         AutoRegisteredListener.Registry.register(this);
     }
     
-    public ElementalAnomalyImpl(@NotNull Key key, @NotNull Component name, @NotNull Element element) {
-        this(key, element.getPrefix(), name, element.getStyle());
-    }
-    
     @Override
-    @NotNull
-    public final Key getKey() {
+    public final @NotNull Key getKey() {
         return key;
     }
     
-    @NotNull
     @Override
-    public Component getPrefix() {
+    public final @NotNull ElementType getElementType() {
+        return elementType;
+    }
+    
+    @Override
+    public @NotNull Component getPrefix() {
         return prefix;
     }
     
-    @NotNull
     @Override
-    public Component getPrefixStyled() {
+    public @NotNull Component getPrefixStyled() {
         return prefix.style(style);
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return name;
     }
     
-    @NotNull
     @Override
-    public Component getDescription() {
+    public @NotNull Component getDescription() {
         return description;
     }
     
-    @NotNull
     @Override
-    public Style getStyle() {
+    public @NotNull Style getStyle() {
         return style;
-    }
-    
-    @Override
-    public void display(@NotNull Location location) {
-        ComponentDisplay.ofAscend(this.asComponent(), location, 40, 1.0f);
     }
     
     @Override
@@ -102,10 +94,14 @@ public abstract class ElementalAnomalyImpl implements ElementalAnomaly {
         return Objects.equals(this.key, that.key);
     }
     
-    @NotNull
     @Override
-    public Component asComponent() {
+    public @NotNull Component asComponent() {
         return prefix.style(style).appendSpace().append(name.style(style));
+    }
+    
+    @Override
+    public @NotNull ElementalPotency getPotency() {
+        return potency;
     }
     
 }

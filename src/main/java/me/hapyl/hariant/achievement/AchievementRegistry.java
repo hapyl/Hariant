@@ -113,7 +113,7 @@ public final class AchievementRegistry extends StaticRegistry<Achievement> {
         INFERNO_FULL_IGNITION = REGISTRY.register("inferno_full_ignition", AchievementInfernoFullIgnition::new);
         
         NYX_DOUBLE_DUTY = REGISTRY.register("nyx_double_duty", AchievementNyxDoubleDuty::new);
-        NYX_RIPPLE_EFFECT = REGISTRY.register("nyx_ripple_effectg", AchievementNyxRippleEffect::new);
+        NYX_RIPPLE_EFFECT = REGISTRY.register("nyx_ripple_effect", AchievementNyxRippleEffect::new);
         NYX_LAST_RITES = REGISTRY.register("nyx_last_rites", AchievementNyxLastRites::new);
         
         BLAST_KNIGHT_FRONT_LINE = REGISTRY.register("blast_knight_front_line", AchievementBlastKnightFrontLine::new);

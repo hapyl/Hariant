@@ -95,7 +95,7 @@ public class SoulStorm extends HariantTickingTask {
                         this.location.getZ() + vector.getZ() * d
                 );
                 
-                final Stream<HariantEntity> entities = player.collectNearbyEntities(location, talent.radius).filter(player::canAffect);
+                final Stream<? extends HariantEntity> entities = player.collectNearbyEntities(location, talent.radius).filter(player::canAffect);
                 
                 entities.forEach(entity -> {
                     if (damageTick && entity.damage(damageSource) == DamageResult.OK) {

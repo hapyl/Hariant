@@ -12,7 +12,7 @@ import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.event.HariantElementalAnomalyEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;

@@ -3,6 +3,7 @@ package me.hapyl.hariant.attribute.instance;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.annotate.NotEmpty;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.attribute.Attributable;
 import me.hapyl.hariant.attribute.AttributeType;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -43,8 +44,7 @@ public class Attributes implements AttributesBase {
         attributeMap.merge(attributeType, value, Double::sum);
     }
     
-    @NotNull
-    public Attributes adjust(@NotNull AttributeType attributeType, double value) {
+    public @NotNull Attributes adjust(@NotNull AttributeType attributeType, double value) {
         this.set(attributeType, value);
         return this;
     }
@@ -55,15 +55,6 @@ public class Attributes implements AttributesBase {
     
     public @NotNull Component createLore(@NotNull AttributeType attributeType) {
         return createLore0(attributeType, 0);
-    }
-    
-    private @NotNull Component createLore0(@NotNull AttributeType attributeType, double externalValue) {
-        return Component.empty()
-                        .append(this.createRelativeArrow(attributeType))
-                        .appendSpace()
-                        .append(attributeType.asComponent())
-                        .appendSpace()
-                        .append(attributeType.format(attributeType.clamp(this.get(attributeType) + externalValue)));
     }
     
     public @NotNull Component createRelativeArrow(@NotNull AttributeType attributeType) {
@@ -77,6 +68,15 @@ public class Attributes implements AttributesBase {
                  : Component.text("■", Colors.DARK_GRAY);
     }
     
+    private @NotNull Component createLore0(@NotNull AttributeType attributeType, double externalValue) {
+        return Component.empty()
+                        .append(this.createRelativeArrow(attributeType))
+                        .appendSpace()
+                        .append(attributeType.asComponent())
+                        .appendSpace()
+                        .append(attributeType.format(attributeType.clamp(this.get(attributeType) + externalValue)));
+    }
+    
     public static @NotNull Attributes base(final double maxHealth, final double attack, final double defense) {
         final Attributes attributes = new Attributes(null);
         attributes.set(AttributeType.MAX_HEALTH, maxHealth);
@@ -86,12 +86,18 @@ public class Attributes implements AttributesBase {
         return attributes;
     }
     
-    public static @NotNull Attributes common() {
-        return base(1000, 100, 100);
+    public static @NotNull Attributes zero() {
+        final Attributes attributes = new Attributes(null);
+        attributes.attributeMap.replaceAll((_, _) -> 0.0);
+        return attributes;
     }
     
     public static @NotNull Attributes copyOf(@NotNull Attributes attributes) {
         return new Attributes(attributes);
+    }
+    
+    public static @NotNull Attributes copyOfNullable(@Nullable Attributable source) {
+        return source != null ? copyOf(source.getAttributes()) : zero();
     }
     
     public static @NotNull Component createExternalValueComponent(@Nullable Double externalValue) {

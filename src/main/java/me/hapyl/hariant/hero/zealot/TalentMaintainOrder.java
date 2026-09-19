@@ -1,8 +1,6 @@
 package me.hapyl.hariant.hero.zealot;
 
-import me.hapyl.eterna.module.block.display.BDEngine;
 import me.hapyl.eterna.module.block.display.DisplayEntity;
-import me.hapyl.eterna.module.block.display.DisplayModel;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.registry.Key;
@@ -18,7 +16,7 @@ import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.ferocity.FerocitySource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
@@ -27,6 +25,7 @@ import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.task.executor.Executable;
 import me.hapyl.hariant.util.BoundingBoxBlueprint;
 import me.hapyl.hariant.util.Icon;
+import me.hapyl.hariant.util.Models;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -55,10 +54,6 @@ public final class TalentMaintainOrder extends TalentUltimate {
     
     private final double landingYOffset = 10;
     private final double distanceFromEyes = 4;
-    
-    private final DisplayModel model = BDEngine.parse(
-            "/summon block_display ~-0.5 ~-0.5 ~-0.5 {Passengers:[{id:\"minecraft:item_display\",item:{id:\"minecraft:golden_sword\",Count:1},item_display:\"none\",transformation:[2.6043f,3.5194f,-2.4148f,-0.2500f,3.4151f,-3.4151f,-1.2941f,1.2500f,-2.5602f,-0.9753f,-4.1826f,-0.5000f,0.0000f,0.0000f,0.0000f,1.0000f]}]}"
-    );
     
     private final DamageSourceIdentity damageSourceIdentityLanding = DamageSourceIdentity.createOfNamed(
             this,
@@ -128,7 +123,7 @@ public final class TalentMaintainOrder extends TalentUltimate {
             
             this.player = player;
             this.location = location;
-            this.displayEntity = model.spawnInterpolated(LocationHelper.copyOfPosition(location).add(0, landingYOffset, 0));
+            this.displayEntity = Models.MAINTAIN_ORDER.spawn(LocationHelper.copyOfPosition(location).add(0, landingYOffset, 0));
             this.duration = getDuration();
             this.durationWithImpact = duration + impactDuration.intValue();
             this.damageSourceLanding = new DamageSourceMaintainOrderLanding(player);
@@ -147,7 +142,7 @@ public final class TalentMaintainOrder extends TalentUltimate {
                 player.playWorldSound(location, Sound.ITEM_SHIELD_BREAK, 0.75f);
             }
             else if (tick > getDuration()) {
-                final Stream<HariantEntity> entities = stream();
+                final Stream<? extends HariantEntity> entities = stream();
                 
                 // Explode the sword
                 if (tick >= durationWithImpact) {
@@ -199,7 +194,7 @@ public final class TalentMaintainOrder extends TalentUltimate {
             return location;
         }
         
-        private @NotNull Stream<HariantEntity> stream() {
+        private @NotNull Stream<? extends HariantEntity> stream() {
             return collectNearbyEntities(landingBoundingBox.create(location)).filter(player::canAffect);
         }
     }

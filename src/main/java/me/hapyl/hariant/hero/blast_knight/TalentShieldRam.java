@@ -11,7 +11,7 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
@@ -150,6 +150,11 @@ public final class TalentShieldRam extends Talent {
             }
             
             location.subtract(x, 0, z);
+            
+            // Play slam fx on first tick
+            if (tick == 0) {
+                player.playWorldSound(location, Sound.ITEM_SHIELD_BREAK, 0.0f);
+            }
         }
         
         @Override

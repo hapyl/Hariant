@@ -5,7 +5,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.*;
-import me.hapyl.hariant.talent.field.DisplayField;
+import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.BlockHelper;
 import me.hapyl.hariant.util.Icon;
@@ -21,7 +21,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TalentWiltBlink extends Talent {
+public final class TalentWiltBlink extends Talent {
     
     private final @DisplayField Decimal maxBlinkDistance = Decimal.ofValue(5);
     
@@ -45,7 +45,7 @@ public class TalentWiltBlink extends Talent {
                          .append(
                                  Component.empty()
                                           .append(Component.text("The rose blooms to life once again and explodes, dealing "))
-                                          .append(ElementType.AETHER.asComponentDamage())
+                                          .append(ElementType.AETHER.asComponentAreaOfEffectDamage())
                                           .append(Component.text(" and applies "))
                                           .append(ElementType.AETHER)
                                           .append(Component.text(" anomaly."))

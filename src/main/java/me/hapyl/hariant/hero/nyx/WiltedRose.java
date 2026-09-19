@@ -1,8 +1,6 @@
 package me.hapyl.hariant.hero.nyx;
 
-import me.hapyl.eterna.module.block.display.BDEngine;
 import me.hapyl.eterna.module.block.display.DisplayEntity;
-import me.hapyl.eterna.module.block.display.DisplayModel;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -11,6 +9,7 @@ import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
+import me.hapyl.hariant.util.Models;
 import me.hapyl.hariant.util.QuaternionRotation;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
@@ -24,10 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 public final class WiltedRose extends HariantTickingTask {
-    
-    private static final DisplayModel MODEL = BDEngine.parse(
-            "/summon block_display ~-0.5 ~ ~-0.5 {Passengers:[{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-1068371645,-1203952194,1458675595,49119003],properties:[{name:\"textures\",value:\"ewogICJ0aW1lc3RhbXAiIDogMTc4MTAxNjMxNjkzMCwKICAicHJvZmlsZUlkIiA6ICI0YWU5MTM5MzZhOGU0MWU0YWNlMTYyYjI4YmM0MzMwMyIsCiAgInByb2ZpbGVOYW1lIiA6ICJ6ZXJ2YXRpb24iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTdjNWE3NTIwZjA5Yzk1OTUyNzUzNTc4ZTgzOTZiZTY5ZTA2MDdmODE3NmExM2EwNmE3YzY2YThlM2UxNzgwOCIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9\"}]}}},item_display:\"none\",transformation:[1f,0f,0f,0f,0f,1f,0f,0.5125f,0f,0f,1f,0f,0f,0f,0f,1f]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-67745515,-1044678911,-1011336281,20198111],properties:[{name:\"textures\",value:\"ewogICJ0aW1lc3RhbXAiIDogMTc4MTAxNDI0NzU0OSwKICAicHJvZmlsZUlkIiA6ICJhNWM5MmJlODg5MGY0NDU0OTdkNGEwOTM2Yjg1NDc5OSIsCiAgInByb2ZpbGVOYW1lIiA6ICJDbG93ZGVyVGVjaCIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS82MGI3ZTUzNDcxMDk5NDIwNTQ5Mjg0Nzk1ZTllZjNlMjgyYjBhMWFiMTk2YWRhMzMzMGY5MTFiMTQ3ZjU5YzAzIgogICAgfQogIH0KfQ==\"}]}}},item_display:\"none\",transformation:[0f,-0.0625f,0f,-0.29625f,1f,0f,0f,0.2f,0f,0f,1.025f,0.00375f,0f,0f,0f,1f],Tags: [\"west\"]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-235189945,-978033769,870310277,718942065],properties:[{name:\"textures\",value:\"ewogICJ0aW1lc3RhbXAiIDogMTc4MTAxNzMxNzA1MCwKICAicHJvZmlsZUlkIiA6ICJiMTM1MDRmMjMxOGI0OWNjYWFkZDcyYWVhYmMyNTQ1MCIsCiAgInByb2ZpbGVOYW1lIiA6ICJUeXBrZW4iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTBjY2FhMmExMmM1NDgxMTY5YmEwMTI5NDU1OTU5YjBkYTlkYTZmMWJhZGY5NGI3MGVlZjZkOWY0MTYzM2E2ZSIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9\"}]}}},item_display:\"none\",transformation:[0f,0f,1.025f,-0.005625f,-1f,0f,0f,0.2f,0f,-0.0625f,0f,-0.293125f,0f,0f,0f,1f],Tags: [\"north\"]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-1786685695,2115638748,-395777575,1042588237],properties:[{name:\"textures\",value:\"ewogICJ0aW1lc3RhbXAiIDogMTc4MTAxNDI0NzU0OSwKICAicHJvZmlsZUlkIiA6ICJhNWM5MmJlODg5MGY0NDU0OTdkNGEwOTM2Yjg1NDc5OSIsCiAgInByb2ZpbGVOYW1lIiA6ICJDbG93ZGVyVGVjaCIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS82MGI3ZTUzNDcxMDk5NDIwNTQ5Mjg0Nzk1ZTllZjNlMjgyYjBhMWFiMTk2YWRhMzMzMGY5MTFiMTQ3ZjU5YzAzIgogICAgfQogIH0KfQ==\"}]}}},item_display:\"none\",transformation:[0f,0.0625f,0f,0.29f,1f,0f,0f,0.2f,0f,0f,-1.025f,-0.00375f,0f,0f,0f,1f],Tags: [\"east\"]},{id:\"minecraft:item_display\",item:{id:\"minecraft:player_head\",Count:1,components:{\"minecraft:profile\":{id:[I;-1292252864,-1893966665,-1131660275,1520973419],properties:[{name:\"textures\",value:\"ewogICJ0aW1lc3RhbXAiIDogMTc4MTAxNzMxNzA1MCwKICAicHJvZmlsZUlkIiA6ICJiMTM1MDRmMjMxOGI0OWNjYWFkZDcyYWVhYmMyNTQ1MCIsCiAgInByb2ZpbGVOYW1lIiA6ICJUeXBrZW4iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTBjY2FhMmExMmM1NDgxMTY5YmEwMTI5NDU1OTU5YjBkYTlkYTZmMWJhZGY5NGI3MGVlZjZkOWY0MTYzM2E2ZSIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9\"}]}}},item_display:\"none\",transformation:[0f,0f,-1.025f,-0.000625f,-1f,0f,0f,0.2f,0f,0.0625f,0f,0.293125f,0f,0f,0f,1f],Tags: [\"south\"]}]}"
-    );
     
     private static final Map<String, QuaternionRotation> PETAL_ROTATION_MAP = Map.of(
             "north", (quaternion, angle) -> quaternion.rotateLocalX(-angle),
@@ -58,7 +53,7 @@ public final class WiltedRose extends HariantTickingTask {
         
         this.player = player;
         this.location = location;
-        this.displayEntity = MODEL.spawnInterpolated(location);
+        this.displayEntity = Models.WILTED_ROSE.spawn(location);
         this.talent = talent;
         this.bloomDelay = talent.roseBloomDelay.intValue();
         this.rotationAngle = PETAL_ROTATION_RADIANS / bloomDelay;

@@ -29,7 +29,7 @@ public class FerocitySourceImpl implements FerocitySource {
     @Override
     public @NotNull DamageInstance getDamageInstance() {
         // Always return a copy of the damage instance since it can be mutated inside damage method
-        return new DamageInstance(damageInstance);
+        return DamageInstance.copyOf(damageInstance);
     }
     
     @Override
@@ -43,7 +43,7 @@ public class FerocitySourceImpl implements FerocitySource {
     }
     
     private static @NotNull DamageInstance prepareDamageInstance(@NotNull DamageInstance damageInstance) {
-        final DamageInstance prepared = new DamageInstance(damageInstance);
+        final DamageInstance prepared = DamageInstance.copyOf(damageInstance);
         
         // Set the damage type to FEROCITY and zero the elemental units application
         prepared.setDamageType(DamageType.FEROCITY);
