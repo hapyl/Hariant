@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.archer;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.math.geometry.Quality;
 import me.hapyl.eterna.module.particle.ParticleBuilder;
@@ -63,7 +64,7 @@ public final class TalentShockDart extends Talent {
     public TalentShockDart(@NotNull Key key) {
         super(key, Component.text("Shock Dart"), Icon.ofMaterial(Material.SPECTRAL_ARROW));
         
-        this.setCooldownSeconds(6);
+        this.setCooldown(Tick.ofSeconds(6));
         
         this.setDescription(
                 Component.empty()

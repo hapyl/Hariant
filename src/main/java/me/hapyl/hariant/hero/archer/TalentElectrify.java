@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.archer;
 
 import me.hapyl.eterna.module.component.ProgressBar;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.Vector3;
 import me.hapyl.eterna.module.particle.ParticleBuilder;
 import me.hapyl.eterna.module.registry.Key;
@@ -63,7 +64,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
     public TalentElectrify(@NotNull Key key) {
         super(key, Component.text("Electrify"), Icon.ofMaterial(Material.BLAZE_POWDER), UltimateResourceType.ENERGY, 100);
         
-        this.setDurationSeconds(10);
+        this.setDuration(Tick.ofSeconds(10));
         
         this.setDescription(
                 Component.empty()
@@ -141,7 +142,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
     
     @Override
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
-        final int duration = this.getDuration();
+        final int duration = this.getDuration().ticks();
         
         final HeroDataArcher archerData = player.getHeroData(HeroRegistry.ARCHER, HeroDataArcher::new);
         archerData.setInfused(true);

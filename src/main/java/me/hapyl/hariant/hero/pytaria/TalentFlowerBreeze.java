@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.pytaria;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.CollectionUtils;
 import me.hapyl.hariant.Colors;
@@ -62,8 +63,8 @@ public final class TalentFlowerBreeze extends Talent {
     public TalentFlowerBreeze(@NotNull Key key) {
         super(key, Component.text("Flower Breeze"), Icon.ofMaterial(Material.RED_DYE));
         
-        this.setCooldownSeconds(16);
-        this.setDurationSeconds(5);
+        setDuration(Tick.ofSeconds(5));
+        setCooldown(Tick.ofSeconds(16));
         
         this.setTalentType(TalentType.ENHANCE);
         
@@ -162,7 +163,7 @@ public final class TalentFlowerBreeze extends Talent {
     private class ModifierFlowerBreeze extends AttributeModifier {
         
         ModifierFlowerBreeze(@NotNull HariantEntity applier) {
-            super(modifierKey, TalentFlowerBreeze.this, applier, TalentFlowerBreeze.this.getDuration());
+            super(modifierKey, TalentFlowerBreeze.this, applier, TalentFlowerBreeze.this.duration());
             
             of(AttributeType.ATTACK, AttributeModifierType.MULTIPLICATIVE, attackIncrease.doubleValue());
             of(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, defenseIncrease.doubleValue());

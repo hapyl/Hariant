@@ -2,11 +2,11 @@ package me.hapyl.hariant.talent.rechargeable;
 
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.text.NumberToWord;
+import me.hapyl.eterna.module.text.Strings;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.task.InternalTasks;
-import me.hapyl.hariant.util.ThisClassShouldNeMovedToEternaAPI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -25,7 +25,7 @@ public enum RechargeType {
             
             // If we're not at max charges, start the cooldown again
             if (rechargeableTalentData.getCharges() < talent.getMaximumCharges()) {
-                InternalTasks.now(() -> player.setCooldown(talent));
+                InternalTasks.now(() -> player.startCooldown(talent));
             }
             
             // Fx
@@ -81,7 +81,7 @@ public enum RechargeType {
             }
             // Otherwise start a tiny internal cooldown and hold
             else {
-                player.setCooldown(talent, 2);
+                player.startCooldown(talent, 2);
                 return Response.hold();
             }
         }
@@ -94,24 +94,7 @@ public enum RechargeType {
         
         @Override
         public @NotNull Component getComponent(int maximumCharges) {
-            return Component.text("This talent can be used %s consecutively.".formatted(numberToString(maximumCharges)), Colors.DARK_GRAY);
-        }
-        
-        @ThisClassShouldNeMovedToEternaAPI
-        private static @NotNull String numberToString(int number) {
-            return switch (number) {
-                case 1 -> "once";
-                case 2 -> "twice";
-                case 3 -> "thrice";
-                case 4 -> "four times";
-                case 5 -> "five times";
-                case 6 -> "six times";
-                case 7 -> "seven times";
-                case 8 -> "eight times";
-                case 9 -> "nine times";
-                case 10 -> "ten times";
-                default -> number + " times";
-            };
+            return Component.text("This talent can be used %s consecutively.".formatted(Strings.occurrencesToString(maximumCharges)), Colors.DARK_GRAY);
         }
         
     };

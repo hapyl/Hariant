@@ -7,6 +7,7 @@ import me.hapyl.eterna.module.location.Coordinates;
 import me.hapyl.eterna.module.location.Distanced;
 import me.hapyl.eterna.module.location.Located;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.geometry.Drawable;
 import me.hapyl.eterna.module.reflect.glowing.Glowing;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
@@ -14,6 +15,7 @@ import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Handle;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
+import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.attribute.Attributable;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -24,7 +26,7 @@ import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.effect.Effect;
@@ -115,8 +117,8 @@ public class HariantEntity
     
     private static final ComponentDisplay COMPONENT_DISPLAY_IMMUNE = createImmuneComponentDisplay(null);
     
-    private static final HariantCooldown HEALTH_MUTATOR_APPLICATION_COOLDOWN = HariantCooldown.ofSeconds(Key.ofString("health_mutator_cooldown"), 1.2f);
-    private static final HariantCooldown FEROCITY_COOLDOWN = HariantCooldown.ofSeconds(Key.ofString("ferocity"), 0.2f);
+    private static final Cooldown HEALTH_MUTATOR_APPLICATION_COOLDOWN = Cooldown.create(Key.ofString("health_mutator_cooldown"), Tick.ofSeconds(1.2f));
+    private static final Cooldown FEROCITY_COOLDOWN = Cooldown.create(Key.ofString("ferocity"), Tick.ofSeconds(0.2f));
     
     private static final HealthStyle DEFAULT_HEALTH_STYLE = HealthStyle.create(Style.style(Colors.ATTRIBUTE_MAX_HEALTH));
     
@@ -231,7 +233,7 @@ public class HariantEntity
         }
         
         this.healthMutators.put(mutator.getClass(), mutator);
-        this.setCooldown(HEALTH_MUTATOR_APPLICATION_COOLDOWN);
+        this.startCooldown(HEALTH_MUTATOR_APPLICATION_COOLDOWN);
         
         // Play mutator fx
         mutator.onApply(this);
@@ -240,17 +242,22 @@ public class HariantEntity
     }
     
     @Override
-    public void setCooldown(@NotNull HariantCooldown cooldown, @Range(from = 0, to = Integer.MAX_VALUE) int duration, @Nullable AttributeType cooldownReducingAttribute) {
-        cooldownHandler.setCooldown(cooldown, duration, cooldownReducingAttribute);
+    public void startCooldown(@NotNull Cooldown cooldown, int duration, @Nullable AttributeType cooldownReducingAttribute) {
+        cooldownHandler.startCooldown(cooldown, duration, cooldownReducingAttribute);
     }
     
     @Override
-    public int getCooldownTimeLeft(@NotNull HariantCooldown cooldown) {
+    public void stopCooldown(@NotNull Cooldown cooldown) {
+        cooldownHandler.stopCooldown(cooldown);
+    }
+    
+    @Override
+    public int getCooldownTimeLeft(@NotNull Cooldown cooldown) {
         return cooldownHandler.getCooldownTimeLeft(cooldown);
     }
     
     @Override
-    public boolean hasCooldown(@NotNull HariantCooldown cooldown) {
+    public boolean hasCooldown(@NotNull Cooldown cooldown) {
         return cooldownHandler.hasCooldown(cooldown);
     }
     
@@ -421,7 +428,7 @@ public class HariantEntity
         
         // Start ferocity cooldown
         if (!force) {
-            this.setCooldown(FEROCITY_COOLDOWN);
+            this.startCooldown(FEROCITY_COOLDOWN);
         }
         
         // Fx
@@ -492,7 +499,7 @@ public class HariantEntity
             ComponentDisplay.ofAscend(
                     Component.empty()
                              .append(Component.text("+", Colors.GREEN))
-                             .append(DigitStyle.STYLE.asComponent((int) actualHealing).color(Colors.GREEN)),
+                             .append(HariantConstants.DIGIT_STYLE.asComponent((int) actualHealing).color(Colors.GREEN)),
                     this.getMidpointLocation(),
                     20, 1.75f
             );
@@ -765,10 +772,6 @@ public class HariantEntity
     
     public double getPitch() {
         return entity.getPitch();
-    }
-    
-    private void tickPortal() {
-        // TODO (xanyjl @ Tuesday, September 15) -> I think this is the only way to keep portals
     }
     
     public final boolean compareEntity(@NotNull Entity entity) {
@@ -1242,8 +1245,8 @@ public class HariantEntity
     }
     
     @Override
-    public void addEffect(@NotNull StatusEffectType effect, int duration, @NotNull HariantEntity applier) {
-        effectMap.addEffect(effect, duration, applier);
+    public void addEffect(@NotNull StatusEffectType effectType, int duration, @NotNull HariantEntity applier) {
+        effectMap.addEffect(effectType, duration, applier);
     }
     
     @Override
@@ -1488,10 +1491,10 @@ public class HariantEntity
         return entity.getEyeHeight();
     }
     
-    public void onCooldownStarted(@NotNull HariantCooldown cooldown, int duration) {
+    public void onCooldownStarted(@NotNull Cooldown cooldown, int duration) {
     }
     
-    public void onCooldownEnded(@NotNull HariantCooldown cooldown) {
+    public void onCooldownEnded(@NotNull Cooldown cooldown) {
     }
     
     public @NotNull DamageInstance createDamageInstance(@NotNull DamageSource damageSource) {
@@ -1639,6 +1642,10 @@ public class HariantEntity
         if (soundFx != null) {
             this.playWorldSound(soundFx.sound(), soundFx.pitch());
         }
+    }
+    
+    private void tickPortal() {
+        // TODO (xanyjl @ Tuesday, September 15) -> I think this is the only way to keep portals
     }
     
     private void tickInvulnerability() {

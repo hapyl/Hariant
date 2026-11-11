@@ -15,7 +15,7 @@ public interface TickingDown {
     int duration();
     
     default boolean isIndefinite() {
-        return this.duration() == HariantConstants.INDEFINITE_DURATION;
+        return Ticks.isIndefinite(this.duration());
     }
     
     default boolean isOver() {
@@ -23,13 +23,11 @@ public interface TickingDown {
     }
     
     default @NotNull Component currentTickFormatted() {
-        return this.isIndefinite()
-               ? HariantConstants.CHARACTER_INFINITY
-               : Component.text(Tick.format(this.currentTick()));
+        return this.isIndefinite() ? HariantConstants.CHARACTER_INFINITY : Tick.format(this.currentTick());
     }
     
     default @NotNull Component durationFormatted() {
-        return Component.text(Tick.format(this.duration()));
+        return Tick.format(this.duration());
     }
     
 }

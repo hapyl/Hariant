@@ -1,9 +1,10 @@
 package me.hapyl.hariant.handler;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.environment.*;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import org.bukkit.GameMode;
@@ -27,23 +28,24 @@ import java.util.Map;
 
 public final class EntityHandler implements Listener {
     
-    private final Map<org.bukkit.damage.DamageType, EnvironmentDamageSupplier> environmentDamageMap;
+    private static final Map<org.bukkit.damage.DamageType, EnvironmentDamageSupplier> ENVIRONMENT_DAMAGE_MAP = Map.ofEntries(
+            Map.entry(DamageType.CACTUS, entity -> new EnvironmentDamageSourceCactus()),
+            Map.entry(DamageType.CAMPFIRE, entity -> new EnvironmentDamageSourceCampfire()),
+            Map.entry(DamageType.DROWN, entity -> new EnvironmentDamageSourceDrown()),
+            Map.entry(DamageType.EXPLOSION, entity -> new EnvironmentDamageSourceExplosion()),
+            Map.entry(DamageType.FREEZE, entity -> new EnvironmentDamageSourceFreeze()),
+            Map.entry(DamageType.HOT_FLOOR, entity -> new EnvironmentDamageSourceHotFloor()),
+            Map.entry(DamageType.IN_FIRE, entity -> new EnvironmentDamageSourceInFire()),
+            Map.entry(DamageType.IN_WALL, entity -> new EnvironmentDamageSourceInWall()),
+            Map.entry(DamageType.LAVA, entity -> new EnvironmentDamageSourceLava()),
+            Map.entry(DamageType.ON_FIRE, entity -> new EnvironmentDamageSourceOnFire()),
+            Map.entry(DamageType.GENERIC_KILL, entity -> new EnvironmentDamageSourceGenericKill()),
+            Map.entry(DamageType.FALL, EnvironmentDamageSourceFall.createSupplier())
+    );
+    
+    private static final Cooldown INTERACTION_COOLDOWN = Cooldown.create(Key.ofString("interaction_cooldown"), Tick.ofTicks(5));
     
     public EntityHandler() {
-        this.environmentDamageMap = Map.ofEntries(
-                Map.entry(DamageType.CACTUS, entity -> new EnvironmentDamageSourceCactus()),
-                Map.entry(DamageType.CAMPFIRE, entity -> new EnvironmentDamageSourceCampfire()),
-                Map.entry(DamageType.DROWN, entity -> new EnvironmentDamageSourceDrown()),
-                Map.entry(DamageType.EXPLOSION, entity -> new EnvironmentDamageSourceExplosion()),
-                Map.entry(DamageType.FREEZE, entity -> new EnvironmentDamageSourceFreeze()),
-                Map.entry(DamageType.HOT_FLOOR, entity -> new EnvironmentDamageSourceHotFloor()),
-                Map.entry(DamageType.IN_FIRE, entity -> new EnvironmentDamageSourceInFire()),
-                Map.entry(DamageType.IN_WALL, entity -> new EnvironmentDamageSourceInWall()),
-                Map.entry(DamageType.LAVA, entity -> new EnvironmentDamageSourceLava()),
-                Map.entry(DamageType.ON_FIRE, entity -> new EnvironmentDamageSourceOnFire()),
-                Map.entry(DamageType.GENERIC_KILL, entity -> new EnvironmentDamageSourceGenericKill()),
-                Map.entry(DamageType.FALL, EnvironmentDamageSourceFall.createSupplier())
-        );
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -76,7 +78,7 @@ public final class EntityHandler implements Listener {
         final org.bukkit.damage.DamageType damageType = damageSource.getDamageType();
         
         // Check for environment damage
-        final EnvironmentDamageSupplier environmentDamageSupplier = environmentDamageMap.get(damageType);
+        final EnvironmentDamageSupplier environmentDamageSupplier = ENVIRONMENT_DAMAGE_MAP.get(damageType);
         
         if (environmentDamageSupplier != null) {
             entity.damage(environmentDamageSupplier.supply(entity));
@@ -129,24 +131,20 @@ public final class EntityHandler implements Listener {
     
     @EventHandler
     public void handlePlayerInteractEvent(PlayerInteractEntityEvent ev) {
-        class Holder {
-            private static final HariantCooldown INTERACTION_COOLDOWN = HariantCooldown.ofTicks(Key.ofString("interaction_cooldown"), 5);
-        }
-        
         if (ev.getHand() == EquipmentSlot.OFF_HAND) {
             return;
         }
         
         final HariantPlayer player = Hariant.getPlayer(ev.getPlayer()).orElse(null);
         
-        if (player == null || player.hasCooldown(Holder.INTERACTION_COOLDOWN)) {
+        if (player == null || player.hasCooldown(INTERACTION_COOLDOWN)) {
             return;
         }
         
         Hariant.getEntity(ev.getRightClicked()).ifPresent(entity -> {
             entity.onInteract(player);
             
-            player.setCooldown(Holder.INTERACTION_COOLDOWN);
+            player.startCooldown(INTERACTION_COOLDOWN);
         });
     }
     

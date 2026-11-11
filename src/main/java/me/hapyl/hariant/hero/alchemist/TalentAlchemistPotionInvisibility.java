@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.alchemist;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentType;
@@ -19,8 +20,9 @@ public final class TalentAlchemistPotionInvisibility extends TalentAlchemistPoti
         
         setTalentType(TalentType.SUPPORT);
         
+        setDuration(Tick.ofSeconds(8));
+        
         setDescription(StatusEffectType.INVISIBILITY.getDescription());
-        setDurationSeconds(8);
     }
     
     @NotNull

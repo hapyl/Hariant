@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.archer;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.achievement.AchievementRegistry;
@@ -17,6 +18,8 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
+import me.hapyl.hariant.talent.energy.EnergyRegenerationRule;
+import me.hapyl.hariant.talent.energy.Fulfilment;
 import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
@@ -42,6 +45,12 @@ public final class TalentTripleShot extends Talent {
     private final @DisplayField Decimal additionalArrowSpread = Decimal.ofAngle(5);
     private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.ELECTRIC, 100);
     
+    private final @DisplayField EnergyRegenerationRule energyRegenerationRule = EnergyRegenerationRule.createOfKeyed(
+            this,
+            2.5,
+            Fulfilment.fulfilment(Tick.ofSeconds(1), 2)
+    );
+    
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
             Key.ofString("triple_shot_damage_source"),
@@ -51,7 +60,7 @@ public final class TalentTripleShot extends Talent {
     public TalentTripleShot(@NotNull Key key) {
         super(key, Component.text("Triple Shot"), Icon.ofMaterial(Material.ARROW));
         
-        this.setCooldownSeconds(4.5f);
+        this.setCooldown(Tick.ofSeconds(4.5f));
         
         this.setDescription(
                 Component.empty()
@@ -138,6 +147,8 @@ public final class TalentTripleShot extends Talent {
             if (entity == null || !(this.getShooter() instanceof HariantPlayer player)) {
                 return;
             }
+            
+            energyRegenerationRule.fulfil(player);
             
             if (player.getProfile().getDatabase().achievements.hasCompleted(AchievementRegistry.ARCHER_TRIPLET)) {
                 return;

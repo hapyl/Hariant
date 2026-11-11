@@ -73,7 +73,7 @@ public class HariantCommandStatusEffect extends HariantPlayerCommand {
                              .append(Component.text("Added "))
                              .append(statusEffect.getName())
                              .append(Component.text(" effect for "))
-                             .append(Component.text(Tick.format(duration)))
+                             .append(Tick.format(duration))
                              .append(Component.text("."))
             );
         }

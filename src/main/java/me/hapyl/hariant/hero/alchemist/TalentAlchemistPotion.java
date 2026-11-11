@@ -4,6 +4,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.PotionContents;
 import me.hapyl.eterna.module.annotate.ForceLowercase;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -31,7 +32,7 @@ public abstract class TalentAlchemistPotion extends Talent {
         this.talent = talent;
         this.abyssalCorrosion = abyssalCorrosion;
         
-        this.setDurationSeconds(10);
+        this.setDuration(Tick.ofSeconds(10));
     }
     
     public double getAbyssalCorrosion() {

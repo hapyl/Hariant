@@ -77,7 +77,7 @@ public final class HeroTroll extends Hero {
             super(
                     Key.ofString("stickonator"),
                     Icon.ofMaterial(Material.STICK),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 56, 10) {
+                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 56, NormalAttack.DEFAULT_ATTACK_COOLDOWN) {
                         @Override
                         public @NotNull KnockbackSource createKnockbackCause(@NotNull HariantEntity attacker) {
                             return KnockbackSource.create(attacker, KNOCKBACK_STRENGTH);

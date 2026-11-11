@@ -94,7 +94,7 @@ public class HariantEntityDummy extends HariantDisplayEntity {
             return false;
         }
         
-        if (damagePerRotation.lastDamageAt > 0 && localTicks() - damagePerRotation.lastDamageAt >= DamagePerRotation.RESET_THRESHOLD) {
+        if (damagePerRotation.lastDamageAt > 0 && localTicks() - damagePerRotation.lastDamageAt >= DamagePerRotation.RESET_THRESHOLD.ticks()) {
             damagePerRotation.reset();
         }
         
@@ -174,7 +174,7 @@ public class HariantEntityDummy extends HariantDisplayEntity {
     
     private static class DamagePerRotation implements ComponentLike, Resettable {
         
-        private static final int RESET_THRESHOLD = Tick.fromSeconds(5);
+        private static final Tick RESET_THRESHOLD = Tick.ofSeconds(5);
         
         private double damage;
         private int lastDamageAt;

@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.zealot;
 
 import me.hapyl.eterna.module.block.display.DisplayEntity;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
@@ -70,8 +71,8 @@ public final class TalentMaintainOrder extends TalentUltimate {
     public TalentMaintainOrder(@NotNull Key key) {
         super(key, Component.text("Maintain Order"), Icon.ofMaterial(Material.GOLDEN_SWORD), UltimateResourceType.ENERGY, 60);
         
-        setDurationSeconds(1);
-        setCooldownSeconds(30);
+        setDuration(Tick.ofSeconds(1));
+        setCooldown(Tick.ofSeconds(30));
         
         setDescription(
                 Component.empty()
@@ -124,7 +125,7 @@ public final class TalentMaintainOrder extends TalentUltimate {
             this.player = player;
             this.location = location;
             this.displayEntity = Models.MAINTAIN_ORDER.spawn(LocationHelper.copyOfPosition(location).add(0, landingYOffset, 0));
-            this.duration = getDuration();
+            this.duration = duration();
             this.durationWithImpact = duration + impactDuration.intValue();
             this.damageSourceLanding = new DamageSourceMaintainOrderLanding(player);
             this.damageSourceFerocity = new DamageSourceMaintainOrderFerocity(player);
@@ -141,7 +142,7 @@ public final class TalentMaintainOrder extends TalentUltimate {
                 // Fx
                 player.playWorldSound(location, Sound.ITEM_SHIELD_BREAK, 0.75f);
             }
-            else if (tick > getDuration()) {
+            else if (tick > duration) {
                 final Stream<? extends HariantEntity> entities = stream();
                 
                 // Explode the sword
@@ -166,7 +167,7 @@ public final class TalentMaintainOrder extends TalentUltimate {
                 // Teleport sword downwards
                 final Location displayLocation = displayEntity.getLocation();
                 
-                final double t = (double) tick / (getDuration() - 1);
+                final double t = (double) tick / (duration - 1);
                 final double y = landingYOffset * t * t * t;
                 
                 displayLocation.setY(location.getY() + landingYOffset - y);

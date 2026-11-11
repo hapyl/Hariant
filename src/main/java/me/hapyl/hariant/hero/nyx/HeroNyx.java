@@ -91,7 +91,7 @@ public class HeroNyx extends Hero {
             super(
                     Key.ofString("entropy_edge"),
                     Icon.ofMaterial(Material.NETHERITE_SWORD),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 67, 10)
+                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 67, NormalAttack.DEFAULT_ATTACK_COOLDOWN)
             );
             
             setName(Component.text("Entropy's Edge"));

@@ -6,6 +6,7 @@ import me.hapyl.hariant.attribute.instance.snapshot.AttributesSnapshot;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.damage.report.DamageReport;
@@ -182,13 +183,16 @@ public class DamageInstance implements MutatesDamage, DamageFlagged, ElementSour
     }
     
     public boolean cooldownExistsEntityOnCooldownElseStartCooldown(@NotNull HariantEntity entity) {
-        if (damageSource.hasCooldown()) {
-            if (entity.hasCooldown(damageSource)) {
+        final Cooldown cooldown = damageSource.cooldown();
+        
+        if (cooldown != null) {
+            // Entity already on cooldown
+            if (entity.hasCooldown(cooldown)) {
                 return true;
             }
             
-            // If cooldown exists and entity is not on cooldown, start it
-            entity.setCooldown(damageSource, damageSource.getCooldown(), null);
+            // Start the cooldown, which is not reduced by any attribute
+            entity.startCooldown(cooldown, cooldown.getCooldown(), null);
         }
         
         return false;

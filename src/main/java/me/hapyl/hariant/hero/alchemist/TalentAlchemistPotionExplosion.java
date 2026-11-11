@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.alchemist;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -45,7 +46,8 @@ public final class TalentAlchemistPotionExplosion extends TalentAlchemistPotion 
         super(talent, "weird_concoction", Component.text("Potion of Weird Concoction"), Color.fromRGB(235, 207, 52), 50);
         
         setTalentType(TalentType.DAMAGE);
-        setDurationSeconds(3.0f);
+        
+        setDuration(Tick.ofSeconds(3.0f));
         
         setDescription(
                 Component.empty()

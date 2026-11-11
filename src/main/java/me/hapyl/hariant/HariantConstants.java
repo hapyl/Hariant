@@ -2,6 +2,8 @@ package me.hapyl.hariant;
 
 import me.hapyl.eterna.module.component.ComponentStyler;
 import me.hapyl.eterna.module.math.Tick;
+import me.hapyl.eterna.module.text.DigitStyle;
+import me.hapyl.hariant.util.Ticks;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -20,14 +22,12 @@ public interface HariantConstants {
     Material DUMMY_MATERIAL = Material.BRICK;
     
     /**
-     * Defines the constant for indefinite duration that doesn't tick down.
+     * Defines the constant for indefinite ticks.
+     *
+     * @deprecated Use {@link Ticks#INDEFINITE} for value passing, {@link Ticks#isIndefinite(int)} for indefinability checks.
      */
-    int INDEFINITE_DURATION = -1;
-    
-    /**
-     * Defines the constant for indefinite cooldown.
-     */
-    int INDEFINITE_COOLDOWN = -1;
+    @Deprecated(forRemoval = true)
+    int INDEFINITE = Ticks.INDEFINITE;
     
     /**
      * Defines the safe fall distance.
@@ -143,7 +143,7 @@ public interface HariantConstants {
     /**
      * Defines the duration, in ticks, how ofter to sync the database with remote.
      */
-    int DATABASE_SYNC_PERIOD = Tick.fromMinutes(10);
+    @NotNull Tick DATABASE_SYNC_PERIOD = Tick.ofMinutes(10);
     
     /**
      * Defines the delay, in ticks, before decay starts to decrement.
@@ -203,7 +203,7 @@ public interface HariantConstants {
     /**
      * Defines the duration in ticks before the game ends.
      */
-    int GAME_END_DELAY = Tick.fromSeconds(5);
+    @NotNull Tick GAME_END_DELAY = Tick.ofSeconds(5);
     
     /**
      * Defines the character used for critical damage.
@@ -239,6 +239,16 @@ public interface HariantConstants {
      * Defines the absolute minimum elemental potency value.
      */
     double ABSOLUTE_MINIMUM_ELEMENTAL_POTENCY = 0.5;
+    
+    /**
+     * Defines the {@link DigitStyle} used by the plugin.
+     */
+    @NotNull DigitStyle DIGIT_STYLE = DigitStyle.MATHEMATICAL;
+    
+    /**
+     * Defines the default style used for lore.
+     */
+    @NotNull Style DEFAULT_LORE_STYLE = Style.style(Colors.GRAY).decoration(TextDecoration.ITALIC, false);
     
     private static @NotNull ComponentStyler createStylerWithPadding(int padding) {
         return ComponentStyler.builder(Style.style(Colors.GRAY)).withPadding(padding).build();

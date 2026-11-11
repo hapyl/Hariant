@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.shark;
 
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.Strings;
 import me.hapyl.hariant.Colors;
@@ -67,8 +68,8 @@ public final class TalentSharknado extends TalentUltimate {
     public TalentSharknado(@NotNull Key key) {
         super(key, Component.text("Sharknado"), Icon.ofMaterial(Material.HEART_OF_THE_SEA), UltimateResourceType.ENERGY, 60);
         
-        setDurationSeconds(5);
-        setCooldownSeconds(30);
+        setDuration(Tick.ofSeconds(5));
+        setCooldown(Tick.ofSeconds(30));
         
         setDescription(
                 Component.empty()
@@ -137,7 +138,7 @@ public final class TalentSharknado extends TalentUltimate {
             this.pullSource = new SharknadoPullSource(player, location);
             this.location = location.add(0, riptideScale.doubleValue(), 0); // Offset location with the scale of riptide, which is used for entity collection
             this.damageSource = new SharknadoDamageSource(player, damage.getScaledValue(player));
-            this.duration = getDuration() + castingTime.intValue();
+            this.duration = duration() + castingTime.intValue();
             
             // Fx
             player.playWorldSound(location, Sound.ENTITY_BREEZE_INHALE, 6, 0.0f);
@@ -233,7 +234,7 @@ public final class TalentSharknado extends TalentUltimate {
     
     private class SharknadoPullSource extends PullSource {
         SharknadoPullSource(@NotNull HariantEntity source, @NotNull Location centre) {
-            super(source, centre, TalentSharknado.this.getName(), TalentSharknado.this.getDuration() + castingTime.intValue(), pullRadius.doubleValue(), pullStrength.doubleValue(), pullResistance.doubleValue());
+            super(source, centre, TalentSharknado.this.getName(), TalentSharknado.this.duration() + castingTime.intValue(), pullRadius.doubleValue(), pullStrength.doubleValue(), pullResistance.doubleValue());
         }
     }
     

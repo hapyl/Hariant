@@ -11,7 +11,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.Attacker;
 import me.hapyl.hariant.entity.NormalAttack;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.player.LifecyclePlayer;
 import me.hapyl.hariant.hero.Hero;
@@ -47,7 +47,7 @@ import java.util.Objects;
 /// </pre>
 public class Weapon implements
         Keyed, ItemCreator, Icon, Named,
-        Described, LifecyclePlayer, Attacker, HariantCooldown,
+        Described, LifecyclePlayer, Attacker, Cooldown,
         DisplayFieldProvider, Registrable, ItemDetailsCreator {
     
     protected final NormalAttack normalAttack;
@@ -186,9 +186,9 @@ public class Weapon implements
     public void onDestroy(@NotNull HariantPlayer player) {
     }
     
-    public void startCooldown(@NotNull HariantPlayer player, int cooldown) {
+    public void startCooldown(@NotNull HariantPlayer player, @NotNull Tick cooldown) {
         // TODO (xanyjl @ Saturday, July 18) -> Maybe introduce ATTACK SPEED, but it would require different scaling (0% -> 100%
-        player.setCooldown(this, cooldown, null);
+        player.startCooldown(this, cooldown, null);
     }
     
     public int getCooldown(@NotNull HariantPlayer player) {
@@ -205,7 +205,7 @@ public class Weapon implements
     }
     
     @Override
-    public int getCooldown() {
+    public @NotNull Tick getCooldown() {
         return normalAttack.getAttackCooldown();
     }
     
@@ -234,7 +234,7 @@ public class Weapon implements
         return Component.empty()
                         .append(this.getPrimaryAbilityCooldownComponent())
                         .appendSpace()
-                        .append(Component.text(Tick.format(cooldown), Colors.TICK));
+                        .append(Tick.format(cooldown).color(Colors.TICK));
     }
     
     public boolean hasAbilities() {

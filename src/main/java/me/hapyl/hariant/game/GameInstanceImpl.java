@@ -65,8 +65,8 @@ public class GameInstanceImpl implements GameInstance {
                                                                           .styleFade(STYLE_SHINE_FADE)
                                                                           .build();
     
-    private static final int TICKS_IN_MINUTE = 1200;
-    private static final int LEVEL_UP_NOTIFICATION_DELAY = Tick.fromSeconds(2.5f);
+    private static final Tick ONE_MINUTE_IN_TICKS = Tick.ofMinutes(1);
+    private static final Tick LEVEL_UP_NOTIFICATION_DELAY = Tick.ofSeconds(2.5f);
     
     private static final Component COMPONENT_NONE = Component.text("None!", Colors.DARK_GRAY);
     private static final Component COMPONENT_SUMMARY = Components.centerText("SUMMARY", Colors.WHITE, TextDecoration.BOLD);
@@ -85,7 +85,7 @@ public class GameInstanceImpl implements GameInstance {
         this.gameType = gameType;
         this.teamDataMap = new TeamDataMap();
         this.state = GameInstanceState.PREPARING;
-        this.timeLeft = gameType.getTimeLimit();
+        this.timeLeft = gameType.getTimeLimit().ticks();
     }
     
     @NotNull
@@ -144,7 +144,7 @@ public class GameInstanceImpl implements GameInstance {
         battleground.onDestroy(players, result);
         gameType.onDestroy(players, result);
         
-        final Component componentDuration = Components.centerText(TimeFormat.format((gameType.getTimeLimit() - timeLeft) * 50L, TimeFormat.Part.MINUTES, TimeFormat.Part.SECONDS), Colors.GRAY);
+        final Component componentDuration = Components.centerText(TimeFormat.format((gameType.getTimeLimit().ticks() - timeLeft) * 50L, TimeFormat.Part.MINUTES, TimeFormat.Part.SECONDS), Colors.GRAY);
         final List<? extends Component> winners = result.createWinnerCenterComponents();
         
         for (HariantPlayer player : players) {
@@ -176,7 +176,7 @@ public class GameInstanceImpl implements GameInstance {
         battleground.onFinalize(players, result);
         gameType.onFinalize(players, result);
         
-        final int minutesPlayed = Math.max(1, (gameType.getTimeLimit() - timeLeft) / TICKS_IN_MINUTE);
+        final int minutesPlayed = Math.max(1, (gameType.getTimeLimit().ticks() - timeLeft) / ONE_MINUTE_IN_TICKS.ticks());
         
         for (HariantPlayer player : players) {
             final PlayerProfile profile = player.getProfile();
@@ -277,7 +277,7 @@ public class GameInstanceImpl implements GameInstance {
                     if (bukkitPlayer.isOnline()) {
                         levelEntry.notifyLevelUp(bukkitPlayer, levelResult.levelBeforeAdd(), levelResult.levelAfterAdd());
                     }
-                }, LEVEL_UP_NOTIFICATION_DELAY);
+                }, LEVEL_UP_NOTIFICATION_DELAY.ticks());
             }
             
             // Progress daily

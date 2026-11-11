@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.mage;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
@@ -22,8 +23,8 @@ public final class WeaponSoulEater extends WeaponRangeProjectile {
         super(
                 Key.ofString("soul_eater"),
                 Icon.ofMaterial(Material.IRON_HOE),
-                NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 45, 10),
-                NormalAttack.ranged(ElementType.AETHER, AttributeType.ATTACK, 62.4, 20),
+                NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 45, Tick.ofTicks(10)),
+                NormalAttack.ranged(ElementType.AETHER, AttributeType.ATTACK, 62.4, NormalAttack.DEFAULT_ATTACK_COOLDOWN),
                 new WeaponRangeProjectileTypeSoul()
         );
         

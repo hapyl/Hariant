@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.alchemist;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.achievement.UniqueId;
@@ -53,7 +54,7 @@ public class TalentBundleOPotions extends Talent implements Listener {
     public TalentBundleOPotions(@NotNull Key key) {
         super(key, Component.text("Bundle o' Potions"), Icon.ofMaterial(Material.BUNDLE));
         
-        this.setCooldownSeconds(10);
+        this.setCooldown(Tick.ofSeconds(10));
         this.setTalentType(TalentType.IMPAIR);
         
         this.setDescription(

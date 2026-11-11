@@ -12,9 +12,9 @@ import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.event.HariantElementalAnomalyEvent;
 import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.TalentPassive;
-import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.util.Definition;
 import me.hapyl.hariant.util.Icon;
+import me.hapyl.hariant.util.field.DisplayField;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -29,7 +29,7 @@ public final class TalentApexPredator extends TalentPassive implements Listener 
         super(key, Component.text("Apex Predator"), Icon.ofMaterial(Material.REDSTONE));
         
         // Match Shark's Bite cooldown
-        setDurationSeconds(16);
+        setDuration(TalentSharkBite.COOLDOWN);
         
         setDescription(
                 Component.empty()
@@ -73,7 +73,7 @@ public final class TalentApexPredator extends TalentPassive implements Listener 
             return;
         }
         
-        player.getHeroData(HeroRegistry.SHARK, HeroDataShark::new).createBloodScent(entity, getDuration());
+        player.getHeroData(HeroRegistry.SHARK, HeroDataShark::new).createBloodScent(entity, duration());
     }
     
     @EventHandler

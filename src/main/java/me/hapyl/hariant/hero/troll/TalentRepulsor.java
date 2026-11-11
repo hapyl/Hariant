@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.troll;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.effect.Effect;
@@ -32,7 +33,8 @@ public final class TalentRepulsor extends Talent implements Effect {
         super(key, Component.text("Repulsor"), Icon.ofMaterial(Material.IRON_BOOTS));
         
         setTalentType(TalentType.IMPAIR);
-        setCooldownSeconds(10);
+        
+        setCooldown(Tick.ofSeconds(10));
         
         setDescription(
                 Component.empty()

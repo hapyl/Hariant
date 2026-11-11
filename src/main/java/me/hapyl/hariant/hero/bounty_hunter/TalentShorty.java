@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.bounty_hunter;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -61,7 +62,7 @@ public final class TalentShorty extends TalentRechargeable {
     public TalentShorty(@NotNull Key key) {
         super(key, Component.text("Shorty"), Icon.ofMaterial(Material.CROSSBOW), 2, RechargeType.DEPLETE_ALL);
         
-        setCooldownSeconds(6);
+        setCooldown(Tick.ofSeconds(6));
         
         setDescription(
                 Component.empty()

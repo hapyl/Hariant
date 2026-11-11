@@ -1,5 +1,6 @@
 package me.hapyl.hariant.achievement;
 
+import me.hapyl.eterna.module.component.ShowTextBuilder;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
@@ -7,7 +8,6 @@ import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.util.ComponentShine;
 import me.hapyl.hariant.util.FireworkHelper;
-import me.hapyl.hariant.util.ShowTextBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;

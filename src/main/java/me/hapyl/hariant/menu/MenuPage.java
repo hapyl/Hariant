@@ -8,6 +8,7 @@ import me.hapyl.eterna.module.inventory.menu.PlayerPageMenu;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPattern;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPatternApplier;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
@@ -25,6 +26,8 @@ public abstract class MenuPage<T> extends Menu {
     private static final int SLOT_NO_CONTENTS = 22;
     private static final int SLOT_BUTTON_PREVIOUS = 51;
     private static final int SLOT_BUTTON_NEXT = 52;
+    
+    private static final ItemStack ITEM_NO_CONTENTS = ItemBuilder.playerHead(PlayerPageMenu.TEXTURE_NO_CONTENTS).setName(Component.text("No Contents")).asIcon();
     
     private LinkedList<? extends T> contents;
     private int currentPage;
@@ -57,7 +60,7 @@ public abstract class MenuPage<T> extends Menu {
     }
     
     public @NotNull ItemStack getItemNoContents() {
-        return PlayerPageMenu.ITEM_EMPTY_CONTENTS;
+        return ITEM_NO_CONTENTS;
     }
     
     @Override
@@ -88,7 +91,10 @@ public abstract class MenuPage<T> extends Menu {
         if (currentPage > 1) {
             setItem(
                     SLOT_BUTTON_PREVIOUS,
-                    PlayerPageMenu.ITEM_ARROW_PREVIOUS,
+                    ItemBuilder.playerHead(PlayerPageMenu.TEXTURE_PAGE_ARROW_PREVIOUS)
+                               .setName(Component.text("Previous Page"))
+                               .setAmount(currentPage - 1)
+                               .asIcon(),
                     PlayerMenuAction.of(player -> this.openMenu(currentPage - 1))
             );
         }
@@ -97,7 +103,10 @@ public abstract class MenuPage<T> extends Menu {
         if (currentPage < (int) Math.ceil((double) contents.size() / NUMBER_OF_ITEMS_PER_PAGE)) {
             setItem(
                     SLOT_BUTTON_NEXT,
-                    PlayerPageMenu.ITEM_ARROW_NEXT,
+                    ItemBuilder.playerHead(PlayerPageMenu.TEXTURE_PAGE_ARROW_NEXT)
+                               .setName(Component.text("Next Page"))
+                               .setAmount(currentPage + 1)
+                               .asIcon(),
                     PlayerMenuAction.of(player -> this.openMenu(currentPage + 1))
             );
         }

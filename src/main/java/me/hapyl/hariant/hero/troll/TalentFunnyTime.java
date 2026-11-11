@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.troll;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -33,7 +34,8 @@ public class TalentFunnyTime extends TalentUltimate {
         super(key, Component.text("Prank Time"), Icon.ofMaterial(Material.CLOCK), UltimateResourceType.ENERGY, 60);
         
         setTalentType(TalentType.IMPAIR);
-        setDurationSeconds(5);
+        
+        setDuration(Tick.ofSeconds(5));
         
         setDescription(
                 Component.empty()
@@ -47,7 +49,7 @@ public class TalentFunnyTime extends TalentUltimate {
     
     @Override
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
-        final int numberOfRotations = this.getDuration() / period.intValue();
+        final int numberOfRotations = this.duration() / period.intValue();
         
         return Executable.execute(() -> {
             player.delegate(

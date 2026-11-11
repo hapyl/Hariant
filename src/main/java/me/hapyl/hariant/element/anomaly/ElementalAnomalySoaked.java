@@ -24,7 +24,7 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
     private final Decimal maxHealthDecrease = Decimal.ofPercentage(10);
     private final Decimal movementSpeedDecrease = Decimal.ofPercentage(20);
     
-    private final int soakedDuration = Tick.fromSeconds(8);
+    private final Tick soakedDuration = Tick.ofSeconds(8);
     
     ElementalAnomalySoaked() {
         super(Key.ofString("soaked"), ElementType.WATER, Component.text("Drown"), new ElementalPotency(1, 0.1));
@@ -52,7 +52,7 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
     
     public int calculateSoakedDuration(@Nullable Attributable attributable) {
         if (attributable == null) {
-            return soakedDuration;
+            return soakedDuration.ticks();
         }
         
         final Attributes attributes = attributable.getAttributes();
@@ -60,7 +60,7 @@ public final class ElementalAnomalySoaked extends ElementalAnomalyImpl {
         final double maxHealth = attributes.get(AttributeType.MAX_HEALTH);
         final double elementalMastery = attributes.get(AttributeType.ELEMENTAL_MASTERY);
         
-        return (int) (soakedDuration * (1 + (maxHealth / (maxHealth + 5000) + elementalMastery / 1000)));
+        return (int) (soakedDuration.ticks() * (1 + (maxHealth / (maxHealth + 5000) + elementalMastery / 1000)));
     }
     
     public class ElementalAnomalySoakedInstance extends ElementalAnomalyInstance {

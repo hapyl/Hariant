@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.inferno;
 
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -9,6 +10,7 @@ import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.WarningType;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
@@ -16,12 +18,12 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
-import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.decimal.Decimal;
+import me.hapyl.hariant.util.field.DisplayField;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -66,7 +68,7 @@ public final class TalentFirePit extends Talent {
     private final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.FIRE, 500);
     
     private final int transformationDelayPerStage = transformationDelay.intValue() / totalStages.intValue();
-    private final Key damageCooldownKey = Key.ofString("fire_pit_damage");
+    private final Cooldown damageCooldown = Cooldown.create(Key.ofString("fire_pit_damage"), damagePeriod.tickValue());
     
     private final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
@@ -77,8 +79,8 @@ public final class TalentFirePit extends Talent {
     public TalentFirePit(@NotNull Key key) {
         super(key, Component.text("Fire Pit"), Icon.ofMaterial(Material.FIRE_CHARGE));
         
-        setDurationSeconds(2.5f);
-        setCooldownSeconds(20);
+        setDuration(Tick.ofSeconds(2.5f));
+        setCooldown(Tick.ofSeconds(20));
         
         setDescription(
                 Component.empty()
@@ -157,7 +159,7 @@ public final class TalentFirePit extends Talent {
             final int stage = tick / transformationDelayPerStage;
             final boolean isLit = tick >= transformationDelay;
             
-            if (tick > getDuration() + transformationDelay) {
+            if (tick > duration() + transformationDelay) {
                 this.cancel();
                 return;
             }
@@ -216,7 +218,12 @@ public final class TalentFirePit extends Talent {
     private class FirePitDamageSource extends DamageSourceImpl {
         
         FirePitDamageSource(@NotNull HariantPlayer source) {
-            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.FIRE, DamageComponents.ofTrueDamage(), Set.of(), damage.getScaledValue(source), elementalApplication.doubleValue(), damageCooldownKey, damagePeriod.intValue());
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.FIRE, DamageComponents.ofTrueDamage(), Set.of(), damage.getScaledValue(source), elementalApplication.doubleValue());
+        }
+        
+        @Override
+        public @NotNull Cooldown cooldown() {
+            return damageCooldown;
         }
         
     }

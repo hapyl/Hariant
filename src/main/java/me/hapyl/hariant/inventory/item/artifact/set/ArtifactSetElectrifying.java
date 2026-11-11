@@ -1,12 +1,13 @@
 package me.hapyl.hariant.inventory.item.artifact.set;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
@@ -24,7 +25,7 @@ public final class ArtifactSetElectrifying extends ArtifactSet implements Listen
     private final ArtifactSetModifier electricDamageBonus = CommonArtifactSetModifiers.ELECTRIC_DAMAGE_BONUS;
     private final Decimal energyRegeneration = Decimal.ofValue(6);
     
-    private final HariantCooldown energyRegenerationCooldown = HariantCooldown.ofSeconds(Key.ofString("electrifying"), 6f);
+    private final Cooldown energyRegenerationCooldown = Cooldown.create(Key.ofString("electrifying"), Tick.ofSeconds(6f));
     
     ArtifactSetElectrifying(@NotNull Key key) {
         super(key, Component.text("Electrifying"));
@@ -91,7 +92,7 @@ public final class ArtifactSetElectrifying extends ArtifactSet implements Listen
             return;
         }
         
-        player.setCooldown(energyRegenerationCooldown);
+        player.startCooldown(energyRegenerationCooldown);
         player.incrementUltimateResource(energyRegeneration.doubleValue());
     }
     

@@ -86,6 +86,10 @@ public abstract class Hero
         StrictNamingConvention.Validator.validate(this);
     }
     
+    public boolean isEnabled() {
+        return true;
+    }
+    
     public @NotNull Set<? extends AttributeType> getRecommendedAttributes() {
         return recommendedAttributes;
     }

@@ -15,7 +15,7 @@ public class AlchemistPotionInstance implements TickingDown {
     
     AlchemistPotionInstance(@NotNull HariantPlayer player, @NotNull TalentAlchemistPotion alchemistPotion) {
         this.player = player;
-        this.duration = alchemistPotion.getDuration();
+        this.duration = alchemistPotion.getDuration().ticks();
         this.tick = duration;
     }
     

@@ -74,7 +74,7 @@ public final class AbilityHandler implements Listener {
                 player.messageError(
                         Component.empty()
                                  .append(Component.text("This ability is on cooldown for "))
-                                 .append(Component.text(Tick.format(cooldownTimeLeft)))
+                                 .append(Tick.format(cooldownTimeLeft))
                                  .append(Component.text("!"))
                 );
                 player.playSound(Sound.ENTITY_ENDERMAN_TELEPORT, 0.0f);

@@ -27,14 +27,14 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
     private static final int TOP_TEAMS_LIMIT = 5;
     private static final Comparator<TeamData> COMPARATOR = (a, b) -> Integer.compare(b.kills, a.kills);
     
-    private final int respawnTime = Tick.fromSeconds(3);
+    private final Tick respawnTime = Tick.ofSeconds(3);
     private final int killGoal = 10;
     
     GameTypeDeathmatch() {
         super(
                 Component.text("Deathmatch"),
                 Component.text("Deathmatch you fight you kill ok"),
-                Tick.fromMinutes(10),
+                Tick.ofMinutes(10),
                 false
         );
     }
@@ -80,7 +80,7 @@ public final class GameTypeDeathmatch extends GameTypeImpl {
         final boolean isWinConditionMet = gameInstance.endIfWinConditionMet();
         
         if (!isWinConditionMet) {
-            player.respawn(respawnTime);
+            player.respawn(respawnTime.ticks());
         }
     }
     

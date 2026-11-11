@@ -59,7 +59,7 @@ public final class HariantPlugin extends JavaPlugin {
         
         // Schedule database syncer
         databaseSyncer = new DatabaseSyncer();
-        scheduler.scheduleSyncRepeatingTask(this, databaseSyncer, HariantConstants.DATABASE_SYNC_PERIOD, HariantConstants.DATABASE_SYNC_PERIOD);
+        scheduler.scheduleSyncRepeatingTask(this, databaseSyncer, HariantConstants.DATABASE_SYNC_PERIOD.ticks(), HariantConstants.DATABASE_SYNC_PERIOD.ticks());
         pluginManager.registerEvents(databaseSyncer, this);
         
         // Load manager

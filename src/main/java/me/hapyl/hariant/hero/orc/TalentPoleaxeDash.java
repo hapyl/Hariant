@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.orc;
 
 import me.hapyl.eterna.module.block.display.DisplayEntity;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -52,8 +53,8 @@ public final class TalentPoleaxeDash extends TalentPoleaxe {
     public TalentPoleaxeDash(@NotNull Key key) {
         super(key, TALENT_NAME, Icon.ofMaterial(Material.NAUTILUS_SHELL));
         
-        setDurationSeconds(1.5f);
-        setCooldownSeconds(15);
+        setDuration(Tick.ofSeconds(1.5f));
+        setCooldown(Tick.ofSeconds(15));
         
         setTalentType(TalentType.MOVEMENT);
         
@@ -112,7 +113,7 @@ public final class TalentPoleaxeDash extends TalentPoleaxe {
         
         @Override
         public void run(int tick) {
-            if (tick > getDuration() || (tick > 10 && player.isSneaking())) {
+            if (tick > duration() || (tick > 10 && player.isSneaking())) {
                 this.cancel();
                 return;
             }
@@ -125,7 +126,7 @@ public final class TalentPoleaxeDash extends TalentPoleaxe {
             
             if (entity != null) {
                 entity.damage(new PoleaxeDashDamageSource(player));
-                entity.addEffect(StatusEffectType.STUNNED, stunDuration, player);
+                entity.addEffect(StatusEffectType.STUNNED, stunDuration.intValue(), player);
                 this.cancel();
                 return;
             }

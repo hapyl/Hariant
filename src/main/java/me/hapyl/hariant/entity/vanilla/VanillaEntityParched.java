@@ -23,7 +23,7 @@ public final class VanillaEntityParched extends VanillaEntity<Parched> {
     
     @Override
     public NormalAttackRanged getRangedAttack() {
-        return NormalAttack.ranged(ElementType.PHYSICAL, AttributeType.ATTACK, 50, 10);
+        return NormalAttack.ranged(ElementType.PHYSICAL, AttributeType.ATTACK, 50, NormalAttack.DEFAULT_ATTACK_COOLDOWN);
     }
     
 }

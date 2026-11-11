@@ -1,5 +1,6 @@
 package me.hapyl.hariant.attribute.modifier;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.HariantEntity;
 import net.kyori.adventure.text.Component;
@@ -23,6 +24,10 @@ public interface AttributeModifiable {
         handler.handle(modifier);
         
         this.addModifier(modifier);
+    }
+    
+    default void addModifier(@NotNull Key key, @NotNull Tick duration, @NotNull HariantEntity applier, @NotNull AttributeModifierAdderHandler handler) {
+        this.addModifier(key, duration.ticks(), applier, handler);
     }
     
     default void addModifierIfAbsent(@NotNull AttributeModifier attributeModifier) {

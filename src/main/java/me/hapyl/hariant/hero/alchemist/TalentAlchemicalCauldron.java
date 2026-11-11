@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.alchemist;
 
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -35,8 +36,8 @@ public final class TalentAlchemicalCauldron extends Talent {
     public TalentAlchemicalCauldron(@NotNull Key key) {
         super(key, Component.text("Alchemical Cauldron"), Icon.ofMaterial(Material.CAULDRON));
         
-        this.setDurationSeconds(10); // Brewing duration
-        this.setCooldownSeconds(30);
+        this.setDuration(Tick.ofSeconds(10)); // Brewing duration
+        this.setCooldown(Tick.ofSeconds(30));
         
         this.setTalentType(TalentType.ENHANCE);
         

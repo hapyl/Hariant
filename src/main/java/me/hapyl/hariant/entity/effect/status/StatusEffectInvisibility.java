@@ -2,13 +2,13 @@ package me.hapyl.hariant.entity.effect.status;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.StreamRules;
 import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.event.HariantAttackEvent;
 import me.hapyl.hariant.event.HariantDamageEvent;
 import me.hapyl.hariant.util.ComponentProgress;
+import me.hapyl.hariant.util.Ticks;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
@@ -66,7 +66,7 @@ public class StatusEffectInvisibility extends StatusEffectImpl implements Listen
     @Override
     public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
         entity.hide(StreamRules.NOT_TEAMMATES);
-        entity.addVanillaEffect(PotionEffectType.INVISIBILITY, 1, HariantConstants.INDEFINITE_DURATION);
+        entity.addVanillaEffect(PotionEffectType.INVISIBILITY, 1, Ticks.INDEFINITE);
     }
     
     @Override

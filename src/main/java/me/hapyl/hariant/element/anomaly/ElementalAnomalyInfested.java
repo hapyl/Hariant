@@ -32,8 +32,8 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     private final Decimal defenseReduction = Decimal.ofPercentage(40);
     private final Decimal defenseReductionDuration = Decimal.ofSeconds(10);
     
-    private final int cloudDuration = Tick.fromSeconds(8);
-    private final int cloudDamagePeriod = 15;
+    private final Tick cloudDuration = Tick.ofSeconds(8);
+    private final Tick cloudDamagePeriod = Tick.ofSeconds(0.75f);
     
     private final double cloudRadius = 3;
     private final double cloudDamage = 2;
@@ -76,12 +76,12 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
     
     public int calculateDuration(@Nullable Attributable attributable) {
         if (attributable == null) {
-            return cloudDuration;
+            return cloudDuration.ticks();
         }
         
         final double elementalMastery = attributable.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
         
-        return (int) (cloudDuration * (1 + elementalMastery / 1000));
+        return (int) (cloudDuration.ticks() * (1 + elementalMastery / 1000));
     }
     
     public double calculateDamage(@Nullable Attributable attributable) {
@@ -167,7 +167,7 @@ public final class ElementalAnomalyInfested extends ElementalAnomalyImpl {
                 .filter(entity -> source == null || source.canAffect(entity))
                 .forEach(entity -> {
                     // Deal damage
-                    if (tick % cloudDamagePeriod == 0) {
+                    if (tick % cloudDamagePeriod.ticks() == 0) {
                         entity.damage(damageSource);
                         
                         // Apply modifier

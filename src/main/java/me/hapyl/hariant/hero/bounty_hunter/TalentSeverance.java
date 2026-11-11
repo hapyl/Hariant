@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.bounty_hunter;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -47,8 +48,8 @@ public final class TalentSeverance extends TalentUltimate {
     
     public TalentSeverance(@NotNull Key key) {
         super(key, Component.text("Severance"), Icon.ofMaterial(Material.NETHERITE_SWORD), UltimateResourceType.ENERGY, 120);
-        
-        setCooldownSeconds(20);
+
+        setCooldown(Tick.ofSeconds(20));
         
         setDescription(
                 Component.empty()

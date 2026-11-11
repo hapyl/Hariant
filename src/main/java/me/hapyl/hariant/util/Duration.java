@@ -1,27 +1,27 @@
 package me.hapyl.hariant.util;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.util.decimal.DecimalFormat;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public interface Duration {
+public interface Duration extends ComponentFormatter {
     
-    int getDuration();
+    @NotNull Tick getDuration();
     
-    default float getDurationSeconds() {
-        return this.getDuration() / 20f;
+    default int duration() {
+        return this.getDuration().ticks();
     }
     
-    void setDuration(int duration);
+    void setDuration(@NotNull Tick duration);
     
-    default void setDurationSeconds(float durationSeconds) {
-        this.setDuration((int) (durationSeconds * 20));
+    @Override
+    default @NotNull Component format() {
+        return this.getDurationFormatted().asComponent();
     }
     
-    @NotNull
-    default Component getDurationFormatted() {
-        return DecimalFormat.SECONDS.format(this.getDurationSeconds()).color(Colors.TICK);
+    default @NotNull Component getDurationFormatted() {
+        return this.format().color(Colors.TICK);
     }
     
 }

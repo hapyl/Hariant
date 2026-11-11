@@ -127,7 +127,7 @@ public class HeroAlchemist extends Hero {
             if (slot == 0) {
                 heroData.setState(State.NORMAL);
                 player.playWorldSound(ITEM_ARMOR_EQUIP_ELYTRA, 0.5f);
-                player.setCooldown(abyssalBottle, 5);
+                player.startCooldown(abyssalBottle, 5);
                 return;
             }
             
@@ -141,7 +141,7 @@ public class HeroAlchemist extends Hero {
             selectedPotion.drink0(player, heroData);
             
             // Start cooldown and reset state
-            player.setCooldown(abyssalBottle);
+            player.startCooldown(abyssalBottle);
             
             heroData.setState(State.NORMAL);
         }
@@ -171,7 +171,7 @@ public class HeroAlchemist extends Hero {
             super(
                     Key.ofString("alchemist_stick"),
                     Icon.ofMaterial(Material.STICK),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 65, 10)
+                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 65, NormalAttack.DEFAULT_ATTACK_COOLDOWN)
             );
             
             setName(Component.text("Brewing Stick"));
@@ -184,7 +184,7 @@ public class HeroAlchemist extends Hero {
             super(
                     Key.ofString("alchemist_stick_madness"),
                     Icon.ofMaterial(Material.STICK, ItemBuilder::glow),
-                    new NormalAttack(ElementType.TOXIC, AttributeType.ATTACK, 125, 10)
+                    new NormalAttack(ElementType.TOXIC, AttributeType.ATTACK, 125, NormalAttack.DEFAULT_ATTACK_COOLDOWN)
             );
             
             setName(Component.text("Brewing Stick (Infused)"));
@@ -197,7 +197,7 @@ public class HeroAlchemist extends Hero {
             super(
                     Key.ofString("alchemist_stick_missing"),
                     Icon.ofMaterial(Material.SLIME_BALL),
-                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 1, 10)
+                    new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 1, NormalAttack.DEFAULT_ATTACK_COOLDOWN)
             );
             
             setName(Component.text("Brewing Stick (Missing)"));

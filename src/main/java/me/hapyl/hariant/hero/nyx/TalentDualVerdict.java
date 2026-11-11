@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.location.Located;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.reflect.glowing.Glowing;
 import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
@@ -72,8 +73,8 @@ public final class TalentDualVerdict extends Talent {
         
         setTalentType(TalentType.SUPPORT);
         
-        setDurationSeconds(1.5f);
-        setCooldownSeconds(16);
+        setDuration(Tick.ofSeconds(1.5f));
+        setCooldown(Tick.ofSeconds(16));
         
         setDescription(
                 Component.empty()
@@ -133,7 +134,7 @@ public final class TalentDualVerdict extends Talent {
     }
     
     public void onPickupAll(@NotNull HariantPlayer player) {
-        player.setCooldown(this);
+        player.startCooldown(this);
     }
     
     private @NotNull Entity createDroplet(@NotNull Location location) {
@@ -180,7 +181,7 @@ public final class TalentDualVerdict extends Talent {
         
         @Override
         public void run(int tick) {
-            final int duration = getDuration();
+            final int duration = duration();
             
             for (int i = 0; i < 3; i++) {
                 if (tick >= duration) {

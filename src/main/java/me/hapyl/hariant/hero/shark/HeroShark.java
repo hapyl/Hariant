@@ -98,7 +98,7 @@ public final class HeroShark extends Hero {
             super(
                     Key.ofString("claws"),
                     Icon.ofMaterial(Material.QUARTZ),
-                    NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 54, 10)
+                    NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 54, NormalAttack.DEFAULT_ATTACK_COOLDOWN)
             );
             
             setName(Component.text("Jaws"));

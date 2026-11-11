@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class CloudsBooster implements Booster {
     
-    private static final int BOOST_DURATION = Tick.fromSeconds(2);
+    private static final Tick BOOST_DURATION = Tick.ofSeconds(2);
     
     private final ImmutableLocation from;
     private final ImmutableLocation to;
@@ -58,12 +58,12 @@ public final class CloudsBooster implements Booster {
         
         @Override
         public void run(int tick) {
-            if (tick > BOOST_DURATION) {
+            if (tick > BOOST_DURATION.ticks()) {
                 this.cancel();
                 return;
             }
             
-            final double progress = (double) tick / BOOST_DURATION;
+            final double progress = (double) tick / BOOST_DURATION.ticks();
             final double progressEased = progress < 0.5 ? 2 * progress * progress : -2 * progress * progress + 4 * progress - 1;
             
             final double angle = Math.sin(Math.PI * progress) * cloudsBooster.height;

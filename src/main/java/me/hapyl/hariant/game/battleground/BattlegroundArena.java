@@ -22,7 +22,7 @@ public final class BattlegroundArena extends BattlegroundImpl {
                 Icon.ofMaterial(Material.COARSE_DIRT)
         );
         
-        setTimeBeforePlayersReveal(Tick.fromSeconds(5));
+        setTimeBeforePlayersReveal(Tick.ofSeconds(5));
         
         setSpawnLocations(
                 ImmutableLocation.create(500, 64, 0),

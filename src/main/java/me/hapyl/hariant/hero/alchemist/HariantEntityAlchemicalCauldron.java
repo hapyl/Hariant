@@ -68,7 +68,7 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
         this.player = player;
         this.talent = talent;
         this.elementSource = ElementSource.create(ElementType.TOXIC, player, talent.cauldronElementalApplication.doubleValue());
-        this.tick = talent.getDuration();
+        this.tick = talent.getDuration().ticks();
         this.stickAnimation = Entities.ARMOR_STAND.spawn(
                 LocationHelper.copyOf(location).subtract(0.0, 0.75, 0.0), self -> {
                     self.setMarker(true);
@@ -210,7 +210,7 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
         super.onDestroy();
         
         this.stickAnimation.remove();
-        this.player.setCooldown(talent);
+        this.player.startCooldown(talent);
         
         // Fx
         final Location fxLocation = this.getLocation().add(0, 1, 0);
@@ -251,7 +251,7 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
     
     @Override
     public int duration() {
-        return talent.getDuration();
+        return talent.getDuration().ticks();
     }
     
     @NotNull
@@ -268,7 +268,7 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
         else {
             builder.append(
                     isBrewing
-                    ? Component.text(Tick.format(tick), Colors.SUCCESS)
+                    ? Tick.format(tick).color(Colors.SUCCESS)
                     : Component.text("NOT BREWING!", Colors.ERROR, TextDecoration.BOLD)
             );
         }

@@ -1,6 +1,7 @@
 package me.hapyl.hariant.game.type;
 
 import me.hapyl.eterna.module.component.ComponentList;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -22,10 +23,10 @@ public class GameTypeImpl implements GameType {
     private final Component name;
     private final Component description;
     
-    private final int timeLimit;
+    private final Tick timeLimit;
     private final boolean allowDuplicateHeroes;
     
-    GameTypeImpl(@NotNull Component name, @NotNull Component description, int timeLimit, boolean allowDuplicateHeroes) {
+    GameTypeImpl(@NotNull Component name, @NotNull Component description, @NotNull Tick timeLimit, boolean allowDuplicateHeroes) {
         this.name = name;
         this.description = description;
         this.timeLimit = timeLimit;
@@ -52,7 +53,7 @@ public class GameTypeImpl implements GameType {
     }
     
     @Override
-    public int getTimeLimit() {
+    public @NotNull Tick getTimeLimit() {
         return timeLimit;
     }
     

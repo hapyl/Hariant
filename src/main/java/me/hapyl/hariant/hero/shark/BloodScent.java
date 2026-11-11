@@ -88,7 +88,7 @@ public class BloodScent implements Ticking, Cancellable, ComponentLike {
                         .appendSpace()
                         .append(entity.asHeadComponent())
                         .appendSpace()
-                        .append(Component.text(Tick.format(duration - tick), Colors.TICK));
+                        .append(Tick.format(duration - tick).color(Colors.TICK));
     }
     
     private void drawPath(@NotNull Queue<? extends Location> path) {

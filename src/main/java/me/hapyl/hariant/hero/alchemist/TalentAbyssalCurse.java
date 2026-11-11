@@ -79,8 +79,8 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
     public TalentAbyssalCurse(@NotNull Key key) {
         super(key, Component.text("Abyssal Curse"), Icon.ofMaterial(Material.FERMENTED_SPIDER_EYE), UltimateResourceType.ENERGY, 60);
         
-        this.setDurationSeconds(10);
-        this.setCooldownSeconds(30);
+        this.setDuration(Tick.ofSeconds(10));
+        this.setCooldown(Tick.ofSeconds(30));
         
         this.setDescription(
                 Component.empty()
@@ -120,7 +120,7 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                     player.playWorldSound(ENTITY_EVOKER_PREPARE_ATTACK, 2.0f);
                 }))
                 .then(Executable.later(() -> {
-                    final int curseDuration = HeroRegistry.ALCHEMIST.getCurseDuration(player, this.getDuration());
+                    final int curseDuration = HeroRegistry.ALCHEMIST.getCurseDuration(player, this.getDuration().ticks());
                     
                     // Store in the global hash set for faster lookup
                     globalCurses.add(new AbyssalCurse(player, curseDuration));
@@ -211,7 +211,7 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
                 player.messageError(
                         Component.empty()
                                  .append(Component.text("Cannot transfer curse for another "))
-                                 .append(Component.text(Tick.format((int) ((transferCooldownInMillis - timePassedSinceLastTransfer) / 50))))
+                                 .append(Tick.format((int) ((transferCooldownInMillis - timePassedSinceLastTransfer) / 50)))
                                  .append(Component.text("!"))
                 );
                 return;

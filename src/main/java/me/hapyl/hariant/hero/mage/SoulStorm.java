@@ -10,6 +10,7 @@ import me.hapyl.hariant.achievement.AchievementMageSoulStorm;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.WarningType;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -117,7 +118,7 @@ public class SoulStorm extends HariantTickingTask {
         }
         
         // If duration is done, stop spawning souls, but only cancel if all souls are dead
-        if (tick >= talent.getDuration()) {
+        if (tick >= talent.duration()) {
             if (souls.isEmpty()) {
                 this.cancel();
             }
@@ -142,8 +143,17 @@ public class SoulStorm extends HariantTickingTask {
     
     private static class SoulStormDamageSource extends DamageSourceImpl {
         
+        private final TalentSoulStorm talent;
+        
         SoulStormDamageSource(@NotNull HariantEntity source, @NotNull TalentSoulStorm talent) {
-            super(DAMAGE_SOURCE_IDENTITY, source, DamageType.ULTIMATE, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), talent.damage.getScaledValue(source), talent.elementalApplication.doubleValue(), talent.cooldownKey, talent.damagePeriod.intValue());
+            super(DAMAGE_SOURCE_IDENTITY, source, DamageType.ULTIMATE, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), talent.damage.getScaledValue(source), talent.elementalApplication.doubleValue());
+            
+            this.talent = talent;
+        }
+        
+        @Override
+        public @NotNull Cooldown cooldown() {
+            return talent.cooldown;
         }
         
     }

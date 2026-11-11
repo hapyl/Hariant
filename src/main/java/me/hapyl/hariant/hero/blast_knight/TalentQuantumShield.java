@@ -2,12 +2,13 @@ package me.hapyl.hariant.hero.blast_knight;
 
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.effect.status.StatusEffectType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantAttackEvent;
@@ -49,7 +50,7 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
     private final @DisplayField Decimal parryQuantumEnergyGeneration = Decimal.ofValue(5);
     
     private final @DisplayField Decimal blockingQuantumEnergyGeneration = Decimal.ofValue(1);
-    private final @DisplayField HariantCooldown blockingQuantumEnergyGenerationCooldown = HariantCooldown.ofSeconds(Key.ofString("quantum_energy_generation_cooldown"), 0.2f);
+    private final @DisplayField Cooldown blockingQuantumEnergyGenerationCooldown = Cooldown.create(Key.ofString("quantum_energy_generation_cooldown"), Tick.ofSeconds(0.2f));
     
     private final @DisplayField BoundingBoxBlueprint parryBoundingBox = BoundingBoxBlueprint.define(1.25, 2.5, 1.25);
     
@@ -66,7 +67,7 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
                 )).setName(this.getName().color(Colors.LIGHT_PURPLE))
                   .asIcon();
         
-        setCooldownSeconds(5);
+        setCooldown(Tick.ofSeconds(5));
         
         setDescription(
                 Component.empty()
@@ -206,7 +207,7 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
         // We have to start the vanilla cooldown because it's a vanilla item
         player.getHandle().setCooldown(
                 Material.SHIELD,
-                (int) (this.getCooldown() * (hasParried ? parryCooldownReduction.doubleValue() : 1.0))
+                (int) (this.getCooldown().ticks() * (hasParried ? parryCooldownReduction.doubleValue() : 1.0))
         );
     }
     
@@ -217,7 +218,7 @@ public final class TalentQuantumShield extends TalentPassive implements Listener
               .filter(player::canAffect)
               .forEach(entity -> {
                   // Stun entity
-                  entity.addEffect(StatusEffectType.STUNNED, parryStunDuration, player);
+                  entity.addEffect(StatusEffectType.STUNNED, parryStunDuration.intValue(), player);
               });
         
         // Fx

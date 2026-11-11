@@ -1,8 +1,10 @@
 package me.hapyl.hariant.entity.effect.status;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.DamageFlag;
 import me.hapyl.hariant.entity.damage.DamageResult;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
@@ -14,13 +16,14 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
 
 public final class StatusEffectRoseIvy extends StatusEffectImpl implements Listener {
+    
+    private static final Cooldown COOLDOWN = Cooldown.create(Key.ofString("rose_ivy_damage_cooldown"), Tick.ofTicks(5));
     
     StatusEffectRoseIvy() {
         super(Key.ofString("effect_rose_ivy"), Component.text("Rose Ivy"), EffectType.DEBUFF);
@@ -48,6 +51,7 @@ public final class StatusEffectRoseIvy extends StatusEffectImpl implements Liste
     }
     
     public class RoseIvyDamageSource extends DamageSourceImpl {
+        
         RoseIvyDamageSource(@Nullable HariantEntity attacker, double damage) {
             super(
                     StatusEffectRoseIvy.this,
@@ -61,16 +65,11 @@ public final class StatusEffectRoseIvy extends StatusEffectImpl implements Liste
             );
         }
         
-        @NotNull
         @Override
-        public Key getCooldownKey() {
-            return StatusEffectRoseIvy.this.getKey();
+        public @Nullable Cooldown cooldown() {
+            return COOLDOWN;
         }
         
-        @Override
-        public int getCooldown() {
-            return 5;
-        }
     }
     
 }

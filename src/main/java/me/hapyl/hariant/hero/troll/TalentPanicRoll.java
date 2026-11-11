@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.troll;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HariantRandom;
@@ -33,7 +34,8 @@ public final class TalentPanicRoll extends Talent implements Listener {
         super(key, Component.text("Panic Roll"), Icon.ofMaterial(Material.IRON_NAUTILUS_ARMOR));
         
         setTalentType(TalentType.MOVEMENT);
-        setCooldownSeconds(6);
+        
+        setCooldown(Tick.ofSeconds(6));
         
         setDescription(
                 Component.empty()

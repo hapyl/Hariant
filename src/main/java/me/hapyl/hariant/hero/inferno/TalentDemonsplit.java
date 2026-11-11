@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.inferno;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -35,8 +36,8 @@ public abstract class TalentDemonsplit extends Talent {
         
         this.demonType = demonType;
         
-        setDurationSeconds(10);
-        setCooldownSeconds(20);
+        setDuration(Tick.ofSeconds(10));
+        setCooldown(Tick.ofSeconds(20));
     }
     
     public abstract @NotNull InfernoDemonEntity newInstance(@NotNull HariantPlayer player, InfernoDemonType infernoDemonType);

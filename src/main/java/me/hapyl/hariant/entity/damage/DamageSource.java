@@ -2,14 +2,15 @@ package me.hapyl.hariant.entity.damage;
 
 import me.hapyl.eterna.module.annotate.NotEmpty;
 import me.hapyl.eterna.module.annotate.SelfReturn;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Buildable;
+import me.hapyl.eterna.module.util.CollectionUtils;
 import me.hapyl.hariant.element.ElementSource;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
-import me.hapyl.hariant.util.ImmutableCollectionMerger;
 import org.jetbrains.annotations.*;
 
 import java.util.List;
@@ -30,7 +31,7 @@ import java.util.Set;
  * </p>
  */
 
-public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSource {
+public interface DamageSource extends DamageFlagged, ElementSource {
     
     @NotNull DamageSourceIdentity getIdentity();
     
@@ -44,10 +45,9 @@ public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSou
     @Override
     double getElementUnits();
     
-    @NotNull Key getCooldownKey();
-    
-    @Override
-    int getCooldown();
+    default @Nullable Cooldown cooldown() {
+        return null;
+    }
     
     @NotNull DamageType getDamageType();
     
@@ -101,9 +101,6 @@ public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSou
         
         private double units;
         
-        private @NotNull Key cooldownKey;
-        private int cooldown;
-        
         Builder(@NotNull DamageSourceIdentity damageSourceIdentity, final double damage) {
             this.damageSourceIdentity = damageSourceIdentity;
             this.damage = damage;
@@ -113,7 +110,6 @@ public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSou
             this.damageComponents = List.of();
             this.damageFlags = Set.of();
             this.units = 0;
-            this.cooldownKey = Key.empty();
         }
         
         @SelfReturn
@@ -136,13 +132,13 @@ public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSou
         
         @SelfReturn
         public Builder damageComponents(@NotNull @Unmodifiable List<? extends DamageComponent> damageComponents, @NotNull Strategy strategy) {
-            this.damageComponents = strategy == Strategy.MERGE ? ImmutableCollectionMerger.merge(this.damageComponents, damageComponents) : damageComponents;
+            this.damageComponents = strategy == Strategy.MERGE ? CollectionUtils.merge(this.damageComponents, damageComponents) : damageComponents;
             return this;
         }
         
         @SelfReturn
         public Builder damageFlags(@NotNull Set<? extends DamageFlag> damageFlags, @NotNull Strategy strategy) {
-            this.damageFlags = strategy == Strategy.MERGE ? ImmutableCollectionMerger.merge(this.damageFlags, damageFlags) : damageFlags;
+            this.damageFlags = strategy == Strategy.MERGE ? CollectionUtils.merge(this.damageFlags, damageFlags) : damageFlags;
             return this;
         }
         
@@ -152,16 +148,9 @@ public interface DamageSource extends DamageFlagged, HariantCooldown, ElementSou
             return this;
         }
         
-        @SelfReturn
-        public Builder cooldown(@NotNull @NotEmpty Key cooldownKey, final int cooldown) {
-            this.cooldownKey = cooldownKey;
-            this.cooldown = cooldown;
-            return this;
-        }
-        
         @Override
         public @NotNull DamageSource build() {
-            return new DamageSourceImpl(damageSourceIdentity, source, damageType, elementType, damageComponents, damageFlags, damage, units, cooldownKey, cooldown);
+            return new DamageSourceImpl(damageSourceIdentity, source, damageType, elementType, damageComponents, damageFlags, damage, units);
         }
         
     }

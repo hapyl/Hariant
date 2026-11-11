@@ -76,8 +76,8 @@ public class HeroArcher extends Hero {
         WeaponBowOfDestiny() {
             super(
                     Key.ofString("bow_of_destiny"),
-                    NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 15, 10),
-                    NormalAttack.ranged(ElementType.PHYSICAL, AttributeType.ATTACK, 94.5, 10)
+                    NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 15, NormalAttack.DEFAULT_ATTACK_COOLDOWN),
+                    NormalAttack.ranged(ElementType.PHYSICAL, AttributeType.ATTACK, 94.5, NormalAttack.DEFAULT_ATTACK_COOLDOWN)
             );
             
             this.setName(Component.text("Bow of Destiny"));

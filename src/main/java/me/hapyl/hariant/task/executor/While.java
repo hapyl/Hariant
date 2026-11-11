@@ -48,7 +48,7 @@ public interface While {
      */
     @NotNull
     static While duration(@NotNull Duration duration, @NotNull IntFunction<@NotNull Boolean> function) {
-        return new WhileImpl(tick -> tick >= duration.getDuration(), function);
+        return new WhileImpl(tick -> tick >= duration.getDuration().ticks(), function);
     }
     
     /**

@@ -1,6 +1,7 @@
 package me.hapyl.hariant.game.battleground;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -79,7 +80,7 @@ public enum EnumBattleground implements Battleground, Selectable {
     }
     
     @Override
-    public int getTimeBeforePlayerReveal() {
+    public @NotNull Tick getTimeBeforePlayerReveal() {
         return battleground.getTimeBeforePlayerReveal();
     }
     

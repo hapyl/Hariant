@@ -1,5 +1,6 @@
 package me.hapyl.hariant.game.battleground;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.inventory.drop.DropTable;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.ImmutableLocation;
@@ -15,7 +16,7 @@ public final class BattlegroundSpawn extends BattlegroundImpl {
                 Icon.ofMaterial(Material.RED_BED)
         );
         
-        this.setTimeBeforePlayersReveal(1);
+        this.setTimeBeforePlayersReveal(Tick.ofTicks(1));
         this.setSpawnLocations(ImmutableLocation.create(0, 64, 0));
     }
 }

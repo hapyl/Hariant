@@ -1,17 +1,18 @@
 package me.hapyl.hariant.command;
 
 import me.hapyl.eterna.module.command.ArgumentList;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.StringList;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.HariantLogger;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.util.Ticks;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +44,7 @@ public final class HariantCommandTemper extends HariantPlayerCommand {
             return;
         }
         
-        final double value = args.get(2).toDouble();
+        final Tick value = Tick.ofTicks(args.get(2).toInt());
         
         final HariantPlayer hariantPlayer = Hariant.getPlayer(player).orElse(null);
         
@@ -54,7 +55,7 @@ public final class HariantCommandTemper extends HariantPlayerCommand {
         
         final AttributesInstance attributes = hariantPlayer.getAttributes();
         
-        if (value == 0) {
+        if (value.isZero()) {
             final boolean removed = attributes.removeModifier(MODIFIER_KEY);
             
             if (removed) {
@@ -65,14 +66,14 @@ public final class HariantCommandTemper extends HariantPlayerCommand {
             }
         }
         else {
-            attributes.addModifier(MODIFIER_KEY, HariantConstants.INDEFINITE_DURATION, hariantPlayer, adder -> adder.of(attributeType, modifierType, value));
+            attributes.addModifier(MODIFIER_KEY, Ticks.INDEFINITE, hariantPlayer, adder -> adder.of(attributeType, modifierType, value.ticks()));
             
             hariantPlayer.messageSuccess(
                     Component.empty()
                              .append(Component.text("Added modifier for "))
                              .append(attributeType)
                              .append(Component.text(": "))
-                             .append(modifierType.format(attributeType, value))
+                             .append(modifierType.format(attributeType, value.ticks()))
                              .appendSpace()
                              .append(Component.text("(%s)".formatted(modifierType.name()), Colors.DARK_GRAY))
             );

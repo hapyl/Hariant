@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.nyx;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.element.ElementType;
@@ -29,7 +30,7 @@ public final class TalentWiltBlink extends Talent {
         super(key, Component.text("Wilted Blink"), Icon.ofMaterial(Material.CLOSED_EYEBLOSSOM));
         
         setTalentType(TalentType.MOVEMENT);
-        setCooldownSeconds(8);
+        setCooldown(Tick.ofSeconds(8));
         
         setDescription(
                 Component.empty()

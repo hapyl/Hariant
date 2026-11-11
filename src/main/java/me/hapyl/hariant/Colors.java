@@ -75,6 +75,8 @@ public final class Colors {
     
     public static final TextColor ULTIMATE_RESOURCE_ENERGY = TextColor.color(0x41B2F2);
     public static final TextColor ULTIMATE_RESOURCE_ENERGY_SECONDARY = TextColor.color(0x4084C3);
+    public static final TextColor ULTIMATE_RESOURCE_SURGE = TextColor.color(0x4BF2EF);
+    public static final TextColor ULTIMATE_RESOURCE_SURGE_SECONDARY = TextColor.color(0x3CAFAC);
     
     public static final TextColor ULTIMATE_OVERCHARGE = TextColor.color(0xCB2FCD);
     public static final TextColor ULTIMATE_OVERCHARGE_SECONDARY = TextColor.color(0xAD2FAF);

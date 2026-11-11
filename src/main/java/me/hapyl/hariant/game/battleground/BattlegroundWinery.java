@@ -21,7 +21,7 @@ public final class BattlegroundWinery extends BattlegroundImpl {
                 Icon.ofMaterial(Material.SWEET_BERRIES)
         );
         
-        this.setTimeBeforePlayersReveal(Tick.fromSeconds(10));
+        this.setTimeBeforePlayersReveal(Tick.ofSeconds(8));
         
         setSize(Size.LARGE);
         setBattlegroundWeather(BattlegroundWeather.THUNDER);

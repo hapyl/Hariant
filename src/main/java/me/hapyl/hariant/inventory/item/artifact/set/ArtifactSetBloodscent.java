@@ -1,12 +1,13 @@
 package me.hapyl.hariant.inventory.item.artifact.set;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.heal.HealingSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantElementalAnomalyEvent;
@@ -30,7 +31,7 @@ public final class ArtifactSetBloodscent extends ArtifactSet implements Listener
             20
     );
     
-    private final HariantCooldown cooldown = HariantCooldown.ofSeconds(Key.ofString("bloodscent_healing"), 0.1f);
+    private final Cooldown cooldown = Cooldown.create(Key.ofString("bloodscent_healing"), Tick.ofSeconds(0.1f));
     
     ArtifactSetBloodscent(@NotNull Key key) {
         super(key, Component.text("Bloodscent"));
@@ -79,7 +80,7 @@ public final class ArtifactSetBloodscent extends ArtifactSet implements Listener
         }
         
         player.heal(HealingSource.create(healing.getScaledValue(player), this));
-        player.setCooldown(cooldown);
+        player.startCooldown(cooldown);
     }
     
     private class ModifierTwoPiece extends AttributeModifierArtifactSet {
