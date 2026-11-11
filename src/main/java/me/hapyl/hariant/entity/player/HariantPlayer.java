@@ -3,6 +3,7 @@ package me.hapyl.hariant.entity.player;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.Eterna;
 import me.hapyl.eterna.module.annotate.EventLike;
+import me.hapyl.eterna.module.math.Precision;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.reflect.Reflect;
 import me.hapyl.hariant.Colors;
@@ -15,7 +16,7 @@ import me.hapyl.hariant.database.rank.FormatRules;
 import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.*;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageSource;
@@ -43,6 +44,7 @@ import me.hapyl.hariant.statistics.Statistic;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentIndex;
+import me.hapyl.hariant.talent.energy.EnergyRegenerationRules;
 import me.hapyl.hariant.talent.rechargeable.RechargeableTalentData;
 import me.hapyl.hariant.talent.rechargeable.TalentRechargeable;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
@@ -51,6 +53,7 @@ import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
+import me.hapyl.hariant.util.Ticks;
 import me.hapyl.hariant.weapon.NormalAttackRanged;
 import me.hapyl.hariant.weapon.Weapon;
 import me.hapyl.hariant.weapon.WeaponBow;
@@ -118,6 +121,7 @@ public class HariantPlayer
     private final CombatTracker combatTracker;
     private final PlayerStatistics statistics;
     private final SharedAchievementData sharedAchievementData;
+    private final EnergyRegenerationRules energyRegenerationRules;
     
     private final Map<Class<? extends Hero>, HeroData<? extends Hero>> heroData;
     private final Map<TalentRechargeable, RechargeableTalentData> rechargeableTalentData;
@@ -139,6 +143,11 @@ public class HariantPlayer
         this.combatTracker = new CombatTracker(this);
         this.statistics = new PlayerStatistics(this);
         this.sharedAchievementData = new SharedAchievementData(this);
+        this.energyRegenerationRules = new EnergyRegenerationRules(this);
+    }
+    
+    public @NotNull EnergyRegenerationRules energyRegenerationRules() {
+        return energyRegenerationRules;
     }
     
     public @NotNull SharedAchievementData getSharedAchievementData() {
@@ -518,6 +527,11 @@ public class HariantPlayer
     }
     
     @Override
+    public void setOutline(@NotNull Outline outline) {
+        outline.setOutline(this.getHandle());
+    }
+    
+    @Override
     public boolean shouldTick() {
         if (this.isDead()) {
             return false;
@@ -586,6 +600,7 @@ public class HariantPlayer
         
         this.rechargeableTalentData.clear();
         this.combatTracker.reset();
+        this.energyRegenerationRules.reset();
         
         // Clear outline
         setOutline(Outline.CLEAR);
@@ -643,14 +658,14 @@ public class HariantPlayer
     }
     
     @Override
-    public void onCooldownStarted(@NotNull HariantCooldown cooldown, int duration) {
+    public void onCooldownStarted(@NotNull Cooldown cooldown, int duration) {
         // Flip -1 cooldown to something big that vanilla supports, 1,000,000 seem to work fine, and it's
         // equal to about 13 real life hours, so you're never seeing it move
-        this.sendCooldownPacket(cooldown, duration == HariantConstants.INDEFINITE_COOLDOWN ? 1_000_000 : duration);
+        this.sendCooldownPacket(cooldown, Ticks.isIndefinite(duration) ? 1_000_000 : duration);
     }
     
     @Override
-    public void onCooldownEnded(@NotNull HariantCooldown cooldown) {
+    public void onCooldownEnded(@NotNull Cooldown cooldown) {
         // Send the packet with 0 duration to reset the visual cooldown
         this.sendCooldownPacket(cooldown, 0);
     }
@@ -842,7 +857,7 @@ public class HariantPlayer
                 // Fx
                 sendTitleSubtitle(
                         Component.text("ʀᴇsᴘᴀᴡɴɪɴɢ", Colors.YELLOW, TextDecoration.BOLD),
-                        Component.text(Tick.format(respawnIn - tick), Colors.TICK),
+                        Tick.format(respawnIn - tick, Precision.FIXED_1).color(Colors.TICK),
                         0, 25, 0
                 );
                 
@@ -974,7 +989,7 @@ public class HariantPlayer
         return combatTracker;
     }
     
-    private void sendCooldownPacket(@NotNull HariantCooldown cooldown, int duration) {
+    private void sendCooldownPacket(@NotNull Cooldown cooldown, int duration) {
         final Identifier vanillaKey = Identifier.fromNamespaceAndPath(Eterna.getPlugin().namespace(), cooldown.getCooldownKey().getKey());
         
         this.sendPacket(new ClientboundCooldownPacket(vanillaKey, duration));
@@ -1020,10 +1035,6 @@ public class HariantPlayer
         this.entity.setHealth(Math.max(radio * maxHearts, HariantConstants.ABSOLUTE_MIN_HEALTH));
     }
     
-    private static void supplyCurrentGameInstance(@NotNull Consumer<GameInstance> consumer) {
-        Hariant.getCurrentGameInstance().ifPresent(consumer);
-    }
-    
     private void startAttackCooldown(boolean isMeleeAttack) {
         final Weapon weapon = heroInstance.getOrigin().getWeapon();
         
@@ -1039,9 +1050,8 @@ public class HariantPlayer
         }
     }
     
-    @Override
-    public void setOutline(@NotNull Outline outline) {
-        outline.setOutline(this.getHandle());
+    private static void supplyCurrentGameInstance(@NotNull Consumer<GameInstance> consumer) {
+        Hariant.getCurrentGameInstance().ifPresent(consumer);
     }
     
 }

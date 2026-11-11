@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.mage;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -28,8 +29,8 @@ public final class TalentArcaneMute extends Talent {
     public TalentArcaneMute(@NotNull Key key) {
         super(key, Component.text("Arcane Mute"), Icon.ofMaterial(Material.FEATHER));
         
-        setDurationSeconds(4);
-        setCooldownSeconds(20);
+        setDuration(Tick.ofSeconds(4));
+        setCooldown(Tick.ofSeconds(20));
         
         setTalentType(TalentType.IMPAIR);
         

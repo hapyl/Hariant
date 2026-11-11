@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.blast_knight;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -55,8 +56,8 @@ public final class TalentNaniteRush extends TalentUltimate implements Listener {
         
         setTalentType(TalentType.DEFENSE);
         
-        setDurationSeconds(1.5f);
-        setCooldownSeconds(20);
+        setDuration(Tick.ofSeconds(1.5f));
+        setCooldown(Tick.ofSeconds(20));
         
         setDescription(
                 Component.empty()
@@ -84,7 +85,7 @@ public final class TalentNaniteRush extends TalentUltimate implements Listener {
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
         final double maximumCapacity = shieldMaximumCapacity.getScaledValue(player);
         final double initialCapacity = maximumCapacity * initialShieldCapacityOfMaximumCapacity.doubleValue();
-        final double shieldRegenerationPerTick = (maximumCapacity - initialCapacity) / (getDuration() - 1);
+        final double shieldRegenerationPerTick = (maximumCapacity - initialCapacity) / (getDuration().ticks() - 1);
         
         return Executable.whilst(While.duration(this, tick -> {
             final Location location = player.getLocation();
@@ -102,7 +103,7 @@ public final class TalentNaniteRush extends TalentUltimate implements Listener {
                   });
             
             // Fx
-            final float pitch = 0.5f + (1.5f * tick / getDuration());
+            final float pitch = 0.5f + (1.5f * tick / getDuration().ticks());
             final double offsetXZ = radius.doubleValue() / 4;
             
             player.spawnWorldParticle(location, Particle.WITCH, 50, offsetXZ, 0.1d, offsetXZ, 1f);

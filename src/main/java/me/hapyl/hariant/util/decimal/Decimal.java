@@ -1,5 +1,6 @@
 package me.hapyl.hariant.util.decimal;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.text.NumberToWord;
 import me.hapyl.hariant.annotate.Percentage;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -89,19 +90,21 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
         return this.doubleValue() * this.doubleValue();
     }
     
-    @NotNull
     @Override
-    public abstract Component format();
+    public @NotNull
+    abstract Component format();
     
-    @NotNull
     @Override
-    public final Component asComponent() {
+    public final @NotNull Component asComponent() {
         return format();
     }
     
-    @NotNull
-    public String wordValue() {
+    public @NotNull String wordValue() {
         return NumberToWord.toWord(intValue());
+    }
+    
+    public @NotNull Tick tickValue() {
+        return Tick.ofTicks((int) value);
     }
     
     @Override

@@ -1,10 +1,12 @@
 package me.hapyl.hariant.hero.mage;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
@@ -35,15 +37,15 @@ public final class TalentSoulStorm extends TalentUltimate {
     public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.AETHER, 100);
     public final @DisplayField Decimal damagePeriod = Decimal.ofSeconds(0.5f);
     
-    public final Key cooldownKey = Key.ofString("soul_storm_icd");
+    public final Cooldown cooldown = Cooldown.create(Key.ofString("soul_storm_icd"), this.damagePeriod.tickValue());
     
     public TalentSoulStorm(@NotNull Key key) {
         super(key, Component.text("Soul Storm"), Icon.ofMaterial(Material.WARDEN_SPAWN_EGG), UltimateResourceType.ENERGY, 60);
         
         setTalentType(TalentType.DAMAGE);
         
-        setDurationSeconds(5);
-        setCooldownSeconds(20);
+        setDuration(Tick.ofSeconds(5));
+        setCooldown(Tick.ofSeconds(20));
         
         setDescription(
                 Component.empty()

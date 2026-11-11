@@ -162,7 +162,7 @@ public final class Hariant implements Runnable, Lifecycle {
             profile.handleInstanceCreated(HANDLER.currentGameInstance);
         });
         
-        final int timeBeforePlayerReveal = HANDLER.currentGameInstance.getBattleground().getTimeBeforePlayerReveal();
+        final Tick timeBeforePlayerReveal = HANDLER.currentGameInstance.getBattleground().getTimeBeforePlayerReveal();
         
         // Hide all players
         getPlayers().forEach(player -> {
@@ -172,7 +172,7 @@ public final class Hariant implements Runnable, Lifecycle {
             player.sendMessage(
                     Component.empty()
                              .append(Component.text(" They have ", Colors.YELLOW))
-                             .append(Component.text(Tick.round(timeBeforePlayerReveal), Colors.RED))
+                             .append(timeBeforePlayerReveal.asComponent().color(Colors.RED))
                              .append(Component.text(" to spread before being revealed!", Colors.YELLOW))
             );
         });
@@ -188,7 +188,7 @@ public final class Hariant implements Runnable, Lifecycle {
             });
             
             HANDLER.currentGameInstance.setState(GameInstanceState.IN_PROGRESS);
-        }, timeBeforePlayerReveal);
+        }, timeBeforePlayerReveal.ticks());
     }
     
     public static boolean endCurrentGameInstance(@NotNull WinResult winResult) {
@@ -226,7 +226,7 @@ public final class Hariant implements Runnable, Lifecycle {
                         gameInstance.onDestroy(players, winResult);
                     }
                     // After the game delay, finalize the game
-                    else if (tick == HariantConstants.GAME_END_DELAY) {
+                    else if (tick == HariantConstants.GAME_END_DELAY.ticks()) {
                         // Mark the game as finished
                         gameInstance.setState(GameInstanceState.FINISHED);
                         gameInstance.onFinalize(players, winResult);

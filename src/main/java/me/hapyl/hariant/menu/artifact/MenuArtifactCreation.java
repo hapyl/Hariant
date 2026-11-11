@@ -7,8 +7,8 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.action.PlayerMenuAction;
 import me.hapyl.hariant.Colors;
+import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.HariantLogger;
-import me.hapyl.hariant.achievement.ComponentUtils;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.database.PlayerDatabase;
 import me.hapyl.hariant.inventory.HariantInventory;
@@ -121,7 +121,7 @@ public final class MenuArtifactCreation extends Menu {
                 final List<Component> lore = Lists.newArrayList();
                 
                 lore.add(Component.empty());
-                lore.add(Component.text("Designated Slot:", ComponentUtils.LORE_STYLE));
+                lore.add(Component.text("Designated Slot:", HariantConstants.DEFAULT_LORE_STYLE));
                 lore.add(
                         Component.empty()
                                  .appendSpace()
@@ -129,11 +129,11 @@ public final class MenuArtifactCreation extends Menu {
                 );
                 
                 lore.add(Component.empty());
-                lore.add(Component.text("Designated Attribute:", ComponentUtils.LORE_STYLE));
+                lore.add(Component.text("Designated Attribute:", HariantConstants.DEFAULT_LORE_STYLE));
                 lore.add(Component.text(" ").append(attributeTypeCycle.currentValue().asComponent().decoration(TextDecoration.ITALIC, false)));
                 
                 lore.add(Component.empty());
-                lore.add(Component.text("Designated Set:", ComponentUtils.LORE_STYLE));
+                lore.add(Component.text("Designated Set:", HariantConstants.DEFAULT_LORE_STYLE));
                 
                 lore.addAll(
                         Objects.requireNonNullElseGet(meta.lore(), Lists::<Component>newArrayList)

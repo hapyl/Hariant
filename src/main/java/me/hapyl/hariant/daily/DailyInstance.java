@@ -2,6 +2,7 @@ package me.hapyl.hariant.daily;
 
 import me.hapyl.eterna.module.component.Components;
 import me.hapyl.eterna.module.component.Described;
+import me.hapyl.eterna.module.component.ShowTextBuilder;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -15,7 +16,6 @@ import me.hapyl.hariant.inventory.item.ItemCreator;
 import me.hapyl.hariant.inventory.item.ResourceRegistry;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.util.Hoverable;
-import me.hapyl.hariant.util.ShowTextBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.bson.Document;

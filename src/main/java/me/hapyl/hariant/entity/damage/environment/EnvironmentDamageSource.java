@@ -1,8 +1,10 @@
 package me.hapyl.hariant.entity.damage.environment;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.Capitalizable;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
@@ -16,15 +18,19 @@ import java.util.Set;
 
 public class EnvironmentDamageSource extends DamageSourceImpl {
     
-    private static final Key COOLDOWN_KEY = Key.ofString("environment_cooldown");
-    private static final int COOLDOWN = 10;
+    private static final Cooldown COOLDOWN = Cooldown.create(Key.ofString("environment_cooldown"), Tick.ofTicks(10));
     
     EnvironmentDamageSource(@NotNull DamageSourceIdentity identity, @NotNull ElementType elementType, double damage) {
-        super(identity, null, DamageType.ENVIRONMENT, elementType, DamageComponents.ofEnvironmentDamage(), Set.of(), damage, 0, COOLDOWN_KEY, COOLDOWN);
+        super(identity, null, DamageType.ENVIRONMENT, elementType, DamageComponents.ofEnvironmentDamage(), Set.of(), damage, 0);
     }
     
     EnvironmentDamageSource(@NotNull org.bukkit.damage.DamageType damageType, @NotNull DeathMessage deathMessage, @NotNull ElementType elementType, double damage) {
         this(createIdentity(damageType, deathMessage), elementType, damage);
+    }
+    
+    @Override
+    public final @NotNull Cooldown cooldown() {
+        return COOLDOWN;
     }
     
     public boolean isCactus() {
@@ -75,8 +81,7 @@ public class EnvironmentDamageSource extends DamageSourceImpl {
         return this instanceof EnvironmentDamageSourceFall;
     }
     
-    @NotNull
-    private static DamageSourceIdentity createIdentity(@NotNull org.bukkit.damage.DamageType damageType, @NotNull DeathMessage deathMessage) {
+    private static @NotNull DamageSourceIdentity createIdentity(@NotNull org.bukkit.damage.DamageType damageType, @NotNull DeathMessage deathMessage) {
         final String key = damageType.getKey().getKey();
         final Component damageTypeName = Component.text(Capitalizable.capitalize(key.replace("_", " ")));
         

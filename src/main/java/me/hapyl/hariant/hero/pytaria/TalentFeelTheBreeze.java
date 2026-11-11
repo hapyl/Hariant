@@ -1,10 +1,12 @@
 package me.hapyl.hariant.hero.pytaria;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DeathMessage;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -39,8 +41,10 @@ public final class TalentFeelTheBreeze extends TalentUltimate {
     public final @DisplayField Decimal elementalApplication = Decimal.ofElementalApplication(ElementType.PHYSICAL, 100);
     public final @DisplayField Decimal maximumBeeSpeed = Decimal.ofBlocksPerSecond(15);
     
-    public final Key cooldownKey = Key.ofString("feel_the_breeze_icd");
-    public final int cooldown = 5;
+    public final Cooldown cooldown = Cooldown.create(
+            Key.ofString("feel_the_breeze_icd"),
+            Tick.ofTicks(5)
+    );
     
     public final DamageSourceIdentity damageSourceIdentity = DamageSourceIdentity.createOfNamed(
             this,
@@ -51,7 +55,7 @@ public final class TalentFeelTheBreeze extends TalentUltimate {
     public TalentFeelTheBreeze(@NotNull Key key) {
         super(key, Component.text("Feel the Breeze"), Icon.ofTexture("d4579f1ea3864269c2148d827c0887b0c5ed43a975b102a01afb644efb85ccfd"), UltimateResourceType.ENERGY, 60);
         
-        this.setCooldownSeconds(20);
+        setCooldown(Tick.ofSeconds(20));
         
         this.setDescription(
                 Component.empty()

@@ -12,10 +12,20 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface ComponentFormatter extends ComponentLike {
     
+    /**
+     * Gets the formatted version of this object.
+     *
+     * <p>
+     * The component is used directly for display field, thus must not be styled!
+     * </p>
+     *
+     * @return the formatted object.
+     */
     @NotNull Component format();
     
+    @Override
     default @NotNull Component asComponent() {
-        return format();
+        return this.format();
     }
     
 }

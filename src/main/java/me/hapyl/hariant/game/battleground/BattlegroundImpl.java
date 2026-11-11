@@ -2,6 +2,7 @@ package me.hapyl.hariant.game.battleground;
 
 import com.google.common.collect.Lists;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
@@ -30,6 +31,8 @@ import java.util.Map;
 @AutoRegisteredListener
 public class BattlegroundImpl implements Battleground {
     
+    private static final Tick DEFAULT_TIME_BEFORE_PLAYERS_REVEAL = Tick.ofSeconds(5);
+    
     private final Component name;
     private final Component description;
     private final DropTable dropTable;
@@ -38,8 +41,8 @@ public class BattlegroundImpl implements Battleground {
     private final List<ImmutableLocation> spawnLocations;
     private final List<BattlegroundFeature> features;
     
-    private int timeBeforePlayersReveal;
-    private Size size;
+    private @NotNull Tick timeBeforePlayersReveal;
+    private @NotNull Size size;
     private @NotNull List<BoundingBox> supplyBoundingBoxes;
     
     private @NotNull BattlegroundWeather battlegroundWeather;
@@ -51,7 +54,7 @@ public class BattlegroundImpl implements Battleground {
         this.dropTable = dropTable;
         this.icon = icon;
         this.spawnLocations = Lists.newArrayList();
-        this.timeBeforePlayersReveal = 100;
+        this.timeBeforePlayersReveal = DEFAULT_TIME_BEFORE_PLAYERS_REVEAL;
         this.features = Lists.newArrayList();
         this.size = Size.MEDIUM;
         this.supplyBoundingBoxes = List.of();
@@ -157,7 +160,7 @@ public class BattlegroundImpl implements Battleground {
     }
     
     @Override
-    public int getTimeBeforePlayerReveal() {
+    public @NotNull Tick getTimeBeforePlayerReveal() {
         return timeBeforePlayersReveal;
     }
     
@@ -238,7 +241,7 @@ public class BattlegroundImpl implements Battleground {
         this.supplyBoundingBoxes = List.of(boundingBoxes);
     }
     
-    protected void setTimeBeforePlayersReveal(int timeBeforePlayersReveal) {
+    protected void setTimeBeforePlayersReveal(@NotNull Tick timeBeforePlayersReveal) {
         this.timeBeforePlayersReveal = timeBeforePlayersReveal;
     }
     

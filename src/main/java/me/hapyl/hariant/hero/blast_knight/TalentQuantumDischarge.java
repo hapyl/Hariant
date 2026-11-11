@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.blast_knight;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.achievement.AchievementRegistry;
@@ -58,7 +59,7 @@ public final class TalentQuantumDischarge extends Talent {
     public TalentQuantumDischarge(@NotNull Key key) {
         super(key, Component.text("Quantum Discharge"), Icon.ofMaterial(Material.CHORUS_PLANT));
         
-        setCooldownSeconds(20);
+        setCooldown(Tick.ofSeconds(20));
         
         setDescription(
                 Component.empty()

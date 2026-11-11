@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.blast_knight;
 
 import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -48,8 +49,8 @@ public final class TalentShieldRam extends Talent {
     public TalentShieldRam(@NotNull Key key) {
         super(key, Component.text("Shield Slam"), Icon.ofMaterial(Material.GOAT_HORN));
         
-        setCooldownSeconds(12);
         setTalentType(TalentType.IMPAIR);
+        setCooldown(Tick.ofSeconds(12));
         
         setDescription(
                 Component.empty()

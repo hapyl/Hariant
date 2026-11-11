@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.nyx;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.achievement.AchievementRegistry;
@@ -59,7 +60,8 @@ public final class TalentReverberation extends TalentPassive implements Listener
         super(key, Component.text("Reverberation"), Icon.ofMaterial(Material.SHULKER_SHELL));
         
         setTalentType(TalentType.SUPPORT);
-        setCooldownSeconds(2.5f);
+        
+        setCooldown(Tick.ofSeconds(2.5f));
         
         setDescription(
                 Component.empty()
@@ -123,7 +125,7 @@ public final class TalentReverberation extends TalentPassive implements Listener
         }
         
         // Start cooldown
-        nyx.setCooldown(this);
+        nyx.startCooldown(this);
         
         // Assist the player
         this.assist(entity, player, nyx);

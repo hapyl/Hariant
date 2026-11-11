@@ -60,8 +60,8 @@ public final class TalentBloodBounty extends Talent implements Listener {
     public TalentBloodBounty(@NotNull Key key) {
         super(key, Component.text("Blood Bounty"), Icon.ofMaterial(Material.STRIDER_SPAWN_EGG));
         
-        setDurationSeconds(30);
-        setCooldownSeconds(30);
+        setDuration(Tick.ofSeconds(30));
+        setCooldown(Tick.ofSeconds(30));
         
         setTalentType(TalentType.IMPAIR);
         
@@ -194,7 +194,7 @@ public final class TalentBloodBounty extends Talent implements Listener {
         @Override
         public void run(int tick) {
             // If player or entity is dead, cancel the bounty
-            if (tick >= getDuration() || player.isDead() || entity.isDead()) {
+            if (tick >= duration() || player.isDead() || entity.isDead()) {
                 this.cancel();
                 return;
             }
@@ -205,7 +205,7 @@ public final class TalentBloodBounty extends Talent implements Listener {
             textDisplay.setTransformation(MatrixUtils.scale(scale));
             
             if (tick % 5 == 0) {
-                final Component timeLeft = Component.space().append(Component.text(Tick.format(getDuration() - tick), Colors.NUMBER));
+                final Component timeLeft = Component.space().append(Tick.format(duration() - tick).color(Colors.NUMBER));
                 
                 player.actionbar(BloodBounty.class, componentEntityToPlayer.append(timeLeft));
                 
@@ -222,7 +222,7 @@ public final class TalentBloodBounty extends Talent implements Listener {
             bloodBounties.remove(entity);
             
             // Start the cooldown when bounty ends
-            player.setCooldown(TalentBloodBounty.this);
+            player.startCooldown(TalentBloodBounty.this);
             
             // If bounty is complete, heal bounty hunter
             if (entity.isDead()) {

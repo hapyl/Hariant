@@ -1,6 +1,5 @@
 plugins {
     `java-library`
-    `maven-publish`
 
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
     id("xyz.jpenilla.run-paper") version "3.0.2"
@@ -22,10 +21,10 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("26.2.build.+")
+    paperweight.paperDevBundle("26.3.build.+")
 
     implementation("org.mongodb:mongo-java-driver:3.12.12")
-    implementation("me.hapyl:eternaapi:6.3.3-SNAPSHOT")
+    implementation("me.hapyl:eternaapi:6.4.3-SNAPSHOT")
 }
 
 group = "me.hapyl"
@@ -53,14 +52,14 @@ tasks {
     bukkitPluginYaml {
         main = "me.hapyl.hariant.HariantPlugin"
         prefix = "Hariant"
-        apiVersion = "26.2"
+        apiVersion = "26.3"
         authors = listOf("hapyl")
         depend = listOf("EternaAPI")
         libraries = listOf("org.mongodb:mongo-java-driver:3.12.12")
     }
 
     runServer {
-        minecraftVersion("26.2")
+        minecraftVersion("26.3")
     }
 }
 

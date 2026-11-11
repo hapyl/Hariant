@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.block.display.DisplayEntity;
 import me.hapyl.eterna.module.component.Keybind;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.math.PiHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -55,8 +56,8 @@ public final class TalentFlowerEscape extends Talent {
     public TalentFlowerEscape(@NotNull Key key) {
         super(key, Component.text("Flower Escape"), Icon.ofMaterial(Material.RED_TULIP));
         
-        this.setCooldownSeconds(12);
-        this.setDurationSeconds(6);
+        setCooldown(Tick.ofSeconds(12));
+        setDuration(Tick.ofSeconds(6));
         
         this.setDescription(
                 Component.empty()

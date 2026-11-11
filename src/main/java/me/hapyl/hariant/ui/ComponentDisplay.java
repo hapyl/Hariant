@@ -9,7 +9,6 @@ import me.hapyl.hariant.entity.EntityGarbageCollector;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
-import me.hapyl.hariant.util.DigitStyle;
 import me.hapyl.hariant.util.MatrixUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
@@ -96,7 +95,7 @@ public class ComponentDisplay implements ComponentDisplayable {
         
         new ComponentDisplay(
                 Component.empty()
-                         .append(DigitStyle.STYLE.asComponent((int) damage).style(style))
+                         .append(HariantConstants.DIGIT_STYLE.asComponent((int) damage).style(style))
                          .append(critical ? HariantConstants.CHARACTER_CRITICAL_DAMAGE.style(style) : Component.empty()),
                 ComponentDisplayAnimation.ofFalloff(),
                 20,

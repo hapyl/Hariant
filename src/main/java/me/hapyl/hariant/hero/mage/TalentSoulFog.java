@@ -4,6 +4,7 @@ import me.hapyl.eterna.module.block.display.DisplayEntity;
 import me.hapyl.eterna.module.block.display.DisplayPart;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.achievement.AchievementMageSoulHarvested;
@@ -73,8 +74,8 @@ public final class TalentSoulFog extends Talent {
         
         setTalentType(TalentType.IMPAIR);
         
-        setDurationSeconds(2f);
-        setCooldownSeconds(12f);
+        setDuration(Tick.ofSeconds(2));
+        setCooldown(Tick.ofSeconds(12));
         
         setDescription(
                 Component.empty()
@@ -145,13 +146,13 @@ public final class TalentSoulFog extends Talent {
         
         @Override
         public void run(int tick) {
-            if (tick > getDuration()) {
+            if (tick > duration()) {
                 this.explode();
                 this.cancel();
                 return;
             }
             
-            final double progress = (double) tick / getDuration();
+            final double progress = (double) tick / duration();
             
             entity.collectNearbyEntities(location, soulFogRadius)
                   .filter(entity::canAffect)
@@ -239,7 +240,7 @@ public final class TalentSoulFog extends Talent {
     private class PullSourceSoulFog extends PullSource {
         
         PullSourceSoulFog(@NotNull HariantEntity source, @NotNull Location centre) {
-            super(source, centre, TalentSoulFog.this.getName(), TalentSoulFog.this.getDuration(), soulFogRadius.doubleValue(), pullStrength.doubleValue(), pullResistance.doubleValue());
+            super(source, centre, TalentSoulFog.this.getName(), TalentSoulFog.this.duration(), soulFogRadius.doubleValue(), pullStrength.doubleValue(), pullResistance.doubleValue());
         }
         
     }

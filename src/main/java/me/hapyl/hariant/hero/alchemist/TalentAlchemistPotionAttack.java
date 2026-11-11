@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.alchemist;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.util.decimal.Decimal;
@@ -17,7 +18,7 @@ public final class TalentAlchemistPotionAttack extends TalentAlchemistPotionAttr
                 25,
                 AttributeType.ATTACK,
                 Decimal.ofPercentage(100),
-                Decimal.ofSeconds(10)
+                Tick.ofSeconds(10)
         );
         
         setTalentType(TalentType.ENHANCE);

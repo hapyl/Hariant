@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.orc;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -27,7 +28,7 @@ public final class TalentAngerIssues extends TalentPassive implements Listener {
     public TalentAngerIssues(@NotNull Key key) {
         super(key, Component.text("Anger Issues"), Icon.ofMaterial(Material.OMINOUS_BOTTLE));
         
-        setCooldownSeconds(10);
+        setCooldown(Tick.ofSeconds(10));
         
         setDescription(
                 Component.empty()
@@ -79,7 +80,7 @@ public final class TalentAngerIssues extends TalentPassive implements Listener {
             TalentRegistry.BERSERK.enterBerserk(player, berserkDuration.intValue());
             
             // Start cooldown
-            player.setCooldown(this);
+            player.startCooldown(this);
         }
     }
     

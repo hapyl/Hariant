@@ -3,6 +3,7 @@ package me.hapyl.hariant.game.type;
 import me.hapyl.eterna.module.component.ComponentList;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
@@ -28,7 +29,7 @@ public interface GameType extends Named, Described, GameInstanceListener {
     
     int getMinimumTeamsRequired();
     
-    int getTimeLimit();
+    @NotNull Tick getTimeLimit();
     
     boolean allowDuplicateHeroes();
     

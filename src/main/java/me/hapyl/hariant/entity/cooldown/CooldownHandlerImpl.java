@@ -3,13 +3,13 @@ package me.hapyl.hariant.entity.cooldown;
 import com.google.common.collect.Maps;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Ticking;
-import me.hapyl.hariant.HariantConstants;
+import me.hapyl.hariant.attribute.Attributable;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.TickSupplier;
+import me.hapyl.hariant.util.Ticks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Range;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -25,41 +25,34 @@ public final class CooldownHandlerImpl implements CooldownHandler, Ticking {
     }
     
     @Override
-    public void setCooldown(@NotNull HariantCooldown cooldown, @Range(from = HariantConstants.INDEFINITE_COOLDOWN, to = Integer.MAX_VALUE) int duration, @Nullable AttributeType cooldownReducingAttribute) {
+    public void startCooldown(@NotNull Cooldown cooldown, int duration, @Nullable AttributeType cooldownReducingAttribute) {
         final Key cooldownKey = cooldown.getCooldownKey().nonEmpty();
+        final boolean isIndefinite = Ticks.isIndefinite(duration);
         
-        // Remove the cooldown instance for 0 duration
-        if (duration == 0) {
-            cooldowns.remove(cooldownKey);
-            
-            this.onCooldownEnded0(cooldown);
+        // If the cooldown respects the cooldown reducing attribute, and it's not indefinite, scale by it
+        if (cooldownReducingAttribute != null && !isIndefinite) {
+            duration = scaleCooldown(duration, entity, cooldownReducingAttribute);
         }
-        else {
-            final boolean isIndefinite = duration == HariantConstants.INDEFINITE_COOLDOWN;
-            
-            // If the cooldown respects the cooldown reducing attribute, and it's not indefinite, scale by it
-            if (cooldownReducingAttribute != null && !isIndefinite) {
-                duration = HariantCooldown.scaleCooldown(duration, entity, cooldownReducingAttribute);
-            }
-            
-            cooldowns.put(
-                    cooldownKey,
-                    new CooldownInstance(cooldown, isIndefinite ? HariantConstants.INDEFINITE_COOLDOWN : entity.localTicks() + duration)
-            );
-            
-            this.onCooldownStarted0(cooldown, duration);
-        }
+        
+        this.cooldowns.put(cooldownKey, new CooldownInstance(cooldown, isIndefinite ? Ticks.INDEFINITE : entity.localTicks() + duration));
+        this.onCooldownStarted0(cooldown, duration);
     }
     
     @Override
-    public int getCooldownTimeLeft(@NotNull HariantCooldown cooldown) {
+    public void stopCooldown(@NotNull Cooldown cooldown) {
+        this.cooldowns.remove(cooldown.getCooldownKey());
+        this.onCooldownEnded0(cooldown);
+    }
+    
+    @Override
+    public int getCooldownTimeLeft(@NotNull Cooldown cooldown) {
         final CooldownInstance instance = cooldowns.get(cooldown.getCooldownKey());
         
-        return instance != null ? instance.isIndefinite() ? HariantConstants.INDEFINITE_COOLDOWN : instance.endTick - entity.localTicks() : 0;
+        return instance != null ? instance.getCooldownTimeLeft(entity) : 0;
     }
     
     @Override
-    public boolean hasCooldown(@NotNull HariantCooldown cooldown) {
+    public boolean hasCooldown(@NotNull Cooldown cooldown) {
         final CooldownInstance instance = cooldowns.get(cooldown.getCooldownKey());
         
         return instance != null && (instance.isIndefinite() || instance.hasCooldown(entity));
@@ -91,32 +84,43 @@ public final class CooldownHandlerImpl implements CooldownHandler, Ticking {
         }
     }
     
-    private void onCooldownStarted0(@NotNull HariantCooldown cooldown, int duration) {
+    private void onCooldownStarted0(@NotNull Cooldown cooldown, int duration) {
         cooldown.onCooldownStarted(entity, duration);
         entity.onCooldownStarted(cooldown, duration);
     }
     
-    private void onCooldownEnded0(@NotNull HariantCooldown cooldown) {
+    private void onCooldownEnded0(@NotNull Cooldown cooldown) {
         cooldown.onCooldownEnded(entity);
         entity.onCooldownEnded(cooldown);
     }
     
+    public static int scaleCooldown(int cooldown, @NotNull Attributable attributable, @NotNull AttributeType attributeType) {
+        final double attributeValue = attributable.getAttributes().get(attributeType);
+        
+        // Scaled cooldown cannot be lower than 1
+        return Math.max(1, (int) (cooldown * (1 - attributeValue / 100)));
+    }
+    
     public static class CooldownInstance {
         
-        private final HariantCooldown cooldown;
+        private final Cooldown cooldown;
         private final int endTick;
         
-        CooldownInstance(@NotNull HariantCooldown cooldown, final int endTick) {
+        CooldownInstance(@NotNull Cooldown cooldown, final int endTick) {
             this.cooldown = cooldown;
             this.endTick = endTick;
         }
         
         public boolean isIndefinite() {
-            return endTick == HariantConstants.INDEFINITE_COOLDOWN;
+            return Ticks.isIndefinite(endTick);
         }
         
         public boolean hasCooldown(@NotNull TickSupplier tickSupplier) {
             return tickSupplier.localTicks() < endTick;
+        }
+        
+        public int getCooldownTimeLeft(@NotNull TickSupplier tickSupplier) {
+            return this.isIndefinite() ? Ticks.INDEFINITE : endTick - tickSupplier.localTicks();
         }
         
     }

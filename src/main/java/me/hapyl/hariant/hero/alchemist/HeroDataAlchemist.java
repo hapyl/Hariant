@@ -186,7 +186,7 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements Action
         return Component.empty()
                         .append(definition.getPrefixStyled())
                         .appendSpace()
-                        .append(Component.text(Tick.format(alchemicalMadness), style));
+                        .append(Tick.format(alchemicalMadness).style(style));
     }
     
     @Override
@@ -211,7 +211,7 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements Action
                 potionInstance != null
                 ? Component.empty()
                            .append(Component.text("\uD83E\uDDEA ", Colors.DARK_PURPLE))
-                           .append(Component.text(Tick.format(potionInstance.currentTick()), Colors.LIGHT_PURPLE))
+                           .append(Tick.format(potionInstance.currentTick()).color(Colors.LIGHT_PURPLE))
                 : Component.empty(),
                 
                 // Append cauldron

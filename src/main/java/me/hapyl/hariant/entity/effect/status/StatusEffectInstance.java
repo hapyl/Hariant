@@ -3,9 +3,9 @@ package me.hapyl.hariant.entity.effect.status;
 import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.util.TickingDown;
+import me.hapyl.hariant.util.Ticks;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +31,7 @@ public class StatusEffectInstance implements Ticking, TickingDown, Removable, Co
     
     public void mutate(int newDuration, @Nullable HariantEntity newApplier) {
         // Mutate tick only if new duration is longer than CURRENT tick, and current duration isn't infinite
-        if (this.duration != HariantConstants.INDEFINITE_DURATION && newDuration > tick) {
+        if (!Ticks.isIndefinite(this.duration) && newDuration > tick) {
             this.duration = newDuration;
             this.tick = newDuration;
         }
@@ -59,7 +59,7 @@ public class StatusEffectInstance implements Ticking, TickingDown, Removable, Co
     
     @Override
     public void tick() {
-        if (this.duration != HariantConstants.INDEFINITE_DURATION) {
+        if (!Ticks.isIndefinite(this.duration)) {
             this.tick--;
         }
         
@@ -78,7 +78,7 @@ public class StatusEffectInstance implements Ticking, TickingDown, Removable, Co
     
     @Override
     public boolean isOver() {
-        return duration != HariantConstants.INDEFINITE_DURATION && tick <= 0;
+        return !Ticks.isIndefinite(this.duration) && tick <= 0;
     }
     
     @Override

@@ -73,7 +73,7 @@ public final class HeroBountyHunter extends Hero {
     private static class WeaponBloodweep extends WeaponMelee {
         
         WeaponBloodweep() {
-            super(Key.ofString("bloodweep"), Icon.ofMaterial(Material.IRON_SWORD), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 77, 10));
+            super(Key.ofString("bloodweep"), Icon.ofMaterial(Material.IRON_SWORD), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 77, NormalAttack.DEFAULT_ATTACK_COOLDOWN));
             
             setName(Component.text("Bloodweep"));
             setDescription(Component.text("A ceremonial sword covered in blood."));

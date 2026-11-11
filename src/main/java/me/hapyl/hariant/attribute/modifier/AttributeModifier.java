@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Streamable;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.TickingEntity;
@@ -14,6 +13,7 @@ import me.hapyl.hariant.entity.effect.EffectType;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.ui.ComponentDisplayable;
 import me.hapyl.hariant.util.TickingDown;
+import me.hapyl.hariant.util.Ticks;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -115,7 +115,7 @@ public class AttributeModifier
     
     @Override
     public final void tick(@NotNull HariantEntity entity) {
-        if (this.duration != HariantConstants.INDEFINITE_DURATION) {
+        if (!Ticks.isIndefinite(this.duration)) {
             this.tick--;
         }
         
@@ -134,7 +134,7 @@ public class AttributeModifier
     
     @Override
     public boolean isOver() {
-        return duration != HariantConstants.INDEFINITE_DURATION && tick <= 0;
+        return !Ticks.isIndefinite(this.duration) && tick <= 0;
     }
     
     @Override

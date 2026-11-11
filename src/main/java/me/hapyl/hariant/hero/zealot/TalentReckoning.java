@@ -63,7 +63,7 @@ public final class TalentReckoning extends TalentPassive implements Listener {
                          .append(Component.text(" attack."))
                          .appendNewline()
                          .appendNewline()
-                         .append(Component.text("Resets after %s of not attacking or after attacking a different enemy.".formatted(Tick.round(resetThreshold.intValue())), Colors.DARK_GRAY))
+                         .append(Component.text("Resets after %s of not attacking or after attacking a different enemy.".formatted(Tick.format(resetThreshold.intValue())), Colors.DARK_GRAY))
         );
         
     }

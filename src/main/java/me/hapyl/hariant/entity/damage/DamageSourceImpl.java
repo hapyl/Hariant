@@ -1,14 +1,11 @@
 package me.hapyl.hariant.entity.damage;
 
-import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
 import me.hapyl.hariant.entity.damage.component.DamageComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,10 +26,7 @@ public class DamageSourceImpl implements DamageSource {
     
     private final double elementUnits;
     
-    private final @NotNull Key cooldownKey;
-    private final int cooldown;
-    
-    public DamageSourceImpl(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents, @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags, final double damage, final double elementUnits, @NotNull Key cooldownKey, int cooldown) {
+    public DamageSourceImpl(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents, @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags, final double damage, final double elementUnits) {
         this.identity = identity;
         this.source = source;
         this.elementType = elementType;
@@ -41,16 +35,6 @@ public class DamageSourceImpl implements DamageSource {
         this.damageFlags = damageFlags;
         this.damage = damage;
         this.elementUnits = elementUnits;
-        this.cooldownKey = cooldownKey;
-        this.cooldown = cooldown;
-    }
-    
-    public DamageSourceImpl(@NotNull DamageSourceIdentity identity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull @Unmodifiable List<? extends DamageComponent> damageComponents, @NotNull @Unmodifiable Set<? extends DamageFlag> damageFlags, final double damage, final double elementUnits) {
-        this(identity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, Key.empty(), 0);
-    }
-    
-    public DamageSourceImpl(@NotNull DamageSourceIdentity damageSourceIdentity, @Nullable HariantEntity source, @NotNull DamageType damageType, @NotNull ElementType elementType, @NotNull List<? extends DamageComponent> damageComponents, @NotNull Set<DamageFlag> damageFlags, double damage, double elementUnits, @NotNull HariantCooldown cooldown) {
-        this(damageSourceIdentity, source, damageType, elementType, damageComponents, damageFlags, damage, elementUnits, cooldown.getCooldownKey(), cooldown.getCooldown());
     }
     
     @Override
@@ -73,20 +57,8 @@ public class DamageSourceImpl implements DamageSource {
         return elementUnits;
     }
     
-    @NonNull
     @Override
-    public Key getCooldownKey() {
-        return cooldownKey;
-    }
-    
-    @Override
-    public int getCooldown() {
-        return cooldown;
-    }
-    
-    @NotNull
-    @Override
-    public DamageType getDamageType() {
+    public @NotNull DamageType getDamageType() {
         return damageType;
     }
     

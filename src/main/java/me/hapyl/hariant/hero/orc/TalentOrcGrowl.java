@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.orc;
 
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
@@ -39,7 +40,7 @@ public final class TalentOrcGrowl extends Talent {
     public TalentOrcGrowl(@NotNull Key key) {
         super(key, Component.text("Orc's Growl"), Icon.ofMaterial(Material.GOAT_HORN));
         
-        setCooldownSeconds(20);
+        setCooldown(Tick.ofSeconds(20));
         
         setTalentType(TalentType.IMPAIR);
         

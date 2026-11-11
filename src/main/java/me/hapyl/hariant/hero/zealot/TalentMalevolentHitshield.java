@@ -1,8 +1,8 @@
 package me.hapyl.hariant.hero.zealot;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
-import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
@@ -15,11 +15,12 @@ import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.Priority;
+import me.hapyl.hariant.util.Ticks;
 import me.hapyl.hariant.util.decimal.Decimal;
+import me.hapyl.hariant.util.field.DisplayField;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,7 +40,7 @@ public final class TalentMalevolentHitshield extends Talent {
         
         setTalentType(TalentType.DEFENSE);
         
-        setCooldownSeconds(16);
+        setCooldown(Tick.ofSeconds(16));
         
         setDescription(
                 Component.empty()
@@ -71,7 +72,7 @@ public final class TalentMalevolentHitshield extends Talent {
     private class MalevolentHitshieldAttributeModifier extends AttributeModifier {
         
         MalevolentHitshieldAttributeModifier(@NotNull HariantEntity applier) {
-            super(MODIFIER_KEY, TalentMalevolentHitshield.this.getName(), applier, HariantConstants.INDEFINITE_DURATION);
+            super(MODIFIER_KEY, TalentMalevolentHitshield.this.getName(), applier, Ticks.INDEFINITE);
             
             of(AttributeType.KNOCKBACK_RESISTANCE, AttributeModifierType.FLAT, knockbackResistanceIncrease.doubleValue());
         }
@@ -81,7 +82,7 @@ public final class TalentMalevolentHitshield extends Talent {
     private class MalevolentHitshield extends Shield {
         
         MalevolentHitshield(@NotNull HariantEntity entity) {
-            super(entity, entity, ShieldStrength.always1(), shieldCapacity.intValue(), HariantConstants.INDEFINITE_DURATION);
+            super(entity, entity, ShieldStrength.always1(), shieldCapacity.intValue(), Ticks.INDEFINITE);
             
             entity.getAttributes().addModifier(new MalevolentHitshieldAttributeModifier(entity));
         }
@@ -112,7 +113,7 @@ public final class TalentMalevolentHitshield extends Talent {
             entity.getAttributes().removeModifier(MODIFIER_KEY);
             
             // Start the cooldown
-            entity.setCooldown(TalentMalevolentHitshield.this);
+            entity.startCooldown(TalentMalevolentHitshield.this);
             
             // Fx
             entity.playWorldSound(Sound.ENTITY_ENDERMAN_HURT, 0.0f);

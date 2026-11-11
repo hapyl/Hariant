@@ -43,11 +43,11 @@ public abstract class TalentPoleaxe extends Talent {
         final TalentPoleaxe otherTalent = this.otherTalent();
         
         // If player cooldown is already higher than other talent cooldown %, don't restart it
-        final int cooldown = (int) (otherTalent.getCooldown() * otherTalentCooldownThreshold.doubleValue());
+        final int cooldown = (int) (otherTalent.cooldown() * otherTalentCooldownThreshold.doubleValue());
         final int playerCooldown = player.getCooldownTimeLeft(otherTalent);
         
         if (playerCooldown == 0 || playerCooldown < cooldown) {
-            player.setCooldown(otherTalent, cooldown);
+            player.startCooldown(otherTalent, cooldown);
         }
         
         return Response.ok();

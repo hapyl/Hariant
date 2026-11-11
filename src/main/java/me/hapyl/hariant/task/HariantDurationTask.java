@@ -5,6 +5,10 @@ import me.hapyl.hariant.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
+/**
+ * @deprecated This is kinda fucking useless
+ */
+@Deprecated
 public abstract class HariantDurationTask extends HariantTickingTask {
     
     private final int duration;
@@ -16,7 +20,7 @@ public abstract class HariantDurationTask extends HariantTickingTask {
     }
     
     public HariantDurationTask(@NotNull Duration duration) {
-        this(duration.getDuration());
+        this(duration.duration());
     }
     
     public abstract void run(int tick, int duration);

@@ -1,5 +1,6 @@
 package me.hapyl.hariant.weapon;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class NormalAttackRanged extends NormalAttack {
     
-    public NormalAttackRanged(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double scaling, int shotCooldown) {
+    public NormalAttackRanged(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double scaling, @NotNull Tick shotCooldown) {
         super(elementType, attributeType, scaling, shotCooldown);
     }
     

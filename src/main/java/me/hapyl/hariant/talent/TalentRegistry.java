@@ -11,6 +11,7 @@ import me.hapyl.hariant.hero.mage.*;
 import me.hapyl.hariant.hero.nyx.*;
 import me.hapyl.hariant.hero.orc.*;
 import me.hapyl.hariant.hero.pytaria.*;
+import me.hapyl.hariant.hero.shaman.*;
 import me.hapyl.hariant.hero.shark.*;
 import me.hapyl.hariant.hero.troll.*;
 import me.hapyl.hariant.hero.zealot.*;
@@ -135,6 +136,15 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
     public static final TalentAngerIssues ANGER_ISSUES;
     public static final TalentBerserk BERSERK;
     
+    /**
+     * {@link HeroShaman}
+     */
+    public static final TalentTotem TOTEM;
+    public static final TalentTotemJump TOTEM_JUMP;
+    public static final TalentShamanMark SHAMAN_MARK;
+    public static final TalentOverheal OVERHEAL;
+    public static final TalentSpiritualCleansing SPIRITUAL_CLEANSING;
+    
     // Private fields
     private static final StaticRegistryMap<Talent> REGISTRY;
     private static final TalentUltimate DUMMY_ULTIMATE;
@@ -214,6 +224,12 @@ public final class TalentRegistry extends StaticRegistry<Talent> {
         POLEAXE_SPIN = REGISTRY.register("poleaxe_spin", TalentPoleaxeSpin::new);
         ANGER_ISSUES = REGISTRY.register("anger_issues", TalentAngerIssues::new);
         BERSERK = REGISTRY.register("berserk", TalentBerserk::new);
+        
+        TOTEM = REGISTRY.register("totem", TalentTotem::new);
+        TOTEM_JUMP = REGISTRY.register("totem_jump", TalentTotemJump::new);
+        SHAMAN_MARK = REGISTRY.register("shaman_mark", TalentShamanMark::new);
+        OVERHEAL = REGISTRY.register("overheal", TalentOverheal::new);
+        SPIRITUAL_CLEANSING = REGISTRY.register("spiritual_cleansing", TalentSpiritualCleansing::new);
     }
     
     public static @NotNull StaticRegistryMap<Talent> getRegistry() {

@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.shark;
 
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.math.geometry.Quality;
 import me.hapyl.eterna.module.registry.Key;
@@ -70,8 +71,8 @@ public final class TalentBubbleTrap extends Talent implements Effect {
         
         setTalentType(TalentType.IMPAIR);
         
-        setDurationSeconds(3);
-        setCooldownSeconds(18);
+        setDuration(Tick.ofSeconds(3));
+        setCooldown(Tick.ofSeconds(18));
         
         setDescription(
                 Component.empty()
@@ -207,7 +208,7 @@ public final class TalentBubbleTrap extends Talent implements Effect {
         private final DamageSource damageSource;
         
         BubbleTrap(@NotNull HariantEntity entity, @NotNull HariantPlayer source, @NotNull Location location) {
-            super(entity, source, TRAP_NAME, TalentBubbleTrap.this.getDuration());
+            super(entity, source, TRAP_NAME, TalentBubbleTrap.this.duration());
             
             this.location = location;
             this.sitHandler = entity.setSitting(entity.getLocation(), false);
@@ -215,7 +216,7 @@ public final class TalentBubbleTrap extends Talent implements Effect {
                     ElementType.WATER,
                     source,
                     // Element is applied over the duration of the talent, so decrement by the decrement to apply the whole value in total
-                    (totalAnomalyApplication.doubleValue() + HariantConstants.ELEMENTAL_UNITS_DECREMENT_PER_TICK * getDuration()) / getDuration()
+                    (totalAnomalyApplication.doubleValue() + HariantConstants.ELEMENTAL_UNITS_DECREMENT_PER_TICK * duration()) / duration()
             );
             this.damageSource = new BubbleDamageSource(source, popDamage.getScaledValue(source));
         }

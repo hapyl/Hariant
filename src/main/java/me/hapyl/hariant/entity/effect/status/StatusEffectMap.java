@@ -45,12 +45,12 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     }
     
     @Override
-    public void addEffect(@NotNull StatusEffectType effect, int duration, @NotNull HariantEntity applier) {
-        if (HariantEffectEvent.callEvent(entity, applier, effect, HariantStatusEffectAddEvent::new)) {
+    public void addEffect(@NotNull StatusEffectType effectType, int duration, @NotNull HariantEntity applier) {
+        if (HariantEffectEvent.callEvent(entity, applier, effectType, HariantStatusEffectAddEvent::new)) {
             return;
         }
         
-        final StatusEffectInstance previousEffect = effectMap.get(effect);
+        final StatusEffectInstance previousEffect = effectMap.get(effectType);
         
         // If previous effect exists, we simply mutate it
         if (previousEffect != null) {
@@ -58,11 +58,11 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
         }
         // Otherwise instantiate new effect
         else {
-            final StatusEffectInstance effectInstance = new StatusEffectInstance(effect, entity, applier, duration);
-            effectMap.put(effect, effectInstance);
+            final StatusEffectInstance effectInstance = new StatusEffectInstance(effectType, entity, applier, duration);
+            effectMap.put(effectType, effectInstance);
             
             // Call event
-            effect.onApply(entity, applier, duration);
+            effectType.onApply(entity, applier, duration);
         }
     }
     

@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.zealot;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -35,8 +36,8 @@ public final class TalentPsionicOverload extends Talent {
         
         setTalentType(TalentType.ENHANCE);
         
-        setDurationSeconds(5);
-        setCooldownSeconds(14);
+        setDuration(Tick.ofSeconds(5));
+        setCooldown(Tick.ofSeconds(14));
         
         setDescription(
                 Component.empty()
@@ -72,7 +73,7 @@ public final class TalentPsionicOverload extends Talent {
     public class ModifierPsionicOverload extends AttributeModifier {
         
         ModifierPsionicOverload(@NotNull HariantEntity applier) {
-            super(modifierKey, TalentPsionicOverload.this, applier, TalentPsionicOverload.this.getDuration());
+            super(modifierKey, TalentPsionicOverload.this, applier, TalentPsionicOverload.this.duration());
             
             of(AttributeType.FEROCITY, AttributeModifierType.FLAT, ferocityIncrease);
             of(AttributeType.MOVEMENT_SPEED, AttributeModifierType.FLAT, movementSpeedIncrease);

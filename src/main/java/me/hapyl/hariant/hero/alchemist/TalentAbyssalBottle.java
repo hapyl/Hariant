@@ -3,6 +3,7 @@ package me.hapyl.hariant.hero.alchemist;
 import me.hapyl.eterna.module.inventory.menu.ChestSize;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPattern;
 import me.hapyl.eterna.module.inventory.menu.pattern.SlotPatternApplier;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.MapMaker;
 import me.hapyl.hariant.Colors;
@@ -38,7 +39,7 @@ public final class TalentAbyssalBottle extends Talent implements MenuHeroTalents
         super(key, Component.text("Abyssal Bottle"), Icon.ofMaterial(Material.OMINOUS_BOTTLE));
         
         this.setTalentType(TalentType.ENHANCE);
-        this.setCooldownSeconds(10f);
+        this.setCooldown(Tick.ofSeconds(10));
         
         // Maps talents by slot
         this.alchemistPotionsMapped = MapMaker.<Integer, TalentAlchemistPotion>ofLinkedHashMap()
@@ -77,7 +78,7 @@ public final class TalentAbyssalBottle extends Talent implements MenuHeroTalents
         heroData.setState(State.SELECT_POTION);
         
         // The talent cooldown is for when we use a potion, so we await and start a 10 tick cooldown to prevent miss-clicks
-        player.setCooldown(this, 10);
+        player.startCooldown(this, 10);
         player.snapTo(7);
         
         // Fx

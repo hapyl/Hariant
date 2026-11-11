@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.troll;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.effect.Effect;
@@ -28,7 +29,8 @@ public final class TalentSpin extends Talent implements Effect {
         super(key, Component.text("Spin"), Icon.ofMaterial(Material.NAUTILUS_SHELL));
         
         setTalentType(TalentType.IMPAIR);
-        setCooldownSeconds(15);
+        
+        setCooldown(Tick.ofSeconds(15));
         
         setDescription(
                 Component.empty()

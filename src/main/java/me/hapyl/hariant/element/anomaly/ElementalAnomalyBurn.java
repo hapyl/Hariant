@@ -32,8 +32,8 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl implements 
     
     private final Decimal attackDecrease = Decimal.ofPercentage(20);
     
-    private final int burnDuration = Tick.fromSeconds(3);
-    private final int burnPeriod = Tick.fromSeconds(0.5f);
+    private final Tick burnDuration = Tick.ofSeconds(3);
+    private final Tick burnPeriod = Tick.ofSeconds(0.5f);
     
     private final double burnDamage = 14;
     
@@ -103,12 +103,12 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl implements 
     
     public int calculateBurnDuration(@Nullable Attributable attributable) {
         if (attributable == null) {
-            return burnDuration;
+            return burnDuration.ticks();
         }
         
         final double elementalMastery = attributable.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
         
-        return (int) (burnDuration * (1 + elementalMastery / 500));
+        return (int) (burnDuration.ticks() * (1 + elementalMastery / 500));
     }
     
     public double calculateBurnDamage(@Nullable Attributable attributable) {
@@ -140,7 +140,7 @@ public final class ElementalAnomalyBurn extends ElementalAnomalyImpl implements 
         public void tick() {
             super.tick();
             
-            if (currentTick() % burnPeriod == 0) {
+            if (currentTick() % burnPeriod.ticks() == 0) {
                 entity.damage(damageSource);
             }
             

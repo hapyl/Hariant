@@ -9,7 +9,7 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.alphabet.Alphabet;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.DamageSourceIdentity;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
@@ -59,7 +59,7 @@ public class BattlegroundLibrary extends BattlegroundImpl {
     
     private static final char[] VOID_CHARS = Alphabet.FUTHARK.translateTo("pustota").toCharArray();
     
-    private static final HariantCooldown VOID_TELEPORT_COOLDOWN = HariantCooldown.ofSeconds(Key.ofString("the_void_teleport_cooldown"), 1.5f);
+    private static final Cooldown VOID_TELEPORT_COOLDOWN = Cooldown.create(Key.ofString("the_void_teleport_cooldown"), Tick.ofSeconds(1.5f));
     
     private static final DamageSourceIdentity DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(
             Key.ofString("the_void"),
@@ -84,7 +84,7 @@ public class BattlegroundLibrary extends BattlegroundImpl {
                 ImmutableLocation.create(3991.0, 74.0, -14.0)
         );
         
-        setTimeBeforePlayersReveal(Tick.fromSeconds(5));
+        setTimeBeforePlayersReveal(Tick.ofSeconds(5));
         setSize(Size.MEDIUM);
         
         setFeatures(new FeatureVoid());
@@ -154,7 +154,7 @@ public class BattlegroundLibrary extends BattlegroundImpl {
                         // Increment void for the player
                         incrementVoid(player, VOID_INCREMENT_TELEPORT);
                         
-                        player.setCooldown(VOID_TELEPORT_COOLDOWN);
+                        player.startCooldown(VOID_TELEPORT_COOLDOWN);
                     }
                 }
                 

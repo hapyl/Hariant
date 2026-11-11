@@ -14,6 +14,7 @@ import me.hapyl.hariant.event.HariantTalentUltimateEvent;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
+import me.hapyl.hariant.talent.energy.EnergyRegenerationRule;
 import me.hapyl.hariant.util.field.DisplayFieldInstance;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.task.executor.Executable;
@@ -31,6 +32,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -114,10 +116,15 @@ public abstract class TalentUltimate extends Talent implements Duration {
         // If ultimate currently in use, show how much time is left
         if (player.isUsingUltimate()) {
             final int ticksAlive = player.localTicks();
-            final int durationTimeLeft = Math.max(0, getDuration() - (ticksAlive - player.getUsedUltimateAt()));
+            final int durationTimeLeft = Math.max(0, getDuration().ticks() - (ticksAlive - player.getUsedUltimateAt()));
             
             builder.append(Component.text("IN USE", resourceColor, TextDecoration.BOLD));
-            builder.append(Component.text(" (%s)".formatted(durationTimeLeft == 0 ? Tick.INFINITY_CHAR : Tick.format(durationTimeLeft)), resourceColor));
+            builder.append(
+                    Component.empty()
+                             .append(Component.text(" (", resourceColor))
+                             .append(Tick.format(durationTimeLeft).color(resourceColor))
+                             .append(Component.text(")", resourceColor))
+            );
         }
         // Otherwise, call `getComponent()`
         else {
@@ -139,29 +146,10 @@ public abstract class TalentUltimate extends Talent implements Duration {
         return builder.build();
     }
     
-    protected final @NotNull Component createUsageComponent(@NotNull Component component) {
-        return Component.empty()
-                        .append(ultimateResourceType.getPrefixStyled())
-                        .appendSpace()
-                        .append(component)
-                        .appendSpace()
-                        .append(Component.text("Press ", Colors.DEFAULT_COLOR))
-                        .append(Component.keybind(Keybind.SWAP_OFFHAND, Colors.GOLD, TextDecoration.BOLD))
-                        .append(Component.text(" to use it!", Colors.DEFAULT_COLOR));
+    @Override
+    public final @Nullable EnergyRegenerationRule energyRegenerationRule() {
+        return null;
     }
-    
-    /**
-     * Executes this {@link TalentUltimate} talent for the given {@link HariantPlayer}.
-     *
-     * @param player           - The player for whom to execute the ultimate.
-     * @param context          - The talent context for target retrieval, if needed.
-     * @param consumedResource - The amount of ultimate resource consumed.
-     * @return an {@link Executable} to run and await the {@link Promise} to complete in order to end the ultimate the start the cooldown.
-     * @see Executable
-     * @see ExecutorService
-     */
-    @NotNull
-    public abstract Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, final double consumedResource);
     
     @NotNull
     @Override
@@ -195,7 +183,7 @@ public abstract class TalentUltimate extends Talent implements Duration {
         
         executable.execute().then(() -> {
             player.setUsingUltimate(false);
-            player.setCooldown(this);
+            player.startCooldown(this);
         });
         
         this.broadcast(player);
@@ -222,6 +210,19 @@ public abstract class TalentUltimate extends Talent implements Duration {
         ));
     }
     
+    /**
+     * Executes this {@link TalentUltimate} talent for the given {@link HariantPlayer}.
+     *
+     * @param player           - The player for whom to execute the ultimate.
+     * @param context          - The talent context for target retrieval, if needed.
+     * @param consumedResource - The amount of ultimate resource consumed.
+     * @return an {@link Executable} to run and await the {@link Promise} to complete in order to end the ultimate the start the cooldown.
+     * @see Executable
+     * @see ExecutorService
+     */
+    @NotNull
+    public abstract Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, final double consumedResource);
+    
     public void broadcast(@NotNull HariantPlayer player) {
         Hariant.getPlayers().forEach(other -> {
             final EnumTeam otherTeam = other.getPlayerTeam();
@@ -243,6 +244,17 @@ public abstract class TalentUltimate extends Talent implements Duration {
             
             soundFx.play(other);
         });
+    }
+    
+    protected final @NotNull Component createUsageComponent(@NotNull Component component) {
+        return Component.empty()
+                        .append(ultimateResourceType.getPrefixStyled())
+                        .appendSpace()
+                        .append(component)
+                        .appendSpace()
+                        .append(Component.text("Press ", Colors.DEFAULT_COLOR))
+                        .append(Component.keybind(Keybind.SWAP_OFFHAND, Colors.GOLD, TextDecoration.BOLD))
+                        .append(Component.text(" to use it!", Colors.DEFAULT_COLOR));
     }
     
 }

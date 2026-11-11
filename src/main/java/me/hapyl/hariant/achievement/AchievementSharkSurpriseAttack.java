@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class AchievementSharkSurpriseAttack extends AchievementHeroImpl implements Listener {
     
-    private static final int TICK_THRESHOLD = Tick.fromSeconds(2.5f);
+    private static final Tick TICK_THRESHOLD = Tick.ofSeconds(2.5f);
     
     AchievementSharkSurpriseAttack(@NotNull Key key) {
         super(
@@ -41,7 +41,7 @@ public final class AchievementSharkSurpriseAttack extends AchievementHeroImpl im
             return;
         }
         
-        if (player.localTicks() - lastEmergeTick > TICK_THRESHOLD) {
+        if (player.localTicks() - lastEmergeTick > TICK_THRESHOLD.ticks()) {
             return;
         }
         
@@ -49,7 +49,7 @@ public final class AchievementSharkSurpriseAttack extends AchievementHeroImpl im
     }
     
     public static void progress(@NotNull HariantPlayer player, int lastEmergeTick) {
-        if (player.localTicks() - lastEmergeTick > TICK_THRESHOLD) {
+        if (player.localTicks() - lastEmergeTick > TICK_THRESHOLD.ticks()) {
             return;
         }
         

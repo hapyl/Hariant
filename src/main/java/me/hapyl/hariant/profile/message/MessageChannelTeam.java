@@ -1,6 +1,5 @@
 package me.hapyl.hariant.profile.message;
 
-import me.hapyl.hariant.database.rank.RankFormatter;
 import me.hapyl.hariant.profile.PlayerProfile;
 import me.hapyl.hariant.team.EnumTeam;
 import net.kyori.adventure.text.Component;

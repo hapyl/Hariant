@@ -2,6 +2,8 @@ package me.hapyl.hariant.hero.bounty_hunter;
 
 import me.hapyl.eterna.module.location.Located;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
+import me.hapyl.eterna.module.math.Vectors;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -14,7 +16,6 @@ import me.hapyl.hariant.hero.HeroRegistry;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.TalentContext;
 import me.hapyl.hariant.talent.TalentType;
-import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.talent.rechargeable.RechargeType;
 import me.hapyl.hariant.talent.rechargeable.RechargeableTalentData;
 import me.hapyl.hariant.talent.rechargeable.TalentRechargeable;
@@ -23,8 +24,8 @@ import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.util.BlockHelper;
 import me.hapyl.hariant.util.Icon;
-import me.hapyl.hariant.util.ThisClassShouldNeMovedToEternaAPI;
 import me.hapyl.hariant.util.decimal.Decimal;
+import me.hapyl.hariant.util.field.DisplayField;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -84,8 +85,8 @@ public final class TalentGrapple extends TalentRechargeable implements Listener 
         
         setTalentType(TalentType.MOVEMENT);
         
-        setDurationSeconds(8); // Refers to maximum duration of grapple before it breaks
-        setCooldownSeconds(10);
+        setDuration(Tick.ofSeconds(8)); // Refers to maximum duration of grapple before it breaks
+        setCooldown(Tick.ofSeconds(10));
         
         setDescription(
                 Component.empty()
@@ -299,14 +300,14 @@ public final class TalentGrapple extends TalentRechargeable implements Listener 
                 final Vector velocity = towardsAnchor.add(inputVector).normalize().multiply(pullSpeed.doubleValue());
                 
                 // Apply smoothing
-                final Vector velocitySmooth = copyVector(velocity)
-                        .multiply(1 - strafingSmoothingFactor.doubleValue())
-                        .add(previousVelocity.multiply(strafingSmoothingFactor.doubleValue()));
+                final Vector velocitySmooth = Vectors.copyOf(velocity)
+                                                     .multiply(1 - strafingSmoothingFactor.doubleValue())
+                                                     .add(previousVelocity.multiply(strafingSmoothingFactor.doubleValue()));
                 
                 player.setVelocity(velocitySmooth);
                 
                 // Assign previous velocity for smoothing
-                previousVelocity = copyVector(velocitySmooth);
+                previousVelocity = Vectors.copyOf(velocitySmooth);
                 
                 // Synchronize hook
                 hook.teleport(anchorLocation);
@@ -328,7 +329,7 @@ public final class TalentGrapple extends TalentRechargeable implements Listener 
             }
             
             // Check for air ticks
-            if (airTicks++ > getDuration()) {
+            if (airTicks++ > getDuration().ticks()) {
                 this.cancelWithReason(Component.text("Your hook broke because it got too tired!", Colors.RED));
                 return;
             }
@@ -405,11 +406,6 @@ public final class TalentGrapple extends TalentRechargeable implements Listener 
         
         @Override
         @NotNull Location getLocation();
-    }
-    
-    @ThisClassShouldNeMovedToEternaAPI
-    private static @NotNull Vector copyVector(@NotNull Vector vector) {
-        return new Vector(vector.getX(), vector.getY(), vector.getZ());
     }
     
 }

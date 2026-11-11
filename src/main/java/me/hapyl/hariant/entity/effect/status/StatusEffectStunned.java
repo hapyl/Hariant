@@ -41,7 +41,7 @@ public class StatusEffectStunned extends StatusEffectImpl implements Listener {
     
     @Override
     public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
-        entity.sendTitleSubtitle(TITLE, Component.text(Tick.format(tick), Colors.AQUA), 0, 10, 0);
+        entity.sendTitleSubtitle(TITLE, Tick.format(tick).color(Colors.AQUA), 0, 10, 0);
         
         // Birds fx
         final Location location = entity.getEyeLocation().add(0, 0.5, 0);

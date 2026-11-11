@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.zealot;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -36,7 +37,7 @@ public final class TalentZealotry extends TalentRechargeable implements Listener
         
         setTalentType(TalentType.ENHANCE);
         
-        setCooldownSeconds(5);
+        setCooldown(Tick.ofSeconds(5));
         
         setDescription(
                 Component.empty()

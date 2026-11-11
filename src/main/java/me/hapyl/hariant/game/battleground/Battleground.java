@@ -3,6 +3,7 @@ package me.hapyl.hariant.game.battleground;
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.util.CollectionUtils;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -48,7 +49,7 @@ public interface Battleground extends Icon, Named, Described, Ticking, GameInsta
     
     @NotNull DropTable getDropTable();
     
-    int getTimeBeforePlayerReveal();
+    @NotNull Tick getTimeBeforePlayerReveal();
     
     @Override
     void tick();

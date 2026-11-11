@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.orc;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -21,7 +22,7 @@ public final class WeaponGorkaMorkaMissing extends WeaponMelee {
     private final Ability abilityRecall;
     
     WeaponGorkaMorkaMissing() {
-        super(Key.ofString("gorka_morka_missing"), Icon.ofMaterial(Material.WOODEN_AXE), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 25, 10));
+        super(Key.ofString("gorka_morka_missing"), Icon.ofMaterial(Material.WOODEN_AXE), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 25, NormalAttack.DEFAULT_ATTACK_COOLDOWN));
         
         setName(WeaponGorkaMorka.WEAPON_NAME.append(Component.text(" (Missing)")));
         
@@ -29,7 +30,7 @@ public final class WeaponGorkaMorkaMissing extends WeaponMelee {
     }
     
     public void startRecallCooldown(@NotNull HariantPlayer player) {
-        player.setCooldown(abilityRecall);
+        player.startCooldown(abilityRecall);
     }
     
     public static class AbilityRecall extends Ability {
@@ -50,7 +51,7 @@ public final class WeaponGorkaMorkaMissing extends WeaponMelee {
             );
             
             // This is more of an internal cooldown so you can't recall right away
-            setCooldownSeconds(1);
+            setCooldown(Tick.one());
         }
         
         @Override

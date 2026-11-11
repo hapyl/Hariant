@@ -139,7 +139,7 @@ public class HeroInferno extends Hero implements Listener {
         );
         
         WeaponDemonhandNormalAttack() {
-            super(ElementType.FIRE, AttributeType.ATTACK, 52, 10);
+            super(ElementType.FIRE, AttributeType.ATTACK, 52, DEFAULT_ATTACK_COOLDOWN);
         }
         
         @Override

@@ -8,7 +8,6 @@ import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.Strings;
-import me.hapyl.eterna.module.util.Enums;
 import me.hapyl.eterna.module.util.StringList;
 import me.hapyl.eterna.module.util.TypeConverter;
 import me.hapyl.hariant.Colors;
@@ -60,7 +59,6 @@ import me.hapyl.hariant.task.HariantTask;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
 import me.hapyl.hariant.team.TeamData;
-import me.hapyl.hariant.util.DigitStyle;
 import me.hapyl.hariant.util.RiptideFx;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -842,25 +840,6 @@ public final class HariantCommandRegistry {
         register("playAchievementCompleteFx", context -> {
             assert false;
             AchievementRegistry.ARCHER_TRIPLET.onComplete(context.getPlayer(), null);
-        });
-        
-        register("setDigitStyle", context -> {
-            final Player player = context.getPlayer();
-            final DigitStyle digitStyle = Enums.byName(DigitStyle.class, context.argument(0).toString());
-            
-            if (digitStyle == null) {
-                HariantLogger.error(player, Component.text("Invalid style; valid styles: " + Enums.getValueLowercaseNamesAsList(DigitStyle.class)));
-                return;
-            }
-            
-            if (DigitStyle.STYLE == digitStyle) {
-                HariantLogger.error(player, Component.text("Digit style is already %s!".formatted(digitStyle.name())));
-                return;
-            }
-            
-            DigitStyle.STYLE = digitStyle;
-            
-            HariantLogger.success(player, Component.text("Set digit style to %s!".formatted(digitStyle.name())));
         });
         
         // If this is ever 2000 lines of code, don't add another fucking command and either refactor or delete commands that you haven't used for 10 years

@@ -108,7 +108,7 @@ public final class HeroBlastKnight extends Hero {
     
     private static class WeaponRoyalSword extends WeaponMelee {
         WeaponRoyalSword() {
-            super(Key.ofString("royal_sword"), Icon.ofMaterial(Material.IRON_SWORD), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 46, 10));
+            super(Key.ofString("royal_sword"), Icon.ofMaterial(Material.IRON_SWORD), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 46, NormalAttack.DEFAULT_ATTACK_COOLDOWN));
             
             setName(Component.text("Royal Sword"));
             

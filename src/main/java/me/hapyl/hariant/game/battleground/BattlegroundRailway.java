@@ -21,7 +21,7 @@ public final class BattlegroundRailway extends BattlegroundImpl {
                 Icon.ofMaterial(Material.RAIL)
         );
         
-        this.setTimeBeforePlayersReveal(Tick.fromSeconds(8));
+        this.setTimeBeforePlayersReveal(Tick.ofSeconds(8));
         
         this.setSpawnLocations(
                 ImmutableLocation.create(3000, 64, 0, -90, 0),

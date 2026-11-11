@@ -35,7 +35,7 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
                 Icon.ofMaterial(Material.CHERRY_SAPLING)
         );
         
-        this.setTimeBeforePlayersReveal(Tick.fromSeconds(8));
+        this.setTimeBeforePlayersReveal(Tick.ofSeconds(8));
         
         this.setSpawnLocations(
                 ImmutableLocation.create(1000, 64, 0, 180, 0),
@@ -98,7 +98,7 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
         
         private final Color outlineColor = Color.fromBGR(237, 57, 204);
         
-        private final int healingInterval = Tick.fromSeconds(2.5f);
+        private final Tick healingInterval = Tick.ofSeconds(2.5f);
         private final HealingSource healingSource = HealingSource.create(15, this);
         
         BattlegroundFeatureJapanSakura() {
@@ -111,7 +111,7 @@ public final class BattlegroundJapan extends BattlegroundImpl implements Listene
         @Override
         public void tick() {
             // Heal at intervals
-            if (Hariant.currentTick() % healingInterval != 0) {
+            if (Hariant.currentTick() % healingInterval.ticks() != 0) {
                 return;
             }
             

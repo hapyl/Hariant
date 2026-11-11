@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.archer;
 
 import com.google.common.collect.Lists;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.math.Vector3;
 import me.hapyl.eterna.module.math.geometry.Geometry;
 import me.hapyl.eterna.module.particle.ParticleBuilder;
@@ -55,7 +56,7 @@ public final class TalentChainLightning extends Talent {
     public TalentChainLightning(@NotNull Key key) {
         super(key, Component.text("Chain Lightning"), Icon.ofMaterial(Material.TIPPED_ARROW, builder -> builder.setPotionColor(ARROW_COLOR)));
         
-        this.setCooldownSeconds(7f);
+        this.setCooldown(Tick.ofSeconds(7f));
         
         this.setDescription(
                 Component.empty()

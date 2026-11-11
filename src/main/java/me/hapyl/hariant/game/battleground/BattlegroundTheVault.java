@@ -1,9 +1,10 @@
 package me.hapyl.hariant.game.battleground;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.element.ElementType;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.battleground.feature.BattlegroundFeatureImpl;
@@ -46,7 +47,7 @@ public class BattlegroundTheVault extends BattlegroundImpl {
     private static class FeatureBouncyLava extends BattlegroundFeatureImpl {
         
         private static final BoundingBox BOUNDING_BOX = new BoundingBox(5970.0, 22.0, -37.0, 6035.0, 32.0, 35.0);
-        private static final HariantCooldown BOUNCY_LAVA_COOLDOWN = HariantCooldown.ofSeconds(Key.ofString("bouncy_lava_cooldown"), 1);
+        private static final Cooldown BOUNCY_LAVA_COOLDOWN = Cooldown.create(Key.ofString("bouncy_lava_cooldown"), Tick.ofSeconds(1));
         
         private static final Decimal DAMAGE_OF_MAX_HEALTH = Decimal.ofPercentage(20);
         private static final Vector PUSH_VECTOR = new Vector(0.0d, 3.1d, 0.0d);
@@ -72,7 +73,7 @@ public class BattlegroundTheVault extends BattlegroundImpl {
                     return;
                 }
                 
-                player.setCooldown(BOUNCY_LAVA_COOLDOWN);
+                player.startCooldown(BOUNCY_LAVA_COOLDOWN);
                 this.bounceUp(player);
             });
         }

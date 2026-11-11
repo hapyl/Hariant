@@ -1,6 +1,7 @@
 package me.hapyl.hariant.game.type;
 
 import me.hapyl.eterna.module.component.ComponentList;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.game.GameInstance;
@@ -45,7 +46,7 @@ public enum EnumGameType implements GameType {
     }
     
     @Override
-    public int getTimeLimit() {
+    public @NotNull Tick getTimeLimit() {
         return gameType.getTimeLimit();
     }
     

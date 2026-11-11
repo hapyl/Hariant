@@ -1,6 +1,6 @@
 package me.hapyl.hariant.hero.blast_knight;
 
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.HeroData;
 import me.hapyl.hariant.profile.ui.ActionbarSupplier;
@@ -50,7 +50,7 @@ public final class HeroDataBlastKnight extends HeroData<HeroBlastKnight> impleme
             // If the target entity has died, remove the ward
             if (this.stoneCastle.shouldRemove()) {
                 this.removeStoneCastle();
-                this.player.setCooldown(TalentRegistry.QUANTUM_WARD);
+                this.player.startCooldown(TalentRegistry.QUANTUM_WARD);
             }
         }
     }
@@ -96,13 +96,13 @@ public final class HeroDataBlastKnight extends HeroData<HeroBlastKnight> impleme
         );
     }
     
-    public void incrementQuantumEnergyIfNotOnCooldown(@NotNull Decimal energy, @NotNull HariantCooldown cooldown) {
+    public void incrementQuantumEnergyIfNotOnCooldown(@NotNull Decimal energy, @NotNull Cooldown cooldown) {
         if (player.hasCooldown(cooldown)) {
             return;
         }
         
         incrementQuantumEnergy(energy.intValue());
-        player.setCooldown(cooldown);
+        player.startCooldown(cooldown);
     }
     
 }

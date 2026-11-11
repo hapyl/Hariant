@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.orc;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -61,7 +62,7 @@ public final class WeaponGorkaMorka extends WeaponMelee {
         super(
                 Key.ofString("gorka_morka"),
                 Icon.ofMaterial(Material.IRON_AXE),
-                NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 65, 10)
+                NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 65, NormalAttack.DEFAULT_ATTACK_COOLDOWN)
         );
         
         setName(WEAPON_NAME);
@@ -84,7 +85,7 @@ public final class WeaponGorkaMorka extends WeaponMelee {
     }
     
     public void startThrowCooldown(@NotNull HariantPlayer player) {
-        player.setCooldown(abilityThrow);
+        player.startCooldown(abilityThrow);
     }
     
     public class AbilityThrow extends Ability {
@@ -123,7 +124,7 @@ public final class WeaponGorkaMorka extends WeaponMelee {
                              .append(Component.text("Cooldown of this ability starts after the poleaxe is recalled and has returned to you.", Colors.DARK_GRAY))
             );
             
-            setCooldownSeconds(8);
+            setCooldown(Tick.ofSeconds(8));
         }
         
         @Override

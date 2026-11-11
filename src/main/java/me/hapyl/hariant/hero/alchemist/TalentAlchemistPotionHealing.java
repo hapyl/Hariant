@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.alchemist;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
@@ -28,9 +29,9 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
     TalentAlchemistPotionHealing(@NotNull TalentAbyssalBottle talent) {
         super(talent, "healing", Component.text("Potion of Healing"), Color.fromRGB(209, 13, 19), 20);
         
-        // This is also used for extra healing delay
-        setDurationSeconds(3);
         setTalentType(TalentType.SUPPORT);
+        
+        setDuration(Tick.ofSeconds(3)); // This is also used for extra healing delay
         
         setDescription(
                 Component.empty()

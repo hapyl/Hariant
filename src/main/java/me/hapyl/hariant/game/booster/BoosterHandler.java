@@ -1,9 +1,10 @@
 package me.hapyl.hariant.game.booster;
 
 import com.google.common.collect.Maps;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Hariant;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.util.ImmutableLocation;
 import org.bukkit.block.Block;
@@ -19,7 +20,7 @@ public final class BoosterHandler implements Listener {
     
     static final Map<ImmutableLocation, Booster> BOOSTERS = Maps.newHashMap();
     
-    private static final HariantCooldown BOOSTER_COOLDOWN = HariantCooldown.ofSeconds(Key.ofString("booster_cooldown"), 1);
+    private static final Cooldown BOOSTER_COOLDOWN = Cooldown.create(Key.ofString("booster_cooldown"), Tick.ofSeconds(1));
     
     @EventHandler
     public void handlePlayerInteractEvent(PlayerInteractEvent ev) {
@@ -53,7 +54,7 @@ public final class BoosterHandler implements Listener {
         }
         
         booster.boost(player);
-        player.setCooldown(BOOSTER_COOLDOWN);
+        player.startCooldown(BOOSTER_COOLDOWN);
     }
     
 }

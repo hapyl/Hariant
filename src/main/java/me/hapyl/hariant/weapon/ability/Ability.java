@@ -2,26 +2,27 @@ package me.hapyl.hariant.weapon.ability;
 
 import me.hapyl.eterna.module.component.Described;
 import me.hapyl.eterna.module.component.Named;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.Response;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class Ability implements Named, Described, HariantCooldown {
+public abstract class Ability implements Named, Described, Cooldown {
     
     private final Key key;
     private final Component name;
     
-    private Component description;
-    private int cooldown;
+    private @NotNull Component description;
+    private @NotNull Tick cooldown;
     
     public Ability(@NotNull Key key, @NotNull Component name) {
         this.key = key;
         this.name = name;
         this.description = Described.defaultValue();
-        this.cooldown = 0;
+        this.cooldown = Tick.zero();
     }
     
     @Override
@@ -30,12 +31,12 @@ public abstract class Ability implements Named, Described, HariantCooldown {
     }
     
     @Override
-    public int getCooldown() {
+    public @NotNull Tick getCooldown() {
         return cooldown;
     }
     
     @Override
-    public void setCooldown(int cooldown) {
+    public void setCooldown(@NotNull Tick cooldown) {
         this.cooldown = cooldown;
     }
     

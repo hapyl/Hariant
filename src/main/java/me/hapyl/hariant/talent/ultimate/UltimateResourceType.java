@@ -11,6 +11,7 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public enum UltimateResourceType implements Prefixed, Named, Styled, ComponentLike, RegenerationRule {
     
@@ -35,14 +36,38 @@ public enum UltimateResourceType implements Prefixed, Named, Styled, ComponentLi
             return 2;
         }
         
-        @NotNull
         @Override
-        public AttributeType getEffectiveAttribute() {
+        public @NotNull AttributeType getEffectiveAttribute() {
             return AttributeType.ENERGY_RECHARGE;
         }
     },
     
-    ;
+    SURGE(
+            Component.text("\uD83D\uDCA0"),
+            Component.text("Surge"),
+            Colors.ULTIMATE_RESOURCE_ENERGY,
+            Colors.ULTIMATE_RESOURCE_ENERGY_SECONDARY
+    ) {
+        @Override
+        public double regeneratePassively() {
+            return 0;
+        }
+        
+        @Override
+        public double regenerateOnElimination() {
+            return 0;
+        }
+        
+        @Override
+        public double regenerateOnAssist() {
+            return 0;
+        }
+        
+        @Override
+        public @Nullable AttributeType getEffectiveAttribute() {
+            return null;
+        }
+    };
     
     private final Component prefix;
     private final Component name;

@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.alchemist;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
@@ -24,14 +25,14 @@ public class TalentAlchemistPotionAttribute extends TalentAlchemistPotion {
             double abyssalCorrosion,
             @NotNull AttributeType attributeType,
             @NotNull Decimal attributeIncrease,
-            @NotNull Decimal duration
+            @NotNull Tick duration
     ) {
         super(talent, key, name, potionColor, abyssalCorrosion);
         
         this.attributeType = attributeType;
         this.attributeIncrease = attributeIncrease;
         
-        this.setDuration(duration.intValue());
+        this.setDuration(duration);
         
         this.setDescription(
                 Component.empty()

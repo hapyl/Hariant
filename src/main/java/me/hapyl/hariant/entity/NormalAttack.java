@@ -1,5 +1,6 @@
 package me.hapyl.hariant.entity;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
@@ -15,22 +16,24 @@ import org.jetbrains.annotations.NotNull;
 
 public class NormalAttack extends AttributeScalingSingle implements DamageSourceCreator {
     
+    public static final Tick DEFAULT_ATTACK_COOLDOWN = Tick.ofTicks(10);
+    
     private static final DamageSourceIdentity DEFAULT_DAMAGE_SOURCE_IDENTITY = DamageSourceIdentity.create(Key.ofString("normal_attack"), Component.text("Normal Attack"), DeathMessage.DEFAULT);
-    private static final NormalAttack COMMON = new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 100, 10);
+    private static final NormalAttack COMMON = new NormalAttack(ElementType.PHYSICAL, AttributeType.ATTACK, 100, DEFAULT_ATTACK_COOLDOWN);
     
     private static final Component COMPONENT_NONE = Component.text("None!", Colors.DARK_GRAY);
     
     protected final ElementType elementType;
-    protected final int attackCooldown;
+    protected final Tick attackCooldown;
     
-    public NormalAttack(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, int attackCooldown) {
+    public NormalAttack(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, @NotNull Tick attackCooldown) {
         super(attributeType, attributeScaling);
         
         this.elementType = elementType;
         this.attackCooldown = attackCooldown;
     }
     
-    public int getAttackCooldown() {
+    public @NotNull Tick getAttackCooldown() {
         return attackCooldown;
     }
     
@@ -60,14 +63,14 @@ public class NormalAttack extends AttributeScalingSingle implements DamageSource
     }
     
     public @NotNull Component formatAttackSpeed() {
-        return attackCooldown == 0 ? COMPONENT_NONE : Component.text("%.1f/s".formatted((double) 20 / attackCooldown));
+        return attackCooldown.isZero() ? COMPONENT_NONE : Component.text("%.1f/s".formatted((double) 20 / attackCooldown.ticks()));
     }
     
-    public static @NotNull NormalAttack melee(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, int attackCooldown) {
+    public static @NotNull NormalAttack melee(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, @NotNull Tick attackCooldown) {
         return new NormalAttack(elementType, attributeType, attributeScaling, attackCooldown);
     }
     
-    public static @NotNull NormalAttackRanged ranged(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, int shotCooldown) {
+    public static @NotNull NormalAttackRanged ranged(@NotNull ElementType elementType, @NotNull AttributeType attributeType, double attributeScaling, @NotNull Tick shotCooldown) {
         return new NormalAttackRanged(elementType, attributeType, attributeScaling, shotCooldown);
     }
     

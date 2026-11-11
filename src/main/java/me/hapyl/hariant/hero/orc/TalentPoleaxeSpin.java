@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.orc;
 
 import me.hapyl.eterna.module.block.display.DisplayEntity;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -8,6 +9,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.VanillaAttributeModifier;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
@@ -26,6 +28,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.Set;
@@ -57,14 +60,14 @@ public final class TalentPoleaxeSpin extends TalentPoleaxe {
             DeathMessage.create("{player} was killed [by {killer}'s] spinning Poleaxe")
     );
     
-    private final Key cooldownKey = Key.ofString("poleaxe_spin_icd");
+    private final Cooldown cooldown = Cooldown.create(Key.ofString("poleaxe_spin_icd"), damagePeriod.tickValue());
     
     public TalentPoleaxeSpin(@NotNull Key key) {
         super(key, TALENT_NAME, Icon.ofMaterial(Material.NETHERITE_AXE));
         
         setTalentType(TalentType.DAMAGE);
         
-        setCooldownSeconds(10);
+        setCooldown(Tick.ofSeconds(10));
         
         setDescription(
                 Component.empty()
@@ -170,7 +173,12 @@ public final class TalentPoleaxeSpin extends TalentPoleaxe {
     public class PoleaxeSpinDamageSource extends DamageSourceImpl {
         
         PoleaxeSpinDamageSource(@NotNull HariantEntity source) {
-            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.PHYSICAL, DamageComponents.ofCommon(), Set.of(), damage.getScaledValue(source), 0, cooldownKey, damagePeriod.intValue());
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.PHYSICAL, DamageComponents.ofCommon(), Set.of(), damage.getScaledValue(source), 0);
+        }
+        
+        @Override
+        public @Nullable Cooldown cooldown() {
+            return cooldown;
         }
         
     }

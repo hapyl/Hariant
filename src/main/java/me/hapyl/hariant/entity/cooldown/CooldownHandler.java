@@ -1,33 +1,43 @@
 package me.hapyl.hariant.entity.cooldown;
 
-import me.hapyl.hariant.HariantConstants;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.util.Ticks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Range;
 
 public interface CooldownHandler {
     
     @NotNull AttributeType DEFAULT_COOLDOWN_REDUCING_ATTRIBUTE = AttributeType.COOLDOWN_REDUCTION;
     
-    void setCooldown(@NotNull HariantCooldown cooldown, @Range(from = HariantConstants.INDEFINITE_COOLDOWN, to = Integer.MAX_VALUE) int duration, @Nullable AttributeType cooldownReducingAttribute);
+    void startCooldown(@NotNull Cooldown cooldown, int duration, @Nullable AttributeType cooldownReducingAttribute);
     
-    default void setCooldown(@NotNull HariantCooldown cooldown, @Range(from = HariantConstants.INDEFINITE_COOLDOWN, to = Integer.MAX_VALUE) int duration) {
-        this.setCooldown(cooldown, duration, DEFAULT_COOLDOWN_REDUCING_ATTRIBUTE);
+    default void startCooldown(@NotNull Cooldown cooldown, @NotNull Tick tick, @Nullable AttributeType cooldownReducingAttribute) {
+        this.startCooldown(cooldown, tick.ticks(), cooldownReducingAttribute);
     }
     
-    default void setCooldown(@NotNull HariantCooldown cooldown) {
-        this.setCooldown(cooldown, cooldown.getCooldown(), DEFAULT_COOLDOWN_REDUCING_ATTRIBUTE);
+    default void startCooldown(@NotNull Cooldown cooldown, int duration) {
+        this.startCooldown(cooldown, duration, DEFAULT_COOLDOWN_REDUCING_ATTRIBUTE);
     }
     
-    default void setIndefiniteCooldown(@NotNull HariantCooldown cooldown) {
+    default void startCooldown(@NotNull Cooldown cooldown, @NotNull Tick duration) {
+        this.startCooldown(cooldown, duration.ticks(), DEFAULT_COOLDOWN_REDUCING_ATTRIBUTE);
+    }
+    
+    default void startCooldown(@NotNull Cooldown cooldown) {
+        this.startCooldown(cooldown, cooldown.getCooldown(), DEFAULT_COOLDOWN_REDUCING_ATTRIBUTE);
+    }
+    
+    default void startIndefiniteCooldown(@NotNull Cooldown cooldown) {
         // Doesn't matter about the cooldown reduction, so we skip it
-        this.setCooldown(cooldown, HariantConstants.INDEFINITE_COOLDOWN, null);
+        this.startCooldown(cooldown, Ticks.INDEFINITE, null);
     }
     
-    int getCooldownTimeLeft(@NotNull HariantCooldown cooldown);
+    void stopCooldown(@NotNull Cooldown cooldown);
     
-    boolean hasCooldown(@NotNull HariantCooldown cooldown);
+    int getCooldownTimeLeft(@NotNull Cooldown cooldown);
+    
+    boolean hasCooldown(@NotNull Cooldown cooldown);
     
     void resetCooldowns();
     

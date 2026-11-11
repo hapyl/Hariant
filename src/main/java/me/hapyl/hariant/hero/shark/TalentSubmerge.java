@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.shark;
 
 import me.hapyl.eterna.module.block.display.DisplayEntity;
 import me.hapyl.eterna.module.component.Keybind;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -11,6 +12,7 @@ import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.StreamRules;
 import me.hapyl.hariant.entity.VanillaAttributeModifier;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
@@ -65,16 +67,16 @@ public final class  TalentSubmerge extends Talent {
             Key.ofString("submerge_damage_source"),
             DeathMessage.create("{player} was sharked to death by [{killer}]")
     );
-    
-    private final Key cooldownKey = Key.ofString("submerge_cooldown");
+
+    private final Cooldown cooldown = Cooldown.create(Key.ofString("submerge_cooldown"), damagePeriod.tickValue());
     
     public TalentSubmerge(@NotNull Key key) {
         super(key, Component.text("Submerge"), Icon.ofMaterial(Material.PRISMARINE_SHARD));
         
         setTalentType(TalentType.MOVEMENT);
         
-        setDurationSeconds(1.2f);
-        setCooldownSeconds(8);
+        setDuration(Tick.ofSeconds(1.2f));
+        setCooldown(Tick.ofSeconds(8));
         
         setDescription(
                 Component.empty()
@@ -132,7 +134,7 @@ public final class  TalentSubmerge extends Talent {
         
         @Override
         public void run(int tick) {
-            if (tick > getDuration()) {
+            if (tick > duration()) {
                 this.cancel();
                 return;
             }
@@ -196,9 +198,16 @@ public final class  TalentSubmerge extends Talent {
     }
     
     private class SubmergeDamageSource extends DamageSourceImpl {
+        
         SubmergeDamageSource(@Nullable HariantEntity source, double damage) {
-            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.WATER, DamageComponents.ofCommon(), Set.of(), damage, elementalApplication.doubleValue(), cooldownKey, damagePeriod.intValue());
+            super(damageSourceIdentity, source, DamageType.TALENT, ElementType.WATER, DamageComponents.ofCommon(), Set.of(), damage, elementalApplication.doubleValue());
         }
+        
+        @Override
+        public @Nullable Cooldown cooldown() {
+            return cooldown;
+        }
+        
     }
     
 }

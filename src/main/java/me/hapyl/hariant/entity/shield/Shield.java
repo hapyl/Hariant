@@ -10,10 +10,7 @@ import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.environment.EnvironmentDamageSource;
 import me.hapyl.hariant.event.HariantShieldRemoveEvent;
 import me.hapyl.hariant.ui.ComponentDisplay;
-import me.hapyl.hariant.util.Identified;
-import me.hapyl.hariant.util.Prioritable;
-import me.hapyl.hariant.util.Priority;
-import me.hapyl.hariant.util.TickingDown;
+import me.hapyl.hariant.util.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
@@ -88,7 +85,7 @@ public class Shield implements Ticking, TickingDown, ComponentLike, Identified, 
     
     @Override
     public void tick() {
-        if (duration != HariantConstants.INDEFINITE_DURATION) {
+        if (!Ticks.isIndefinite(duration)) {
             tick--;
         }
     }

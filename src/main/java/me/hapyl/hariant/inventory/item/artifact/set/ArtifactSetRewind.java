@@ -1,5 +1,6 @@
 package me.hapyl.hariant.inventory.item.artifact.set;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.player.sequencer.Sequencer;
 import me.hapyl.eterna.module.player.sequencer.Track;
 import me.hapyl.eterna.module.registry.Key;
@@ -7,7 +8,7 @@ import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.HariantTalentEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
@@ -27,7 +28,7 @@ public final class ArtifactSetRewind extends ArtifactSet implements Listener {
     private final ArtifactSetModifier cooldownReductionIncrease = CommonArtifactSetModifiers.COOLDOWN_REDUCTION;
     
     private final Decimal rewindChance = Decimal.ofPercentage(25);
-    private final HariantCooldown rewindCooldown = HariantCooldown.ofSeconds(Key.ofString("rewind_cooldown"), 12);
+    private final Cooldown rewindCooldown = Cooldown.create(Key.ofString("rewind_cooldown"), Tick.ofSeconds(12));
     
     private final Sequencer sequencer = Sequencer.singleTrack(
             Hariant.getPlugin(),
@@ -82,8 +83,8 @@ public final class ArtifactSetRewind extends ArtifactSet implements Listener {
             return;
         }
         
-        player.setCooldown(talent, 0);
-        player.setCooldown(rewindCooldown);
+        player.startCooldown(talent, 0);
+        player.startCooldown(rewindCooldown);
         
         // Fx
         player.sendSubtitle(Component.text("⌚", Colors.ATTRIBUTE_COOLDOWN_REDUCTION), 0, 10, 5);

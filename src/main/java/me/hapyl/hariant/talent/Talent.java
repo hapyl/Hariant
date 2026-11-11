@@ -13,7 +13,7 @@ import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.annotate.AutoRegisteredListener;
 import me.hapyl.hariant.annotate.StrictNamingConvention;
 import me.hapyl.hariant.entity.SmallCapsLike;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.entity.player.LifecyclePlayer;
 import me.hapyl.hariant.event.HariantTalentEvent;
@@ -22,6 +22,7 @@ import me.hapyl.hariant.inventory.item.ItemCreator;
 import me.hapyl.hariant.inventory.item.ItemDetailsCreator;
 import me.hapyl.hariant.profile.setting.Settings;
 import me.hapyl.hariant.registry.Registrable;
+import me.hapyl.hariant.talent.energy.EnergyRegenerationRule;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Duration;
 import me.hapyl.hariant.util.Icon;
@@ -29,8 +30,10 @@ import me.hapyl.hariant.util.Identified;
 import me.hapyl.hariant.util.field.DisplayFieldInstance;
 import me.hapyl.hariant.util.field.DisplayFieldProvider;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -44,8 +47,9 @@ import java.util.stream.IntStream;
 public abstract class Talent
         implements
         Named, Described, Keyed, ItemCreator,
-        Registrable, HariantCooldown, Duration, Identified,
-        LifecyclePlayer, SmallCapsLike, DisplayFieldProvider, ItemDetailsCreator {
+        Registrable, Cooldown, Duration, Identified,
+        LifecyclePlayer, SmallCapsLike, DisplayFieldProvider, ItemDetailsCreator,
+        ComponentLike {
     
     private final Key key;
     private final Component name;
@@ -58,8 +62,9 @@ public abstract class Talent
     private @NotNull Component description;
     private @NotNull TalentType talentType;
     
-    private int cooldown;
-    private int duration;
+    // TODO (xanyjl @ Tuesday, November 3) -> Make this Tick, yep FUCK YOU too
+    private @NotNull Tick cooldown;
+    private @NotNull Tick duration;
     
     public Talent(@NotNull Key key, @NotNull Component name, @NotNull Icon icon) {
         this.key = key;
@@ -70,9 +75,15 @@ public abstract class Talent
         this.talentType = TalentType.DAMAGE;
         this.smallCaps = SmallCapsLike.asSmallCaps(name);
         this.displayFields = List.of();
+        this.cooldown = Tick.zero();
+        this.duration = Tick.zero();
         
         AutoRegisteredListener.Registry.register(this);
         StrictNamingConvention.Validator.validate(this);
+    }
+    
+    public @Nullable EnergyRegenerationRule energyRegenerationRule() {
+        return null;
     }
     
     @Override
@@ -95,13 +106,18 @@ public abstract class Talent
     }
     
     @Override
-    public int getCooldown() {
+    public @NotNull Tick getCooldown() {
         return cooldown;
     }
     
     @Override
-    public void setCooldown(int cooldown) {
+    public void setCooldown(@NotNull Tick cooldown) {
         this.cooldown = cooldown;
+    }
+    
+    @Override
+    public @NotNull Component format() {
+        return name;
     }
     
     @Override
@@ -110,12 +126,12 @@ public abstract class Talent
     }
     
     @Override
-    public int getDuration() {
+    public @NotNull Tick getDuration() {
         return duration;
     }
     
     @Override
-    public void setDuration(int duration) {
+    public void setDuration(@NotNull Tick duration) {
         this.duration = duration;
     }
     
@@ -234,7 +250,7 @@ public abstract class Talent
             if (player.getSetting(Settings.COOLDOWN_FEEDBACK)) {
                 player.messageError(
                         Component.text("This talent is on cooldown for ")
-                                 .append(Component.text(Tick.format(cooldownTimeLeft)))
+                                 .append(Tick.format(cooldownTimeLeft))
                                  .append(Component.text("!"))
                 );
                 player.playSound(Sound.ENTITY_ENDERMAN_TELEPORT, 0.0f);
@@ -285,6 +301,9 @@ public abstract class Talent
         // Call player callback
         player.onTalentExecuted(this, response);
         
+        // Fulfil energy regeneration rule if exists
+        fulfilEnergyGenerationRule(player);
+        
         // Call the talent event AFTER the execution
         new HariantTalentEvent(player, this, response).callEvent();
     }
@@ -303,12 +322,20 @@ public abstract class Talent
     
     @OverridingMethodsMustInvokeSuper
     public void initDisplayFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
-        if (cooldown > 0) {
-            attributeFields.add(DisplayFieldInstance.create(Component.text("Cooldown"), this.getCooldownFormatted()));
+        if (cooldown.isPositive()) {
+            attributeFields.add(DisplayFieldInstance.create(Component.text("Cooldown"), cooldown.asComponent()));
         }
         
-        if (duration > 0) {
-            attributeFields.add(DisplayFieldInstance.create(Component.text("Duration"), this.getDurationFormatted()));
+        if (duration.isPositive()) {
+            attributeFields.add(DisplayFieldInstance.create(Component.text("Duration"), duration.asComponent()));
+        }
+    }
+    
+    protected void fulfilEnergyGenerationRule(@NotNull HariantPlayer player) {
+        final EnergyRegenerationRule energyRegenerationRule = this.energyRegenerationRule();
+        
+        if (energyRegenerationRule != null) {
+            energyRegenerationRule.fulfil(player);
         }
     }
     

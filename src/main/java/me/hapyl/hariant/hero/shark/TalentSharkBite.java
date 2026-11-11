@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.shark;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeScaling;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -37,6 +38,8 @@ import java.util.stream.Stream;
 
 public final class TalentSharkBite extends Talent {
     
+    public static final Tick COOLDOWN = Tick.ofSeconds(16);
+    
     private final @DisplayField AttributeScaling damage = AttributeScaling.create(Map.of(
             AttributeType.ATTACK, 45.0,
             AttributeType.ELEMENTAL_MASTERY, 90.0
@@ -54,8 +57,8 @@ public final class TalentSharkBite extends Talent {
         super(key, Component.text("Shark's Bite"), Icon.ofMaterial(Material.SHEARS));
         
         // Anything other than 8 ticks will look off because of the hardcoded animation
-        setDuration(8);
-        setCooldownSeconds(16);
+        setDuration(Tick.ofTicks(8));
+        setCooldown(COOLDOWN);
         
         setDescription(
                 Component.empty()
@@ -104,7 +107,7 @@ public final class TalentSharkBite extends Talent {
         public void run(int tick) {
             final Stream<? extends HariantEntity> entities = collectNearbyEntities(boundingBox.create(location)).filter(player::canAffect);
             
-            if (tick > getDuration()) {
+            if (tick > duration()) {
                 this.bite(entities);
                 this.cancel();
                 return;

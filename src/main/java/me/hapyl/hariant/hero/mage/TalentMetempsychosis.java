@@ -1,6 +1,7 @@
 package me.hapyl.hariant.hero.mage;
 
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.entity.player.DelegateType;
@@ -33,8 +34,8 @@ public final class TalentMetempsychosis extends Talent {
     public TalentMetempsychosis(@NotNull Key key) {
         super(key, Component.text("Metempsychosis"), Icon.ofMaterial(Material.ECHO_SHARD));
         
-        setDurationSeconds(0.75f);
-        setCooldownSeconds(16);
+        setDuration(Tick.ofSeconds(0.75f));
+        setCooldown(Tick.ofSeconds(16));
         
         setTalentType(TalentType.MOVEMENT);
         
@@ -134,7 +135,7 @@ public final class TalentMetempsychosis extends Talent {
             super(Scheduler.ofTimer());
             this.player = player;
             this.targetLocation = targetLocation;
-            this.duration = getDuration();
+            this.duration = duration();
         }
         
         @Override

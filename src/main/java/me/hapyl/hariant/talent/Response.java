@@ -1,6 +1,6 @@
 package me.hapyl.hariant.talent;
 
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,8 +69,8 @@ public class Response {
          */
         AWAIT {
             @Override
-            public void setCooldown(@NotNull HariantPlayer player, @NotNull HariantCooldown cooldown) {
-                player.setIndefiniteCooldown(cooldown);
+            public void setCooldown(@NotNull HariantPlayer player, @NotNull Cooldown cooldown) {
+                player.startIndefiniteCooldown(cooldown);
             }
         },
         
@@ -79,7 +79,7 @@ public class Response {
          */
         HOLD {
             @Override
-            public void setCooldown(@NotNull HariantPlayer player, @NotNull HariantCooldown cooldown) {
+            public void setCooldown(@NotNull HariantPlayer player, @NotNull Cooldown cooldown) {
                 // Skip cooldown
             }
         },
@@ -89,8 +89,8 @@ public class Response {
          */
         ERROR;
         
-        public void setCooldown(@NotNull HariantPlayer player, @NotNull HariantCooldown cooldown) {
-            player.setCooldown(cooldown);
+        public void setCooldown(@NotNull HariantPlayer player, @NotNull Cooldown cooldown) {
+            player.startCooldown(cooldown);
         }
         
     }

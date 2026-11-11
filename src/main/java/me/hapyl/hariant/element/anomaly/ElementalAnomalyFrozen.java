@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implements Listener {
     
-    private final int frozenDuration = Tick.fromSeconds(5);
+    private final Tick frozenDuration = Tick.ofSeconds(5);
     
     private final Decimal damageMultiplier = Decimal.ofPercentage(200);
     
@@ -62,15 +62,15 @@ public final class ElementalAnomalyFrozen extends ElementalAnomalyImpl implement
     
     public int calculateFrozenDuration(@Nullable Attributable attributes) {
         if (attributes == null) {
-            return frozenDuration;
+            return frozenDuration.ticks();
         }
         
         final double elementalMastery = attributes.getAttributes().get(AttributeType.ELEMENTAL_MASTERY);
         
-        return (int) (frozenDuration * (1 + (elementalMastery / (elementalMastery + 500))));
+        return (int) (frozenDuration.ticks() * (1 + (elementalMastery / (elementalMastery + 500))));
     }
     
-    public class ElementalAnomalyFrozenInstance extends ElementalAnomalyInstance {
+    public static class ElementalAnomalyFrozenInstance extends ElementalAnomalyInstance {
         
         ElementalAnomalyFrozenInstance(@NotNull ElementalAnomalySource anomalySource, @NotNull HariantEntity entity, @Nullable HariantEntity source, int duration) {
             super(anomalySource, entity, source, duration);

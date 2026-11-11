@@ -5,6 +5,7 @@ import io.papermc.paper.math.Rotations;
 import me.hapyl.eterna.module.entity.Entities;
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Removable;
 import me.hapyl.hariant.Colors;
@@ -71,8 +72,9 @@ public class TalentInfernalWrath extends TalentUltimate {
     public TalentInfernalWrath(@NotNull Key key) {
         super(key, Component.text("Infernal Wrath"), Icon.ofMaterial(Material.MAGMA_BLOCK), UltimateResourceType.ENERGY, 60);
         
-        setDurationSeconds(2);
         setTalentType(TalentType.IMPAIR);
+        
+        setDuration(Tick.ofSeconds(2));
         
         setDescription(
                 Component.empty()
@@ -153,7 +155,7 @@ public class TalentInfernalWrath extends TalentUltimate {
                 }
             }
             // Otherwise tick entities
-            else if (tick <= getDuration()) {
+            else if (tick <= duration()) {
                 // Warn entities
                 if (modulo(2)) {
                     this.collectEntities().forEach(entity -> entity.showWarning(WarningType.DANGER, 3));
@@ -162,7 +164,7 @@ public class TalentInfernalWrath extends TalentUltimate {
                     fxEntities.forEach(entity -> player.spawnWorldParticle(entity.location, Particle.FLAME, 1, 0.05, 0.05, 0.05, 0.1f));
                     
                     // Sfx
-                    final double progress = (double) tick / getDuration();
+                    final double progress = (double) tick / duration();
                     
                     player.playWorldSound(origin, Sound.ENTITY_BLAZE_HURT, (float) (0.5f + progress));
                 }

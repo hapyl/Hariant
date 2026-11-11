@@ -7,6 +7,7 @@ import me.hapyl.hariant.achievement.AchievementRegistry;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.HariantRandom;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.DamageSourceImpl;
 import me.hapyl.hariant.entity.damage.DamageType;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
@@ -181,8 +182,17 @@ public class BeeSwarm extends HariantTickingTask {
     
     public static class BeeSwarmDamageSource extends DamageSourceImpl {
         
+        private final TalentFeelTheBreeze talent;
+        
         BeeSwarmDamageSource(@Nullable HariantEntity source, double damage, @NotNull TalentFeelTheBreeze talent) {
-            super(talent.damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponents.ofCommon(), Set.of(), damage, talent.elementalApplication.doubleValue(), talent.cooldownKey, talent.cooldown);
+            super(talent.damageSourceIdentity, source, DamageType.ULTIMATE, ElementType.PHYSICAL, DamageComponents.ofCommon(), Set.of(), damage, talent.elementalApplication.doubleValue());
+            
+            this.talent = talent;
+        }
+        
+        @Override
+        public @NotNull Cooldown cooldown() {
+            return talent.cooldown;
         }
         
     }

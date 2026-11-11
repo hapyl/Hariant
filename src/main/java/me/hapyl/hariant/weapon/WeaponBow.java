@@ -1,6 +1,7 @@
 package me.hapyl.hariant.weapon;
 
 import me.hapyl.eterna.module.inventory.builder.ItemBuilder;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.NormalAttack;
 import me.hapyl.hariant.entity.player.HariantPlayer;
@@ -41,12 +42,12 @@ public class WeaponBow extends WeaponRange {
     }
     
     @Override
-    public void startCooldown(@NotNull HariantPlayer player, int cooldown) {
+    public void startCooldown(@NotNull HariantPlayer player, @NotNull Tick cooldown) {
         // Once again, bows are fucking annoying, so we have to set the cooldown to all bows,
         // to prevent vanilla cooldown behaviour... Furthermore, it HAS to be set via the vanilla
         // method, because sending a packet does not prevent the player from drawing their bow, for
         // some reason...
-        player.getHandle().setCooldown(Material.BOW, cooldown);
+        player.getHandle().setCooldown(Material.BOW, cooldown.ticks());
     }
     
     @Override

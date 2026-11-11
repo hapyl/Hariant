@@ -2,6 +2,7 @@ package me.hapyl.hariant.hero.pytaria;
 
 import me.hapyl.eterna.module.block.display.DisplayEntity;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
@@ -58,8 +59,8 @@ public final class TalentRoseIvy extends Talent {
     public TalentRoseIvy(@NotNull Key key) {
         super(key, Component.text("Rose Ivy"), Icon.ofTexture("41cceb6ee1210e1725ce30a7da3d8e68fc38a7d8b6d30abc030a2601df951d2d"));
         
-        this.setCooldownSeconds(16);
-        this.setDurationSeconds(4);
+        setCooldown(Tick.ofSeconds(16));
+        setDuration(Tick.ofSeconds(4));
         
         this.setTalentType(TalentType.IMPAIR);
         
@@ -166,7 +167,7 @@ public final class TalentRoseIvy extends Talent {
         
         @Override
         public void run(int tick) {
-            if (tick >= TalentRoseIvy.this.getDuration()) {
+            if (tick >= TalentRoseIvy.this.duration()) {
                 this.cancel();
                 return;
             }
@@ -181,7 +182,7 @@ public final class TalentRoseIvy extends Talent {
                 collectNearbyEntities(origin, radius, 1, radius)
                         .filter(player::canAffect)
                         .forEach(entity -> {
-                            entity.addEffect(StatusEffectType.ROSE_IVY, effectDuration, player);
+                            entity.addEffect(StatusEffectType.ROSE_IVY, effectDuration.tickValue(), player);
                             entity.getAttributes().addModifier(new RoseIvyModifier(player));
                             
                             // Fx

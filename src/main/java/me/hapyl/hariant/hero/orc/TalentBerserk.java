@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.orc;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -39,8 +40,8 @@ public final class TalentBerserk extends TalentUltimate {
     public TalentBerserk(@NotNull Key key) {
         super(key, Component.text("Berserk"), Icon.ofMaterial(Material.NETHER_WART), UltimateResourceType.ENERGY, 60);
         
-        setDurationSeconds(10);
-        setCooldownSeconds(20);
+        setDuration(Tick.ofSeconds(10));
+        setCooldown(Tick.ofSeconds(20));
         
         setTalentType(TalentType.ENHANCE);
         
@@ -68,7 +69,7 @@ public final class TalentBerserk extends TalentUltimate {
     
     @Override
     public @NotNull Executable execute(@NotNull HariantPlayer player, @NotNull TalentContext context, double consumedResource) {
-        return Executable.execute(() -> enterBerserk(player, this.getDuration()));
+        return Executable.execute(() -> enterBerserk(player, this.duration()));
     }
     
     @Override

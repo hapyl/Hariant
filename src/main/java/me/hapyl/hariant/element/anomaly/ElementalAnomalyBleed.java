@@ -25,8 +25,8 @@ import java.util.Set;
 
 public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements Listener {
     
-    private final int bleedDuration = Tick.fromSeconds(4);
-    private final int bleedPeriod = Tick.fromSeconds(0.75f);
+    private final Tick bleedDuration = Tick.ofSeconds(4);
+    private final Tick bleedPeriod = Tick.ofSeconds(0.75f);
     
     private final double bleedDamage = 20;
     
@@ -85,10 +85,10 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
     
     public int calculateBleedDuration(@Nullable Attributable attributable) {
         if (attributable == null) {
-            return bleedDuration;
+            return bleedDuration.ticks();
         }
         
-        return (int) (bleedDuration * (1 + attributable.getAttributes().get(AttributeType.ELEMENTAL_MASTERY) / 500));
+        return (int) (bleedDuration.ticks() * (1 + attributable.getAttributes().get(AttributeType.ELEMENTAL_MASTERY) / 500));
     }
     
     public double calculateBleedDamage(@Nullable Attributable attributable) {
@@ -118,7 +118,7 @@ public final class ElementalAnomalyBleed extends ElementalAnomalyImpl implements
         public void tick() {
             super.tick();
             
-            if (currentTick() % bleedPeriod == 0) {
+            if (currentTick() % bleedPeriod.ticks() == 0) {
                 entity.damage(damageSource);
             }
             

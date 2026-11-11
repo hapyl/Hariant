@@ -3,6 +3,7 @@ package me.hapyl.hariant.hero.nyx;
 import me.hapyl.eterna.module.block.display.DisplayEntity;
 import me.hapyl.eterna.module.location.Coordinates;
 import me.hapyl.eterna.module.location.LocationHelper;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeScaling;
@@ -12,7 +13,7 @@ import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.EntityCollector;
 import me.hapyl.hariant.entity.WarningType;
-import me.hapyl.hariant.entity.cooldown.HariantCooldown;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.component.DamageComponents;
 import me.hapyl.hariant.entity.player.DelegateType;
@@ -34,6 +35,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -58,15 +60,15 @@ public final class TalentWitherPath extends Talent {
             DeathMessage.create("{player} was spiked to death [by {killer}]")
     );
     
-    private final HariantCooldown damageCooldown = HariantCooldown.ofSeconds(Key.ofString("wither_path_damage_cooldown"), 0.5f);
+    private final Cooldown damageCooldown = Cooldown.create(Key.ofString("wither_path_damage_cooldown"), Tick.ofSeconds(0.5f));
     
     private final Key modifierKey = Key.ofString("wither_path_modifier");
     
     public TalentWitherPath(@NotNull Key key) {
         super(key, Component.text("Wither Path"), Icon.ofMaterial(Material.WITHER_ROSE));
-        
-        setDurationSeconds(1.6f);
-        setCooldownSeconds(8);
+    
+        setDuration(Tick.ofSeconds(1.6f));
+        setCooldown(Tick.ofSeconds(8));
         
         setDescription(
                 Component.empty()
@@ -178,7 +180,7 @@ public final class TalentWitherPath extends Talent {
         @Override
         public void run(int tick) {
             // Cleanup
-            if (tick > getDuration()) {
+            if (tick > duration()) {
                 this.cancel();
                 return;
             }
@@ -251,9 +253,16 @@ public final class TalentWitherPath extends Talent {
     }
     
     private class DamageSourceWitherPath extends DamageSourceImpl {
+        
         DamageSourceWitherPath(@NotNull HariantPlayer player, double damage) {
-            super(damageSourceIdentity, player, DamageType.TALENT, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damage, spikeElementalApplication.doubleValue(), damageCooldown);
+            super(damageSourceIdentity, player, DamageType.TALENT, ElementType.AETHER, DamageComponents.ofCommon(), Set.of(), damage, spikeElementalApplication.doubleValue());
         }
+        
+        @Override
+        public @Nullable Cooldown cooldown() {
+            return damageCooldown;
+        }
+        
     }
     
     private class AttributeModifierWitherPath extends AttributeModifier {

@@ -42,8 +42,8 @@ public abstract class InfernoDemonEntity extends HariantEntity implements Infern
         
         this.player = player;
         this.demonType = demonType;
-        this.duration = talentDemonsplit.getDuration();
-        this.tick = talentDemonsplit.getDuration();
+        this.duration = talentDemonsplit.duration();
+        this.tick = talentDemonsplit.duration();
         
         final EnumTeam playerTeam = player.getPlayerTeam();
         playerTeam.addEntry(this);

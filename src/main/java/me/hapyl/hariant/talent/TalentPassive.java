@@ -2,10 +2,12 @@ package me.hapyl.hariant.talent;
 
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import me.hapyl.hariant.talent.energy.EnergyRegenerationRule;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class TalentPassive extends Talent {
     
@@ -33,4 +35,10 @@ public class TalentPassive extends Talent {
     public String getTalentClassName() {
         return "Passive Talent";
     }
+    
+    @Override
+    public final @Nullable EnergyRegenerationRule energyRegenerationRule() {
+        return null;
+    }
+    
 }
