@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-public class HariantTalentUltimateEvent extends HariantPlayerEvent {
+public class HariantUltimateFinishEvent extends HariantPlayerEvent {
     
     private static final HandlerList HANDLER_LIST = new HandlerList();
     
@@ -15,7 +15,7 @@ public class HariantTalentUltimateEvent extends HariantPlayerEvent {
     private final double resourceConsumed;
     
     @ApiStatus.Internal
-    public HariantTalentUltimateEvent(@NotNull HariantPlayer player, @NotNull TalentUltimate talent, double resourceConsumed) {
+    public HariantUltimateFinishEvent(@NotNull HariantPlayer player, @NotNull TalentUltimate talent, double resourceConsumed) {
         super(player);
         
         this.talent = talent;

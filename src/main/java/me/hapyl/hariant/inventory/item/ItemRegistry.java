@@ -26,6 +26,7 @@ public final class ItemRegistry extends StaticRegistry<Item> {
     public static final ItemArtifact ARTIFACT_WANTED_POSTER;
     public static final ItemArtifact ARTIFACT_SNOWY_BEADS;
     public static final ItemArtifact ARTIFACT_VOODOO_DOLL;
+    public static final ItemArtifact ARTIFACT_HOURGLASS;
     
     private static final StaticRegistryMap<Item> REGISTRY;
     
@@ -51,6 +52,7 @@ public final class ItemRegistry extends StaticRegistry<Item> {
         ARTIFACT_WANTED_POSTER = REGISTRY.register("artifact_wanted_poster", ItemArtifactWantedPoster::new);
         ARTIFACT_SNOWY_BEADS = REGISTRY.register("artifact_snowy_beads", ItemArtifactSnowyBeads::new);
         ARTIFACT_VOODOO_DOLL = REGISTRY.register("artifact_voodoo_doll", ItemArtifactVoodooDoll::new);
+        ARTIFACT_HOURGLASS = REGISTRY.register("artifact_hourglass", ItemArtifactHourglass::new);
     }
     
     public static @NotNull StaticRegistryMap<Item> getRegistry() {

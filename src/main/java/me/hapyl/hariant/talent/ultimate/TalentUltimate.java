@@ -10,7 +10,7 @@ import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.HariantConstants;
 import me.hapyl.hariant.entity.player.DelegateType;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantTalentUltimateEvent;
+import me.hapyl.hariant.event.HariantUltimateFinishEvent;
 import me.hapyl.hariant.talent.Response;
 import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.TalentContext;
@@ -190,12 +190,12 @@ public abstract class TalentUltimate extends Talent implements Duration {
         executable.execute().then(() -> {
             player.setUsingUltimate(false);
             player.startCooldown(this);
+            
+            // Call event
+            new HariantUltimateFinishEvent(player, this, resourceConsumption).callEvent();
         });
         
         this.broadcast(player);
-        
-        // Call event
-        new HariantTalentUltimateEvent(player, this, resourceConsumption).callEvent();
         
         return Response.ok();
     }

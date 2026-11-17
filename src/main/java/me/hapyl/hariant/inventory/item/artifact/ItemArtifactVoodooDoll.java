@@ -14,6 +14,10 @@ public final class ItemArtifactVoodooDoll extends ItemArtifact {
                 ArtifactSetRegistry.ANCESTRAL_BLOOM,
                 Component.text("Voodoo Doll"),
                 Component.empty()
+                         .append(Component.text("A human shaped doll with needles poking out of it."))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("It is an inanimate object, but it as if you can feel its pain."))
         );
     }
 }
