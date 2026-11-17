@@ -29,6 +29,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -85,7 +86,7 @@ public abstract class TalentUltimate extends Talent implements Duration {
         final double minimumResourceCost = this.getMinimumCost();
         
         if (previousValue < minimumResourceCost && newValue >= minimumResourceCost) {
-            player.sendSubtitle(Component.text("ᴜʟᴛɪᴍᴀᴛᴇ ᴄʜᴀʀɢᴇᴅ", Colors.ULTIMATE_RESOURCE_ENERGY, TextDecoration.BOLD), 5, 10, 5);
+            player.showTitle(Title.title(Component.empty(), Component.text("ᴜʟᴛɪᴍᴀᴛᴇ ᴄʜᴀʀɢᴇᴅ", Colors.ULTIMATE_RESOURCE_ENERGY, TextDecoration.BOLD), 5, 10, 5));
             player.sendMessage(createUsageComponent(CHARGED_COMPONENT));
             
             player.playSound(Sound.BLOCK_CONDUIT_ACTIVATE, 2.0f);
@@ -135,7 +136,12 @@ public abstract class TalentUltimate extends Talent implements Duration {
                 final int cooldownTimeLeft = player.getCooldownTimeLeft(this);
                 
                 builder.append(Components.applyStyle(component, STYLE_ULTIMATE_ON_COOLDOWN));
-                builder.append(Component.text(" (%s)".formatted(Tick.format(cooldownTimeLeft)), Colors.TICK));
+                builder.append(
+                        Component.space()
+                                 .append(Component.text("(", Colors.TICK))
+                                 .append(Tick.format(cooldownTimeLeft).color(Colors.TICK))
+                                 .append(Component.text(")", Colors.TICK))
+                );
             }
             // Otherwise append normally
             else {

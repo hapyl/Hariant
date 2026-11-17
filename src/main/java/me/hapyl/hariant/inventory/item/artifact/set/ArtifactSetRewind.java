@@ -18,6 +18,7 @@ import me.hapyl.hariant.talent.Talent;
 import me.hapyl.hariant.talent.ultimate.TalentUltimate;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -87,7 +88,7 @@ public final class ArtifactSetRewind extends ArtifactSet implements Listener {
         player.startCooldown(rewindCooldown);
         
         // Fx
-        player.sendSubtitle(Component.text("⌚", Colors.ATTRIBUTE_COOLDOWN_REDUCTION), 0, 10, 5);
+        player.showTitle(Title.title(Component.empty(), Component.text("⌚", Colors.ATTRIBUTE_COOLDOWN_REDUCTION), 0, 10, 5));
         sequencer.play(player.getHandle());
     }
     

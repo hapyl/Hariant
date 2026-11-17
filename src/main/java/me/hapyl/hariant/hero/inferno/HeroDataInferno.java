@@ -40,7 +40,7 @@ public class HeroDataInferno extends HeroData<HeroInferno> implements ActionbarS
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return List.of(
                 currentDemon != null
                 ? Component.empty()

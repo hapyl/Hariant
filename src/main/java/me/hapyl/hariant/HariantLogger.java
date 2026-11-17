@@ -1,5 +1,6 @@
 package me.hapyl.hariant;
 
+import com.google.common.collect.Sets;
 import me.hapyl.eterna.module.text.prefix.Prefix;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.Range;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public final class HariantLogger {
@@ -29,6 +31,8 @@ public final class HariantLogger {
     
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm:ss");
     private static final Logger LOGGER = Hariant.getPlugin().getLogger();
+    
+    private static final Set<? super Class<?>> WARNINGS = Sets.newHashSet();
     
     private HariantLogger() {
     }
@@ -52,14 +56,10 @@ public final class HariantLogger {
     public static void debug(@NotNull Object object) {
         final TextComponent message = Component.empty()
                                                .append(Component.text("[DEBUG] ", Colors.RED))
-                                               .append(Component.text("%s ".formatted(TIME_FORMATTER.format(LocalTime.now())), Colors.DARK_GRAY))
+                                               .append(HariantLogger::currentTimeFormatted).appendSpace()
                                                .append(Component.text(String.valueOf(object), Colors.YELLOW));
         
-        Bukkit.getOnlinePlayers().stream()
-              .filter(ServerOperator::isOp) // Fuck it, just check for operator instead of rank, since it throws errors when used wrongly
-              .forEach(player -> player.sendMessage(message));
-        
-        Bukkit.getConsoleSender().sendMessage(message);
+        operatorMessage(message);
     }
     
     public static void debugValues(@NotNull Object... values) {
@@ -91,12 +91,36 @@ public final class HariantLogger {
         debug(builder.toString());
     }
     
+    public static void warning(@NotNull Class<?> clazz, @NotNull String warning) {
+        if (WARNINGS.add(clazz)) {
+            final Component message = Component.empty()
+                                               .append(Component.text("[WARNING] ", Colors.YELLOW, TextDecoration.BOLD))
+                                               .append(HariantLogger::currentTimeFormatted).appendSpace()
+                                               .append(Component.text("<%s>".formatted(clazz.getSimpleName()), Colors.GOLD)).appendSpace()
+                                               .append(Component.text(warning, Colors.GRAY));
+            
+            operatorMessage(message);
+        }
+    }
+    
     public static void sound(@NotNull Player player, @NotNull Sound sound, @Range(from = 0, to = 2) float pitch) {
         player.playSound(player, sound, SoundCategory.UI, 3.0f, Math.clamp(pitch, 0.0f, 2.0f));
     }
     
     public static @NotNull Logger logger() {
         return LOGGER;
+    }
+    
+    private static @NotNull Component currentTimeFormatted() {
+        return Component.text(TIME_FORMATTER.format(LocalTime.now()), Colors.DARK_GRAY);
+    }
+    
+    private static void operatorMessage(@NotNull Component message) {
+        Bukkit.getOnlinePlayers().stream()
+              .filter(ServerOperator::isOp) // Fuck it, just check for operator instead of rank, since it throws errors when used wrongly
+              .forEach(player -> player.sendMessage(message));
+        
+        Bukkit.getConsoleSender().sendMessage(message);
     }
     
     private static @NotNull Prefix create(@NotNull Component prefix, @NotNull Style messageStyle) {

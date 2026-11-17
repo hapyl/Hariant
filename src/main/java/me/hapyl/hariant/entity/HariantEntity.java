@@ -24,9 +24,9 @@ import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.element.*;
 import me.hapyl.hariant.element.anomaly.ElementalAnomaly;
 import me.hapyl.hariant.element.anomaly.ElementalAnomalyType;
+import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.cooldown.CooldownHandlerImpl;
-import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.*;
 import me.hapyl.hariant.entity.damage.mutator.DamageMutator;
 import me.hapyl.hariant.entity.effect.Effect;
@@ -57,7 +57,10 @@ import me.hapyl.hariant.team.TeamEntry;
 import me.hapyl.hariant.team.TeamEntryProvider;
 import me.hapyl.hariant.ui.ComponentDisplay;
 import me.hapyl.hariant.ui.ComponentDisplayAnimation;
-import me.hapyl.hariant.util.*;
+import me.hapyl.hariant.util.Cancellable;
+import me.hapyl.hariant.util.Counter;
+import me.hapyl.hariant.util.SoundFx;
+import me.hapyl.hariant.util.UniquelyIdentified;
 import me.hapyl.hariant.weapon.NormalAttackRanged;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
@@ -66,8 +69,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.object.PlayerHeadObjectContents;
-import net.kyori.adventure.title.Title;
-import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -75,6 +76,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.potion.PotionEffect;
@@ -87,7 +89,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import java.time.Duration;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -101,7 +102,7 @@ public class HariantEntity
         TeamEntryProvider, StatusEffectHandler, HeadComponent, DeathComponent,
         CooldownHandler, Elemental, ElementHandler, HariantLogger.Sender,
         EffectHandler, TickSupplier, Trappable, Delegatable,
-        ProjectileLauncher {
+        ProjectileLauncher, Glowable {
     
     private static final ComponentDisplay EFFECT_RESISTANCE_DISPLAY = new ComponentDisplay(
             Component.text("ᴇꜰꜰᴇᴄᴛ ʀᴇꜱ", AttributeType.EFFECT_RESISTANCE.getStyle()),
@@ -901,8 +902,7 @@ public class HariantEntity
         return "%s(%s)".formatted(entity.getType().getKey().getKey(), uuidString.substring(0, uuidString.indexOf("-")));
     }
     
-    @NotNull
-    public Component getName() {
+    public @NotNull Component getName() {
         return Component.text(this.toString());
     }
     
@@ -1096,7 +1096,7 @@ public class HariantEntity
     }
     
     public boolean isTeammate(@Nullable HariantEntity other) {
-        // Explicit self check, we're NOT out own teammate
+        // Explicit self check, we're NOT our own teammate
         if (other == null || this.equals(other)) {
             return false;
         }
@@ -1255,6 +1255,11 @@ public class HariantEntity
     }
     
     @Override
+    public int removeEffects(@NotNull Predicate<? super StatusEffectType> predicate) {
+        return effectMap.removeEffects(predicate);
+    }
+    
+    @Override
     public int clearEffects() {
         return effectMap.clearEffects();
     }
@@ -1388,12 +1393,14 @@ public class HariantEntity
         return this.getLocationInFront0(distance, true);
     }
     
-    public void setGlowing(@NotNull HariantPlayer player, @NotNull PacketTeamColor color) {
-        Glowing.setGlowing(player.getHandle(), entity, color, Glowing.INFINITE_DURATION);
+    @Override
+    public void setGlowing(@NotNull Player player, @NotNull PacketTeamColor color) throws IllegalArgumentException {
+        Glowing.setGlowing(player, entity, color, Glowing.INFINITE_DURATION);
     }
     
-    public void stopGlowing(@NotNull HariantPlayer player) {
-        Glowing.stopGlowing(player.getHandle(), entity);
+    @Override
+    public void stopGlowing(@NotNull Player player) {
+        Glowing.stopGlowing(player, entity);
     }
     
     public void updateHealth(double maxHealth) {
@@ -1408,23 +1415,6 @@ public class HariantEntity
     
     public void setVisualFire(@Nullable Boolean visualFire) {
         entity.setVisualFire(visualFire == null ? TriState.NOT_SET : visualFire ? TriState.TRUE : TriState.FALSE);
-    }
-    
-    public void sendTitleSubtitle(@NotNull Component title, @NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(title, subtitle, fadeIn, stay, fadeOut);
-    }
-    
-    public void sendTitle(@NotNull Component title, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(title, null, fadeIn, stay, fadeOut);
-    }
-    
-    public void sendSubtitle(@NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        // Subtitle cannot be displayed without a title, so we send an empty title, which will override the main title, if any showing
-        this.sendTitle0(Component.empty(), subtitle, fadeIn, stay, fadeOut);
-    }
-    
-    public void sendSubtitleKeepTitle(@NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitle0(null, subtitle, fadeIn, stay, fadeOut);
     }
     
     public boolean isInvulnerable() {
@@ -1786,18 +1776,6 @@ public class HariantEntity
         final Vector vector = location.getDirection().setY(0);
         
         return vector.lengthSquared() > 0 ? location.add(vector.normalize().multiply(distance)) : location;
-    }
-    
-    private void sendTitle0(@Nullable Component title, @Nullable Component subtitle, int fadeIn, int stay, int fadeOut) {
-        this.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.ofMillis(fadeIn * 50L), Duration.ofMillis(stay * 50L), Duration.ofMillis(fadeOut * 50L)));
-        
-        if (title != null) {
-            this.sendTitlePart(TitlePart.TITLE, title);
-        }
-        
-        if (subtitle != null) {
-            this.sendTitlePart(TitlePart.SUBTITLE, subtitle);
-        }
     }
     
     public static @NotNull Component createHeadComponent(@NotNull String texture) {

@@ -16,9 +16,9 @@ public enum WarningType implements ComponentLike {
         this.component = component;
     }
     
-    @NotNull
     @Override
-    public Component asComponent() {
+    public @NotNull Component asComponent() {
         return component;
     }
+    
 }

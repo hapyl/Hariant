@@ -76,7 +76,7 @@ public final class TalentRoseIvy extends Talent {
                          .append(Component.text(" in small "))
                          .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text(" for "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()

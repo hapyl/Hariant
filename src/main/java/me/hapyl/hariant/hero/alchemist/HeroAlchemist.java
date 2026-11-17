@@ -150,9 +150,8 @@ public class HeroAlchemist extends Hero {
         }
     }
     
-    @NotNull
     @Override
-    public List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return player.getHeroData(HeroRegistry.ALCHEMIST, HeroDataAlchemist::new).supplyActionbar(player);
     }
     

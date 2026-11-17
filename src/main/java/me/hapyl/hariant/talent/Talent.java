@@ -82,6 +82,13 @@ public abstract class Talent
         StrictNamingConvention.Validator.validate(this);
     }
     
+    @Override
+    public final @NotNull Component format() {
+        // This is fuckass method we have to override because Talent implements Cooldown & Duration,
+        // which both inherit this method from `ComponentFormatter`
+        return name;
+    }
+    
     public @Nullable EnergyRegenerationRule energyRegenerationRule() {
         return null;
     }
@@ -113,11 +120,6 @@ public abstract class Talent
     @Override
     public void setCooldown(@NotNull Tick cooldown) {
         this.cooldown = cooldown;
-    }
-    
-    @Override
-    public @NotNull Component format() {
-        return name;
     }
     
     @Override
@@ -322,11 +324,11 @@ public abstract class Talent
     
     @OverridingMethodsMustInvokeSuper
     public void initDisplayFields(@NotNull List<? super DisplayFieldInstance> attributeFields) {
-        if (cooldown.isPositive()) {
+        if (cooldown.ticks() > 0) {
             attributeFields.add(DisplayFieldInstance.create(Component.text("Cooldown"), cooldown.asComponent()));
         }
         
-        if (duration.isPositive()) {
+        if (duration.ticks() > 0) {
             attributeFields.add(DisplayFieldInstance.create(Component.text("Duration"), duration.asComponent()));
         }
     }

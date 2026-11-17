@@ -104,7 +104,7 @@ public final class HeroZealot extends Hero {
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return player.getHeroData(this, HeroDataZealot::new).supplyActionbar(player);
     }
     

@@ -190,7 +190,7 @@ public class HeroDataAlchemist extends HeroData<HeroAlchemist> implements Action
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         final Style abyssalCorrosionStyle = Definition.ABYSSAL_CORROSION.getStyle();
         final int abyssalCorrosionLevel = this.getAbyssalCorrosionLevel();
         

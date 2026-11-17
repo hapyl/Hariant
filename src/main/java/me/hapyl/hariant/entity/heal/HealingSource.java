@@ -17,23 +17,19 @@ public interface HealingSource extends Named {
     
     @Nullable HariantEntity getHealer();
     
-    @NotNull
-    static HealingSource create(double amount, @NotNull Component name, @Nullable HariantEntity healer) {
+    static @NotNull HealingSource create(double amount, @NotNull Component name, @Nullable HariantEntity healer) {
         return new HealingSourceImpl(amount, name, healer);
     }
     
-    @NotNull
-    static HealingSource create(double amount, @NotNull Named named, @Nullable HariantEntity healer) {
+    static @NotNull HealingSource create(double amount, @NotNull Named named, @Nullable HariantEntity healer) {
         return create(amount, named.getName(), healer);
     }
     
-    @NotNull
-    static HealingSource create(double amount, @NotNull Component name) {
+    static @NotNull HealingSource create(double amount, @NotNull Component name) {
         return create(amount, name, null);
     }
     
-    @NotNull
-    static HealingSource create(double amount, @NotNull Named named) {
+    static @NotNull HealingSource create(double amount, @NotNull Named named) {
         return create(amount, named.getName(), null);
     }
     

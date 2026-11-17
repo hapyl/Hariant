@@ -11,7 +11,7 @@ public final class DamageMutatorImplSubtract implements DamageMutator {
     
     @NotNull
     @Override
-    public String identify() {
+    public String operator() {
         return "-";
     }
     

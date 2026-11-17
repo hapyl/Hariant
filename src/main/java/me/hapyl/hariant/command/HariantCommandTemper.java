@@ -12,7 +12,6 @@ import me.hapyl.hariant.attribute.instance.AttributesInstance;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
 import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.util.Ticks;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +65,7 @@ public final class HariantCommandTemper extends HariantPlayerCommand {
             }
         }
         else {
-            attributes.addModifier(MODIFIER_KEY, Ticks.INDEFINITE, hariantPlayer, adder -> adder.of(attributeType, modifierType, value.ticks()));
+            attributes.addModifier(MODIFIER_KEY, Tick.INDEFINITE, hariantPlayer, adder -> adder.of(attributeType, modifierType, value.ticks()));
             
             hariantPlayer.messageSuccess(
                     Component.empty()

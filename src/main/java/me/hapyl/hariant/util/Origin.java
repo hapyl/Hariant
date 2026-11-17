@@ -6,6 +6,7 @@ import me.hapyl.eterna.module.location.Coordinates;
 import me.hapyl.eterna.module.location.LocationHelper;
 import me.hapyl.eterna.module.location.Rotation;
 import org.bukkit.Location;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public class Origin implements Coordinates, Rotation {
@@ -50,11 +51,12 @@ public class Origin implements Coordinates, Rotation {
         return pitch;
     }
     
+    @Contract(mutates = "param1")
     public @NotNull Location merge(@NotNull @Mutates Location location, double x, double y, double z) {
         return location.set(this.x + x, this.y + y, this.z + z);
     }
     
-    public @NotNull Location mergeCopy(@NotNull @DefensiveCopy Location location, double x, double y, double z) {
+    public @NotNull Location mergeAsCopy(@NotNull @DefensiveCopy Location location, double x, double y, double z) {
         return this.merge(LocationHelper.copyOf(location), x, y, z);
     }
     

@@ -2,7 +2,6 @@ package me.hapyl.hariant.entity.cooldown;
 
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.hariant.attribute.AttributeType;
-import me.hapyl.hariant.util.Ticks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +29,7 @@ public interface CooldownHandler {
     
     default void startIndefiniteCooldown(@NotNull Cooldown cooldown) {
         // Doesn't matter about the cooldown reduction, so we skip it
-        this.startCooldown(cooldown, Ticks.INDEFINITE, null);
+        this.startCooldown(cooldown, Tick.INDEFINITE, null);
     }
     
     void stopCooldown(@NotNull Cooldown cooldown);

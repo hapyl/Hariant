@@ -49,7 +49,7 @@ public final class TalentPsionicOverload extends Talent {
                          .appendNewline()
                          .append(AttributeType.MOVEMENT_SPEED)
                          .append(Component.text(" buffs for "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text("."))
         );
     }

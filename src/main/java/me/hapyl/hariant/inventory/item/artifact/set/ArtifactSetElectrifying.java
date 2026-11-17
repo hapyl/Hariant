@@ -47,7 +47,7 @@ public final class ArtifactSetElectrifying extends ArtifactSet implements Listen
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("This effect can only occur once every "))
-                         .append(energyRegenerationCooldown.getCooldownFormatted())
+                         .append(energyRegenerationCooldown.asCooldownComponentFormatted())
                          .append(Component.text("."))
         );
     }

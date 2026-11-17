@@ -468,6 +468,10 @@ public final class Hariant implements Runnable, Lifecycle {
                : Optional.empty();
     }
     
+    public static @Nullable HariantPlayer getPlayerOrNull(@NotNull Player player) {
+        return HANDLER.entityMap.get(player.getUniqueId()) instanceof HariantPlayer hariantPlayer ? hariantPlayer : null;
+    }
+    
     public static @NotNull Stream<HariantPlayer> getPlayers() {
         // Using profiles as a bridge to get players is faster than iterating over the entities map, because
         // we're just calling get() on uuid

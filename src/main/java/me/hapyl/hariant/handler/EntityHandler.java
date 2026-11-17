@@ -2,11 +2,13 @@ package me.hapyl.hariant.handler;
 
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.Hariant;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
 import me.hapyl.hariant.entity.damage.environment.*;
 import me.hapyl.hariant.entity.player.HariantPlayer;
+import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
@@ -60,9 +62,11 @@ public final class EntityHandler implements Listener {
         if (ev instanceof EntityDamageByEntityEvent ev2 && ev2.getDamager() instanceof Player player && player.getGameMode() == GameMode.CREATIVE && !(bukkitEntity instanceof Player)) {
             // If HariantEntity exists, call removal on that so it clears stuff, otherwise, remove bukkit entity
             if (entity != null) {
+                player.sendActionBar(Component.text("Annihilated Hariant entity", Colors.RED));
                 entity.remove();
             }
             else {
+                player.sendActionBar(Component.text("Annihilated non-Hariant entity", Colors.RED));
                 bukkitEntity.remove();
             }
             return;

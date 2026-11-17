@@ -14,6 +14,7 @@ import me.hapyl.hariant.event.HariantDamageComputeEvent;
 import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -41,7 +42,7 @@ public class StatusEffectStunned extends StatusEffectImpl implements Listener {
     
     @Override
     public void onTick(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int tick, int duration) {
-        entity.sendTitleSubtitle(TITLE, Tick.format(tick).color(Colors.AQUA), 0, 10, 0);
+        entity.showTitle(Title.title(TITLE, Tick.format(tick).color(Colors.AQUA), 0, 10, 0));
         
         // Birds fx
         final Location location = entity.getEyeLocation().add(0, 0.5, 0);

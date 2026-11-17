@@ -8,6 +8,7 @@ import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 public final class DisplayFieldInstance implements ComponentLike {
@@ -15,7 +16,7 @@ public final class DisplayFieldInstance implements ComponentLike {
     private final Component component;
     
     /**
-     * {@see #create(Component, Component)}
+     * {@link #create(Component, Component)}
      */
     DisplayFieldInstance(@NotNull Component fieldName, @NotNull Component fieldValue) {
         this.component = Component.empty()
@@ -45,6 +46,11 @@ public final class DisplayFieldInstance implements ComponentLike {
                     
                     if (displayField == null) {
                         continue;
+                    }
+                    
+                    // Disallow `static` modifier on display fields
+                    if (Modifier.isStatic(field.getModifiers())) {
+                        throw new IllegalArgumentException("Modifier `static` is not allowed on @DisplayField!");
                     }
                     
                     field.setAccessible(true);

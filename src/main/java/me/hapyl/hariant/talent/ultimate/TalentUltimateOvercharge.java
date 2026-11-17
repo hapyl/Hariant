@@ -17,6 +17,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,7 +62,7 @@ public abstract class TalentUltimateOvercharge extends TalentUltimate {
     @Override
     public void onResourceValue(@NotNull HariantPlayer player, double previousValue, double newValue) {
         if (previousValue < overchargeCost && newValue >= overchargeCost) {
-            player.sendSubtitle(Component.text("ᴜʟᴛɪᴍᴀᴛᴇ ᴏᴠᴇʀᴄʜᴀʀɢᴇᴅ", Colors.ULTIMATE_OVERCHARGE, TextDecoration.BOLD), 5, 10, 5);
+            player.showTitle(Title.title(Component.empty(), Component.text("ᴜʟᴛɪᴍᴀᴛᴇ ᴏᴠᴇʀᴄʜᴀʀɢᴇᴅ", Colors.ULTIMATE_OVERCHARGE, TextDecoration.BOLD), 5, 10, 5));
             player.sendMessage(createUsageComponent(USAGE_COMPONENT));
             
             player.playSound(Sound.BLOCK_CONDUIT_DEACTIVATE, 1.75f);

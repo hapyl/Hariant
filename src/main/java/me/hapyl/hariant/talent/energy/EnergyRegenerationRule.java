@@ -11,7 +11,8 @@ public interface EnergyRegenerationRule extends Keyed, ComponentFormatter {
     
     @Override
     @NotNull Key getKey();
-    
+
+    // FIXME (xanyjl @ Wednesday, November 11) -> Do we care about formatting this? Could just keep it internal
     @Override
     @NotNull Component format();
     

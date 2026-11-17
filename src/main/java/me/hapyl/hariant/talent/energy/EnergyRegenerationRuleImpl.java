@@ -1,6 +1,7 @@
 package me.hapyl.hariant.talent.energy;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.entity.PullSource;
 import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.talent.ultimate.UltimateResourceType;
 import me.hapyl.hariant.util.decimal.DecimalFormat;

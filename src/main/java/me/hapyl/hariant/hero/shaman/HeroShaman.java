@@ -1,10 +1,12 @@
 package me.hapyl.hariant.hero.shaman;
 
 import me.hapyl.eterna.module.registry.Key;
+import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.instance.Attributes;
 import me.hapyl.hariant.element.ElementType;
 import me.hapyl.hariant.entity.NormalAttack;
+import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.hero.*;
 import me.hapyl.hariant.hero.orc.TalentSpiritualCleansing;
 import me.hapyl.hariant.talent.TalentRegistry;
@@ -14,26 +16,21 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-public class HeroShaman extends Hero {
+import java.util.List;
+
+public final class HeroShaman extends Hero {
     
-    //
-    // [1] Totem
-    //  Throw a totem that heals teammates and damages enemies
-    //
-    // [2] Totem Jump
-    //  Jump towards the targeting totem
-    //
-    // [3] Shaman's Mark
-    //  Throw a projectile forward that sticks to the first teammate it hits, applying Shaman's Mark unto them.
-    //
-    // [4] Overheal
-    //
-    // [5] Spiritual Cleansing
-    //
-    
+    public static final Component SHAMAN_S = Component.text("Shaman's", Colors.GREEN);
     
     public HeroShaman(@NotNull Key key) {
-        super(key, Component.text("Shaman"), Attributes.base(1000, 100, 100), new WeaponStick());
+        super(
+                key,
+                Component.text("Shaman"),
+                Attributes.base(800, 50, 100)
+                          .adjust(AttributeType.EFFECT_RESISTANCE, 30)
+                          .adjust(AttributeType.MENDING, 150), // Base MENDING is 100
+                new WeaponStick()
+        );
         
         final HeroProfile profile = getProfile();
         profile.setElementType(ElementType.TOXIC);
@@ -45,11 +42,13 @@ public class HeroShaman extends Hero {
         equipment.setChestPlate(110, 94, 74);
         equipment.setLeggings(57, 40, 90);
         
-    }
-    
-    @Override
-    public boolean isEnabled() {
-        return false;
+        setDescription(
+                Component.empty()
+                         .append(Component.text("An orc from the Jungle."))
+                         .appendNewline()
+                         .appendNewline()
+                         .append(Component.text("Always rumbles about something."))
+        );
     }
     
     @Override
@@ -58,8 +57,8 @@ public class HeroShaman extends Hero {
     }
     
     @Override
-    public @NotNull TalentTotemJump getSecondTalent() {
-        return TalentRegistry.TOTEM_JUMP;
+    public @NotNull TalentImprisonment getSecondTalent() {
+        return TalentRegistry.IMPRISONMENT;
     }
     
     @Override
@@ -77,10 +76,18 @@ public class HeroShaman extends Hero {
         return TalentRegistry.SPIRITUAL_CLEANSING;
     }
     
+    @Override
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
+        return player.getHeroData(this, HeroDataShaman::new).supplyActionbar(player);
+    }
+    
     private static class WeaponStick extends WeaponMelee {
         
         WeaponStick() {
-            super(Key.ofString("shaman_stick"), Icon.ofMaterial(Material.STICK), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 1, NormalAttack.DEFAULT_ATTACK_COOLDOWN));
+            super(Key.ofString("shaman_stick"), Icon.ofMaterial(Material.BAMBOO), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 47, NormalAttack.DEFAULT_ATTACK_COOLDOWN));
+            
+            setName(Component.text("Bamboo Stick"));
+            setDescription(Component.text("An ordinary stick found in the jungle."));
         }
         
     }

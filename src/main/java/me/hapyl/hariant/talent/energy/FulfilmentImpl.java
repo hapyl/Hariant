@@ -9,11 +9,11 @@ public final class FulfilmentImpl implements Fulfilment {
     static final Fulfilment ALWAYS = new FulfilmentImpl(Tick.ofTicks(0), 0);
     
     private final Tick cooldown;
-    private final int fulfilment;
+    private final int threshold;
     
-    FulfilmentImpl(@NotNull Tick cooldown, int fulfilment) {
+    FulfilmentImpl(@NotNull Tick cooldown, int threshold) {
         this.cooldown = cooldown;
-        this.fulfilment = fulfilment;
+        this.threshold = threshold;
     }
     
     @Override
@@ -23,7 +23,7 @@ public final class FulfilmentImpl implements Fulfilment {
     
     @Override
     public int threshold() {
-        return fulfilment;
+        return threshold;
     }
     
 }

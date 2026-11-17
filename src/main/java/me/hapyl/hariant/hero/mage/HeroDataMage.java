@@ -19,7 +19,7 @@ public class HeroDataMage extends HeroData<HeroMage> implements ActionbarSupplie
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return List.of();
     }
     

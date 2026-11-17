@@ -15,7 +15,7 @@ public interface TickingDown {
     int duration();
     
     default boolean isIndefinite() {
-        return Ticks.isIndefinite(this.duration());
+        return Tick.isIndefinite(this.duration());
     }
     
     default boolean isOver() {

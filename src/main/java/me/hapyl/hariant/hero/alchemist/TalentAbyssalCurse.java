@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;
@@ -291,10 +292,8 @@ public final class TalentAbyssalCurse extends TalentUltimate implements Listener
             
             // Display
             if (modulo(5)) {
-                bearer.sendSubtitle(
-                        obfuscate("ʏᴏᴜ ᴀʀᴇ ᴄᴜʀꜱᴇᴅ", 3, curseStyle, curseStyleObfuscated),
-                        0, 10, 5
-                );
+                // FIXME (xanyjl @ Monday, November 16) -> Maybe cache this?
+                bearer.showTitle(Title.title(Component.empty(), obfuscate("ʏᴏᴜ ᴀʀᴇ ᴄᴜʀꜱᴇᴅ", 3, curseStyle, curseStyleObfuscated), 0, 10, 5));
             }
         }
         

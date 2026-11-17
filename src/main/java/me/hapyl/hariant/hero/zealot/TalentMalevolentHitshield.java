@@ -18,7 +18,6 @@ import me.hapyl.hariant.talent.TalentType;
 import me.hapyl.hariant.talent.target.TalentTarget;
 import me.hapyl.hariant.util.Icon;
 import me.hapyl.hariant.util.Priority;
-import me.hapyl.hariant.util.Ticks;
 import me.hapyl.hariant.util.decimal.Decimal;
 import me.hapyl.hariant.util.field.DisplayField;
 import net.kyori.adventure.text.Component;
@@ -72,7 +71,7 @@ public final class TalentMalevolentHitshield extends Talent {
     private class MalevolentHitshieldAttributeModifier extends AttributeModifier {
         
         MalevolentHitshieldAttributeModifier(@NotNull HariantEntity applier) {
-            super(MODIFIER_KEY, TalentMalevolentHitshield.this.getName(), applier, Ticks.INDEFINITE);
+            super(MODIFIER_KEY, TalentMalevolentHitshield.this.getName(), applier, Tick.INDEFINITE);
             
             of(AttributeType.KNOCKBACK_RESISTANCE, AttributeModifierType.FLAT, knockbackResistanceIncrease.doubleValue());
         }
@@ -82,7 +81,7 @@ public final class TalentMalevolentHitshield extends Talent {
     private class MalevolentHitshield extends Shield {
         
         MalevolentHitshield(@NotNull HariantEntity entity) {
-            super(entity, entity, ShieldStrength.always1(), shieldCapacity.intValue(), Ticks.INDEFINITE);
+            super(entity, entity, ShieldStrength.always1(), shieldCapacity.intValue(), Tick.INDEFINITE);
             
             entity.getAttributes().addModifier(new MalevolentHitshieldAttributeModifier(entity));
         }

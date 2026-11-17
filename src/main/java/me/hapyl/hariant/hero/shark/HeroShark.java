@@ -89,7 +89,7 @@ public final class HeroShark extends Hero {
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return player.getHeroData(this, HeroDataShark::new).supplyActionbar(player);
     }
     

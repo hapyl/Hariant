@@ -1,6 +1,7 @@
 package me.hapyl.hariant.entity.shield;
 
 import me.hapyl.eterna.module.annotate.EventLike;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.HariantConstants;
@@ -85,7 +86,7 @@ public class Shield implements Ticking, TickingDown, ComponentLike, Identified, 
     
     @Override
     public void tick() {
-        if (!Ticks.isIndefinite(duration)) {
+        if (!Tick.isIndefinite(duration)) {
             tick--;
         }
     }

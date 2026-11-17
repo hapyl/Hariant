@@ -50,7 +50,7 @@ public final class TalentBerserk extends TalentUltimate {
                          .append(Component.text("Enter "))
                          .append(COMPONENT_BERSERK)
                          .append(Component.text(" for "))
-                         .append(getDurationFormatted())
+                         .append(asDurationComponentFormatted())
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()

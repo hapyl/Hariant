@@ -22,6 +22,7 @@ public final class ArtifactSetRegistry extends StaticRegistry<ArtifactSet> {
     public static final ArtifactSet SWORN_OATH;
     public static final ArtifactSet OPEN_WOUNDS;
     public static final ArtifactSet PROOF_OF_POWER;
+    public static final ArtifactSet ANCESTRAL_BLOOM;
     
     private static final StaticRegistryMap<ArtifactSet> REGISTRY;
     
@@ -44,6 +45,7 @@ public final class ArtifactSetRegistry extends StaticRegistry<ArtifactSet> {
         SWORN_OATH = REGISTRY.register("artifact_set_sworn_oath", ArtifactSetSwornOath::new);
         OPEN_WOUNDS = REGISTRY.register("artifact_set_open_wounds", ArtifactSetOpenWounds::new);
         PROOF_OF_POWER = REGISTRY.register("artifact_set_proof_of_power", ArtifactSetProofOfPower::new);
+        ANCESTRAL_BLOOM = REGISTRY.register("artifact_set_ancestral_bloom", ArtifactSetAncestralBloom::new);
     }
     
     private ArtifactSetRegistry() {

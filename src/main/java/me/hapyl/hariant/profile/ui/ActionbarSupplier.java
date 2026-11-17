@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface ActionbarSupplier {
     
-    @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player);
+    @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player);
     
 }

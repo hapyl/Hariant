@@ -1,5 +1,6 @@
 package me.hapyl.hariant.hero.archer;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -14,7 +15,6 @@ import me.hapyl.hariant.hero.pytaria.HeroDataPytaria;
 import me.hapyl.hariant.talent.TalentPassive;
 import me.hapyl.hariant.term.EnumTerminology;
 import me.hapyl.hariant.util.Icon;
-import me.hapyl.hariant.util.Ticks;
 import me.hapyl.hariant.util.decimal.Decimal;
 import me.hapyl.hariant.util.field.DisplayField;
 import net.kyori.adventure.text.Component;
@@ -123,7 +123,7 @@ public final class TalentExcellency extends TalentPassive implements Listener {
         private int excellency;
         
         ExcellencyAttributeModifier(@NotNull HariantEntity applier) {
-            super(modifierKey, TalentExcellency.this.getName(), applier, Ticks.INDEFINITE);
+            super(modifierKey, TalentExcellency.this.getName(), applier, Tick.INDEFINITE);
         }
         
         @Override

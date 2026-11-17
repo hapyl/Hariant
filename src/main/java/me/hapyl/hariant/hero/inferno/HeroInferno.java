@@ -93,7 +93,7 @@ public class HeroInferno extends Hero implements Listener {
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return player.getHeroData(this, HeroDataInferno::new).supplyActionbar(player);
     }
     

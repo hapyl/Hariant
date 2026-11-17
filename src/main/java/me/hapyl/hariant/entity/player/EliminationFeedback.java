@@ -3,6 +3,7 @@ package me.hapyl.hariant.entity.player;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.util.Prefixed;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,13 +43,7 @@ public enum EliminationFeedback implements Prefixed {
     
     @OverridingMethodsMustInvokeSuper
     public void feedback(@NotNull HariantPlayer player, @NotNull HariantPlayer victim) {
-        player.sendSubtitle(
-                Component.empty()
-                         .append(prefix)
-                         .appendSpace()
-                         .append(victim.asDeathComponent()),
-                0, 10, 5
-        );
+        player.showTitle(Title.title(Component.empty(), prefix.appendSpace().append(victim.asDeathComponent()), 0, 10, 5));
     }
     
 }
