@@ -73,7 +73,7 @@ public final class TalentFlowerBreeze extends Talent {
                          .append(Component.text("Feel the breeze of beautiful flowers, that brings back terrible memories, "))
                          .append(Component.text(" hurts ", Colors.RED))
                          .append(Component.text("and enrages you for "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()

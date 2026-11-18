@@ -16,7 +16,7 @@ public final class StepImpl implements Step {
         this.identified = identified;
         this.damageMutator = damageMutator;
         this.component = Component.text(
-                "%,.1f %s %,.3f = %,.1f".formatted(damageBeforeMutation, damageMutator.identify(), value, damageAfterMutation),
+                "%,.1f %s %,.3f = %,.1f".formatted(damageBeforeMutation, damageMutator.operator(), value, damageAfterMutation),
                 Colors.GRAY
         );
     }

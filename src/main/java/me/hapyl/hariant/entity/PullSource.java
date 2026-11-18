@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+// TODO (xanyjl @ Wednesday, November 11) -> Maybe add ability to move the centre?
 public class PullSource extends HariantTickingTask implements EntityCollector {
     
     private static final double VERY_CLOSE = 0.05;

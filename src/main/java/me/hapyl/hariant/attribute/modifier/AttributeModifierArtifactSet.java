@@ -1,12 +1,12 @@
 package me.hapyl.hariant.attribute.modifier;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.text.Capitalizable;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import me.hapyl.hariant.inventory.item.artifact.set.ArtifactSet;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
-import me.hapyl.hariant.util.Ticks;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public class AttributeModifierArtifactSet extends AttributeModifier {
     }
     
     public AttributeModifierArtifactSet(@NotNull ArtifactSet artifactSet, @NotNull PieceCount pieceCount, @NotNull HariantEntity applier, @NotNull ArtifactSetModifier modifier) {
-        this(artifactSet, pieceCount, applier, Ticks.INDEFINITE);
+        this(artifactSet, pieceCount, applier, Tick.INDEFINITE);
         
         this.of(modifier.getAttributeType(), modifier.getModifierType(), modifier.getValue());
     }

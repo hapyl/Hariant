@@ -76,7 +76,7 @@ public final class TalentFlowerEscape extends Talent {
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text(", the "))
                          .append(Component.text("flower", Colors.LIGHT_PURPLE))
                          .append(Component.text(" explodes violently, dealing greater "))

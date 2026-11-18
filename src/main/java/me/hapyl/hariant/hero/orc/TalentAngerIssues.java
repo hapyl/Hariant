@@ -40,7 +40,7 @@ public final class TalentAngerIssues extends TalentPassive implements Listener {
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("This effect can only trigger once every ", Colors.DARK_GRAY))
-                         .append(this.getCooldownFormatted().color(Colors.DARK_GRAY))
+                         .append(this.asCooldownComponentFormatted().color(Colors.DARK_GRAY))
                          .append(Component.text(".", Colors.DARK_GRAY))
                          .appendNewline()
                          .appendNewline()

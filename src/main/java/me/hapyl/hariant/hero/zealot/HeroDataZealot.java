@@ -104,7 +104,7 @@ public final class HeroDataZealot extends HeroData<HeroZealot> implements Action
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return List.of(
                 this.createTargetComponent()
         );

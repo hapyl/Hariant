@@ -1,9 +1,6 @@
 package me.hapyl.hariant.entity.damage;
 
-import me.hapyl.eterna.module.annotate.NotEmpty;
 import me.hapyl.eterna.module.annotate.SelfReturn;
-import me.hapyl.eterna.module.math.Tick;
-import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Buildable;
 import me.hapyl.eterna.module.util.CollectionUtils;
 import me.hapyl.hariant.element.ElementSource;

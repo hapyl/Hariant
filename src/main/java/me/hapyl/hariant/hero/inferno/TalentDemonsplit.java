@@ -67,7 +67,7 @@ public abstract class TalentDemonsplit extends Talent {
                          .append(Component.text(" — "))
                          .append(demonType.getName())
                          .append(Component.text(" — for "))
-                         .append(getDurationFormatted())
+                         .append(asDurationComponentFormatted())
                          .append(Component.text("."))
                          .appendNewline()
                          .append(Component.text("The demon inherits your health and attributes.", Colors.DARK_GRAY))

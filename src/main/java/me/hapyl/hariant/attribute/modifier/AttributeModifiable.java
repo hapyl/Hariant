@@ -52,15 +52,11 @@ public interface AttributeModifiable {
     
     boolean hasModifier(@NotNull Class<? extends AttributeModifier> modifierClass);
     
-    @NotNull
-    List<? extends AttributeModifier> getModifiers();
+    @NotNull List<? extends AttributeModifier> getModifiers();
     
-    @NotNull
-    Optional<AttributeModifier> getModifier(@NotNull Key key);
+    @NotNull Optional<AttributeModifier> getModifier(@NotNull Key key);
     
-    @NotNull
-    <M extends AttributeModifier> Optional<M> getModifier(@NotNull Class<M> modifierClass);
+    <M extends AttributeModifier> @NotNull Optional<M> getModifier(@NotNull Class<M> modifierClass);
     
-    @NotNull
-    Stream<AttributeModifier> streamModifiers();
+    @NotNull  Stream<AttributeModifier> streamModifiers();
 }

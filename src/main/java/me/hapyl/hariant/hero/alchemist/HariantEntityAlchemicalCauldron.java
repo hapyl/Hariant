@@ -29,6 +29,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.ArmorStand;
@@ -53,6 +54,7 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
     private static final Particle.DustOptions DUST_OPTIONS = new Particle.DustOptions(bukkitColorFromStyle(ElementType.TOXIC.getStyle()), 1);
     
     private static final double RAD_2 = Math.toRadians(2);
+    private static final Title TITLE_BREWING_FINISHED = Title.title(CAULDRON_PREFIX, Component.text("BREWING FINISHED!", Colors.SUCCESS, TextDecoration.BOLD), 5, 20, 5);
     
     private final HariantPlayer player;
     private final TalentAlchemicalCauldron talent;
@@ -125,7 +127,7 @@ public class HariantEntityAlchemicalCauldron extends HariantDisplayEntity implem
                 isBrewing = false;
                 
                 // Fx
-                player.sendTitleSubtitle(CAULDRON_PREFIX, Component.text("BREWING FINISHED!", Colors.SUCCESS, TextDecoration.BOLD), 5, 20, 5);
+                player.showTitle(TITLE_BREWING_FINISHED);
                 player.sendMessage(
                         Component.empty()
                                  .append(CAULDRON_PREFIX)

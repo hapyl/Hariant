@@ -39,7 +39,7 @@ public final class TalentApexPredator extends TalentPassive implements Listener 
                          .appendNewline()
                          .append(Definition.PREY)
                          .append(Component.text(" mark for "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()

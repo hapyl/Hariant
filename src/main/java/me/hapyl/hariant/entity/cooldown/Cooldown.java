@@ -22,16 +22,25 @@ public interface Cooldown extends ComponentFormatter, CooldownListener {
     }
     
     default boolean hasCooldown() {
-        return this.getCooldown().isPositive();
+        return !this.getCooldown().isIndefinite();
     }
     
     @Override
     default @NotNull Component format() {
+        return this.asCooldownComponent();
+    }
+    
+    @Override
+    default @NotNull Component asComponent() {
+        return this.asCooldownComponentFormatted();
+    }
+    
+    default @NotNull Component asCooldownComponent() {
         return this.getCooldown().asComponent();
     }
     
-    default @NotNull Component getCooldownFormatted() {
-        return this.format().color(Colors.TICK);
+    default @NotNull Component asCooldownComponentFormatted() {
+        return this.asCooldownComponent().color(Colors.TICK);
     }
     
     @Override

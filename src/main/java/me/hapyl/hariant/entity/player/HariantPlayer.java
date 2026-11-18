@@ -15,8 +15,8 @@ import me.hapyl.hariant.daily.DailyType;
 import me.hapyl.hariant.database.rank.FormatRules;
 import me.hapyl.hariant.element.ElementalAnomalySource;
 import me.hapyl.hariant.entity.*;
-import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.cooldown.Cooldown;
+import me.hapyl.hariant.entity.cooldown.CooldownHandler;
 import me.hapyl.hariant.entity.damage.AssistSource;
 import me.hapyl.hariant.entity.damage.DamageInstance;
 import me.hapyl.hariant.entity.damage.DamageSource;
@@ -53,12 +53,12 @@ import me.hapyl.hariant.task.HariantTickingTask;
 import me.hapyl.hariant.task.InternalTasks;
 import me.hapyl.hariant.task.Scheduler;
 import me.hapyl.hariant.team.EnumTeam;
-import me.hapyl.hariant.util.Ticks;
 import me.hapyl.hariant.weapon.NormalAttackRanged;
 import me.hapyl.hariant.weapon.Weapon;
 import me.hapyl.hariant.weapon.WeaponBow;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
@@ -112,8 +112,11 @@ public class HariantPlayer
     private static final Component HEALING_SOURCE_PLAYER_ASSIST = Component.text("Player Assist");
     
     private static final Component PREFIX_DEATH = PlayerHandler.createPrefix(Component.text("☠", Colors.DARK_RED));
-    private static final Component COMPONENT_YOU_DIED = Component.text("ʏᴏᴜ ᴅɪᴇᴅ", Colors.ERROR, TextDecoration.BOLD);
     private static final Component PREFIX_INTERRUPTION = Component.text("\uD83D\uDCA5", Colors.ERROR, TextDecoration.BOLD);
+    private static final Component COMPONENT_RESPAWNING = Component.text("ʀᴇsᴘᴀᴡɴɪɴɢ", Colors.YELLOW, TextDecoration.BOLD);
+    
+    private static final Title TITLE_YOU_DIED = Title.title(Component.text("ʏᴏᴜ ᴅɪᴇᴅ", Colors.ERROR, TextDecoration.BOLD), Component.empty(), 5, 25, 10);
+    private static final Title TITLE_RESPAWNED = Title.title(Component.text("ʀᴇsᴘᴀᴡɴᴇᴅ", Colors.SUCCESS, TextDecoration.BOLD), Component.empty(), 0, 20, 5);
     
     private final PlayerProfile profile;
     private final HeroInstance heroInstance;
@@ -397,7 +400,7 @@ public class HariantPlayer
         
         this.statistics.incrementStatistic(Statistic.DEATH, 1);
         
-        this.sendTitle(COMPONENT_YOU_DIED, 5, 25, 10);
+        this.showTitle(TITLE_YOU_DIED);
         this.playSound(Sound.ENTITY_BLAZE_DEATH, 1.0f);
         
         // Award eliminations & assists
@@ -537,6 +540,7 @@ public class HariantPlayer
             return false;
         }
         
+        // -- donotinline
         if (Hariant.isGameInProgressButNotActive()) {
             return false;
         }
@@ -549,9 +553,8 @@ public class HariantPlayer
         return entity.getName();
     }
     
-    @NotNull
     @Override
-    public Component getName() {
+    public @NotNull Component getName() {
         return profile.getName();
     }
     
@@ -636,7 +639,7 @@ public class HariantPlayer
     
     @Override
     public void showWarning(@NotNull WarningType warningType, int duration) {
-        this.sendTitle(warningType.asComponent(), 0, duration, 0);
+        this.showTitle(Title.title(warningType.asComponent(), Component.empty(), 0, duration, 0));
     }
     
     @Override
@@ -661,7 +664,7 @@ public class HariantPlayer
     public void onCooldownStarted(@NotNull Cooldown cooldown, int duration) {
         // Flip -1 cooldown to something big that vanilla supports, 1,000,000 seem to work fine, and it's
         // equal to about 13 real life hours, so you're never seeing it move
-        this.sendCooldownPacket(cooldown, Ticks.isIndefinite(duration) ? 1_000_000 : duration);
+        this.sendCooldownPacket(cooldown, Tick.isIndefinite(duration) ? 1_000_000 : duration);
     }
     
     @Override
@@ -688,10 +691,6 @@ public class HariantPlayer
         else {
             DailyType.USE_TALENTS.progress(profile);
         }
-    }
-    
-    public @NotNull String getEntityName() {
-        return entity.getName();
     }
     
     public double getMaxVanillaHearts() {
@@ -855,10 +854,12 @@ public class HariantPlayer
                 }
                 
                 // Fx
-                sendTitleSubtitle(
-                        Component.text("ʀᴇsᴘᴀᴡɴɪɴɢ", Colors.YELLOW, TextDecoration.BOLD),
-                        Tick.format(respawnIn - tick, Precision.FIXED_1).color(Colors.TICK),
-                        0, 25, 0
+                showTitle(
+                        Title.title(
+                                COMPONENT_RESPAWNING,
+                                Tick.format(respawnIn - tick, Precision.FIXED_1).color(Colors.TICK),
+                                0, 25, 0
+                        )
                 );
                 
                 if (tick == 0 || this.modulo(20)) {
@@ -880,7 +881,7 @@ public class HariantPlayer
         
         // Fx
         addVanillaEffect(PotionEffectType.BLINDNESS, 1, 20);
-        sendTitleSubtitle(Component.text("ʀᴇsᴘᴀᴡɴᴇᴅ", Colors.SUCCESS, TextDecoration.BOLD), Component.empty(), 0, 20, 5);
+        showTitle(TITLE_RESPAWNED);
     }
     
     public @NotNull Component createSuffix() {

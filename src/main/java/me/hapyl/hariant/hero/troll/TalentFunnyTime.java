@@ -42,7 +42,7 @@ public class TalentFunnyTime extends TalentUltimate {
                          .append(Component.text("Start a hilarious prank by constantly turning all "))
                          .append(Component.text("enemy players", Colors.RED))
                          .append(Component.text(" heads left or right for "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text("."))
         );
     }

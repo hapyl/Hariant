@@ -76,4 +76,8 @@ public enum DamageType implements Named, Terminology {
         return false;
     }
     
+    public boolean isDirectDamage() {
+        return this == MELEE || this == RANGED;
+    }
+    
 }

@@ -84,7 +84,7 @@ public final class HeroDataBlastKnight extends HeroData<HeroBlastKnight> impleme
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         final Style styleQuantumEnergy = Definition.QUANTUM_ENERGY.getStyle();
         
         return List.of(

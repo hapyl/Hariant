@@ -8,6 +8,7 @@ import me.hapyl.hariant.profile.ui.ActionbarSupplier;
 import me.hapyl.hariant.talent.TalentRegistry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +29,7 @@ public final class HeroDataPytaria extends HeroData<HeroPytaria> implements Comp
         this.excellency = excellency;
         
         // Notify
-        this.player.sendSubtitle(this.asComponent(), 5, 15, 5);
+        this.player.showTitle(Title.title(Component.empty(), this.asComponent(), 5, 15, 5));
         this.player.playSound(Sound.ENTITY_BREEZE_LAND, excellency > 0 ? 1f + 0.25f * excellency : 0);
     }
     
@@ -49,7 +50,7 @@ public final class HeroDataPytaria extends HeroData<HeroPytaria> implements Comp
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return List.of(
                 this.asComponent(),
                 TalentRegistry.FLOWER_BREEZE.createComponent(player)

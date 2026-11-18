@@ -1,13 +1,13 @@
 package me.hapyl.hariant.entity.cooldown;
 
 import com.google.common.collect.Maps;
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.Ticking;
 import me.hapyl.hariant.attribute.Attributable;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.TickSupplier;
-import me.hapyl.hariant.util.Ticks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,14 +27,14 @@ public final class CooldownHandlerImpl implements CooldownHandler, Ticking {
     @Override
     public void startCooldown(@NotNull Cooldown cooldown, int duration, @Nullable AttributeType cooldownReducingAttribute) {
         final Key cooldownKey = cooldown.getCooldownKey().nonEmpty();
-        final boolean isIndefinite = Ticks.isIndefinite(duration);
+        final boolean isIndefinite = Tick.isIndefinite(duration);
         
         // If the cooldown respects the cooldown reducing attribute, and it's not indefinite, scale by it
         if (cooldownReducingAttribute != null && !isIndefinite) {
             duration = scaleCooldown(duration, entity, cooldownReducingAttribute);
         }
         
-        this.cooldowns.put(cooldownKey, new CooldownInstance(cooldown, isIndefinite ? Ticks.INDEFINITE : entity.localTicks() + duration));
+        this.cooldowns.put(cooldownKey, new CooldownInstance(cooldown, isIndefinite ? Tick.INDEFINITE : entity.localTicks() + duration));
         this.onCooldownStarted0(cooldown, duration);
     }
     
@@ -112,7 +112,7 @@ public final class CooldownHandlerImpl implements CooldownHandler, Ticking {
         }
         
         public boolean isIndefinite() {
-            return Ticks.isIndefinite(endTick);
+            return Tick.isIndefinite(endTick);
         }
         
         public boolean hasCooldown(@NotNull TickSupplier tickSupplier) {
@@ -120,7 +120,7 @@ public final class CooldownHandlerImpl implements CooldownHandler, Ticking {
         }
         
         public int getCooldownTimeLeft(@NotNull TickSupplier tickSupplier) {
-            return this.isIndefinite() ? Ticks.INDEFINITE : endTick - tickSupplier.localTicks();
+            return this.isIndefinite() ? Tick.INDEFINITE : endTick - tickSupplier.localTicks();
         }
         
     }

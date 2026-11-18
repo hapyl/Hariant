@@ -197,7 +197,7 @@ public final class TalentQuantumWard extends Talent implements Listener {
         final double damageReduction = damage - (damage * (1 - damageSplit.doubleValue()) + Math.max(0, -wardStrengthAfterTakingDamage));
         
         // Mutate damage by reducing the damage based on the mitigated damage
-        ev.mutateDamage(() -> TalentQuantumWard.this + " (Split to %s)".formatted(player.getEntityName()), DamageMutator.subtract(), damageReduction);
+        ev.mutateDamage(() -> TalentQuantumWard.this + " (Split to %s)".formatted(player), DamageMutator.subtract(), damageReduction);
         
         // Deal damage to blast knight
         player.damage(new DamageSourceStoneCastle(ev.getDamageSource(), damageToDealToBlastKnight));
@@ -325,10 +325,7 @@ public final class TalentQuantumWard extends Talent implements Listener {
         }
         
         private static @NotNull Component asComponent0(@NotNull HeadComponent headComponent) {
-            return CASTLE_CHAR.appendSpace()
-                              .append(Component.text("[", Colors.GRAY))
-                              .append(headComponent.asHeadComponent())
-                              .append(Component.text("]", Colors.GRAY));
+            return CASTLE_CHAR.appendSpace().append(headComponent.asHeadComponentInBrackets());
         }
         
     }

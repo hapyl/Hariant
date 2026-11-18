@@ -1,6 +1,7 @@
 package me.hapyl.hariant.event;
 
 import me.hapyl.hariant.attribute.AttributeType;
+import me.hapyl.hariant.attribute.instance.snapshot.AttributeModifierSnapshot;
 import me.hapyl.hariant.attribute.instance.snapshot.AttributesSnapshot;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.entity.damage.DamageInstance;
@@ -17,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  * </p>
  *
  * <p>
- * It is recommended to use {@link AttributeModifier} via {@link AttributesSnapshot#addModifier(AttributeModifier)} to do so, such as
+ * It is recommended to use {@link AttributeModifier} via {@link AttributesSnapshot#addModifier(AttributeModifierSnapshot)}} to do so, such as
  * doing so will <b>not</b> trigger any entity-attribute related updates, nor will it call the {@link HariantEffectEvent} and will stack with
  * any other modifications, as the modifiers do.
  * </p>

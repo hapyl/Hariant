@@ -11,7 +11,7 @@ public final class DamageMutatorImplMultiply implements DamageMutator {
     
     @NotNull
     @Override
-    public String identify() {
+    public String operator() {
         return "*";
     }
     

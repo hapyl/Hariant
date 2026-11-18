@@ -105,11 +105,7 @@ public class AttributesInstance extends Attributes implements AttributeModifiabl
     
     @Override
     public <M extends AttributeModifier> @NotNull Optional<M> getModifier(@NotNull Class<M> modifierClass) {
-        return modifiers.values()
-                        .stream()
-                        .filter(modifierClass::isInstance)
-                        .map(modifierClass::cast)
-                        .findFirst();
+        return modifiers.values().stream().filter(modifierClass::isInstance).map(modifierClass::cast).findAny();
     }
     
     @Override

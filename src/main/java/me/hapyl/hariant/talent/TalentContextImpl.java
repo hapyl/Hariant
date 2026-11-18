@@ -12,7 +12,7 @@ public class TalentContextImpl implements TalentContext {
     
     @Override
     @NotNull
-    public <T> T retrieve(@NotNull Class<T> clazz) {
+    public <T> T retrieve(@NotNull Class<T> clazz) throws ClassCastException {
         if (clazz.isInstance(object)) {
             return clazz.cast(object);
         }

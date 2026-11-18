@@ -52,7 +52,7 @@ public class HeroDataShark extends HeroData<HeroShark> implements ActionbarSuppl
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         if (bloodScent == null) {
             return List.of();
         }

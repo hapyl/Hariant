@@ -3,7 +3,6 @@ package me.hapyl.hariant;
 import me.hapyl.eterna.module.component.ComponentStyler;
 import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.text.DigitStyle;
-import me.hapyl.hariant.util.Ticks;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -24,10 +23,10 @@ public interface HariantConstants {
     /**
      * Defines the constant for indefinite ticks.
      *
-     * @deprecated Use {@link Ticks#INDEFINITE} for value passing, {@link Ticks#isIndefinite(int)} for indefinability checks.
+     * @deprecated Use {@link Tick#INDEFINITE} for value passing, {@link Tick#isIndefinite(int)} for indefinability checks.
      */
     @Deprecated(forRemoval = true)
-    int INDEFINITE = Ticks.INDEFINITE;
+    int INDEFINITE = Tick.INDEFINITE;
     
     /**
      * Defines the safe fall distance.

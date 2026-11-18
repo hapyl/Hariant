@@ -35,6 +35,7 @@ import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -73,7 +74,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
                          .append(Component.text(" energy on your bow, which "))
                          .append(Component.text("replaces your next bow shot").decorate(TextDecoration.UNDERLINED))
                          .append(Component.text(" for a maximum of "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text("."))
                          .appendNewline()
                          .appendNewline()
@@ -82,7 +83,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
                          .append(Component.text(" in large "))
                          .append(EnumTerminology.AREA_OF_EFFECT)
                          .append(Component.text(" over "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text("."))
         );
     }
@@ -153,7 +154,7 @@ public final class TalentElectrify extends TalentUltimate implements Listener {
                 return true;
             }
             
-            player.sendSubtitle(progressBar.build(duration - tick, duration), 0, 20, 5);
+            player.showTitle(Title.title(Component.empty(), progressBar.build(duration - tick, duration), 0, 20, 5));
             return false;
         }));
     }

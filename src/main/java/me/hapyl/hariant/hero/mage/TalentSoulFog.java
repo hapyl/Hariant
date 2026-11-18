@@ -92,7 +92,7 @@ public final class TalentSoulFog extends Talent {
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text(", the fog releases the souls, dealing "))
                          .append(ElementType.AETHER.asComponentAreaOfEffectDamage())
                          .append(Component.text(" and applies a high amount of "))

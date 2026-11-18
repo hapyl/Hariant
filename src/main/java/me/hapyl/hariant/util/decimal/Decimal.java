@@ -12,6 +12,8 @@ import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
+import java.util.Locale;
+
 /**
  * <p>Represents a {@link Decimal}, which is a numeric structure extending {@link Number}.</p>
  *
@@ -99,8 +101,8 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
         return format();
     }
     
-    public @NotNull String wordValue() {
-        return NumberToWord.toWord(intValue());
+    public @NotNull String wordValue(@NotNull WordValue wordValue) {
+        return wordValue.wordValue((int)value);
     }
     
     public @NotNull Tick tickValue() {
@@ -218,6 +220,30 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
     
     public static @NotNull Decimal ofAngle(double angleDegrees) {
         return new DecimalAngleImpl(angleDegrees);
+    }
+    
+    public enum WordValue {
+        
+        NORMAL,
+        
+        UPPERCASE {
+            @Override
+            public @NotNull String wordValue(int value) {
+                return super.wordValue(value).toUpperCase(Locale.ROOT);
+            }
+        },
+        
+        LOWERCASE {
+            @Override
+            public @NotNull String wordValue(int value) {
+                return super.wordValue(value).toLowerCase(Locale.ROOT);
+            }
+        };
+        
+        public @NotNull String wordValue(int value) {
+            return NumberToWord.toWord(value);
+        }
+        
     }
     
 }

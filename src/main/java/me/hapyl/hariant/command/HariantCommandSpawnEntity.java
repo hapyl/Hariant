@@ -1,6 +1,7 @@
 package me.hapyl.hariant.command;
 
 import me.hapyl.eterna.module.command.ArgumentList;
+import me.hapyl.eterna.module.reflect.team.PacketTeamColor;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.eterna.module.util.TypeConverter;
 import me.hapyl.hariant.Hariant;
@@ -10,6 +11,7 @@ import me.hapyl.hariant.database.rank.PlayerRank;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.vanilla.VanillaEntity;
 import me.hapyl.hariant.entity.vanilla.VanillaEntityType;
+import me.hapyl.hariant.team.EnumTeam;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -67,7 +69,7 @@ public final class HariantCommandSpawnEntity extends HariantPlayerCommand {
                     throw new IllegalArgumentException("Unknown argument: " + argument);
                 }
                 
-                spawnArgument.apply(entity, argumentValue);
+                spawnArgument.apply(player, entity, argumentValue);
             }
         }
         
@@ -96,7 +98,7 @@ public final class HariantCommandSpawnEntity extends HariantPlayerCommand {
         
         SET_HEALTH("-h") {
             @Override
-            public void apply(@NotNull HariantEntity entity, @NotNull TypeConverter value) throws RuntimeException {
+            public void apply(@NotNull Player player, @NotNull HariantEntity entity, @NotNull TypeConverter value) throws RuntimeException {
                 final double health = value.toDouble();
                 
                 if (health <= 0) {
@@ -105,6 +107,21 @@ public final class HariantCommandSpawnEntity extends HariantPlayerCommand {
                 
                 entity.getAttributes().set(AttributeType.MAX_HEALTH, health);
                 entity.setHealth(health);
+            }
+        },
+        
+        IS_ALLY("-a") {
+            @Override
+            public void apply(@NotNull Player player, @NotNull HariantEntity entity, @NotNull TypeConverter value) throws RuntimeException {
+                final boolean ally = value.toBoolean();
+                
+                if (ally) {
+                    final EnumTeam team = Hariant.getPlayerProfile(player).getTeam();
+                    
+                    team.addEntry(entity);
+                    
+                    entity.setGlowing(player, PacketTeamColor.GREEN);
+                }
             }
         };
         
@@ -117,7 +134,7 @@ public final class HariantCommandSpawnEntity extends HariantPlayerCommand {
             this.argument = argument;
         }
         
-        public void apply(@NotNull HariantEntity entity, @NotNull TypeConverter value) throws RuntimeException {
+        public void apply(@NotNull Player player, @NotNull HariantEntity entity, @NotNull TypeConverter value) throws RuntimeException {
             throw new IllegalStateException();
         }
         

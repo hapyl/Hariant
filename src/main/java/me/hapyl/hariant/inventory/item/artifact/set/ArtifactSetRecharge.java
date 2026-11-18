@@ -6,7 +6,7 @@ import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierArtifactSet;
 import me.hapyl.hariant.entity.HariantEntity;
 import me.hapyl.hariant.entity.player.HariantPlayer;
-import me.hapyl.hariant.event.HariantTalentUltimateEvent;
+import me.hapyl.hariant.event.HariantUltimateFinishEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
@@ -48,7 +48,7 @@ public final class ArtifactSetRecharge extends ArtifactSet implements Listener {
     }
     
     @EventHandler
-    public void handleHariantTalentEvent(HariantTalentUltimateEvent ev) {
+    public void handleHariantTalentEvent(HariantUltimateFinishEvent ev) {
         final HariantPlayer player = ev.getPlayer();
         
         if (ev.getResourceType() != UltimateResourceType.ENERGY) {

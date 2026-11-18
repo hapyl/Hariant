@@ -10,7 +10,7 @@ public final class StepBaseImpl implements Step {
     private static final DamageMutator EMPTY_MUTATOR = new DamageMutator() {
         @NotNull
         @Override
-        public String identify() {
+        public String operator() {
             return "";
         }
         

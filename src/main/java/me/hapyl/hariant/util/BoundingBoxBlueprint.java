@@ -13,7 +13,12 @@ public class BoundingBoxBlueprint implements ComponentFormatter {
     
     private BoundingBoxBlueprint(double[] region) {
         this.region = region;
-        this.component = Component.text("%.1f x %.1f x %.1f".formatted(region[0], region[1], region[2]));
+        this.component = asComponent1(region[0], region[1], region[2]);
+    }
+    
+    private static @NotNull  Component asComponent1(double x, double y, double z) {
+        // We display it as cuboid, so multiply by 2
+        return Component.text("%.1f x %.1f x %.1f".formatted(x * 2, y * 2, z * 2));
     }
     
     public @NotNull BoundingBox create(@NotNull Location location) {

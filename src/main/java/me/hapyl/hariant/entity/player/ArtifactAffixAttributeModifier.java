@@ -1,10 +1,10 @@
 package me.hapyl.hariant.entity.player;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.attribute.AttributeType;
 import me.hapyl.hariant.attribute.modifier.AttributeModifier;
 import me.hapyl.hariant.attribute.modifier.AttributeModifierType;
-import me.hapyl.hariant.util.Ticks;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ public final class ArtifactAffixAttributeModifier extends AttributeModifier {
     private static final AttributeModifierType ATTRIBUTE_MODIFIER_TYPE = AttributeModifierType.FLAT;
     
     ArtifactAffixAttributeModifier(@NotNull HariantPlayer player, @NotNull Map<? extends @NotNull AttributeType, ? extends @NotNull Double> artifactAffixes) {
-        super(MODIFIER_KEY, MODIFIER_NAME, player, Ticks.INDEFINITE);
+        super(MODIFIER_KEY, MODIFIER_NAME, player, Tick.INDEFINITE);
         
         artifactAffixes.forEach((attributeType, value) -> of(attributeType, ATTRIBUTE_MODIFIER_TYPE, value));
     }

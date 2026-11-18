@@ -19,9 +19,8 @@ public final class TalentTargetBlock implements TalentTarget {
         this.filter = filter;
     }
     
-    @Nullable
     @Override
-    public TalentContext createContext(@NotNull HariantPlayer player) {
+    public @Nullable TalentContext createContext(@NotNull HariantPlayer player) {
         final Block hitBlock = player.getHandle().getTargetBlockExact(maxDistance);
         
         if (hitBlock == null || !filter.test(hitBlock)) {
@@ -31,9 +30,9 @@ public final class TalentTargetBlock implements TalentTarget {
         return TalentContext.create(hitBlock);
     }
     
-    @NotNull
     @Override
-    public Component errorMessage() {
+    public @NotNull Component errorMessage() {
         return Component.text("No valid target block!");
     }
+    
 }

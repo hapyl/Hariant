@@ -1,12 +1,10 @@
 package me.hapyl.hariant.entity.damage.mutator;
 
-import me.hapyl.hariant.util.Identified;
 import org.jetbrains.annotations.NotNull;
 
-public interface DamageMutator extends Identified {
+public interface DamageMutator {
     
-    @Override
-    @NotNull String identify();
+    @NotNull String operator();
     
     double mutate(double damage, final double value);
     

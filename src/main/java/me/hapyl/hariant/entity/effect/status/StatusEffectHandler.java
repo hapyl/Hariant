@@ -5,6 +5,7 @@ import me.hapyl.hariant.entity.HariantEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public interface StatusEffectHandler {
@@ -16,6 +17,8 @@ public interface StatusEffectHandler {
     }
     
     void removeEffect(@NotNull StatusEffectType effect);
+    
+    int removeEffects(@NotNull Predicate<? super StatusEffectType> predicate);
     
     int clearEffects();
     

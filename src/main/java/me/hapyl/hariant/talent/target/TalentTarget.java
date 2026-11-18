@@ -28,21 +28,7 @@ public interface TalentTarget {
     @NotNull Component errorMessage();
     
     static @NotNull TalentTarget none() {
-        class Holder {
-            private static final TalentTarget EMPTY = new TalentTarget() {
-                @Override
-                public @NotNull TalentContext createContext(@NotNull HariantPlayer player) {
-                    return TalentContext.empty();
-                }
-                
-                @Override
-                public @NotNull Component errorMessage() {
-                    return Component.empty();
-                }
-            };
-        }
-        
-        return Holder.EMPTY;
+        return TalentTargetImpl.INSTANCE;
     }
     
     static @NotNull TalentTarget targetEntity(double maxDistance, double lookupRadius, @NotNull TalentTargetEntityRayCast.BlockCollision blockCollision, @NotNull TalentTargetEntityRayCast.EntityPriority entityPriority, @NotNull Predicate<HariantEntity> filter) {

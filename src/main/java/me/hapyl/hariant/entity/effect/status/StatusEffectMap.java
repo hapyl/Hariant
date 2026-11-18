@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class StatusEffectMap implements Ticking, StatusEffectHandler {
@@ -71,11 +72,27 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
         final StatusEffectInstance previousEffect = effectMap.remove(effect);
         
         if (previousEffect != null) {
-            previousEffect.remove();
-            
-            // Call event
-            new HariantStatusEffectRemoveEvent(entity, previousEffect.getEffect()).callEvent();
+            removeStatusEffectInstance(entity, previousEffect);
         }
+    }
+    
+    @Override
+    public int removeEffects(@NotNull Predicate<? super StatusEffectType> predicate) {
+        final Iterator<StatusEffectInstance> iterator = effectMap.values().iterator();
+        int removedEffects = 0;
+        
+        while (iterator.hasNext()) {
+            final StatusEffectInstance statusEffectInstance = iterator.next();
+            
+            if (predicate.test(statusEffectInstance.getEffect())) {
+                iterator.remove();
+                
+                removedEffects++;
+                removeStatusEffectInstance(entity, statusEffectInstance);
+            }
+        }
+        
+        return removedEffects;
     }
     
     @Override
@@ -104,6 +121,13 @@ public final class StatusEffectMap implements Ticking, StatusEffectHandler {
     @Override
     public Stream<StatusEffectInstance> getEffects() {
         return effectMap.values().stream();
+    }
+    
+    private static void removeStatusEffectInstance(@NotNull HariantEntity entity, @NotNull StatusEffectInstance statusEffectInstance) {
+        statusEffectInstance.remove();
+        
+        // Call removal event
+        new HariantStatusEffectRemoveEvent(entity, statusEffectInstance.getEffect()).callEvent();
     }
     
 }

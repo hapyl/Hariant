@@ -271,7 +271,7 @@ public abstract class Hero
     }
     
     @Override
-    public @NotNull List<Component> supplyActionbar(@NotNull HariantPlayer player) {
+    public @NotNull List<@NotNull Component> supplyActionbar(@NotNull HariantPlayer player) {
         return List.of();
     }
     

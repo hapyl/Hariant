@@ -17,11 +17,20 @@ public interface Duration extends ComponentFormatter {
     
     @Override
     default @NotNull Component format() {
-        return this.getDurationFormatted().asComponent();
+        return this.asDurationComponent();
     }
     
-    default @NotNull Component getDurationFormatted() {
-        return this.format().color(Colors.TICK);
+    @Override
+    default @NotNull Component asComponent() {
+        return this.asDurationComponentFormatted();
+    }
+    
+    default @NotNull Component asDurationComponentFormatted() {
+        return this.asDurationComponent().color(Colors.TICK);
+    }
+    
+    default @NotNull Component asDurationComponent() {
+        return this.getDuration().asComponent();
     }
     
 }

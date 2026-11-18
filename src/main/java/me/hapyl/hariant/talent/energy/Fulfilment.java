@@ -9,8 +9,8 @@ public interface Fulfilment {
     
     int threshold();
     
-    static @NotNull Fulfilment fulfilment(@NotNull Tick tick, int fulfilment) {
-        return new FulfilmentImpl(tick, fulfilment);
+    static @NotNull Fulfilment fulfilment(@NotNull Tick tick, int threshold) {
+        return new FulfilmentImpl(tick, threshold);
     }
     
     static @NotNull Fulfilment always() {

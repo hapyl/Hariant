@@ -94,7 +94,7 @@ public final class TalentBubbleTrap extends Talent implements Effect {
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("After "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text(", the bubble pops, dealing "))
                          .appendNewline()
                          .append(ElementType.WATER.asComponentAreaOfEffectDamage())

@@ -1,5 +1,6 @@
 package me.hapyl.hariant.inventory.item.artifact.set;
 
+import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.registry.Key;
 import me.hapyl.hariant.Colors;
 import me.hapyl.hariant.attribute.AttributeType;
@@ -12,7 +13,6 @@ import me.hapyl.hariant.event.HariantHealthChangeEvent;
 import me.hapyl.hariant.inventory.item.artifact.PieceCount;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.ArtifactSetModifier;
 import me.hapyl.hariant.inventory.item.artifact.set.modifier.CommonArtifactSetModifiers;
-import me.hapyl.hariant.util.Ticks;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
@@ -82,7 +82,7 @@ public final class ArtifactSetBulwark extends ArtifactSet implements Listener {
         private final boolean isFourPieceBonus;
         
         Modifier(@NotNull HariantEntity applier, boolean isFourPieceBonus) {
-            super(ArtifactSetBulwark.this.getKey(), ArtifactSetBulwark.this.getName(), applier, Ticks.INDEFINITE);
+            super(ArtifactSetBulwark.this.getKey(), ArtifactSetBulwark.this.getName(), applier, Tick.INDEFINITE);
             this.isFourPieceBonus = isFourPieceBonus;
             
             of(AttributeType.DEFENSE, AttributeModifierType.MULTIPLICATIVE, defenseIncrease.getValue() * (isFourPieceBonus ? 1 + fourPieceEffectIncrease.doubleValue() : 1));

@@ -10,6 +10,7 @@ import me.hapyl.hariant.entity.player.HariantPlayer;
 import me.hapyl.hariant.event.Cancel;
 import me.hapyl.hariant.event.HariantTalentPreconditionEvent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
@@ -18,7 +19,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class StatusEffectArcaneMute extends StatusEffectImpl implements Listener {
     
-    public static final Component ARCANE_MUTE_PREFIX = Component.text("⛧", Colors.BLOOD_PURPLE);
+    private static final Title TITLE = Title.title(
+            Component.text("⛧", Colors.BLOOD_PURPLE),
+            Component.text("Shhhhh...", Colors.LIGHT_PURPLE),
+            10, 20, 10
+    );
     
     StatusEffectArcaneMute() {
         super(Key.ofString("effect_arcane_mute"), Component.text("Arcane Mute"), EffectType.DEBUFF);
@@ -27,7 +32,7 @@ public class StatusEffectArcaneMute extends StatusEffectImpl implements Listener
     @Override
     public void onApply(@NotNull HariantEntity entity, @NotNull HariantEntity applier, int duration) {
         // Fx
-        entity.sendTitleSubtitle(ARCANE_MUTE_PREFIX, Component.text("Shhhhh...", Colors.LIGHT_PURPLE), 10, 20, 10);
+        entity.showTitle(TITLE);
         entity.playSound(Sound.ENTITY_SILVERFISH_HURT, 0.0f);
     }
     

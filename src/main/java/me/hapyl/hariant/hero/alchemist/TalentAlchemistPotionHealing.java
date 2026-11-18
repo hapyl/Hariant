@@ -13,6 +13,7 @@ import me.hapyl.hariant.util.field.DisplayField;
 import me.hapyl.hariant.util.decimal.Decimal;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Color;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
@@ -45,7 +46,7 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
                          .append(Component.text("If you "))
                          .append(Component.text("don't take", Colors.GRAY, TextDecoration.UNDERLINED))
                          .append(Component.text(" damage in "))
-                         .append(this.getDurationFormatted())
+                         .append(this.asDurationComponentFormatted())
                          .append(Component.text(" after using this potion, heal for an additional "))
                          .append(extraHealing)
                          .append(Component.text(" of your "))
@@ -92,6 +93,9 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
     
     public class ExtraHealingPotionInstance extends AlchemistPotionInstance {
         
+        private static final Title TITLE_HEALED = Title.title(Component.text("\uD83D\uDC9E", Colors.DARK_GREEN), Component.text("ʜᴇᴀʟᴇᴅ!", Colors.GREEN), 5, 10, 5);
+        private static final Title TITLE_HEALING_CANCELLED = Title.title(Component.text("\uD83D\uDC9E", Colors.DARK_RED), Component.text("ʜᴇᴀʟɪɴɢ ᴄᴀɴᴄᴇʟʟᴇᴅ, ʏᴏᴜ ᴛᴏᴏᴋ ᴅᴀᴍᴀɢᴇ!", Colors.RED), 5, 10, 5);
+        
         private final HealingSource extraHealingSource;
         
         ExtraHealingPotionInstance(@NotNull HariantPlayer player) {
@@ -108,12 +112,7 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
             if (this.currentTick() == 0) {
                 player.heal(extraHealingSource);
                 
-                player.sendTitleSubtitle(
-                        Component.text("\uD83D\uDC9E", Colors.DARK_GREEN),
-                        Component.text("ʜᴇᴀʟᴇᴅ!", Colors.GREEN),
-                        5, 10, 5
-                );
-                
+                player.showTitle(TITLE_HEALED);
                 player.playWorldSound(BLOCK_BREWING_STAND_BREW, 1.25f);
             }
             
@@ -122,12 +121,7 @@ public final class TalentAlchemistPotionHealing extends TalentAlchemistPotion im
         
         public void cancel() {
             // Fx
-            player.sendTitleSubtitle(
-                    Component.text("\uD83D\uDC9E", Colors.DARK_RED),
-                    Component.text("ʜᴇᴀʟɪɴɢ ᴄᴀɴᴄᴇʟʟᴇᴅ, ʏᴏᴜ ᴛᴏᴏᴋ ᴅᴀᴍᴀɢᴇ!", Colors.RED),
-                    5, 10, 5
-            );
-            
+            player.showTitle(TITLE_HEALING_CANCELLED);
             player.playWorldSound(Sound.ENTITY_WITCH_HURT, 1.25f);
         }
     }

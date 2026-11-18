@@ -138,6 +138,8 @@ public final class Colors {
     public static final TextColor ORC = TextColor.color(0x1B700B);
     public static final TextColor THE_STRONGHOLD = TextColor.color(0xD7D7D7);
     public static final TextColor BERSERK = TextColor.color(0x9E0D0D);
+    public static final TextColor OVERHEAL = TextColor.color(0x57B463);
+    public static final TextColor BLOOM = TextColor.color(0x8DEA4B);
     
     private Colors() {
     }

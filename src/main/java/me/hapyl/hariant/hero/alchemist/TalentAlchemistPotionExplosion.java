@@ -54,7 +54,7 @@ public final class TalentAlchemistPotionExplosion extends TalentAlchemistPotion 
                          .append(Component.text("A weird looking potions that "))
                          .append(Component.text("explodes", Colors.RED))
                          .append(Component.text(" after "))
-                         .append(getDurationFormatted())
+                         .append(asDurationComponentFormatted())
                          .append(Component.text(", dealing "))
                          .append(ElementType.TOXIC.asComponentAreaOfEffectDamage())
                          .append(Component.text(" applies "))
