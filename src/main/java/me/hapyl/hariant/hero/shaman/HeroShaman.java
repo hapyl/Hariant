@@ -26,9 +26,9 @@ public final class HeroShaman extends Hero {
         super(
                 key,
                 Component.text("Shaman"),
-                Attributes.base(800, 50, 100)
-                          .adjust(AttributeType.EFFECT_RESISTANCE, 30)
-                          .adjust(AttributeType.MENDING, 150), // Base MENDING is 100
+                Attributes.base(800, 60, 80)
+                          .adjust(AttributeType.EFFECT_RESISTANCE, 25)
+                          .adjust(AttributeType.MENDING, 130), // Base MENDING is 100
                 new WeaponStick()
         );
         
@@ -84,7 +84,7 @@ public final class HeroShaman extends Hero {
     private static class WeaponStick extends WeaponMelee {
         
         WeaponStick() {
-            super(Key.ofString("shaman_stick"), Icon.ofMaterial(Material.BAMBOO), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 47, NormalAttack.DEFAULT_ATTACK_COOLDOWN));
+            super(Key.ofString("shaman_stick"), Icon.ofMaterial(Material.BAMBOO), NormalAttack.melee(ElementType.PHYSICAL, AttributeType.ATTACK, 54, NormalAttack.DEFAULT_ATTACK_COOLDOWN));
             
             setName(Component.text("Bamboo Stick"));
             setDescription(Component.text("An ordinary stick found in the jungle."));

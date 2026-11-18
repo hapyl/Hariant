@@ -49,7 +49,7 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
                 return;
             }
             
-            entity.damage(new AbyssalCorrosionDamageSource(applier, DAMAGE));
+            entity.damage(new AbyssalCorrosionDamageSource(DAMAGE));
         }
         
     }
@@ -75,8 +75,8 @@ public class StatusEffectAbyssalCorrosion extends StatusEffectImpl {
                 DeathMessage.createWithDefaultKiller("{player} died from abyssal corrosion")
         );
         
-        AbyssalCorrosionDamageSource(@NotNull HariantEntity source, double damage) {
-            super(IDENTITY, source, DamageType.TALENT, ElementType.TOXIC, DamageComponents.ofAnomaly(), Set.of(), damage, 0);
+        AbyssalCorrosionDamageSource(double damage) {
+            super(IDENTITY, null, DamageType.TALENT, ElementType.TOXIC, DamageComponents.ofAnomaly(), Set.of(), damage, 0);
         }
         
     }

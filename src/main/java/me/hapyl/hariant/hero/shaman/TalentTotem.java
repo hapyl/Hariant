@@ -33,8 +33,8 @@ public final class TalentTotem extends Talent {
     
     public final @DisplayField AttributeScaling totemLandingDamage = AttributeScaling.create(AttributeType.MAX_HEALTH, 2);
     
-    public final @DisplayField AttributeScaling totemResonanceHealing = AttributeScaling.create(AttributeType.MAX_HEALTH, 5, 10);
-    public final @DisplayField AttributeScaling totemResonanceDamage = AttributeScaling.create(AttributeType.MAX_HEALTH, 8);
+    public final @DisplayField AttributeScaling totemResonanceHealing = AttributeScaling.create(AttributeType.MAX_HEALTH, 3, 8);
+    public final @DisplayField AttributeScaling totemResonanceDamage = AttributeScaling.create(AttributeType.MAX_HEALTH, 6);
     
     public final @DisplayField Decimal totemResonanceElementalApplication = Decimal.ofElementalApplication(ElementType.TOXIC, 100);
     

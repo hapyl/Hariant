@@ -100,18 +100,23 @@ public final class ArtifactSetAncestralBloom extends ArtifactSet implements List
             return;
         }
         
-        final AttributesInstance attributes = player.getAttributes();
-        final ModifierFourPiece existingModifier = attributes.getModifier(ModifierFourPiece.class).orElse(null);
+        final AttributesInstance playerAttributes = player.getAttributes();
+        final ModifierFourPiece existingModifier = playerAttributes.getModifier(ModifierFourPiece.class).orElse(null);
         
         if (existingModifier != null) {
             final HariantEntity entity = ev.getEntity();
             
             // If stacks already at max, add modifier to the healed entity
             if (existingModifier.stacks == maximumBloomStacks.intValue()) {
-                entity.getAttributes().addModifier(new AttributeModifierBlooming(player));
+                final AttributesInstance entityAttributes = entity.getAttributes();
+                final boolean newModifier = !entityAttributes.hasModifier(blookingModifierKey);
+                
+                entityAttributes.addModifier(new AttributeModifierBlooming(player));
                 
                 // Notify entity
-                entity.showTitle(TITLE_DAMAGE_BONUS_ACTIVE);
+                if (newModifier) {
+                    entity.showTitle(TITLE_DAMAGE_BONUS_ACTIVE);
+                }
             }
             // Otherwise increment stacks
             else {
@@ -127,7 +132,7 @@ public final class ArtifactSetAncestralBloom extends ArtifactSet implements List
             existingModifier.resetTicksBeforeStackDecrement();
         }
         else {
-            attributes.addModifier(new ModifierFourPiece(player));
+            playerAttributes.addModifier(new ModifierFourPiece(player));
         }
     }
     

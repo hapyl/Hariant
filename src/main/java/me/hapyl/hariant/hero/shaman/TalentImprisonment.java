@@ -59,7 +59,7 @@ public final class TalentImprisonment extends Talent implements Listener {
     private final @DisplayField Decimal maximumDistance = Decimal.ofValue(15);
     private final @DisplayField Decimal imprisonmentDelay = Decimal.ofSeconds(0.15f);
     private final @DisplayField Decimal buildingSpeed = Decimal.ofValue(4, v -> Component.text("%d Pillar/t".formatted((int) v)));
-    private final @DisplayField Decimal prisonHealthOfMaxHealth = Decimal.ofPercentage(25);
+    private final @DisplayField Decimal prisonHealthOfMaxHealth = Decimal.ofPercentage(50);
     private final @DisplayField Decimal firePrisonDamageMultiplier = Decimal.ofPercentage(150);
     
     private final @DisplayField BoundingBoxBlueprint prisonSize = BoundingBoxBlueprint.define(1, 1.5, 1);
