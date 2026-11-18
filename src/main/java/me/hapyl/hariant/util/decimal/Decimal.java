@@ -106,7 +106,7 @@ public abstract class Decimal extends Number implements ComponentFormatter, Comp
     }
     
     public @NotNull Tick tickValue() {
-        return Tick.ofTicks((int) value);
+        return Tick.ofTicks(this.intValue());
     }
     
     @Override

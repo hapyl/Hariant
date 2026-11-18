@@ -24,4 +24,9 @@ public final class CooldownImpl implements Cooldown {
         return cooldown;
     }
     
+    @Override
+    public String toString() {
+        return "%s=%d".formatted(key, cooldown.ticks());
+    }
+    
 }

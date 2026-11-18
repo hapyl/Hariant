@@ -1,6 +1,5 @@
 package me.hapyl.hariant.talent.rechargeable;
 
-import me.hapyl.eterna.module.math.Tick;
 import me.hapyl.eterna.module.text.NumberToWord;
 import me.hapyl.eterna.module.text.Strings;
 import me.hapyl.hariant.Colors;
@@ -37,7 +36,11 @@ public enum RechargeType {
             final int nextChargeIn = player.getCooldownTimeLeft(talent);
             
             player.playSound(Sound.BLOCK_WOODEN_DOOR_CLOSE, 0.75f);
-            return Response.error("No more charges, next one in %s!".formatted(Tick.format(nextChargeIn)));
+            return Response.error("No more charges, next one in %s!".formatted(formatTick(nextChargeIn)));
+        }
+        
+        private static @NotNull String formatTick(int tick) {
+            return tick % 20 == 0 ? (tick / 20) + "s" : "%.1f".formatted((double) tick / 20) + "s";
         }
         
         @Override

@@ -192,7 +192,7 @@ public class DamageInstance implements MutatesDamage, DamageFlagged, ElementSour
             }
             
             // Start the cooldown, which is not reduced by any attribute
-            entity.startCooldown(cooldown, cooldown.getCooldown(), null);
+            entity.startCooldown(cooldown, cooldown.cooldown(), null);
         }
         
         return false;
